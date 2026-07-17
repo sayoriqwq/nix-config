@@ -1,0 +1,464 @@
+# Instincts generated from https://github.com/sayoriqwq/nix-config
+# Generated: 2026-07-17T08:45:55.283Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: nix-config-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: docs
+
+## Evidence
+
+- 17 commits analyzed
+- Detected conventional commit pattern
+- Examples: docs: define repository agent protocol, docs: add Chinese project overview
+
+---
+id: nix-config-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Commit Length
+
+## Action
+
+Keep commit messages concise (~41 characters)
+
+## Evidence
+
+- Average commit message length: 41 chars
+- Based on 17 commits
+
+---
+id: nix-config-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Naming Files
+
+## Action
+
+Use kebab-case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: kebab-case
+
+---
+id: nix-config-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: nix-config-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: nix-config-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: nix-config-workflow-feature-development
+trigger: "when implementing a new feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Workflow Feature Development
+
+## Action
+
+Follow the feature-development workflow:
+1. Add feature implementation
+2. Add tests for feature
+3. Update documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~11x per month
+- Files: 
+
+---
+id: nix-config-workflow-add-architecture-decision-record
+trigger: "when doing add architecture decision record"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Workflow Add Architecture Decision Record
+
+## Action
+
+Follow the add-architecture-decision-record workflow:
+1. Create a new markdown file in docs/adr/ with a sequential number and descriptive name.
+2. Write the ADR content explaining the context, decision, and consequences.
+3. Commit the new ADR file with a descriptive commit message.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: docs/adr/*.md
+
+---
+id: nix-config-workflow-add-or-update-domain-documentation
+trigger: "when doing add or update domain documentation"
+confidence: 0.8
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Workflow Add Or Update Domain Documentation
+
+## Action
+
+Follow the add-or-update-domain-documentation workflow:
+1. Create or update a markdown file in docs/agents/, docs/architecture/, or root documentation files.
+2. Write or revise the documentation content.
+3. Commit the changes with a descriptive message.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~6x per month
+- Files: docs/agents/*.md, docs/architecture/*.md, CONTEXT.md
+
+---
+id: nix-config-workflow-add-project-workflow-or-template
+trigger: "when doing add project workflow or template"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/sayoriqwq/nix-config
+---
+
+# Nix Config Workflow Add Project Workflow Or Template
+
+## Action
+
+Follow the add-project-workflow-or-template workflow:
+1. Create or update a markdown file in .github/ISSUE_TEMPLATE/, .github/, or docs/runbooks/.
+2. Write or revise the template or runbook content.
+3. Commit the changes with a descriptive message.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: .github/ISSUE_TEMPLATE/*.md, .github/PULL_REQUEST_TEMPLATE.md, docs/runbooks/*.md
+
+---
+id: nix-config-instinct-file-naming
+trigger: "When creating or renaming a file in the codebase."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct File Naming
+
+## Action
+
+Use kebab-case for file names.
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.files
+- Consistent file naming in repository
+
+---
+id: nix-config-instinct-function-naming
+trigger: "When defining a new function."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Function Naming
+
+## Action
+
+Use camelCase for function names.
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.functions
+
+---
+id: nix-config-instinct-class-naming
+trigger: "When defining a new class."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Class Naming
+
+## Action
+
+Use PascalCase for class names.
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.classes
+
+---
+id: nix-config-instinct-constant-naming
+trigger: "When defining a constant."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names.
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.constants
+
+---
+id: nix-config-instinct-import-style
+trigger: "When importing modules in TypeScript files."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Import Style
+
+## Action
+
+Use relative import paths.
+
+## Evidence
+
+- Pattern in codeStyle.importStyle
+
+---
+id: nix-config-instinct-export-style
+trigger: "When exporting modules or functions."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Export Style
+
+## Action
+
+Use named exports.
+
+## Evidence
+
+- Pattern in codeStyle.exportStyle
+
+---
+id: nix-config-instinct-test-location
+trigger: "When adding or updating tests."
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files.
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: nix-config-instinct-commit-format
+trigger: "When making a git commit."
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Commit Format
+
+## Action
+
+Use the conventional commit format with a 'docs:' prefix for documentation changes.
+
+## Evidence
+
+- docs: define repository agent protocol
+- docs: add Chinese project overview
+- docs: define Nix configuration domain context
+
+---
+id: nix-config-instinct-commit-length
+trigger: "When writing a commit message."
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Commit Length
+
+## Action
+
+Keep commit messages concise, around 41 characters on average.
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: nix-config-instinct-add-adr
+trigger: "When someone wants to document a significant architectural or design decision."
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Add Adr
+
+## Action
+
+Create a new markdown file in docs/adr/ with a sequential number and descriptive name, write the ADR content, and commit with a descriptive message.
+
+## Evidence
+
+- Workflow: add-architecture-decision-record
+- docs/adr/*.md
+- Commit: docs: record single-flake architecture decision
+
+---
+id: nix-config-instinct-update-domain-docs
+trigger: "When someone wants to define, update, or translate domain-specific documentation."
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Update Domain Docs
+
+## Action
+
+Create or update markdown files in docs/agents/, docs/architecture/, CONTEXT.md, or AGENTS.md, then commit with a descriptive message.
+
+## Evidence
+
+- Workflow: add-or-update-domain-documentation
+- docs/agents/*.md
+- docs/architecture/*.md
+- CONTEXT.md
+- AGENTS.md
+- Commits: docs: define repository agent protocol
+
+---
+id: nix-config-instinct-add-template
+trigger: "When someone wants to formalize or update project workflows, templates, or operational runbooks."
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: sayoriqwq/nix-config
+---
+
+# Nix Config Instinct Add Template
+
+## Action
+
+Create or update markdown files in .github/ISSUE_TEMPLATE/, .github/PULL_REQUEST_TEMPLATE.md, or docs/runbooks/, then commit with a descriptive message.
+
+## Evidence
+
+- Workflow: add-project-workflow-or-template
+- .github/ISSUE_TEMPLATE/*.md
+- .github/PULL_REQUEST_TEMPLATE.md
+- docs/runbooks/*.md
+
