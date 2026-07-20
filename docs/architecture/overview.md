@@ -4,6 +4,14 @@
 
 本仓库采用“**一个 Flake、多个主机输出、分层复用**”的结构。目标不是让三台机器拥有完全相同的软件，而是让共享部分只有一个定义，同时保留操作系统、硬件和角色差异。
 
+Phase 1 已确认的 output 与平台边界如下：
+
+| output | 平台 | 当前角色 |
+| --- | --- | --- |
+| `macbook` | `aarch64-darwin` | 首个接入目标，承载主要个人配置 |
+| `nixbox` | `x86_64-linux` | NixOS 工作站，保留现有硬件与状态版本事实 |
+| `server` | `x86_64-linux` | Ubuntu 过渡主机，最终迁移到 NixOS |
+
 ```text
 flake.nix + flake.lock
 │

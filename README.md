@@ -88,7 +88,7 @@ secrets/
 docs/
 ```
 
-逻辑主机名 `macbook`、`nixbox`、`server` 目前只是文档中的暂定标识。Phase 1 会根据真实盘点结果确认或调整。
+逻辑 output 名称已在 Phase 1 确认为 `macbook`、`nixbox`、`server`。它们不要求与真实主机名相同；脱敏后的平台事实见 [`docs/inventory/phase-1-hosts.md`](docs/inventory/phase-1-hosts.md)。
 
 ## 安全提示
 

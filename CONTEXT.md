@@ -8,15 +8,15 @@
 
 ## 2. 当前机器拓扑
 
-以下名称是逻辑角色，不代表已经确认的真实主机名：
+以下名称是 Phase 1 已确认的逻辑 output 名称，不要求与真实主机名相同：
 
 | 逻辑角色 | 当前状态 | 目标状态 | 主要管理层 |
 | --- | --- | --- | --- |
-| `macbook` | macOS，主要个人配置目前在此 | nix-darwin + Home Manager | Darwin 系统层、共享用户层、Mac 专属用户层 |
-| `nixbox` | 空的 NixOS，但已有自身硬件与系统配置 | NixOS + Home Manager | NixOS 系统层、共享用户层、Linux 桌面用户层 |
-| `server` | Ubuntu Server | 先独立 Home Manager，后迁移到 NixOS | 过渡用户层、最终 NixOS 服务器层 |
+| `macbook` | Apple Silicon macOS，主要个人配置目前在此 | nix-darwin + Home Manager | Darwin 系统层、共享用户层、Mac 专属用户层 |
+| `nixbox` | `x86_64-linux` NixOS，已有自身硬件与系统配置 | NixOS + Home Manager | NixOS 系统层、共享用户层、Linux 桌面用户层 |
+| `server` | `x86_64-linux` Ubuntu Server | 先独立 Home Manager，后迁移到 NixOS | 过渡用户层、最终 NixOS 服务器层 |
 
-Phase 1 会确认真实用户名、CPU 架构、主机名、Nix 安装方式、已有配置位置和其他必要事实。
+脱敏后的已确认事实与明确延后项记录在 `docs/inventory/phase-1-hosts.md`。真实主机名、地址和其他不影响 output 组合的敏感值不进入仓库。
 
 ## 3. 核心概念
 
