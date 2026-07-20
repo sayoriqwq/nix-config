@@ -8,7 +8,7 @@
 - output：`macbook`
 - OS / 版本：macOS 26.6
 - 架构：Apple Silicon，目标平台 `aarch64-darwin`
-- Nix：Phase 1 采集时尚未安装；2026-07-20 在 Phase 2 中由维护者手动安装 Lix 2.95.2，system type 为 `aarch64-darwin`，长期实现选择见 ADR-0005
+- Nix：Phase 1 采集时尚未安装；2026-07-20 在 Phase 2 中由维护者手动安装 Lix 2.95.2，system type 为 `aarch64-darwin`，`flakes` 与 `nix-command` 已启用，长期实现选择见 ADR-0005
 - 主用户与 home：`sayori`，`/Users/sayori`
 - 默认 shell：`/opt/homebrew/bin/fish`
 - Homebrew：已安装于 `/opt/homebrew`；formula 与 cask 原始清单仅保留在本地

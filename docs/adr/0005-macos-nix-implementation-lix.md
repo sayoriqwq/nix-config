@@ -60,9 +60,8 @@ nix.package = pkgs.lix;
 - additional system type：`x86_64-darwin`；
 - system configuration：`/etc/nix/nix.conf`；
 - store directory：`/nix/store`；
-- state directory：`/nix/var/nix`。
-
-experimental features 仍由 Phase 2 的下一步只读验证确认。
+- state directory：`/nix/var/nix`；
+- experimental features：`flakes nix-command`。
 
 ## 结果
 

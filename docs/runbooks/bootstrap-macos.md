@@ -74,9 +74,10 @@ curl --proto '=https' --tlsv1.2 -sSf -L \
 - system type 为 `aarch64-darwin`；
 - additional system type 包含 `x86_64-darwin`；
 - system configuration 为 `/etc/nix/nix.conf`；
-- store 与 state directory 分别为 `/nix/store`、`/nix/var/nix`。
+- store 与 state directory 分别为 `/nix/store`、`/nix/var/nix`；
+- experimental features 为 `flakes nix-command`。
 
-以上结果确认当前终端已正确加载 Lix，但不代表 Flakes 已验证或 nix-darwin 已构建。
+以上结果确认当前终端已正确加载 Lix，且 Flakes 与 `nix-command` 已启用；不代表 nix-darwin 已构建。
 
 安装结束后关闭当前终端，打开一个新终端，然后验证：
 
@@ -85,7 +86,7 @@ nix --version
 nix config show experimental-features
 ```
 
-版本验证已经通过。下一项预期是 experimental features 包含 `nix-command` 和 `flakes`。
+版本与 experimental features 验证均已通过。
 
 如果安装失败，不继续执行 nix-darwin。优先使用安装器自己的回退：
 
