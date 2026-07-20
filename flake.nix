@@ -19,6 +19,7 @@
   outputs =
     inputs@{
       self,
+      home-manager,
       nix-darwin,
       nixpkgs,
       nixpkgs-darwin,
@@ -37,6 +38,7 @@
         modules = [
           ./hosts/macbook
           ./modules/darwin/base.nix
+          home-manager.darwinModules.home-manager
         ];
       };
 
