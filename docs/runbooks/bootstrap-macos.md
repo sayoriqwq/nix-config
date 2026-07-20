@@ -138,11 +138,12 @@ nix build .#darwinConfigurations.macbook.system --no-link
 
 - `/etc/nix/`；
 - `/etc/fstab` 与 root-only 的 `/etc/synthetic.conf`；
+- 接入前启用 Touch ID sudo 的 `/etc/pam.d/sudo_local`；
 - `/etc/bash.bashrc`、`/etc/bashrc`、`/etc/zshenv`、`/etc/zshrc` 与 `/etc/profile.d/`；
 - `org.nixos.darwin-store.plist`、`org.nixos.nix-daemon.plist` 与 `systems.lix.nix-installer.nix-hook.plist`；
 - `/nix/receipt.json` 与实际安装器 `/nix/nix-installer`。
 
-验证结果：所有可读源文件均与副本逐字节或递归比较一致；备份目录权限为 `700`，`synthetic.conf` 副本权限为 `600`，总大小约 7.2 MiB。源文件未被修改，nix-darwin 未被激活。
+验证结果：所有可读源文件均与副本逐字节或递归比较一致；备份目录权限为 `700`，`synthetic.conf` 与 `sudo_local` 副本权限为 `600`，总大小约 7.2 MiB。源文件未被修改，nix-darwin 未被激活。
 
 以下是同类备份的参考步骤；本次已执行，不需要重复运行：
 
@@ -153,6 +154,7 @@ chmod 700 "$backup_dir"
 sudo cp -a /etc/nix "$backup_dir/"
 sudo cp -a /etc/synthetic.conf "$backup_dir/" 2>/dev/null || true
 sudo cp -a /etc/fstab "$backup_dir/" 2>/dev/null || true
+sudo cp -a /etc/pam.d/sudo_local "$backup_dir/"
 sudo cp -a /etc/bash.bashrc /etc/bashrc /etc/zshenv /etc/zshrc "$backup_dir/"
 sudo cp -a /etc/profile.d "$backup_dir/"
 sudo cp -a /Library/LaunchDaemons/org.nixos.darwin-store.plist "$backup_dir/"
@@ -162,6 +164,7 @@ sudo cp -a /nix/receipt.json /nix/nix-installer "$backup_dir/"
 sudo chown -R "$(id -un):$(id -gn)" "$backup_dir"
 chmod 700 "$backup_dir"
 chmod 600 "$backup_dir/synthetic.conf"
+chmod 600 "$backup_dir/sudo_local"
 
 printf '备份目录：%s\n' "$backup_dir"
 ```
@@ -175,14 +178,41 @@ printf '备份目录：%s\n' "$backup_dir"
 
 ## 7. 第一次激活：人工关卡
 
-以下命令现在**不要执行**。它必须等 Phase 2 PR 中出现当次明确批准后，由维护者手动执行：
+### 第一次尝试：已安全中止
+
+维护者于 2026-07-20 明确批准并手动执行第一次激活。构建完成后，nix-darwin 的 `/etc` 安全检查因已有 `/etc/pam.d/sudo_local` 内容未被当前 generation 识别而主动中止：
+
+```text
+error: Unexpected files in /etc, aborting activation
+/etc/pam.d/sudo_local
+```
+
+只读诊断确认该文件并非垃圾文件，而是接入前已有的 Touch ID sudo 配置：
+
+```text
+auth sufficient pam_tid.so
+```
+
+锁定 revision 中，`security.pam.services.sudo_local.enable` 默认为 `true`，而 `touchIdAuth` 默认为 `false`。直接改名会允许激活继续，但会丢失现有 Touch ID sudo 行为。因此主机配置显式声明：
+
+```nix
+security.pam.services.sudo_local.touchIdAuth = true;
+```
+
+失败后的核心 Lix 配置、挂载文件和 launchd plist 与备份一致；`/run/current-system` 不存在。构建 generation 已登记为 `system-1-link`，但没有完成 activation，不需要手动删除。冲突文件也已追加到备份。
+
+开头的 `$HOME` warning 是因为 `sudo` 进程继承 `/Users/sayori`，而该目录不属于 root；Lix 已安全回退到 `/var/root`，它不是本次失败原因。后续使用 `sudo -H` 从一开始设置 root Home，避免该 warning。root channels 不存在的 warning 对 Flake 工作流也不是阻断项。
+
+参考：[锁定 revision 的 PAM 模块](https://github.com/nix-darwin/nix-darwin/blob/c3e90c89649b07d1a96e4b9dd6cd0d6e44b91a74/modules/security/pam.nix)
+
+### 下一次尝试
+
+以下命令必须先重新 build 并获得针对重试的明确人工批准，再由维护者手动执行：
 
 ```bash
-cd /Users/sayori/Desktop/nix-config
-
-sudo nix run \
-  github:nix-darwin/nix-darwin/nix-darwin-26.05#darwin-rebuild \
-  -- switch --flake .#macbook
+sudo -H nix run \
+  'github:nix-darwin/nix-darwin/c3e90c89649b07d1a96e4b9dd6cd0d6e44b91a74#darwin-rebuild' \
+  -- switch --flake '/Users/sayori/Desktop/nix-config#macbook'
 ```
 
 激活完成后验证：
@@ -196,7 +226,7 @@ dscl . -read /Users/sayori NFSHomeDirectory UserShell
 
 预期：
 
-- 存在第一代 nix-darwin generation；
+- 存在至少一个已完成激活的 nix-darwin generation；
 - Nix 实现仍为 Lix；
 - Flakes 仍启用；
 - home 仍为 `/Users/sayori`；

@@ -11,6 +11,7 @@
 - Nix：Phase 1 采集时尚未安装；2026-07-20 在 Phase 2 中由维护者手动安装 Lix 2.95.2，system type 为 `aarch64-darwin`，`flakes` 与 `nix-command` 已启用，长期实现选择见 ADR-0005
 - 主用户与 home：`sayori`，`/Users/sayori`
 - 默认 shell：`/opt/homebrew/bin/fish`
+- sudo：接入前的 `/etc/pam.d/sudo_local` 已启用 `pam_tid.so`；Phase 2 必须通过 nix-darwin 保留 Touch ID sudo
 - Homebrew：已安装于 `/opt/homebrew`；formula 与 cask 原始清单仅保留在本地
 - 现有 Nix 配置：无
 - 现有 `system.stateVersion` / `home.stateVersion`：不适用；首次引入时必须按对应模块的兼容性规则设置并保留

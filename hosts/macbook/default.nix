@@ -16,4 +16,7 @@
     uid = 501;
     home = "/Users/sayori";
   };
+
+  # Preserve the pre-existing macOS sudo_local behavior during adoption.
+  security.pam.services.sudo_local.touchIdAuth = true;
 }
