@@ -199,6 +199,14 @@ auth sufficient pam_tid.so
 security.pam.services.sudo_local.touchIdAuth = true;
 ```
 
+维护者随后手动重新构建修正后的 output：
+
+```fish
+nix build '/Users/sayori/Desktop/nix-config#darwinConfigurations.macbook.system' --no-link
+```
+
+构建约 5 秒完成，fish 的 `$status` 为 `0`。这确认 Touch ID sudo 声明可以在真实 `aarch64-darwin` 上构建；尚未重试 activation。
+
 失败后的核心 Lix 配置、挂载文件和 launchd plist 与备份一致；`/run/current-system` 不存在。构建 generation 已登记为 `system-1-link`，但没有完成 activation，不需要手动删除。冲突文件也已追加到备份。
 
 开头的 `$HOME` warning 是因为 `sudo` 进程继承 `/Users/sayori`，而该目录不属于 root；Lix 已安全回退到 `/var/root`，它不是本次失败原因。后续使用 `sudo -H` 从一开始设置 root Home，避免该 warning。root channels 不存在的 warning 对 Flake 工作流也不是阻断项。
