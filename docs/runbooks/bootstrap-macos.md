@@ -66,7 +66,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L \
 - 配置 Nix daemon 的 launchd 服务；
 - 清理临时安装目录。
 
-此记录只证明 Lix Installer 完成，不代表 nix-darwin 已构建或激活。
+此记录描述 bootstrap 当时的状态；后续章节记录 nix-darwin 已完成构建和激活。
 
 维护者随后在新终端完成版本验证，结果为：
 
@@ -77,7 +77,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L \
 - store 与 state directory 分别为 `/nix/store`、`/nix/var/nix`；
 - experimental features 为 `flakes nix-command`。
 
-以上结果确认当前终端已正确加载 Lix，且 Flakes 与 `nix-command` 已启用；不代表 nix-darwin 已构建。
+以上结果确认 bootstrap 后的终端已正确加载 Lix，且 Flakes 与 `nix-command` 已启用；激活后的声明式运行时版本见第 7 节。
 
 安装结束后关闭当前终端，打开一个新终端，然后验证：
 
@@ -213,9 +213,9 @@ nix build '/Users/sayori/Desktop/nix-config#darwinConfigurations.macbook.system'
 
 参考：[锁定 revision 的 PAM 模块](https://github.com/nix-darwin/nix-darwin/blob/c3e90c89649b07d1a96e4b9dd6cd0d6e44b91a74/modules/security/pam.nix)
 
-### 下一次尝试
+### 第二次尝试：已成功
 
-以下命令必须先重新 build 并获得针对重试的明确人工批准，再由维护者手动执行：
+维护者在修复后 build 退出码为 `0` 的基础上，明确批准 activation 重试。维护者先手动将既有文件改名为 `/etc/pam.d/sudo_local.before-nix-darwin`，再手动执行：
 
 ```bash
 sudo -H nix run \
@@ -223,10 +223,25 @@ sudo -H nix run \
   -- switch --flake '/Users/sayori/Desktop/nix-config#macbook'
 ```
 
-激活完成后验证：
+命令成功完成 `/etc`、launchd、Nix daemon、网络、防火墙、电源、字体和 NVRAM 等 activation 步骤，fish 的 `$status` 为 `0`。Agent 未执行改名或 activation。
+
+激活后的只读验证结果：
+
+- `/run/current-system` 指向 `/nix/store/ignp0xk38ajdn56yq5psm7vi996ql68f-darwin-system-26.05.c3e90c8`；
+- system profile 指向 `system-2-link`；
+- Nix 实现仍为 Lix，版本为 `2.94.2`；
+- experimental features 仍为 `flakes nix-command`；
+- home 仍为 `/Users/sayori`；
+- shell 仍为 `/opt/homebrew/bin/fish`；
+- `/etc/pam.d/sudo_local` 由 nix-darwin 管理，并包含 `auth sufficient pam_tid.so`；
+- 接入前文件保留为 `/etc/pam.d/sudo_local.before-nix-darwin`，另有已验证的私有备份副本。
+
+bootstrap 使用的 Lix 2.95.2 与激活后的 Lix 2.94.2 不同，是因为 `nix.package = pkgs.lix` 在激活后使用锁定 nixpkgs 26.05 提供的版本。这仍然是 Lix，不是切换到上游 Nix；后续版本由 `flake.lock` 和 nixpkgs 更新流程管理。
+
+用于今后重复验证的命令：
 
 ```bash
-darwin-rebuild --list-generations
+sudo darwin-rebuild --list-generations
 nix --version
 nix config show experimental-features
 dscl . -read /Users/sayori NFSHomeDirectory UserShell
@@ -239,6 +254,12 @@ dscl . -read /Users/sayori NFSHomeDirectory UserShell
 - Flakes 仍启用；
 - home 仍为 `/Users/sayori`；
 - shell 仍为 `/opt/homebrew/bin/fish`。
+
+### sudo 生物识别验证结果
+
+生成的 PAM 配置已确认包含 `pam_tid.so`，并且 `sudo -v` 会调用 macOS 系统授权界面。维护者分别在 Ghostty 的普通本地 shell（无 tmux/zellij）和 macOS Terminal.app 中测试；两者均只显示密码授权框，没有提供 Touch ID 指纹选项。输入密码可以正常完成 sudo 验证，退出状态为 `0`。
+
+系统设置中已存在两个指纹，且“使用 Touch ID 解锁 Mac”已开启。因此当前结论是：nix-darwin 已保留声明和 PAM 链路，但 macOS 26.6 当前授权策略或兼容性行为仍回退到密码。它不影响 sudo 可用性，也不阻塞 Phase 2。后续如需继续调查，应建立独立 maintenance issue；本阶段不安装 `pam-reattach`，因为测试会话不在 tmux、zellij 或 SSH 中。
 
 ## 8. 回滚
 

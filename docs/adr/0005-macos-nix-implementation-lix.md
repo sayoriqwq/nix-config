@@ -33,7 +33,7 @@ nix.package = pkgs.lix;
 2. 原生 Darwin build 由维护者手动执行，且不激活；
 3. 第一次 `darwin-rebuild switch` 需要新的明确批准。
 
-截至 2026-07-20，维护者已在 `macbook` 使用 Lix 2.95.2 完成 `nix flake check --all-systems` 和 `darwinConfigurations.macbook.system` 原生构建，两者退出状态均为 `0`。这证明 Flake 可以在目标 Mac 上检查和构建；nix-darwin 仍未激活。
+截至 2026-07-20，维护者已在 `macbook` 使用 bootstrap 阶段的 Lix 2.95.2 完成 `nix flake check --all-systems` 和 `darwinConfigurations.macbook.system` 原生构建，两者退出状态均为 `0`。维护者随后在明确批准后手动完成第一次 nix-darwin 激活；当前 generation 使用锁定 nixpkgs 提供的 Lix 2.94.2。
 
 ## 选择依据
 
@@ -55,7 +55,7 @@ nix.package = pkgs.lix;
 - 配置 launchd daemon；
 - 清理临时安装目录。
 
-安装成功不等于 nix-darwin 已构建或激活。安装后只读验证已确认：
+安装成功不等于 nix-darwin 已构建或激活。bootstrap 安装后、第一次激活前的只读验证已确认：
 
 - Lix 版本：`2.95.2`；
 - system type：`aarch64-darwin`；
@@ -64,6 +64,8 @@ nix.package = pkgs.lix;
 - store directory：`/nix/store`；
 - state directory：`/nix/var/nix`；
 - experimental features：`flakes nix-command`。
+
+第一次 nix-darwin 激活后，`nix.package = pkgs.lix` 接管运行时版本。锁定的 nixpkgs 26.05 当前提供 Lix 2.94.2，因此版本从安装器提供的 2.95.2 变为 2.94.2。这不是切换回上游 Nix，也不是隐式自升级；它是声明式配置和 `flake.lock` 决定的版本。激活后再次确认 `flakes nix-command`、`aarch64-darwin`、`/nix/store` 和 `/nix/var/nix` 均保持正常。
 
 ## 结果
 
@@ -79,6 +81,7 @@ nix.package = pkgs.lix;
 - `macbook` 与当前 NixOS 工作站可能使用不同的 Nix 实现和版本；
 - 排障和升级时必须注明问题发生在 Lix 还是上游 Nix；
 - Lix 升级必须继续通过锁定的 nixpkgs/nix-darwin 配置评估，不能把安装器的自升级当作日常升级流程；
+- bootstrap 安装器版本与 nix-darwin 激活后的 `pkgs.lix` 版本可能不同，排障记录必须区分两者；
 - 完整卸载 Lix 与回滚 nix-darwin generation 是不同操作，不能混用。
 
 ## 被否决的替代方案
@@ -102,6 +105,10 @@ nix-darwin 官方说明技术上可行，但首次激活会切换实现，增加
 - Agent 不得自行执行 Lix 安装、卸载、升级、原生 Mac build 或 nix-darwin 激活。
 
 维护者于 2026-07-20 授权 Agent 执行首次激活前备份。备份位于 `/Users/sayori/nix-darwin-backup-phase2.zpxaHo`，包含 Nix 配置、挂载文件、shell/profile 集成、三个相关 launchd plist、安装收据与实际安装器；副本验证通过。此授权只覆盖备份，不覆盖 nix-darwin activation。
+
+维护者随后分别批准第一次 activation 和修复后的重试，并亲自执行命令。第一次尝试因既有 `/etc/pam.d/sudo_local` 冲突安全中止；在声明 `security.pam.services.sudo_local.touchIdAuth = true`、重新构建并再次批准后，第二次尝试成功。`/run/current-system` 与 `system-2-link` 已建立，home 和默认 shell 未改变。
+
+激活后确认生成的 `sudo_local` 仍包含 `pam_tid.so`。但在 Ghostty 普通 shell 和 macOS Terminal.app 中执行 `sudo -v` 时，macOS 26.6 均只显示系统密码授权框，没有提供指纹选项；密码认证可正常完成。该现象不阻塞 nix-darwin 接入，作为后续独立兼容性问题处理，不在本 ADR 中引入 `pam-reattach` 或其他 PAM 组件。
 
 ## 参考
 
