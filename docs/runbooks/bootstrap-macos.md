@@ -102,17 +102,25 @@ sudo /nix/lix-installer uninstall
 nix flake check --all-systems /Users/sayori/Desktop/nix-config
 ```
 
-命令没有输出，fish 的 `$status` 为 `0`，确认 Mac 本机 Flake check 通过。Darwin system build 尚待执行。
+命令没有输出，fish 的 `$status` 为 `0`，确认 Mac 本机 Flake check 通过。
+
+维护者随后手动执行只构建命令：
+
+```fish
+nix build '/Users/sayori/Desktop/nix-config#darwinConfigurations.macbook.system' --no-link
+```
+
+构建产生正常的 `darwin-rebuild`、`darwin-option`、`system-path` 等 phase 日志，最终 fish 的 `$status` 为 `0`。这确认 `darwinConfigurations.macbook.system` 已在真实 `aarch64-darwin` 主机上构建成功；`--no-link` 没有创建 `result` 链接，且没有执行 activation。
 
 ```bash
 cd /Users/sayori/Desktop/nix-config
 
 nix fmt -- --check flake.nix hosts/macbook/default.nix modules/darwin/base.nix
 nix flake check --all-systems
-nix build .#darwinConfigurations.macbook.system
+nix build .#darwinConfigurations.macbook.system --no-link
 ```
 
-以上命令不得使用 `sudo`，也不会激活 nix-darwin。构建失败时停止，并把完整错误交给当前 Phase 2 任务处理。
+以上验证已经通过。命令不得使用 `sudo`，也不会激活 nix-darwin。未来重复构建失败时应停止，并把完整错误交给对应维护任务处理。
 
 ## 6. 第一次激活前备份
 
