@@ -8,14 +8,17 @@
 - output：`macbook`
 - OS / 版本：macOS 26.6
 - 架构：Apple Silicon，目标平台 `aarch64-darwin`
-- Nix：尚未安装
+- Nix：Phase 1 采集时尚未安装；2026-07-20 在 Phase 2 中由维护者手动安装 Lix 2.95.2 完成 bootstrap，第一次 nix-darwin 激活后由锁定 nixpkgs 的 `pkgs.lix` 管理为 Lix 2.94.2；system type 为 `aarch64-darwin`，`flakes` 与 `nix-command` 已启用，长期实现选择见 ADR-0005
 - 主用户与 home：`sayori`，`/Users/sayori`
 - 默认 shell：`/opt/homebrew/bin/fish`
+- sudo：接入前的 `/etc/pam.d/sudo_local` 已启用 `pam_tid.so`；Phase 2 已通过 nix-darwin 生成包含同一 PAM 模块的 `sudo_local`。激活后在 Ghostty 普通 shell 与 macOS Terminal.app 中测试时，macOS 26.6 均只显示系统密码授权框，未提供指纹选项；密码认证正常。该兼容性现象不阻塞 Phase 2，后续单独处理
 - Homebrew：已安装于 `/opt/homebrew`；formula 与 cask 原始清单仅保留在本地
 - 现有 Nix 配置：无
 - 现有 `system.stateVersion` / `home.stateVersion`：不适用；首次引入时必须按对应模块的兼容性规则设置并保留
 - 主机名：未提交，Phase 1 的 Flake evaluation 不依赖该值
-- 未确认事实：Nix 安装方案、首次 nix-darwin 激活前的回滚方式
+- Nix 安装方案：Lix Installer bootstrap，nix-darwin 后续固定 `nix.package = pkgs.lix`
+- 当前激活状态：维护者于 2026-07-20 手动完成第一次 nix-darwin 激活；`/run/current-system` 指向 nix-darwin 26.05 generation，system profile 为 `system-2-link`
+- 当前回滚边界：优先回滚 nix-darwin generation；完整卸载仅作为最后手段，详见 Phase 2 runbook
 - 证据采集日期：2026-07-20
 - 证据来源：维护者 Mac 本地只读命令
 

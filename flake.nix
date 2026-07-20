@@ -17,7 +17,9 @@
   };
 
   outputs =
-    {
+    inputs@{
+      self,
+      nix-darwin,
       nixpkgs,
       nixpkgs-darwin,
       ...
@@ -30,8 +32,14 @@
         };
     in
     {
-      # Phase 1 only exposes evaluation-safe tooling. Host outputs are added
-      # in their dedicated adoption phases after their facts are confirmed.
+      darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
+        specialArgs = { inherit inputs self; };
+        modules = [
+          ./hosts/macbook
+          ./modules/darwin/base.nix
+        ];
+      };
+
       formatter = {
         aarch64-darwin = (packagesFor "aarch64-darwin").nixfmt;
         # Used by the temporary Linux validation container on Apple Silicon.
