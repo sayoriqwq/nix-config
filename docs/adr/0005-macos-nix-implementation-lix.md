@@ -53,7 +53,16 @@ nix.package = pkgs.lix;
 - 配置 launchd daemon；
 - 清理临时安装目录。
 
-安装成功不等于 nix-darwin 已构建或激活。Lix 版本与 experimental features 仍由 Phase 2 的后续只读验证确认。
+安装成功不等于 nix-darwin 已构建或激活。安装后只读验证已确认：
+
+- Lix 版本：`2.95.2`；
+- system type：`aarch64-darwin`；
+- additional system type：`x86_64-darwin`；
+- system configuration：`/etc/nix/nix.conf`；
+- store directory：`/nix/store`；
+- state directory：`/nix/var/nix`。
+
+experimental features 仍由 Phase 2 的下一步只读验证确认。
 
 ## 结果
 
