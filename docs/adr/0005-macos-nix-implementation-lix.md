@@ -33,6 +33,8 @@ nix.package = pkgs.lix;
 2. 原生 Darwin build 由维护者手动执行，且不激活；
 3. 第一次 `darwin-rebuild switch` 需要新的明确批准。
 
+截至 2026-07-20，维护者已在 `macbook` 使用 Lix 2.95.2 完成 `nix flake check --all-systems`，退出状态为 `0`。这证明 Flake 可以在目标 Mac 上检查，不代表 Darwin system 已构建或激活。
+
 ## 选择依据
 
 - 当前 Mac 是干净环境，不需要兼容或迁移既有 Nix 安装；

@@ -96,6 +96,14 @@ sudo /nix/lix-installer uninstall
 
 ## 5. 只构建，不激活
 
+维护者已于 2026-07-20 在 `macbook` 手动执行：
+
+```bash
+nix flake check --all-systems /Users/sayori/Desktop/nix-config
+```
+
+命令没有输出，fish 的 `$status` 为 `0`，确认 Mac 本机 Flake check 通过。Darwin system build 尚待执行。
+
 ```bash
 cd /Users/sayori/Desktop/nix-config
 
