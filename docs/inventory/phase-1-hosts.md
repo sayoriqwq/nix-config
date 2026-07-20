@@ -8,14 +8,15 @@
 - output：`macbook`
 - OS / 版本：macOS 26.6
 - 架构：Apple Silicon，目标平台 `aarch64-darwin`
-- Nix：尚未安装
+- Nix：Phase 1 采集时尚未安装；2026-07-20 在 Phase 2 中由维护者手动安装 Lix，长期实现选择见 ADR-0005
 - 主用户与 home：`sayori`，`/Users/sayori`
 - 默认 shell：`/opt/homebrew/bin/fish`
 - Homebrew：已安装于 `/opt/homebrew`；formula 与 cask 原始清单仅保留在本地
 - 现有 Nix 配置：无
 - 现有 `system.stateVersion` / `home.stateVersion`：不适用；首次引入时必须按对应模块的兼容性规则设置并保留
 - 主机名：未提交，Phase 1 的 Flake evaluation 不依赖该值
-- 未确认事实：Nix 安装方案、首次 nix-darwin 激活前的回滚方式
+- Nix 安装方案：Lix Installer bootstrap，nix-darwin 后续固定 `nix.package = pkgs.lix`
+- 当前回滚边界：首次激活前使用安装器收据；激活后优先回滚 nix-darwin generation，详见 Phase 2 runbook
 - 证据采集日期：2026-07-20
 - 证据来源：维护者 Mac 本地只读命令
 

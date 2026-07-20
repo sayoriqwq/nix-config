@@ -134,6 +134,7 @@ flake.nix + flake.lock
 | 工具 | 角色 | 引入阶段 |
 | --- | --- | --- |
 | Flakes | inputs、lock file、多主机 outputs | 仓库骨架 |
+| Lix | `macbook` 的 Nix 实现与 bootstrap；见 ADR-0005 | macOS 最小接入 |
 | nix-darwin | macOS 系统层 | macOS 最小接入 |
 | Home Manager | 跨平台用户层 | macOS 用户层与后续主机 |
 | nix-homebrew / nix-darwin Homebrew options | Mac 专属 GUI 与 Homebrew 声明 | Mac 基础稳定后 |

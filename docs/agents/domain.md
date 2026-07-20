@@ -53,7 +53,8 @@ Issue、PR、代码和文档应使用 `CONTEXT.md` 定义的词汇，例如：
 - 单一 Flake 与多主机输出；
 - Home Manager 的层级边界；
 - sops-nix 机密管理；
-- 服务器分阶段迁移。
+- 服务器分阶段迁移；
+- macOS 使用的 Nix 实现与 bootstrap 边界。
 
 如果提案与已接受 ADR 冲突，不能静默覆盖。必须在 Issue 和 PR 中明确写出：
 

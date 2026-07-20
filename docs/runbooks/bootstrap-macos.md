@@ -18,6 +18,8 @@
 
 使用 Lix Installer 完成第一次 Nix 实现安装，随后由 nix-darwin 管理 Nix daemon，并在配置中固定 `nix.package = pkgs.lix`。
 
+这是维护者在了解上游 Nix 与 Lix 的替代关系后，于 2026-07-20 明确接受的项目决策。长期依据、代价与复审条件见 [ADR-0005](../adr/0005-macos-nix-implementation-lix.md)。
+
 选择依据：
 
 - nix-darwin 官方 README 推荐没有现有 Nix 安装时使用带自动卸载能力的 Lix Installer；
@@ -37,7 +39,7 @@
 
 参考：[固定 revision 的 `system.stateVersion` 定义](https://github.com/nix-darwin/nix-darwin/blob/c3e90c89649b07d1a96e4b9dd6cd0d6e44b91a74/modules/system/version.nix#L34-L54)
 
-## 4. 人工安装 Lix
+## 4. 人工安装 Lix（已完成）
 
 先确认仍是干净状态：
 
@@ -53,6 +55,18 @@ curl --proto '=https' --tlsv1.2 -sSf -L \
   https://install.lix.systems/lix \
   | sh -s -- install
 ```
+
+维护者于 2026-07-20 手动执行并确认安装成功。安装器报告完成了以下操作：
+
+- 创建加密 APFS `Nix Store` 并挂载到 `/nix`；
+- provision Nix；
+- 创建 UID 351–382 的构建用户和 GID 350 的构建组；
+- 配置 Time Machine exclusions；
+- 配置 Nix、zsh 非交互 shell 支持和 launchd PATH；
+- 配置 Nix daemon 的 launchd 服务；
+- 清理临时安装目录。
+
+此记录只证明 Lix Installer 完成，不代表 nix-darwin 已构建或激活。
 
 安装结束后关闭当前终端，打开一个新终端，然后验证：
 
