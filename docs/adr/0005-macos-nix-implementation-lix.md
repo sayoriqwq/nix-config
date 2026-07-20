@@ -97,9 +97,11 @@ nix-darwin 官方说明技术上可行，但首次激活会切换实现，增加
 
 ## 操作与回滚边界
 
-- 第一次 nix-darwin 激活前，安装器卸载入口为 `/nix/lix-installer uninstall`；具体命令以当时安装收据和 runbook 为准。
+- 第一次 nix-darwin 激活前，本机安装收据为 `/nix/receipt.json`，实际安装器入口为 `/nix/nix-installer uninstall`；具体命令以当时安装收据和 runbook 为准。
 - 激活 nix-darwin 后，优先回滚 nix-darwin generation；不能用完整卸载代替 generation 回滚。
 - Agent 不得自行执行 Lix 安装、卸载、升级、原生 Mac build 或 nix-darwin 激活。
+
+维护者于 2026-07-20 授权 Agent 执行首次激活前备份。备份位于 `/Users/sayori/nix-darwin-backup-phase2.zpxaHo`，包含 Nix 配置、挂载文件、shell/profile 集成、三个相关 launchd plist、安装收据与实际安装器；副本验证通过。此授权只覆盖备份，不覆盖 nix-darwin activation。
 
 ## 参考
 

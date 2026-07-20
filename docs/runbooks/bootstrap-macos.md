@@ -23,7 +23,7 @@
 选择依据：
 
 - nix-darwin 官方 README 推荐没有现有 Nix 安装时使用带自动卸载能力的 Lix Installer；
-- Lix Installer 支持 Apple Silicon macOS、默认启用 Flakes、保留安装收据，并提供 `/nix/lix-installer uninstall`；
+- Lix Installer 支持 Apple Silicon macOS、默认启用 Flakes 并保留安装收据；本机实际安装器入口为 `/nix/nix-installer`；
 - 不使用 Determinate Nix，因为它的独立 daemon 管理会要求 `nix.enable = false`，与本阶段由 nix-darwin 管理 Nix 基础设置的目标不同。
 
 参考：
@@ -91,7 +91,7 @@ nix config show experimental-features
 如果安装失败，不继续执行 nix-darwin。优先使用安装器自己的回退：
 
 ```bash
-sudo /nix/lix-installer uninstall
+sudo /nix/nix-installer uninstall
 ```
 
 ## 5. 只构建，不激活
@@ -126,17 +126,42 @@ nix build .#darwinConfigurations.macbook.system --no-link
 
 只有 build 成功并在 PR 中获得针对第一次激活的明确人工批准后，才执行本节。
 
-创建本地备份目录：
+备份必须使用新建的私有目录，不覆盖旧备份。除了最初计划的 Nix 配置、挂载文件和 daemon plist，还应包含安装收据、实际安装器以及安装器修改的 shell/profile 文件。
+
+维护者授权 Agent 于 2026-07-20 执行备份，实际目录为：
+
+```text
+/Users/sayori/nix-darwin-backup-phase2.zpxaHo
+```
+
+已复制：
+
+- `/etc/nix/`；
+- `/etc/fstab` 与 root-only 的 `/etc/synthetic.conf`；
+- `/etc/bash.bashrc`、`/etc/bashrc`、`/etc/zshenv`、`/etc/zshrc` 与 `/etc/profile.d/`；
+- `org.nixos.darwin-store.plist`、`org.nixos.nix-daemon.plist` 与 `systems.lix.nix-installer.nix-hook.plist`；
+- `/nix/receipt.json` 与实际安装器 `/nix/nix-installer`。
+
+验证结果：所有可读源文件均与副本逐字节或递归比较一致；备份目录权限为 `700`，`synthetic.conf` 副本权限为 `600`，总大小约 7.2 MiB。源文件未被修改，nix-darwin 未被激活。
+
+以下是同类备份的参考步骤；本次已执行，不需要重复运行：
 
 ```bash
-backup_dir="$HOME/nix-darwin-backup-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$backup_dir"
+backup_dir="$(mktemp -d "$HOME/nix-darwin-backup-phase2.XXXXXX")"
+chmod 700 "$backup_dir"
 
 sudo cp -a /etc/nix "$backup_dir/"
 sudo cp -a /etc/synthetic.conf "$backup_dir/" 2>/dev/null || true
 sudo cp -a /etc/fstab "$backup_dir/" 2>/dev/null || true
-sudo cp -a /Library/LaunchDaemons/org.nixos.nix-daemon.plist \
-  "$backup_dir/" 2>/dev/null || true
+sudo cp -a /etc/bash.bashrc /etc/bashrc /etc/zshenv /etc/zshrc "$backup_dir/"
+sudo cp -a /etc/profile.d "$backup_dir/"
+sudo cp -a /Library/LaunchDaemons/org.nixos.darwin-store.plist "$backup_dir/"
+sudo cp -a /Library/LaunchDaemons/org.nixos.nix-daemon.plist "$backup_dir/"
+sudo cp -a /Library/LaunchDaemons/systems.lix.nix-installer.nix-hook.plist "$backup_dir/"
+sudo cp -a /nix/receipt.json /nix/nix-installer "$backup_dir/"
+sudo chown -R "$(id -un):$(id -gn)" "$backup_dir"
+chmod 700 "$backup_dir"
+chmod 600 "$backup_dir/synthetic.conf"
 
 printf '备份目录：%s\n' "$backup_dir"
 ```
@@ -145,7 +170,7 @@ printf '备份目录：%s\n' "$backup_dir"
 
 - 当前仓库无未提交修改；
 - 至少保留一个不关闭的管理员终端；
-- 已记录 Lix 安装器路径 `/nix/lix-installer`；
+- 已记录本机安装收据 `/nix/receipt.json` 与安装器路径 `/nix/nix-installer`；
 - 已复制 PR commit SHA 和本手册路径。
 
 ## 7. 第一次激活：人工关卡
@@ -193,7 +218,7 @@ sudo darwin-rebuild --rollback
 4. 只有决定完整移除 Nix/Lix 时，才手动运行：
 
 ```bash
-sudo /nix/lix-installer uninstall
+sudo /nix/nix-installer uninstall
 ```
 
 完整卸载是最后手段，不能和 nix-darwin rollback 同时盲目执行。
