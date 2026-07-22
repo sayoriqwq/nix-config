@@ -1,6 +1,8 @@
 { config, lib, ... }:
 
 {
+  imports = [ ./darwin/ghostty ];
+
   # The current login shell is Homebrew Fish and does not source nix-darwin's
   # POSIX set-environment script. Add the integrated user profile explicitly.
   home.sessionPath = [ "/etc/profiles/per-user/${config.home.username}/bin" ];
