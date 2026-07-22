@@ -1,7 +1,12 @@
 { config, lib, ... }:
 
 {
-  imports = [ ./darwin/ghostty ];
+  imports = [
+    ./darwin/ghostty
+    ./darwin/shells/zsh.nix
+    ./darwin/user-behaviors/editor-launchers.nix
+    ./darwin/wezterm
+  ];
 
   # The current login shell is Homebrew Fish and does not source nix-darwin's
   # POSIX set-environment script. Add the integrated user profile explicitly.
