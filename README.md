@@ -11,7 +11,7 @@
 
 仓库目前处于 **Phase 3：迁移 macOS Home Manager 用户层**。
 
-Phase 1 已完成三台主机的脱敏盘点与 Flake 骨架；Phase 2 已建立并由维护者激活 `darwinConfigurations.macbook`。Phase 3 从 Git、Fish、Helix、tmux、direnv 与通用 CLI 的最小集合开始，把 Home Manager 作为 nix-darwin module 集成。维护者已在 macOS 27 上完成首次 activation 与人工行为验收；当前等待 chezmoi 重复所有权交接、PR 最终审阅和人工合并。
+Phase 1 已完成三台主机的脱敏盘点与 Flake 骨架；Phase 2 已建立并由维护者激活 `darwinConfigurations.macbook`。Phase 3 从 Git、Fish、Helix、tmux、direnv 与通用 CLI 的最小集合开始，把 Home Manager 作为 nix-darwin module 集成。维护者已在 macOS 27 上完成首次 activation 与人工行为验收；chezmoi 重复所有权已进入独立 Draft PR，当前等待两边 PR 的最终审阅和人工合并。
 
 ## 目标模型
 
