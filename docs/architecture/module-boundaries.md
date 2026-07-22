@@ -58,6 +58,12 @@
 | `secrets/` | sops 加密后的文件 | 任何明文 secret、age 私钥 |
 | `docs/` | 架构、ADR、计划、runbook、维护说明 | 真实 secret、未脱敏 inventory |
 
+### Phase 3 首次采用范围
+
+`macbook` 首次接入 Home Manager 时，`modules/home/common.nix` 只声明 Git、Fish、Helix、tmux、direnv 和一组已在 Mac 使用的跨平台 CLI。Git 身份通过本机私有的 `~/.config/git/identity.inc` 提供，仓库不保存邮箱等账户标识。
+
+`modules/home/darwin.nix` 显式把 nix-darwin 集成用户 profile 加入 Homebrew Fish 的 PATH，再追加未迁移 Homebrew CLI 的兼容路径，并按存在性加载 OrbStack/OpenClaw 的用户级 shell integration；它不管理这些应用的数据或安装来源。Atuin 数据库与 key、GitHub CLI 登录状态、Fish universal variables、缓存、history 和其他运行时状态仍在可写目录中，由独立备份流程负责。详细证据与交接路径见 `docs/inventory/phase-3-macos-home.md`。
+
 ## 3. Import 方向
 
 允许的依赖方向：
