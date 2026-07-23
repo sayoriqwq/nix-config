@@ -1,4 +1,4 @@
-{ config, ... }:
+{ pkgs, ... }:
 
 {
   programs.git = {
@@ -11,11 +11,11 @@
     settings.credential = {
       "https://github.com".helper = [
         ""
-        "${config.programs.gh.package}/bin/gh auth git-credential"
+        "${pkgs.gh}/bin/gh auth git-credential"
       ];
       "https://gist.github.com".helper = [
         ""
-        "${config.programs.gh.package}/bin/gh auth git-credential"
+        "${pkgs.gh}/bin/gh auth git-credential"
       ];
     };
   };
