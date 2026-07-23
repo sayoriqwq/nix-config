@@ -115,4 +115,29 @@ nix build .#darwinConfigurations.macbook.system --no-link
 - OMP 在仅含 `/usr/bin:/bin` 的隔离 PATH 下输出 `omp/17.0.8`；
 - 使用 generation 配置的可写临时副本启动交互式 Fish 后，Starship、zoxide、FZF/Atuin、direnv、eza、mise 与 OMP 均可解析，mise 与 OMP 均来自新 generation 的 `home-path/bin`。
 
-原始 live 反馈环仍会报告 `config.fish` 不是 Home Manager 链接，这是尚未执行 activation 的预期结果。只有通过后续人工关卡处理 regular file 并激活目标 generation 后，才能把实机故障判定为修复。
+离线阶段的原始 live 反馈环仍报告 `config.fish` 不是 Home Manager 链接；后续人工关卡完成后的最终结果见下一节。
+
+## 9. 实机 activation 与验收
+
+维护者于 2026-07-23 批准针对 commit `2622b96` 执行 activation，并明确确认原 7 行 live `config.fish` 不需要备份。Agent 在复核 commit、文件类型与行数后删除该精确 regular file，并执行：
+
+```fish
+sudo -H /run/current-system/sw/bin/darwin-rebuild switch \
+  --flake "/Users/sayori/Desktop/nix-config#macbook"
+```
+
+命令返回 `0`。实机验收结果：
+
+- `~/.config/fish/config.fish` 已恢复为指向 Nix Store 的 Home Manager 链接；
+- 全新交互式 Fish 能加载 Starship、zoxide、FZF、Atuin、direnv、eza 与声明式 PATH；
+- Atuin 的 `Ctrl+R`、`Ctrl+Up` 绑定存在；
+- mise 2026.5.12 来自 `/etc/profiles/per-user/sayori/bin/mise`，Fish wrapper 调用 Nix Store 中的 mise；
+- OMP 17.0.8 来自 Nix profile；
+- Bun 1.3.14 继续由 mise 管理；
+- 增量安装 Node 26.5.0 后，原 Node 25.8.1 仍保留；
+- 临时项目的 `mise.toml` 能把 Node 切换到 25.8.1，离开项目后全局恢复 26.5.0；
+- `mise doctor` 报告 `No problems found`。
+
+`mise doctor` 仍提示当前锁定的 mise 不是上游最新版，以及 mise tool paths 排在 Nix profile 与 `~/.local/bin` 之后。当前声明禁止 Nix 与 mise 重复管理 Node/Bun，实机切换也已通过，因此保留上游默认 `activate_aggressive = false`，不为消除非阻塞 warning 改变 PATH 语义。
+
+Homebrew mise、Bun global OMP 和 mise 下载的运行时仍保留。它们的清理需要单独批准，不属于本次 activation。
