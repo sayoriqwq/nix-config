@@ -71,7 +71,7 @@
 
 `macbook` 首次接入 Home Manager 时，共享用户层只声明 Git、Fish、Helix、tmux、direnv 和一组已在 Mac 使用的跨平台 CLI。Git 身份通过本机私有的 `~/.config/git/identity.inc` 提供，仓库不保存邮箱等账户标识。
 
-Phase 3 曾通过 `modules/home/darwin.nix` 为 Homebrew Fish 补充 Nix profile 与未迁移工具路径。Issue #23 把登录 Shell 切到 Nix Fish，删除通用 Homebrew、OpenClaw、pnpm、Rust 与 Haskell PATH，只保留有独立所有权的 Darwin integration。Atuin 数据库与 key、GitHub CLI 登录状态、Fish universal variables、缓存、history 和其他运行时状态仍在可写目录中，由独立备份流程负责。
+Phase 3 曾通过 `modules/home/darwin.nix` 为 Homebrew Fish 补充 Nix profile 与未迁移工具路径。Issue #23 让 nix-darwin 注册稳定的 Nix Fish 登录路径，并通过单独批准的 macOS `chsh` 账户事实完成切换；管理员账户不加入 `users.knownUsers`。同时删除通用 Homebrew、OpenClaw、pnpm、Rust 与 Haskell PATH，只保留有独立所有权的 Darwin integration。Atuin 数据库与 key、GitHub CLI 登录状态、Fish universal variables、缓存、history 和其他运行时状态仍在可写目录中，由独立备份流程负责。
 
 ### 目录入口约定
 

@@ -1,8 +1,14 @@
+{ config, ... }:
+
 {
   imports = [
     ./fish.nix
     ./zsh.nix
   ];
+
+  # Home Manager packages must win over still-installed compatibility
+  # packages from platform package managers.
+  home.sessionPath = [ "${config.home.profileDirectory}/bin" ];
 
   sayori.shortcuts = [
     {
