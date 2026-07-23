@@ -92,14 +92,19 @@ Build 成功不构成 activation 授权。
 
 1. 审阅 nix-config PR #27 与 dotfiles PR #3，记录待激活 commit 和当前 generation。
 2. 确认 Ghostty、WezTerm、Fish、Zsh、Atuin、mise 与重要可变状态具备可用备份或可回滚来源。
-3. 关闭 Ghostty 与 WezTerm，避免旧进程掩盖新配置。
-4. 由维护者针对精确 commit 批准并执行 nix-darwin activation。
-5. 确认账户登录 Shell 已切换到 Nix Fish，新开 Ghostty 正常进入 Fish。
-6. 从 `~/Applications/Home Manager Apps` 打开 Ghostty 与 WezTerm，分别验收两套支持环境。
-7. 验证快捷键、主题、字体、Atuin、fzf、zoxide、lazygit、pay-respects、direnv、mise 与 pnpm。
-8. 确认 OrbStack 与 PostgreSQL 仍正常，Rust/Haskell 数据目录未删除。
-9. 完成 Nix 应用验收后，再单独批准定向执行 `brew uninstall --cask ghostty wezterm`。
-10. 清理后再次确认 `/Applications` 不再残留 Homebrew 终端应用，Nix 应用仍可正常启动。
+3. 对待激活 Home Manager generation 的所有 `home-files` 执行 live
+   regular-file 冲突扫描；本次已确认并备份
+   `~/.wezterm.lua`、`~/.zshrc`、`~/.zprofile`、`~/.zshenv`、
+   `~/.config/gh/config.yml` 与
+   `~/Library/Application Support/lazygit/config.yml`。
+4. 关闭 Ghostty 与 WezTerm，避免旧进程掩盖新配置。
+5. 由维护者针对精确 commit 批准并执行 nix-darwin activation。
+6. 确认账户登录 Shell 已切换到 Nix Fish，新开 Ghostty 正常进入 Fish。
+7. 从 `~/Applications/Home Manager Apps` 打开 Ghostty 与 WezTerm，分别验收两套支持环境。
+8. 验证快捷键、主题、字体、Atuin、fzf、zoxide、lazygit、pay-respects、direnv、mise 与 pnpm。
+9. 确认 OrbStack 与 PostgreSQL 仍正常，Rust/Haskell 数据目录未删除。
+10. 完成 Nix 应用验收后，再单独批准定向执行 `brew uninstall --cask ghostty wezterm`。
+11. 清理后再次确认 `/Applications` 不再残留 Homebrew 终端应用，Nix 应用仍可正常启动。
 
 ## 7. 回滚
 
