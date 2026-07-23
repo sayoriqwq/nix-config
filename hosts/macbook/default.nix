@@ -9,6 +9,11 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
 
+  environment.etc."shells".knownSha256Hashes = [
+    # macOS defaults plus this host's pre-migration Homebrew Fish registration.
+    "1655f96aad74ad3fd074d08a2c38fe4253ba120ed8937996f4deb89abccc2e41"
+  ];
+
   system = {
     primaryUser = "sayori";
     configurationRevision = self.rev or self.dirtyRev or null;
