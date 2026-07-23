@@ -8,7 +8,7 @@
 
 macOS 上已有主要个人配置，NixOS 工作站目前较空，Ubuntu Server 未来还要重装。需要最大化复用 shell、Git、编辑器等用户配置，同时避免把 macOS GUI、NixOS 系统服务或服务器角色混入所谓“共享配置”。
 
-Home Manager 可以作为 NixOS/nix-darwin 的集成模块，也可以 standalone 运行。如果三台机器都用完全独立的 Home Manager，系统与用户配置可能使用不同 nixpkgs 或分别激活；如果把所有内容都塞进一个 `common.nix`，共享层会充满平台判断。
+Home Manager 可以作为 NixOS/nix-darwin 的集成模块，也可以 standalone 运行。如果三台机器都用完全独立的 Home Manager，系统与用户配置可能使用不同 nixpkgs 或分别激活；如果把所有内容都塞进一个 `common/default.nix`，共享层会充满平台判断。
 
 ## 决策
 
@@ -16,7 +16,8 @@ Home Manager 可以作为 NixOS/nix-darwin 的集成模块，也可以 standalon
 - NixOS 工作站和最终 NixOS Server：Home Manager 作为 NixOS module 集成。
 - Ubuntu Server 过渡期：使用 standalone Home Manager，只管理用户环境，不接管操作系统服务。
 - 用户模块显式拆分为 `common`、`desktop`、`darwin`、`linux` 和 `server` 等角色。
-- `common.nix` 必须平台中立并可用于 headless server。
+- `common/default.nix` 必须平台中立并可用于 headless server。
+- 角色模块使用目录与 `default.nix` 作为入口，不同时保留同名 `.nix` 文件和目录。
 - 优先使用 `programs.*` 等结构化模块；没有成熟模块时才链接静态 dotfiles；activation script 是最后选择。
 - NixOS/nix-darwin 集成模式优先共享系统提供的 `pkgs`，避免用户层和系统层无意使用不同包集合。
 
@@ -34,7 +35,7 @@ Home Manager 可以作为 NixOS/nix-darwin 的集成模块，也可以 standalon
 
 - 同一用户可能有多个模块组合；
 - standalone Ubuntu output 与集成 output 的激活命令不同；
-- 需要持续审查 `common.nix` 是否发生平台泄漏；
+- 需要持续审查 `common/default.nix` 是否发生平台泄漏；
 - 某些软件在 Darwin/Linux 包名或能力不同，需要平台模块处理。
 
 ## 被否决的替代方案

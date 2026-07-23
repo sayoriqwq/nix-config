@@ -19,21 +19,21 @@ flake.nix + flake.lock
 │   ├── hosts/<mac-host>
 │   ├── modules/darwin/*
 │   └── Home Manager
-│       ├── modules/home/common.nix
-│       ├── modules/home/desktop.nix
-│       └── modules/home/darwin.nix
+│       ├── modules/home/common/
+│       ├── modules/home/desktop/
+│       └── modules/home/darwin/
 │
 ├── nixosConfigurations.<workstation-host>
 │   ├── hosts/<workstation-host>
 │   ├── modules/nixos/base.nix
 │   ├── modules/nixos/desktop.nix
 │   └── Home Manager
-│       ├── modules/home/common.nix
-│       ├── modules/home/desktop.nix
+│       ├── modules/home/common/
+│       ├── modules/home/desktop/
 │       └── modules/home/linux.nix
 │
 ├── homeConfigurations."<user>@<ubuntu-host>"       # 过渡期
-│   ├── modules/home/common.nix
+│   ├── modules/home/common/
 │   ├── modules/home/linux.nix
 │   └── modules/home/server.nix
 │
@@ -42,7 +42,7 @@ flake.nix + flake.lock
     ├── modules/nixos/base.nix
     ├── modules/nixos/server.nix
     └── Home Manager
-        ├── modules/home/common.nix
+        ├── modules/home/common/
         ├── modules/home/linux.nix
         └── modules/home/server.nix
 ```
@@ -96,9 +96,9 @@ flake.nix + flake.lock
 
 ### 3.4 用户模块层
 
-- `common.nix`：真正跨平台、可用于 headless server 的基础用户环境；
-- `desktop.nix`：桌面工作站共有的用户设置；
-- `darwin.nix`：macOS 专属用户设置；
+- `common/default.nix`：真正跨平台、可用于 headless server 的基础用户环境；
+- `desktop/default.nix`：桌面工作站共有的用户设置；
+- `darwin/default.nix`：macOS 专属用户设置；
 - `linux.nix`：Linux 专属用户设置；
 - `server.nix`：服务器最小用户环境。
 
@@ -137,7 +137,7 @@ flake.nix + flake.lock
 | Lix | `macbook` 的 Nix 实现与 bootstrap；见 ADR-0005 | macOS 最小接入 |
 | nix-darwin | macOS 系统层 | macOS 最小接入 |
 | Home Manager | 跨平台用户层 | macOS 用户层与后续主机 |
-| nix-homebrew / nix-darwin Homebrew options | Mac 专属 GUI 与 Homebrew 声明 | Mac 基础稳定后 |
+| nix-homebrew / nix-darwin Homebrew options | 迁移期遗留 Homebrew 声明；终态逐项退出 | Mac 基础稳定后 |
 | `nh` | 友好的构建命令与 diff 展示 | 基础用户工具阶段 |
 | sops-nix + age | 机密部署 | 两台本地机器稳定后 |
 | disko | 服务器磁盘声明 | 服务器 NixOS 设计阶段 |

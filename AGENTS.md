@@ -56,7 +56,7 @@ If no implementation issue exists, do not start implementation. Limit work to in
 - Keep reusable macOS system modules under `modules/darwin/`.
 - Keep reusable NixOS system modules under `modules/nixos/`.
 - Keep reusable user modules under `modules/home/`.
-- `modules/home/common.nix` must remain platform-neutral and suitable for headless hosts.
+- `modules/home/common/default.nix` must remain platform-neutral and suitable for headless hosts.
 - Desktop-only, Darwin-only, Linux-only, and server-only user configuration must remain in separate modules.
 - Prefer existing Home Manager, NixOS, and nix-darwin options over custom activation scripts or generated shell code.
 - Put project-specific development dependencies in each project's dev shell, not in the global user profile.

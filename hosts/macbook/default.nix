@@ -1,7 +1,11 @@
 { self, ... }:
 
 {
-  imports = [ ../../modules/darwin/homebrew.nix ];
+  imports = [
+    ../../modules/darwin/fonts.nix
+    ../../modules/darwin/homebrew.nix
+    ../../modules/darwin/shell.nix
+  ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
 
@@ -25,8 +29,9 @@
 
     users.sayori = {
       imports = [
-        ../../modules/home/common.nix
-        ../../modules/home/darwin.nix
+        ../../modules/home/common
+        ../../modules/home/darwin
+        ../../modules/home/desktop
       ];
 
       home = {

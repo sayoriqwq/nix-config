@@ -2,15 +2,9 @@
   homebrew = {
     enable = true;
 
-    # GUI application installation belongs to nix-darwin. Home Manager only
-    # owns terminal user configuration and does not install duplicate apps.
-    casks = [
-      "ghostty"
-      "wezterm"
-    ];
-
-    # Phase 4 adopts applications one at a time. Never remove undeclared
-    # Homebrew software during activation.
+    # Ghostty and WezTerm are now owned by Home Manager/Nix. Keep global
+    # cleanup disabled: their existing casks are removed later by an explicit,
+    # targeted and separately approved handoff.
     onActivation.cleanup = "none";
   };
 }

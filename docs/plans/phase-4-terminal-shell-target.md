@@ -1,90 +1,133 @@
 # Phase 4 终端与 Shell 最终目标基线
 
-本文固化 Issue [#23](https://github.com/sayoriqwq/nix-config/issues/23) 后续实施必须遵守的已批准共识。它取代 `0c6a81a` 交付快照中的软件来源、模块边界与集成决策，但不抹除迁移前证据、备份记录或构建记录。
+本文固化 Issue [#23](https://github.com/sayoriqwq/nix-config/issues/23) 在架构 grilling 与紧急修复完成后的最终共识。它取代该 Issue 早期关于 Homebrew、Darwin-only Zsh、编辑器 launcher 与 mise 退出的结论。
 
-本文只描述声明式配置的最终目标，不授权 activation、Homebrew cleanup、删除可变数据或合并 Pull Request。
+本文只描述声明式终态，不授权 activation、Homebrew 卸载、数据删除或合并 Pull Request。
 
-## 1. 支持矩阵
+## 1. 支持环境
 
-- 主环境是 Ghostty + Fish。
-- 备用/兼容环境是 WezTerm + Zsh。
+- 主环境：Ghostty + Fish。
+- 兼容环境：WezTerm + Zsh。
 - Ghostty + Zsh 与 WezTerm + Fish 不属于承诺维护和验收的组合。
-- Ghostty 默认键位是终端快捷键基准；WezTerm 对齐双方共有的高频操作。
-- Zsh 核心配置属于跨平台共享用户层，必须可用于 macOS、Linux 与 NixOS；Darwin 专属 PATH、应用集成和启动钩子单独声明。
+- Ghostty 是终端视觉与默认键位基准；WezTerm 只适配双方能自然对应的高频语义。
+- Zsh 是跨 macOS、Linux 与 NixOS 的可移植 Shell，不属于 Darwin 私有配置。
 
-## 2. 软件、配置与数据所有权
+## 2. 软件与配置所有权
 
-每个软件的迁移必须明确以下七项：软件来源、稳定配置、Shell/平台集成、字体/插件/外部依赖、生成目标、可变数据边界、可复用模块边界。
+| 能力 | 安装所有者 | 稳定配置所有者 | 可变状态 |
+| --- | --- | --- | --- |
+| Ghostty | Home Manager/Nix；Darwin 使用 `ghostty-bin`，Linux 使用 `ghostty` | `modules/home/desktop/terminal/` | 窗口、session、登录态与 macOS preferences 保持可写 |
+| WezTerm | Home Manager/Nixpkgs | `modules/home/desktop/terminal/` | 窗口、mux 与运行时状态保持可写 |
+| Fish/Zsh | Home Manager；macOS 登录 Fish 由 nix-darwin 声明 | `modules/home/common/shell/` | history 与 universal variables 保持可写 |
+| Node/Bun/pnpm | mise | Nix 管理 mise 本体、默认值和 Shell integration | mise runtime/cache/state 保持可写 |
+| Maple Mono NF-CN | macOS 由 nix-darwin 安装 | `modules/darwin/fonts.nix` | 无用户数据 |
 
-- 软件优先由 Nix 安装，稳定配置由 nix-config 通过 Home Manager、nix-darwin 或 NixOS module 管理。
-- 优先使用上游 `programs.*` 和结构化选项；静态配置链接次之；activation script 是最后选择。
-- 已迁入 Nix 的 CLI 不再由 Homebrew 持续管理。
-- 可变数据、数据库、历史、密钥、缓存、登录态和应用状态不进入 Nix Store。
-- WezTerm 由 Nixpkgs 与 `programs.wezterm` 安装和配置；允许升级到 `flake.lock` 固定的版本。
-- WezTerm 使用 Nix 提供的 Zsh；macOS 登录 Shell 暂不改变。
-- Maple Mono NF-CN 由 nix-darwin 统一安装，供 Ghostty 与 WezTerm 共用；两个终端都通过实机验收后才能清理手工重复字体。
-- VS Code 与 Zed 的安装、设置和扩展不属于本次迁移。
+Ghostty 与 WezTerm 的应用本体不再由 Homebrew 声明。`homebrew.onActivation.cleanup` 继续为 `none`；真实机器先验证 Nix 应用，再经当次批准定向卸载两个 cask。
 
-## 3. 模块组织
+两个终端都关闭自身更新检查，版本升级只通过 `flake.lock` 与 Nix 完成：
 
-- 每个软件使用独立模块；配置复杂的软件使用目录与 `default.nix` 作为入口。
-- 不采用同名 `.nix` 文件与同名目录并存的结构。
-- 模块通过显式 `imports` 组合，不通过目录自动扫描决定配置。
-- `common` 只包含跨平台且适用于 headless host 的用户配置。
-- 平台专属路径、GUI 应用与系统服务进入对应的平台模块。
-- 最终目录结构仍需在实施前单独批准；本节只约束组织原则。
+- Ghostty：`auto-update = off`；
+- WezTerm：`check_for_updates = false`。
 
-## 4. 共享 Shell 行为
+## 3. 模块结构
 
-- `v` 与 `z` 是 Fish/Zsh 共用行为：无参数时打开当前目录，有参数时原样转发。
-- 编辑器可执行程序的安装和具体配置由后续编辑器 issue 接管。
-- Starship 在 Fish 与 Zsh 使用同一套提示符配置。
-- Atuin 由 `programs.atuin` 管理包和稳定配置，数据库与密钥保留为可变数据；`Ctrl+R` 是唯一增强历史入口，删除自定义 `Ctrl+Up`。
-- Fish 与 Zsh 的上下方向键保留原生前缀历史行为。
-- FZF 使用 `Ctrl+T` 选择文件、`Alt+C` 选择目录，不占用 `Ctrl+R`。
-- zoxide 的增强 `cd` 行为在 Fish 与 Zsh 等价提供，其数据保持可写。
-- eza 使用 `ls`、`ll`、`la`、`lla`、`lt` 与图标自动模式。
-- lazygit 使用 `lg`；正常退出同步工作目录，`Shift+Q` 退出时不做目录同步。
-- direnv 与 nix-direnv 由 Nix 管理，Fish/Zsh 都启用 hook；项目通过 `.envrc` 和显式 `direnv allow` 启用。
-- pay-respects 由 Nix 管理，保留上游默认别名 `f`，不创建 `fuck` 兼容别名，不添加自定义规则。
-- 上游默认快捷键、别名或集成与当前配置冲突时，必须先展示冲突并获得维护者决定，不得静默覆盖。
+```text
+modules/home/
+├── common/
+│   ├── default.nix
+│   ├── shell/
+│   └── cli/
+├── desktop/
+│   ├── default.nix
+│   └── terminal/
+│       ├── default.nix
+│       ├── appearance.nix
+│       ├── keybindings.nix
+│       ├── themes/
+│       └── adapters/
+└── darwin/
+    ├── default.nix
+    ├── cli/
+    └── integrations/
+```
 
-## 5. 终端快捷键
+- 目录通过 `default.nix` 暴露，不使用 `index.nix`。
+- 不保留 `common.nix + common/` 等同名文件与目录。
+- Shell 模块只拥有 Shell 原生行为；第三方软件的包、配置与 hook 由对应 CLI 模块拥有。
+- 简单能力使用单文件；存在多个稳定子域或 Shell adapter 时才使用目录。
+- 能力由实际配置效果表达，不建立通用 capability 数据库。
+- 快捷键只提供生成 `docs/guide/SHORTCUTS.md` 所需的最小元数据。
+- Ghostty 原生 `Ctrl+Cmd+=` 保留为均分所有 pane；WezTerm 没有对应原生动作，不引入脆弱的自定义 pane-tree 算法。
 
-WezTerm 保留并对齐以下 Ghostty 行为：
+## 4. 终端主题与行为
 
-| 快捷键 | 行为 |
-| --- | --- |
-| `Cmd+D` | 向右分屏 |
-| `Shift+Cmd+D` | 向下分屏 |
-| `Shift+Cmd+Enter` | 缩放/还原当前 pane |
-| `Alt+Cmd+方向键` | 切换 pane 焦点 |
-| `Ctrl+Cmd+方向键` | 调整 pane 大小 |
-| `Cmd+Enter` | 切换全屏 |
-| `Shift+Cmd+P` | 打开命令面板 |
-| `Cmd+Up` / `Cmd+Down` | 在 OSC 133 语义提示区域之间滚动 |
-| `Ctrl+Cmd+=` | 均分 pane |
+`sayoriqwq-obsidian.nix` 是 Ghostty/WezTerm 的唯一主题数据源，Ghostty 当前值为权威：
 
-终端内部模式或无法自然对应的专属快捷键不强制统一。最终快捷键总表维护在独立中文 reference 文档中。
+- ANSI yellow：`#BDBDBD`，有意设计为中性灰；
+- bright yellow：`#FFFFFF`；
+- Maple Mono NF-CN，字号 `20`；
+- 背景透明度 `0.95`；
+- 背景模糊 `10`。
 
-## 6. mise 退出边界
+Ghostty 保持自身窗口与原生 tabs；WezTerm 可以保留适合其实现的窗口外壳。两者不追求像素级组件一致。
 
-- nix-config 不声明 `programs.mise`，mise 不再管理全局 Node、Bun 或其他运行时。
-- mise 的安装、Shell hook 与稳定配置必须从最终环境移除。
-- Oh My Pi 需要的 Bun/Node 不得继续依赖 mise。
-- 不得直接写入或覆盖 Home Manager 管理的 `~/.config/fish/config.fish`。
+Ghostty 使用默认 `shell-integration = detect` 自动集成初始 Fish；Home Manager 不重复注入 Fish/Zsh。WezTerm 由 Home Manager 为 Zsh 加载上游 shell integration。Ghostty 默认关闭的 `sudo`/`ssh` 包装不启用。
 
-## 7. 工作线分叉
+## 5. Shell 与 CLI 行为
 
-Issue #23 继续负责终端与 Shell 的完整最终迁移。当前 Fish 配置丢失、mise/Bun 与 Oh My Pi 可用性属于阻塞日常开发的紧急修复，必须使用独立 issue、分支和 Pull Request：
+- Atuin：Fish/Zsh 共用数据库；`Ctrl+R` 是唯一增强历史入口，不绑定 `Ctrl+Up`。
+- Fish/Zsh：上下方向键保留前缀历史行为。
+- fzf：保留 `Ctrl+T` 与 `Alt+C`，显式不占用 `Ctrl+R`。
+- zoxide：Fish/Zsh 提供等价的增强 `cd`。
+- eza：提供 `ls`、`ll`、`la`、`lla`、`lt`，图标为自动模式。
+- lazygit：`lg` 启动；正常退出同步目录，`Shift+Q` 不同步。
+- direnv/nix-direnv：两个 Shell 都启用 hook；项目仍需 `.envrc` 与显式 `direnv allow`。
+- pay-respects：由 Nix 管理，Fish/Zsh 使用上游别名 `f`；不保留 `thefuck`/`fuck`。
+- mise：Fish/Zsh 都启用；Node、Bun、pnpm 默认 `latest`，Nix 不直接安装这些 runtime。
+- Starship：Fish/Zsh 使用同一提示符配置。
 
-- 紧急修复只恢复 Home Manager 对 Fish 配置的唯一所有权，移除 mise 依赖，并让 Oh My Pi 使用非 mise 的声明式运行时；
-- 紧急修复不得顺带实施 Issue #23 尚未完成的全量模块重构；
-- Issue #23 后续以本基线重新修订验收标准和实现，不沿用旧交付快照中的 Homebrew WezTerm、`/bin/zsh` 或保留 mise 决策。
+`v`、`z` 与 VS Code/Zed 的应用、配置和 launcher 全部移出 #23，留给编辑器迁移阶段共同设计。
 
-## 8. 验收约束
+## 6. 删除与保留边界
 
-- 先执行格式化、Flake check 与受影响 output build，不把 build 当作 activation 授权。
-- 实机 activation 必须针对明确 commit 获得当次批准。
-- activation 后分别验收 Ghostty + Fish 与 WezTerm + Zsh，并核对共享行为、快捷键、PATH 和可变数据边界。
-- 清理 Homebrew 软件、mise、手工字体或旧配置必须在替代项实机验收通过后单独执行。
+#23 从声明中删除：
+
+- OpenClaw Shell integration；
+- 通用 `/opt/homebrew/bin` PATH；
+- `~/Library/pnpm` PATH；
+- Cargo/rustup、GHCup、Cabal PATH 与初始化；
+- Homebrew thefuck compatibility；
+- Atuin `Ctrl+Up`；
+- Ghostty/WezTerm Homebrew cask 声明。
+
+#23 不删除真实数据目录，也不迁移以下能力：
+
+- `~/.cargo`、`~/.rustup`、`~/.ghcup`、`~/.cabal`；
+- Atuin、Fish、Zsh、mise、Ghostty、WezTerm 的可变数据；
+- OrbStack 软件与容器数据；
+- Homebrew PostgreSQL 16 service 与数据目录；
+- VS Code、Zed 或其配置。
+
+OrbStack 与 PostgreSQL 分别使用独立迁移 Issue。#23 仅隔离并保留当前必要的 Darwin integration。
+
+## 7. 验收与人工关卡
+
+Agent 必须完成：
+
+```fish
+nix fmt -- --check .
+nix flake check
+nix build .#darwinConfigurations.macbook.system --no-link
+```
+
+还需验证：
+
+- Home Manager closure 包含 Nix Ghostty、WezTerm、Fish、Zsh、mise、pnpm 默认声明与 Maple Mono NF-CN；
+- 生成的 Ghostty/WezTerm 配置能由对应 CLI 解析；
+- Fish/Zsh 语法通过；
+- Atuin 与 fzf 的最终键位没有 `Ctrl+R` 冲突；
+- `v`、`z`、OpenClaw、thefuck、Rust/Haskell/pnpm 旧 PATH 不出现在生成配置；
+- dotfiles handoff 后 chezmoi 不再管理 WezTerm/Zsh 目标；
+- 可变 history、数据库与状态目录没有被链接进 Nix Store。
+
+真实机器 activation、登录 Shell 切换、Homebrew 定向卸载与任何数据删除均是独立人工关卡。回滚优先切回上一代 nix-darwin/Home Manager generation；Homebrew app 需要按 activation 前清单单独恢复。

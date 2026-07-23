@@ -1,0 +1,3 @@
+{
+  programs.fzf.enableFishIntegration = true;
+}

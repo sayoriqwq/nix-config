@@ -1,5 +1,8 @@
 # Phase 4 Ghostty 迁移记录
 
+> [!IMPORTANT]
+> 本文是 Issue #22 当时的迁移证据，保留其历史事实。Ghostty 应用来源、终端模块与最终验收现由 Issue #23 和 `phase-4-terminal-shell.md` 取代。
+
 本文记录 Issue [#22](https://github.com/sayoriqwq/nix-config/issues/22) 的证据、所有权交接、离线验证、人工 activation 清单与回滚步骤。本文不授权 activation、Homebrew cleanup 或删除可变数据。
 
 ## 1. 迁移前证据
