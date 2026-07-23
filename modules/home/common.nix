@@ -6,6 +6,8 @@
 }:
 
 {
+  imports = [ ./programs ];
+
   home = {
     packages = with pkgs; [
       fd
@@ -193,6 +195,7 @@
     };
 
     lazygit.enable = true;
+
     nh.enable = true;
 
     starship = {

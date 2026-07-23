@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -7,6 +12,10 @@
     ./darwin/user-behaviors/editor-launchers.nix
     ./darwin/wezterm
   ];
+
+  # OMP is a standalone Nix package. It does not depend on the Bun version
+  # selected by mise for project development.
+  home.packages = [ (pkgs.callPackage ../../packages/oh-my-pi { }) ];
 
   # The current login shell is Homebrew Fish and does not source nix-darwin's
   # POSIX set-environment script. Add the integrated user profile explicitly.
