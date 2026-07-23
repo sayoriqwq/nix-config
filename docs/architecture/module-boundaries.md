@@ -46,6 +46,7 @@
 | `flake.nix` | inputs、outputs、少量组合 helper、checks/formatter | 大量程序配置、主机硬件细节、明文机密 |
 | `hosts/<host>/` | 主机平台、硬件、boot、磁盘、主机名、专属网络、state version、模块组合 | 可被多主机复用的通用软件配置 |
 | `modules/home/common.nix` | Git、shell、编辑器、tmux、direnv、通用 CLI 等跨平台基础 | GUI、Homebrew、systemd、launchd、Linux/macOS 专属路径、服务器 daemon |
+| `modules/home/programs/` | 跨平台用户程序的独立 Home Manager 模块；由 `default.nix` 统一导出 | 平台专属程序、可变数据、项目私有版本文件 |
 | `modules/home/desktop.nix` | 两台桌面机器共有的用户级桌面配置 | boot、GPU 驱动、系统桌面服务、服务器工具 |
 | `modules/home/darwin.nix` | macOS 专属用户设置与用户级应用配置 | nix-darwin 系统 defaults、Linux 配置 |
 | `modules/home/linux.nix` | Linux 专属用户设置 | NixOS 系统服务、磁盘、bootloader |
@@ -118,6 +119,19 @@ Mac 上遵循：
 - Homebrew 本身/taps 与 formula/cask 的声明职责分开；
 - 迁移初期不启用会自动删除现有软件的 cleanup/zap；
 - 任何清理策略必须先在 Issue 中列出受影响软件并由维护者批准。
+
+### 6.1 语言运行时所有权
+
+Node 与 Bun 的版本切换是 mise 的核心职责，不按普通全局 CLI 处理：
+
+- Nix/Home Manager 只安装 mise 本体、管理稳定默认值和 shell integration；
+- Node、Bun 的安装、全局默认和项目版本切换全部由 mise 管理；
+- `home.packages` 不得直接包含 `nodejs`、`nodejs-slim` 或 `bun`，违反时必须在求值阶段失败；
+- 共享默认值放在 Nix 管理的 mise `conf.d` 文件，`mise use -g` 的个人可写结果留在 `~/.config/mise/config.toml`；
+- 项目版本事实由项目自己的 `mise.toml` 管理，个人项目覆盖使用不提交的 `mise.local.toml`；
+- mise 的 runtime、cache、state 和已安装版本属于可变数据，不进入 Nix Store，也不因切换安装来源而删除。
+
+当前机器证据、清理关卡与验收命令见 `docs/inventory/mise-runtime-ownership.md`。
 
 ## 7. 服务与容器边界
 
