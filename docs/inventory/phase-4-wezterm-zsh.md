@@ -1,5 +1,8 @@
 # Phase 4 WezTerm + Zsh 迁移记录
 
+> [!IMPORTANT]
+> 本文保存 commit `0c6a81a` 的迁移证据与旧交付快照，不再代表最终目标。后续实施以 [Phase 4 终端与 Shell 最终目标基线](../plans/phase-4-terminal-shell-target.md) 为准；其中 WezTerm 来源、Zsh 路径、mise 所有权和模块边界已经改变。
+
 本文记录 Issue [#23](https://github.com/sayoriqwq/nix-config/issues/23) 的决策、迁移前证据、所有权交接、离线验证、人工 activation 清单与回滚步骤。本文不授权 activation、Homebrew cleanup 或删除可变数据。
 
 ## 1. 支持边界
