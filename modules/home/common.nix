@@ -20,6 +20,15 @@
     sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
   };
 
+  # Nix owns mise itself and its stable defaults. The writable
+  # ~/.config/mise/config.toml remains available for `mise use -g`, while
+  # projects own their committed mise.toml version selections.
+  xdg.configFile."mise/conf.d/10-nix-defaults.toml".text = ''
+    [tools]
+    bun = "latest"
+    node = "latest"
+  '';
+
   programs = {
     atuin = {
       enable = true;
@@ -193,6 +202,12 @@
     };
 
     lazygit.enable = true;
+
+    mise = {
+      enable = true;
+      enableFishIntegration = true;
+    };
+
     nh.enable = true;
 
     starship = {
