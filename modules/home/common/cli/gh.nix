@@ -1,7 +1,3 @@
 {
-  programs.gh = {
-    enable = true;
-
-    settings.aliases.co = "pr checkout";
-  };
+  programs.gh.enable = true;
 }
