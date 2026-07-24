@@ -1,3 +1,6 @@
 {
-  imports = [ ./terminal ];
+  imports = [
+    ./editors
+    ./terminal
+  ];
 }

@@ -1,0 +1,126 @@
+{
+  /* main style */
+  "editor.fontSize": 16,
+  "editor.fontLigatures": true,
+  "editor.fontFamily": "Maple Mono NF CN",
+
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontFamily": "Maple Mono NF CN",
+  "terminal.integrated.fontLigatures.enabled": true,
+  "terminal.integrated.fontWeightBold": "normal",
+  "terminal.integrated.cursorBlinking": true,
+  // 失焦时不显示
+  "terminal.integrated.cursorStyleInactive": "none",
+  "workbench.iconTheme": "material-icon-theme",
+
+  /* editor */
+  // 空格 -打开尾随空格
+  "editor.renderWhitespace": "trailing",
+  // "editor.renderLineHighlight": "none",
+  // 实际上也是有高亮的，但不会那么刺，也不是多文件
+  "editor.occurrencesHighlight": "off",
+  // 缩进参考线
+  "editor.guides.indentation": false,
+  // 开启联动编辑
+  "editor.linkedEditing": true,
+  // cursor
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "phase",
+
+  // scrollbar
+  // 实际上我用的主题都是几乎隐藏了
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.scrollbar.vertical": "hidden",
+  // 让右边那俩彻底消失
+  "editor.scrollbar.verticalScrollbarSize": 0,
+  "editor.overviewRulerBorder": false,
+  // 建议的小灯泡图标（功能依然在）
+  "editor.lightbulb.enabled": "off",
+  // 被识别为链接
+  "editor.links": false,
+  /* layout */
+  // minimap
+  "editor.minimap.enabled": false,
+  // "editor.minimap.renderCharacters": false,
+  // 文件树辅助线
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "none",
+  // 顶部面包屑导航
+  "breadcrumbs.enabled": false,
+  "window.titleBarStyle": "custom",
+  // 右上角一些操作按钮
+  "workbench.editor.editorActionsLocation": "hidden",
+  // 顶部命令中心 UI
+  "window.commandCenter": false,
+  // 右上角布局控制器（真的有人用过这个吗？）
+  "workbench.layoutControl.enabled": false,
+  // 左侧操作栏
+  // "workbench.activityBar.location": "hidden",
+  // 虽然几乎用不上断点调试，但是留点空间好看
+  // "editor.glyphMargin": false,
+
+  /* 小功能 */
+
+  // explorer
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  // 本来就有
+  // "explorer.decorations.colors": true,
+  // "explorer.decorations.badges": true,
+  // 单子文件夹也要展开
+  "explorer.compactFolders": false,
+  // 当前打开文件不自动在左侧定位
+  "explorer.autoReveal": false,
+
+  "editor.mouseWheelZoom": true,
+  "security.workspace.trust.enabled": false,
+  "update.mode": "none",
+  "chat.disableAIFeatures": true,
+  // 无障碍
+  "editor.accessibilitySupport": "off",
+  // 粘贴时不自动格式化
+  // 实际上我把format本来就关了
+  "editor.formatOnPaste": false,
+
+  // 空格 无条件用空格缩进
+  // "editor.detectIndentation": false,
+  // "editor.insertSpaces": true,
+
+  // "problems.decorations.enabled": false,
+  // 虽然是默认设置，但是强调一下
+  // 触摸板横向操作太简单了
+  "editor.wordWrap": "off",
+
+  // 没感觉出有什么差异的滚动
+  "workbench.list.smoothScrolling": true,
+  "editor.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+
+  // 打开新 vsc 的时候保持空
+  "workbench.startupEditor": "none",
+  "workbench.tips.enabled": false,
+
+  // git
+  "git.autofetch": true,
+  /* 其他扩展 */
+  "console-ninja.featureSet": "Community",
+  "cSpell.userWords": ["Nuqs", "wezterm"],
+  "workbench.colorTheme": "Moegi Iris",
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+  },
+  // ty
+  "python.languageServer": "Pylance",
+  "ty.disableLanguageServices": true,
+  "git.ignoreRebaseWarning": true,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "markdown-preview-enhanced.enablePreviewZenMode": false,
+  "explorer.confirmPasteNative": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+}
