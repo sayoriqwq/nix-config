@@ -27,13 +27,11 @@ in
     }
   ];
 
-  # Nix owns mise itself and its stable defaults. The writable
-  # ~/.config/mise/config.toml remains available for `mise use -g`, while
-  # projects own their committed mise.toml version selections.
   xdg.configFile."mise/conf.d/10-nix-defaults.toml".text = ''
     [tools]
     bun = "latest"
     node = "latest"
+    pnpm = "latest"
 
     [settings]
     activate_aggressive = true
@@ -42,6 +40,7 @@ in
   programs.mise = {
     enable = true;
     enableFishIntegration = true;
+    enableZshIntegration = true;
     package = pkgs.mise;
   };
 }

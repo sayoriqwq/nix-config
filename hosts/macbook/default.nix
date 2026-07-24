@@ -1,9 +1,18 @@
 { self, ... }:
 
 {
-  imports = [ ../../modules/darwin/homebrew.nix ];
+  imports = [
+    ../../modules/darwin/fonts.nix
+    ../../modules/darwin/homebrew.nix
+    ../../modules/darwin/shell.nix
+  ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
+
+  environment.etc."shells".knownSha256Hashes = [
+    # macOS defaults plus this host's pre-migration Homebrew Fish registration.
+    "1655f96aad74ad3fd074d08a2c38fe4253ba120ed8937996f4deb89abccc2e41"
+  ];
 
   system = {
     primaryUser = "sayori";
@@ -25,8 +34,9 @@
 
     users.sayori = {
       imports = [
-        ../../modules/home/common.nix
-        ../../modules/home/darwin.nix
+        ../../modules/home/common
+        ../../modules/home/darwin
+        ../../modules/home/desktop
       ];
 
       home = {

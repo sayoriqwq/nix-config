@@ -1,0 +1,24 @@
+{
+  imports = [
+    ./atuin.nix
+    ./bat.nix
+    ./btop.nix
+    ./direnv.nix
+    ./eza.nix
+    ./fd.nix
+    ./fzf
+    ./gh.nix
+    ./git.nix
+    ./helix.nix
+    ./jq.nix
+    ./lazygit
+    ./mise.nix
+    ./nh.nix
+    ./pay-respects.nix
+    ./ripgrep.nix
+    ./starship.nix
+    ./tmux.nix
+    ./tree.nix
+    ./zoxide
+  ];
+}

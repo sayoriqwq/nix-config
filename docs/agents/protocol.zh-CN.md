@@ -56,7 +56,7 @@ Agent 修改文件前必须依次阅读：
 - `modules/darwin/` 保存可复用的 macOS 系统模块。
 - `modules/nixos/` 保存可复用的 NixOS 系统模块。
 - `modules/home/` 保存可复用的用户模块。
-- `modules/home/common.nix` 必须与平台无关，并可用于无桌面的服务器。
+- `modules/home/common/default.nix` 必须与平台无关，并可用于无桌面的服务器。
 - Desktop、Darwin、Linux 和 Server 的用户配置必须拆分。
 - 优先使用 Home Manager、NixOS 和 nix-darwin 的成熟选项，最后才考虑 activation script 或生成 shell 脚本。
 - 项目专用开发依赖进入各项目 dev shell，不进入全局用户 profile。

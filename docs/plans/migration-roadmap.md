@@ -127,8 +127,8 @@ Phase 12 业务恢复、加固与 v1 收尾
 
 **允许修改**
 
-- `modules/home/common.nix`
-- `modules/home/darwin.nix`
+- `modules/home/common/`
+- `modules/home/darwin/`
 - 静态 dotfiles 的最小集合
 - macOS Home Manager integration
 
@@ -181,7 +181,7 @@ Phase 12 业务恢复、加固与 v1 收尾
 
 **目标**
 
-让 macOS 与 NixOS 工作站使用同一个 `home/common.nix`，把平台差异移入明确模块。
+让 macOS 与 NixOS 工作站使用同一个 `home/common/`，把平台差异移入明确模块。
 
 **完成标准**
 
@@ -199,7 +199,7 @@ Phase 12 业务恢复、加固与 v1 收尾
 **允许范围**
 
 - standalone `homeConfigurations."<user>@<server>"`
-- `home/common.nix`、`home/linux.nix`、`home/server.nix`
+- `home/common/`、`home/linux.nix`、`home/server.nix`
 
 **明确不做**
 
