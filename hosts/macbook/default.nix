@@ -1,4 +1,4 @@
-{ self, ... }:
+{ lib, self, ... }:
 
 {
   imports = [
@@ -8,6 +8,7 @@
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "vscode";
 
   environment.etc."shells".knownSha256Hashes = [
     # macOS defaults plus this host's pre-migration Homebrew Fish registration.
