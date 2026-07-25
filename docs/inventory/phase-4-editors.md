@@ -45,62 +45,38 @@ Zed 扩展继续属于可变状态。维护者于 2026-07-26 确认：当前 9 �
 ## VS Code 扩展快照
 
 清单由 Nix VS Code 1.119.0 的官方 CLI `--list-extensions --show-versions` 采集。
-Copilot 与 Copilot Chat 已不在 live 注册表中，不作为待保留候选。
+维护者于 2026-07-26 在应用内自行完成精简；重新采集后剩余 24 个扩展，并确认
+它们全部保留。该集合只描述 `macbook` 当前需要，不要求 Darwin 与 NixOS 保持
+完全一致，因此适用范围统一记为 local。扩展继续由 VS Code 管理，Nix 不负责
+自动安装、升级或删除。Copilot、Copilot Chat、Claude Code 与 OpenAI ChatGPT
+均已不在 live 注册表中。
 
-| ID | 版本 | 当前管理 | 分类决定 |
-| --- | --- | --- | --- |
-| `aaron-bond.better-comments` | `3.0.2` | VS Code 可变状态 | 待确认 |
-| `adpyke.codesnap` | `1.3.4` | VS Code 可变状态 | 待确认 |
-| `alefragnani.bookmarks` | `14.1.1` | VS Code 可变状态 | 待确认 |
-| `andrejunges.handlebars` | `0.4.1` | VS Code 可变状态 | 待确认 |
-| `antfu.iconify` | `1.0.0` | VS Code 可变状态 | 待确认 |
-| `anthropic.claude-code` | `2.1.220` | VS Code 可变状态 | 待确认 |
-| `astral-sh.ty` | `2026.64.0` | VS Code 可变状态 | 待确认 |
-| `bradlc.vscode-tailwindcss` | `0.16.0` | VS Code 可变状态 | 待确认 |
-| `chakrounanas.turbo-console-log` | `3.27.0` | VS Code 可变状态 | 待确认 |
-| `ckolkman.vscode-postgres` | `1.4.3` | VS Code 可变状态 | 待确认 |
-| `davidanson.vscode-markdownlint` | `0.61.2` | VS Code 可变状态 | 待确认 |
-| `dbaeumer.vscode-eslint` | `3.0.34` | VS Code 可变状态 | 待确认 |
-| `ddiu8081.moegi-theme` | `0.7.1` | VS Code 可变状态 | 待确认 |
-| `eamodio.gitlens` | `18.3.0` | VS Code 可变状态 | 待确认 |
-| `effectful-tech.effect-vscode` | `0.9.0` | VS Code 可变状态 | 待确认 |
-| `esbenp.prettier-vscode` | `12.4.0` | VS Code 可变状态 | 待确认 |
-| `github.remotehub` | `0.64.0` | VS Code 可变状态 | 待确认 |
-| `github.vscode-github-actions` | `0.32.3` | VS Code 可变状态 | 待确认 |
-| `intellsmi.comment-translate` | `3.1.0` | VS Code 可变状态 | 待确认 |
-| `justusadam.language-haskell` | `3.6.0` | VS Code 可变状态 | 待确认 |
-| `kisstkondoros.vscode-gutter-preview` | `0.32.2` | VS Code 可变状态 | 待确认 |
-| `letrieu.expand-region` | `0.1.4` | VS Code 可变状态 | 待确认 |
-| `mermaidchart.vscode-mermaid-chart` | `2.7.4` | VS Code 可变状态 | 待确认 |
-| `mhutchie.git-graph` | `1.30.0` | VS Code 可变状态 | 待确认 |
-| `ms-azuretools.vscode-containers` | `2.4.5` | VS Code 可变状态 | 待确认 |
-| `ms-ceintl.vscode-language-pack-zh-hans` | `1.118.2026052020` | VS Code 可变状态 | 待确认 |
-| `ms-playwright.playwright` | `1.1.19` | VS Code 可变状态 | 待确认 |
-| `ms-python.python` | `2026.4.0` | VS Code 可变状态 | 待确认 |
-| `ms-python.vscode-pylance` | `2026.3.1` | VS Code 可变状态 | 待确认 |
-| `ms-vscode-remote.remote-containers` | `0.466.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode-remote.remote-ssh` | `0.124.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode-remote.remote-ssh-edit` | `0.87.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode-remote.remote-wsl` | `0.104.3` | VS Code 可变状态 | 待确认 |
-| `ms-vscode-remote.vscode-remote-extensionpack` | `0.26.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode.azure-repos` | `0.40.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode.remote-explorer` | `0.5.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode.remote-repositories` | `0.42.0` | VS Code 可变状态 | 待确认 |
-| `ms-vscode.remote-server` | `1.5.3` | VS Code 可变状态 | 待确认 |
-| `naumovs.color-highlight` | `2.8.0` | VS Code 可变状态 | 待确认 |
-| `openai.chatgpt` | `26.721.41059` | VS Code 可变状态 | 待确认 |
-| `pkief.material-icon-theme` | `5.37.0` | VS Code 可变状态 | 待确认 |
-| `pomdtr.excalidraw-editor` | `3.9.3` | VS Code 可变状态 | 待确认 |
-| `ritwickdey.liveserver` | `5.7.10` | VS Code 可变状态 | 待确认 |
-| `shd101wyy.markdown-preview-enhanced` | `0.8.30` | VS Code 可变状态 | 待确认 |
-| `streetsidesoftware.code-spell-checker` | `4.5.6` | VS Code 可变状态 | 待确认 |
-| `teabyii.ayu` | `1.1.12` | VS Code 可变状态 | 待确认 |
-| `vue.volar` | `3.3.8` | VS Code 可变状态 | 待确认 |
-| `w88975.code-translate` | `1.0.20` | VS Code 可变状态 | 待确认 |
-| `wakatime.vscode-wakatime` | `30.2.1` | VS Code 可变状态 | 待确认 |
-| `wallabyjs.console-ninja` | `1.0.537` | VS Code 可变状态 | 待确认 |
-| `yoavbls.pretty-ts-errors` | `0.8.7` | VS Code 可变状态 | 待确认 |
-| `yzhang.markdown-all-in-one` | `3.6.3` | VS Code 可变状态 | 待确认 |
+| ID | 版本 | 适用范围 | 终态所有权 | 决定 |
+| --- | --- | --- | --- | --- |
+| `antfu.iconify` | `1.0.0` | local | VS Code 可变状态 | 保留 |
+| `astral-sh.ty` | `2026.64.0` | local | VS Code 可变状态 | 保留 |
+| `bradlc.vscode-tailwindcss` | `0.16.0` | local | VS Code 可变状态 | 保留 |
+| `dbaeumer.vscode-eslint` | `3.0.34` | local | VS Code 可变状态 | 保留 |
+| `ddiu8081.moegi-theme` | `0.7.1` | local | VS Code 可变状态 | 保留 |
+| `eamodio.gitlens` | `18.3.0` | local | VS Code 可变状态 | 保留 |
+| `effectful-tech.effect-vscode` | `0.9.0` | local | VS Code 可变状态 | 保留 |
+| `esbenp.prettier-vscode` | `12.4.0` | local | VS Code 可变状态 | 保留 |
+| `justusadam.language-haskell` | `3.6.0` | local | VS Code 可变状态 | 保留 |
+| `kisstkondoros.vscode-gutter-preview` | `0.32.2` | local | VS Code 可变状态 | 保留 |
+| `mhutchie.git-graph` | `1.30.0` | local | VS Code 可变状态 | 保留 |
+| `ms-ceintl.vscode-language-pack-zh-hans` | `1.118.2026052020` | local | VS Code 可变状态 | 保留 |
+| `ms-python.python` | `2026.4.0` | local | VS Code 可变状态 | 保留 |
+| `ms-python.vscode-pylance` | `2026.3.1` | local | VS Code 可变状态 | 保留 |
+| `naumovs.color-highlight` | `2.8.0` | local | VS Code 可变状态 | 保留 |
+| `pkief.material-icon-theme` | `5.37.0` | local | VS Code 可变状态 | 保留 |
+| `ritwickdey.liveserver` | `5.7.10` | local | VS Code 可变状态 | 保留 |
+| `shd101wyy.markdown-preview-enhanced` | `0.8.30` | local | VS Code 可变状态 | 保留 |
+| `streetsidesoftware.code-spell-checker` | `4.5.6` | local | VS Code 可变状态 | 保留 |
+| `teabyii.ayu` | `1.1.12` | local | VS Code 可变状态 | 保留 |
+| `vue.volar` | `3.3.8` | local | VS Code 可变状态 | 保留 |
+| `w88975.code-translate` | `1.0.20` | local | VS Code 可变状态 | 保留 |
+| `wakatime.vscode-wakatime` | `30.2.1` | local | VS Code 可变状态 | 保留 |
+| `yoavbls.pretty-ts-errors` | `0.8.7` | local | VS Code 可变状态 | 保留 |
 
 ## 审计规则
 
