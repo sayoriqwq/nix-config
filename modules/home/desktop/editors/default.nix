@@ -1,3 +1,7 @@
 {
-  imports = [ ./vscode ];
+  imports = [
+    ./seed-files.nix
+    ./vscode
+    ./zed
+  ];
 }

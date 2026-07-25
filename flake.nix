@@ -14,6 +14,10 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # ADR-0006: consume only the upstream Nightly package output. Zed keeps
+    # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
+    zed.url = "github:zed-industries/zed";
   };
 
   outputs =
@@ -40,6 +44,13 @@
           ./modules/darwin/base.nix
           home-manager.darwinModules.home-manager
         ];
+      };
+
+      # Explicit package outputs give CI and future hosts a stable validation
+      # target without importing Zed's internal Flake modules.
+      packages = {
+        aarch64-darwin.zed-nightly = inputs.zed.packages.aarch64-darwin.default;
+        x86_64-linux.zed-nightly = inputs.zed.packages.x86_64-linux.default;
       };
 
       formatter = {
