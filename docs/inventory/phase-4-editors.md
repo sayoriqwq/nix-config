@@ -26,21 +26,21 @@ activation 自动修正；第一次启动 Nightly 前必须由维护者确认 li
 
 ## Zed 扩展快照
 
-Zed 扩展继续属于可变状态。表中“待确认”表示本 PR 不声明、不安装、不升级也不
-删除该扩展；维护者确认实际用途后，再决定 shared / Darwin / Linux / local 与
-保留 / 排除。
+Zed 扩展继续属于可变状态。维护者于 2026-07-26 确认：通用语言与外观扩展继续
+保留，但不由 Nix 自动安装；Elixir 是实际使用的语言，也必须保留。表中“待确认”
+表示本 PR 不声明、不安装、不升级也不删除该扩展，等待维护者了解其能力后决定。
 
-| ID | 版本 | 当前管理 | 分类决定 |
-| --- | --- | --- | --- |
-| `ayu-darker` | `1.1.2` | Zed 可变状态 | 待确认 |
-| `elixir` | `0.6.2` | Zed 可变状态 | 待确认 |
-| `git-firefly` | `0.1.8` | Zed 可变状态 | 待确认 |
-| `html` | `0.3.1` | Zed 可变状态 | 待确认 |
-| `log` | `0.0.7` | Zed 可变状态 | 待确认 |
-| `material-icon-theme` | `1.3.1` | Zed 可变状态 | 待确认 |
-| `nix` | `0.1.4` | Zed 可变状态 | 待确认 |
-| `toml` | `1.0.3` | Zed 可变状态 | 待确认 |
-| `vue` | `0.4.0` | Zed 可变状态 | 待确认 |
+| ID | 版本 | 适用范围 | 终态所有权 | 决定与理由 |
+| --- | --- | --- | --- | --- |
+| `ayu-darker` | `1.1.2` | shared | Zed 可变状态 | 保留；Zed baseline 使用的深色主题 |
+| `elixir` | `0.6.2` | shared | Zed 可变状态 | 保留；维护者实际使用 Elixir，扩展提供 Elixir/EEx/HEEx、LSP 与调试支持 |
+| `git-firefly` | `0.1.8` | 待确认 | Zed 可变状态 | 待确认；只提供 Git config/rebase/ignore/attributes 语法高亮 |
+| `html` | `0.3.1` | shared | Zed 可变状态 | 保留；通用 HTML 语言支持 |
+| `log` | `0.0.7` | 待确认 | Zed 可变状态 | 待确认；只提供 `.log` 文件语法高亮 |
+| `material-icon-theme` | `1.3.1` | shared | Zed 可变状态 | 保留；Zed baseline 使用的图标主题 |
+| `nix` | `0.1.4` | shared | Zed 可变状态 | 保留；本仓库及未来两台工作站需要 Nix 语言支持 |
+| `toml` | `1.0.3` | shared | Zed 可变状态 | 保留；通用 TOML 语言支持 |
+| `vue` | `0.4.0` | shared | Zed 可变状态 | 保留；通用 Vue 语言支持 |
 
 ## VS Code 扩展快照
 
