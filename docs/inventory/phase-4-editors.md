@@ -26,17 +26,17 @@ activation 自动修正；第一次启动 Nightly 前必须由维护者确认 li
 
 ## Zed 扩展快照
 
-Zed 扩展继续属于可变状态。维护者于 2026-07-26 确认：通用语言与外观扩展继续
-保留，但不由 Nix 自动安装；Elixir 是实际使用的语言，也必须保留。表中“待确认”
-表示本 PR 不声明、不安装、不升级也不删除该扩展，等待维护者了解其能力后决定。
+Zed 扩展继续属于可变状态。维护者于 2026-07-26 确认：当前 9 个扩展全部保留，
+归类为 shared，但不由 Nix 自动安装、升级或删除；Elixir 是实际使用的语言，
+`.log` 与 Git 配置文件的语法高亮也需要保留。
 
 | ID | 版本 | 适用范围 | 终态所有权 | 决定与理由 |
 | --- | --- | --- | --- | --- |
 | `ayu-darker` | `1.1.2` | shared | Zed 可变状态 | 保留；Zed baseline 使用的深色主题 |
 | `elixir` | `0.6.2` | shared | Zed 可变状态 | 保留；维护者实际使用 Elixir，扩展提供 Elixir/EEx/HEEx、LSP 与调试支持 |
-| `git-firefly` | `0.1.8` | 待确认 | Zed 可变状态 | 待确认；只提供 Git config/rebase/ignore/attributes 语法高亮 |
+| `git-firefly` | `0.1.8` | shared | Zed 可变状态 | 保留；提供 Git config/rebase/ignore/attributes 语法高亮 |
 | `html` | `0.3.1` | shared | Zed 可变状态 | 保留；通用 HTML 语言支持 |
-| `log` | `0.0.7` | 待确认 | Zed 可变状态 | 待确认；只提供 `.log` 文件语法高亮 |
+| `log` | `0.0.7` | shared | Zed 可变状态 | 保留；提供 `.log` 文件语法高亮 |
 | `material-icon-theme` | `1.3.1` | shared | Zed 可变状态 | 保留；Zed baseline 使用的图标主题 |
 | `nix` | `0.1.4` | shared | Zed 可变状态 | 保留；本仓库及未来两台工作站需要 Nix 语言支持 |
 | `toml` | `1.0.3` | shared | Zed 可变状态 | 保留；通用 TOML 语言支持 |
