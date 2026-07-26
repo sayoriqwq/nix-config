@@ -1,0 +1,12 @@
+// Zed keymap baseline. Live keymaps remain writable.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      "secondary-shift-g": [
+        "task::Spawn",
+        { "task_name": "LazyGit", "reveal_target": "center" }
+      ]
+    }
+  }
+]

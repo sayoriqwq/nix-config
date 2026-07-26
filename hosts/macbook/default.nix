@@ -1,4 +1,9 @@
-{ lib, self, ... }:
+{
+  inputs,
+  lib,
+  self,
+  ...
+}:
 
 {
   imports = [
@@ -30,6 +35,7 @@
   };
 
   home-manager = {
+    extraSpecialArgs = { inherit inputs; };
     useGlobalPkgs = true;
     useUserPackages = true;
 
