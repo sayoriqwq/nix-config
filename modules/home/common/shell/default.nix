@@ -6,9 +6,12 @@
     ./zsh.nix
   ];
 
-  # Home Manager packages must win over still-installed compatibility
-  # packages from platform package managers.
-  home.sessionPath = [ "${config.home.profileDirectory}/bin" ];
+  # Home Manager packages must win over mutable compatibility tools. Keep
+  # ~/.local/bin available for user-managed commands that have not migrated.
+  home.sessionPath = [
+    "${config.home.profileDirectory}/bin"
+    "${config.home.homeDirectory}/.local/bin"
+  ];
 
   sayori.shortcuts = [
     {
