@@ -10,19 +10,21 @@
 | 项目 | 当前事实 |
 | --- | --- |
 | Zed Preview | `1.13.0`，bundle ID `dev.zed.Zed-Preview`，位于 `/Applications/Zed Preview.app` |
-| 目标 Zed Nightly | 官方 Flake revision `a3ac036eb6b73e0a50af4a44c96a43f1abf1b989`，version `1.14.0-nightly+a3ac036` |
-| Zed CLI 契约 | 官方 package main program 为 `zed`；目标 `EDITOR` / `VISUAL` 为 `zed --wait` |
-| Zed settings | `~/.config/zed/settings.json`，普通可写文件，SHA-256 `494e48f67be389a8966930463aed9c1d09621f5b5c87f9c44a73aa8fb7da1f9a` |
+| Zed Nightly | 已于 2026-07-26 激活；官方 Flake revision `a3ac036eb6b73e0a50af4a44c96a43f1abf1b989`，version `1.14.0-nightly+a3ac036`，位于 `~/Applications/Home Manager Apps/Zed Nightly.app` |
+| Zed CLI 契约 | 全新登录环境中 `/etc/profiles/per-user/sayori/bin/zed` 解析为 Nightly，`EDITOR` / `VISUAL` 均为 `zed --wait`；激活前已运行的会话需重启后刷新环境 |
+| Zed Cachix | daemon 的 substituters 与 trusted public keys 已包含 `https://zed.cachix.org` 及 ADR-0006 接受的公钥 |
+| Zed settings | `~/.config/zed/settings.json`，普通可写文件，SHA-256 `b12ccea2dcbc2838fb7d5379bddfa37f50587e796885a1972f9fed8edcfc1636` |
 | Zed keymap | `~/.config/zed/keymap.json`，普通可写文件，SHA-256 `28fbca1a467473e1b697f82e777db32bef5713340127e71b66ef6025d9cc4867` |
 | Zed tasks | `~/.config/zed/tasks.json`，普通可写文件，SHA-256 `faef4ea8541195b7c6a8cd6a6b828e1b37c21e1cbf4b19862b3a4cfeb46d8657` |
-| 默认编辑器声明 | 采集时没有模块声明 `EDITOR` 或 `VISUAL` |
+| 默认编辑器声明 | Home Manager 声明 `EDITOR` 与 `VISUAL` 为 `zed --wait` |
 | 机密扫描 | Zed config directory 的 Gitleaks 扫描无发现；settings/keymap/tasks 无敏感关键词命中 |
 
 Zed baseline 以当前设置为证据，但删除了已经弃用的 Copilot prediction provider
 和不适合作为跨机器安全默认值的 `session.trust_all_worktrees`，并加入
-`"auto_update": false`。由于采用 seed-only 模型，现有 live settings 不会被
-activation 自动修正；第一次启动 Nightly 前必须由维护者确认 live 文件中已经
-关闭应用自更新。
+`"auto_update": false`。维护者在 activation 前已将该键加入 live settings；
+activation 保留了现有 live settings 里的 Copilot provider 与
+`session.trust_all_worktrees`，也保留了 keymap/tasks 的原 hash，符合 seed-only
+边界。上述两个 live-only 设置没有进入跨机器 baseline。
 
 ## Zed 扩展快照
 

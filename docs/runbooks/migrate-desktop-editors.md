@@ -33,6 +33,23 @@
 4. 确认当前 generation 和上一代回滚入口；
 5. 只对 PR 中已构建并审阅的精确 commit 执行 activation。
 
+## 首次 Cachix 引导
+
+当前 nix-daemon 在首次 activation 前还没有读取 Zed Cachix 配置。直接构建可能
+退回本地编译大量依赖；这不是应当等待完成的正常路径。维护者批准 activation 后，
+第一次切换使用与 ADR-0006 完全相同的 URL 和公钥：
+
+```fish
+sudo darwin-rebuild switch \
+  --flake 'github:sayoriqwq/nix-config/<approved-revision>#macbook' \
+  --option extra-substituters 'https://zed.cachix.org' \
+  --option extra-trusted-public-keys 'zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU='
+```
+
+`<approved-revision>` 必须替换为已审阅并批准的完整提交 SHA。临时参数不增加新
+信任边界，只为首次构建提前提供仓库已经声明的缓存配置。切换成功后 daemon 会从
+正式配置读取这两项，后续普通 activation 不再需要临时参数。
+
 ## 双安装验收
 
 activation 后保留 Zed Preview 与旧 Homebrew VS Code。明确从
