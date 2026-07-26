@@ -149,6 +149,16 @@ Node 与 Bun 的版本切换是 mise 的核心职责，不按普通全局 CLI �
 
 当前机器证据、清理关卡与验收命令见 `docs/inventory/mise-runtime-ownership.md`。
 
+Python 使用不同的所有权模型：
+
+- Nix/Home Manager 只提供 `uv` 可执行文件，不在全局用户 profile 安装 Python 解释器；
+- uv 根据项目的 `.python-version` 与 `requires-python` 选择并获取 Python；
+- 项目的 `.venv`、依赖与 `uv.lock` 由 uv 和项目共同管理，不进入全局 Home Manager profile；
+- mise 不得声明 Python 或 uv；Node、Bun 与 pnpm 的既有所有权不变；
+- `~/.local/bin` 是用户可变工具的低优先级兼容路径，必须排在 Nix profile 之后，Nix 不扫描、同步或清理其中内容。
+
+当前机器事实、验收关卡与回滚方式见 `docs/inventory/uv-python-ownership.md`。
+
 ## 7. 服务与容器边界
 
 服务器迁移初期优先恢复现有、已验证的容器/Compose 服务，不在同一阶段重写全部服务：

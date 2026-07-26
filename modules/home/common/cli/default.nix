@@ -19,6 +19,7 @@
     ./starship.nix
     ./tmux.nix
     ./tree.nix
+    ./uv.nix
     ./zoxide
   ];
 }
