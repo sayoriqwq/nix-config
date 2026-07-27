@@ -169,7 +169,6 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 
 | 应用 | Cask | 主要边界 |
 | --- | --- | --- |
-| AltTab | `alt-tab` | Nix 版本明显落后 |
 | Google Chrome | `google-chrome` | Chrome 自更新和 profile 保持外部 |
 | Raycast | `raycast` | Nix 版本落后；账号、扩展和 history 外部 |
 | Telegram | `telegram` | 保留官方 macOS 应用形态与账户状态 |
@@ -333,6 +332,7 @@ GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通
 - `HOME.md` 与 `rcm`；
 - Typora、Google Antigravity、`antigravity-tools`；
 - Itsycal；
+- AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
 - Clash Nyanpasu 与 Clash Party；
 - Zed Preview、旧 Zed cask和旧 Preview CLI；
 - 旧 Homebrew VS Code cask与 `/Applications/Visual Studio Code.app`；
