@@ -214,7 +214,6 @@ nix-darwin 原生 `homebrew.masApps`，等待真实机器验收。
 | 第三方 | HazeOver | 430798174 | 本机偏好可写 |
 | 第三方 | KeyScreen | 6753302381 | 本机状态和权限外部 |
 | 第三方 | One Thing | 1604176982 | 本机内容和偏好外部 |
-| 第三方 | The Unarchiver | 425424353 | 归档内容和历史外部 |
 | 第三方 | Windows App | 1295203466 | 账号、远程连接和凭据外部 |
 
 App Store 登录是人工前置条件。`mas` 仅由 nix-darwin 在 Homebrew activation 中临时
@@ -346,6 +345,7 @@ Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
 - SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
 - Lark；不再声明 `lark` cask，现有 `Lark.app` 的账号、聊天、本地文件和缓存须在定向清理前单独审查；
+- The Unarchiver；功能与保留的 iZip 高度重叠，不再声明 MAS 安装；
 - Clash Nyanpasu 与 Clash Party；
 - Zed Preview、旧 Zed cask和旧 Preview CLI；
 - 旧 Homebrew VS Code cask与 `/Applications/Visual Studio Code.app`；
@@ -388,7 +388,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
    mise Elixir/Erlang 单独修订运行时合同。
 2. **Nix GUI：** Atuin Desktop、Discord、IINA、LocalSend、MonitorControl、Mos、
    Obsidian、Upscayl、xbar 已由 #45 声明并完成基础实机验收；旧应用留到后续定向清理。
-3. **Homebrew 与 MAS 声明：** #46 已写入批准的 casks 和 10 个 `masApps`；upgrade 关闭，
+3. **Homebrew 与 MAS 声明：** #46 已写入批准的 casks 和 9 个 `masApps`；upgrade 关闭，
    cleanup 保持 `none`，Swift 工具链保持外部所有。
 4. **外部应用恢复表：** 补齐厂商 URL、签名身份和人工恢复步骤，不接管可变状态。
 5. **defaults：** 按 #37 逐组设计、实现与验证。

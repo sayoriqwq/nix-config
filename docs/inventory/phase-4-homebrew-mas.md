@@ -10,7 +10,7 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 
 - 1 个限定 Homebrew tap：`erictli/tap`；
 - 30 个 Homebrew cask；
-- 10 个 Mac App Store 应用；
+- 9 个 Mac App Store 应用；
 - 0 个 Homebrew formula；
 - `homebrew.onActivation.autoUpdate = false`；
 - `homebrew.onActivation.upgrade = false`；
@@ -65,10 +65,10 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
 
 ## 4. Mac App Store 边界
 
-10 个目标中有 9 个在 activation 前存在有效 App Store receipt，`mas list` 能识别其
-App ID；`The Unarchiver`（ID `425424353`）当前没有应用实体或 MAS receipt，首次
-activation 预期从 App Store 安装它。由于 `upgrade = false`，其余 9 个已安装目标不应
-升级。Xcode 仍能被 `mas list` 识别，但保持外部 Swift 工具链所有，不在 `masApps` 中。
+9 个目标在 activation 前均存在有效 App Store receipt，`mas list` 能识别其 App ID。
+由于 `upgrade = false`，首次 activation 不应升级这些既有应用。Xcode 仍能被
+`mas list` 识别，但保持外部 Swift 工具链所有，不在 `masApps` 中。The Unarchiver 已
+由维护者删除并明确退役；其功能与保留的 iZip 高度重叠，不在声明中。
 
 `mas` 6.x 不再提供可用于脚本化确认账号的 `mas account`。activation 前由维护者人工
 确认 Mac App Store 已登录；本仓库不保存 Apple ID、账号标识或凭据，也不清除 receipt。
@@ -88,7 +88,7 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 还必须检查生成 Brewfile：
 
-1. 正好包含 1 个 tap、30 个 cask、10 个 MAS 应用和 0 个 formula；
+1. 正好包含 1 个 tap、30 个 cask、9 个 MAS 应用和 0 个 formula；
 2. Scratch 使用 `erictli/tap/scratch`，不存在裸 `scratch`；
 3. ChatGPT 使用 `chatgpt` cask，ChatGPT Classic 不在声明中；
 4. Xcode、Xcode Beta 与 XcodeGen 不在 Homebrew/MAS 声明中；
@@ -115,8 +115,7 @@ Agent 不执行真实 activation。备份完成后只把绑定精确 commit 的
 activation 后逐项确认：
 
 1. Homebrew Bundle 完成且没有升级、cleanup 或卸载输出；
-2. 30 个目标 cask 与 10 个 MAS ID 均可由声明解释；9 个既有 MAS 应用没有升级，
-   `The Unarchiver` 已作为唯一缺失 MAS 目标安装；
+2. 30 个目标 cask 与 9 个 MAS ID 均可由声明解释，既有 MAS 应用没有升级；
 3. 既有应用账号、偏好和数据仍可用；
 4. `ChatGPT.app` 仍是 `com.openai.codex`，`ChatGPT Classic.app` 仍是
    `com.openai.chat`；

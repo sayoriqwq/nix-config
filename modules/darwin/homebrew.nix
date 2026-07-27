@@ -51,7 +51,6 @@
       Numbers = 409203825;
       "One Thing" = 1604176982;
       Pages = 409201541;
-      "The Unarchiver" = 425424353;
       "Windows App" = 1295203466;
     };
 
