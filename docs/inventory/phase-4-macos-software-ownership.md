@@ -5,6 +5,7 @@
 - **父阶段：** [Issue #6](https://github.com/sayoriqwq/nix-config/issues/6)
 - **决策来源：** [Issue #36](https://github.com/sayoriqwq/nix-config/issues/36)
 - **文档实施：** [Issue #38](https://github.com/sayoriqwq/nix-config/issues/38)
+- **Nix GUI 实施：** [Issue #45](https://github.com/sayoriqwq/nix-config/issues/45)
 - **macOS defaults：** 独立由 [Issue #37](https://github.com/sayoriqwq/nix-config/issues/37) 处理
 
 本文统一记录 macOS 软件的安装、稳定配置、版本更新和可变状态所有权。
@@ -27,6 +28,7 @@
 | 状态 | 含义 |
 | --- | --- |
 | 已声明并验收 | 已进入仓库、完成真实 Mac activation 和人工验证 |
+| 已声明待验收 | 已进入仓库并通过离线构建，但尚未完成真实 Mac activation 和人工验证 |
 | 已批准待实施 | 维护者已决定终态，但配置尚未落地或验收 |
 | 外部所有 | 仓库只记录恢复入口和边界，不声明安装 |
 | 有意试用 | 维护者明确保留的实验性应用，不按低使用频率清理 |
@@ -145,8 +147,8 @@
 | `pearcleaner` | 5.4.3 | Homebrew cask | 保留 |
 | `scratch` | 0.4.0 | Homebrew cask | 保留 |
 | `topnotch` | 1.3.2 | Homebrew cask | 保留 |
-| `localsend` | 1.17.0 | Nix / Home Manager | 已批准待实施；cask 待 Nix 实机验收后定向清理 |
-| `xbar` | 2.1.7-beta | Nix / Home Manager | 已批准待实施；plugins 与缓存保持可写 |
+| `localsend` | 1.17.0 | Nix / Home Manager | 已声明并验收；cask 待后续定向清理 |
+| `xbar` | 2.1.7-beta | Nix / Home Manager | 已声明并验收；plugins 与缓存保持可写 |
 | `visual-studio-code` | 1.107.1 | Nix / Home Manager | Nix 版已验收；旧 cask 与 `/Applications` 副本待清理 |
 | `zed` | 0.219.4 | 官方 Zed Flake Nightly | Nightly 已验收；旧 cask与 Preview 待独立清理 |
 | `aionui` | 1.8.17 | 退役 | 未发现应用实体；待清理登记 |
@@ -224,7 +226,7 @@ App Store 登录是人工前置条件。`mas` 仅由 nix-darwin 在 Homebrew act
 | Visual Studio Code | Nix / Home Manager | Git/Nix 基线 + 可写 live settings | 扩展、登录、History、workspaceStorage 外部 |
 | Zed Nightly | 官方 Flake + Home Manager | Git/Nix 基线 + 可写 live settings | 扩展、登录、workspace/session 外部 |
 
-### 7.2 已批准待实施
+### 7.2 已声明并验收
 
 | 应用 | 目标安装所有者 | 说明 |
 | --- | --- | --- |
@@ -237,6 +239,9 @@ App Store 登录是人工前置条件。`mas` 仅由 nix-darwin 在 Homebrew act
 | Obsidian | Nix / Home Manager | vault、插件和应用状态外部；使用精确 unfree allowlist |
 | Upscayl | Nix / Home Manager | 模型、缓存和输出外部 |
 | xbar | Nix / Home Manager | plugins、缓存和运行态外部 |
+
+具体版本、应用身份、双安装验收与回滚步骤见
+[`phase-4-nix-gui.md`](phase-4-nix-gui.md)。
 
 ## 8. Setapp
 
@@ -289,7 +294,7 @@ Desktop workspace 是三个不同状态域，不因 CLI/应用交给 Nix 就自�
 | 夸克网盘 | 厂商安装器 / 自更新 | 外部所有，保留 | 待补官方恢复入口；账号、同步与下载数据外部 |
 | Collaborator | 手工/厂商，来源待确认 | 有意试用 | 待补恢复来源；账号、项目与 session 外部 |
 | LiteEdit | 手工安装，来源待确认 | 有意试用 | 当前 app 为 ad-hoc/未确认签名；待补恢复来源 |
-| Mole | 上游/厂商，adapter 待定 | 有意试用 | 清理记录、状态与偏好外部 |
+| Mole | tw93 厂商应用 / 内置更新 | 有意试用 | `com.tw93.MoleApp`；Nixpkgs 同名 `mole` 是 Darwin 上 broken 的 SSH tunnel CLI，不得替代；状态与偏好外部 |
 | Multica | 厂商应用，adapter 待定 | 有意试用 | workspace、本地 daemon、账号和 Agent 状态外部 |
 | Paseo | 上游提供 cask 与 Flake，尚未选择 | 有意试用 | 不提前决定 adapter；Agent session 与 workspace 外部 |
 | Syncless | LangGenius 签名应用，来源待确认 | 有意试用 | 待补恢复来源；账号、项目和运行态外部 |
@@ -360,7 +365,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 以下项目阻止 #6 宣称“未分类项为零”，但不阻止本清单作为当前事实来源：
 
 1. Collaborator、LiteEdit、Syncless 的可靠恢复来源。
-2. Mole、Multica、Paseo、Vorssaint 的最终安装 adapter。
+2. Multica、Paseo、Vorssaint 的最终安装 adapter。
 3. OpenAI 两个桌面应用分别对应的官方恢复入口与 Homebrew cask 身份。
 4. Clash Verge 与 Docker Desktop 的目标安装 adapter。
 5. 五个尚未批准 disposition 的 Homebrew tap。
@@ -376,7 +381,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 1. **Nix CLI 与静态用户配置：** 新增批准的 CLI、Atuin 配置、`.hushlogin`，并为
    mise Elixir/Erlang 单独修订运行时合同。
 2. **Nix GUI：** Atuin Desktop、Discord、IINA、LocalSend、MonitorControl、Mos、
-   Obsidian、Upscayl、xbar；先 build 和双安装验证，不清理旧应用。
+   Obsidian、Upscayl、xbar 已由 #45 声明并完成基础实机验收；旧应用留到后续定向清理。
 3. **Homebrew 与 MAS 声明：** 写入批准的 casks 和 11 个 `masApps`；upgrade 关闭，
    cleanup 保持 `none`。
 4. **外部应用恢复表：** 补齐厂商 URL、签名身份和人工恢复步骤，不接管可变状态。
