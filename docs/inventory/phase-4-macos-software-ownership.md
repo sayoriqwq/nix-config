@@ -175,7 +175,6 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | Steam | `steam` | 游戏库、兼容状态和自更新外部 |
 | Transmission | `transmission` | Nix 主程序形态不等价于原生 App |
 | 百度网盘 | `baidunetdisk` | 账号、同步/下载目录和传输状态外部 |
-| Battery Buddy | `battery-buddy` | 本机偏好和运行状态可写 |
 | Lark | `lark` | 账号、聊天、本地文件和缓存外部 |
 | Linear | `linear` | 账号、workspace 和缓存外部 |
 | MEGAsync | `megasync` | 账号、同步映射、目录和数据库外部 |
@@ -330,7 +329,8 @@ GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通
 - cmux 应用与配置；
 - `HOME.md` 与 `rcm`；
 - Typora、Google Antigravity、`antigravity-tools`；
-- Itsycal；
+- Itsycal 与 Battery Buddy；原生菜单栏时钟和电池百分比已通过实机体验，
+  两个第三方菜单栏应用后续定向清理；
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
 - SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
 - Clash Nyanpasu 与 Clash Party；
