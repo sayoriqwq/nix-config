@@ -243,7 +243,7 @@ App Store 登录是人工前置条件。`mas` 仅由 nix-darwin 在 Homebrew act
 
 Setapp 客户端、订阅和自更新是唯一安装/版本所有者。nix-config 不新增 Homebrew
 `setapp` cask，也不逐应用伪造 Nix 声明。新机器先安装 Setapp 客户端，再由维护者
-人工登录恢复以下 15 个应用：
+人工登录恢复以下 14 个应用：
 
 | 应用 | 盘点版本 | 重要可变边界 |
 | --- | --- | --- |
@@ -256,7 +256,6 @@ Setapp 客户端、订阅和自更新是唯一安装/版本所有者。nix-confi
 | Paste | 6.6.2 | 剪贴板历史与同步状态 |
 | Permute | 4.0.6 | 转码队列、输出和偏好 |
 | PixelSnap | 2.6.4 | 偏好与运行状态 |
-| SideNotes | 1.6.3 | 笔记内容与同步状态 |
 | Slidepad | 1.6.2 | 站点登录、Cookie 与布局 |
 | Supercharge | 1.29.2 | 系统增强偏好与权限 |
 | TablePlus | 26.7.9 | 数据库连接、凭据和 history |
@@ -333,6 +332,7 @@ GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通
 - Typora、Google Antigravity、`antigravity-tools`；
 - Itsycal；
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
+- SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
 - Clash Nyanpasu 与 Clash Party；
 - Zed Preview、旧 Zed cask和旧 Preview CLI；
 - 旧 Homebrew VS Code cask与 `/Applications/Visual Studio Code.app`；
