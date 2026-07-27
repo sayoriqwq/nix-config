@@ -40,7 +40,6 @@
 
       showAppExposeGestureEnabled = false;
       showDesktopGestureEnabled = true;
-      showLaunchpadGestureEnabled = false;
       showMissionControlGestureEnabled = true;
 
       wvous-tl-corner = 1;

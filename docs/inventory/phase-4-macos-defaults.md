@@ -80,13 +80,16 @@ Finder 窗口未刷新，人工退出并重新打开 Finder，不在无人值守
 | `...ForceSuppressed` | `0` | `false` |
 | `...ActuateDetents` | `1` | `true` |
 | `com.apple.dock.showDesktopGestureEnabled` | 未设置 | `true` |
-| `com.apple.dock.showLaunchpadGestureEnabled` | 未设置 | `false` |
 | `com.apple.dock.showMissionControlGestureEnabled` | 未设置 | `true` |
 | `com.apple.dock.showAppExposeGestureEnabled` | 未设置 | `false` |
 
 四指水平手势切换 Spaces/全屏应用；四指上推进入 Mission Control，四指展开显示
-桌面。Launchpad 和 App Exposé 不占用手势，三指只用于拖动。Dock 重启后验证；
-Trackpad 系统面板或现有应用未刷新时重新登录。
+桌面，三指只用于拖动。App Exposé 不占用手势。macOS 27 已从 Trackpad UI 和
+官方设置说明中移除独立的 Launchpad 开关；实机验证确认旧的
+`showLaunchpadGestureEnabled = false` 虽然能写入 plist，但不会阻止四指向内捏合
+打开应用启动器。因此最终配置不声明这个无效键，并接受“向外展开显示桌面、向内
+捏合打开应用启动器”的成对系统行为。Dock 重启后验证；Trackpad 系统面板或现有
+应用未刷新时重新登录。
 
 ## 窗口与 Hot Corners
 
@@ -161,7 +164,6 @@ defaults delete -g NSAutomaticQuoteSubstitutionEnabled
 defaults delete -g AppleShowScrollBars
 
 defaults delete com.apple.dock showDesktopGestureEnabled
-defaults delete com.apple.dock showLaunchpadGestureEnabled
 defaults delete com.apple.dock showMissionControlGestureEnabled
 defaults delete com.apple.dock showAppExposeGestureEnabled
 
@@ -181,3 +183,13 @@ defaults delete com.apple.menuextra.clock ShowSeconds
 才删除前三个 corner 键并将右下恢复为 `1`。
 
 完成定向回滚后，按同样的人工关卡重启 Dock/Finder/SystemUIServer 或重新登录。
+
+PR #40 的首次实机 activation 曾写入无效的
+`com.apple.dock.showLaunchpadGestureEnabled = false`。最终声明已删除该键；现有主机
+若要同时清理遗留值，可在维护者手工执行关卡中运行：
+
+```fish
+defaults delete com.apple.dock showLaunchpadGestureEnabled
+```
+
+该清理不改变 macOS 27 的实际手势行为。
