@@ -61,11 +61,10 @@ Home Manager activation 只安装声明文件，不下载或编译 runtime。mis
 迁移前本机 Homebrew 提供 Erlang 28.5 与 Elixir 1.19.5；mise 已保留相同旧版本的
 runtime。Homebrew 副本在新版本通过真实项目验收前继续作为回退，不在 #43 清理。
 
-2026-07-27 首次显式预装在下载/编译前中止：GitHub API 与
-`raw.githubusercontent.com` 的连接被关闭，kerl 与 OTP build metadata 均未取得，
-Elixir 因 Erlang 依赖失败而跳过。没有创建 29.0.3 或 1.20.2-otp-29 安装目录，
-当前 runtime 与 PATH 未变化。网络恢复后应从同一精确版本命令重试，不把网络失败
-误判为版本或配置不兼容。
+2026-07-27 首次显式预装因 GitHub 网络连接中断而失败；网络恢复后使用同一精确
+版本命令重试成功。`mise x` 已验证 Erlang/OTP 29（ERTS 17.0.3）与 Elixir 1.20.2
+（编译目标 OTP 29）可以共同运行。由于 Home Manager 声明尚未 activation，mise
+正确提示 runtime 已安装但尚未由配置激活；当前默认 PATH 仍保持迁移前状态。
 
 ## 4. 激活后验收
 
