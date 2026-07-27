@@ -48,7 +48,7 @@
 | `~/Applications` 顶层应用 | 4 | 用户级手工/PWA/Steam/helper 应用 |
 | Home Manager Apps | 4 | 当前为 Ghostty、VS Code、WezTerm、Zed Nightly |
 | 已识别 MAS 应用 | 11 | App Store ID 已逐项确认 |
-| Setapp 保留应用 | 15 | 维护者清理后重新扫描的最终集合 |
+| Setapp 保留应用 | 14 | 维护者清理后重新扫描的最终集合 |
 
 本快照不包含账号、序列号、token、Cookie、私有主机、代理、数据库内容、
 浏览器 profile、聊天记录、订阅信息或其他可变数据。
