@@ -4,4 +4,6 @@
     ./shell
     ./cli
   ];
+
+  home.file.".hushlogin".text = "";
 }

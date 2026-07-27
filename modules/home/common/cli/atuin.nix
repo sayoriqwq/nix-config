@@ -4,6 +4,17 @@
     enableFishIntegration = true;
     enableZshIntegration = true;
     flags = [ "--disable-up-arrow" ];
+    settings = {
+      key_path = "~/.local/share/atuin/key";
+      search_mode = "daemon-fuzzy";
+
+      sync.records = true;
+
+      daemon = {
+        enabled = true;
+        autostart = true;
+      };
+    };
   };
 
   sayori.shortcuts = [
