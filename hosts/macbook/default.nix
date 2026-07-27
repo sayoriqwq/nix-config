@@ -14,7 +14,14 @@
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "vscode";
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "discord"
+      "mos"
+      "obsidian"
+      "vscode"
+    ];
 
   environment.etc."shells".knownSha256Hashes = [
     # macOS defaults plus this host's pre-migration Homebrew Fish registration.

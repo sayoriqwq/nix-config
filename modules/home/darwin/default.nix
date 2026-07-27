@@ -1,5 +1,6 @@
 {
   imports = [
+    ./applications.nix
     ./cli
     ./editors
     ./integrations
