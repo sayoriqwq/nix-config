@@ -3,7 +3,7 @@
 - **Issue：** [#45](https://github.com/sayoriqwq/nix-config/issues/45)
 - **目标机器：** `macbook`
 - **安装层：** Home Manager desktop / Darwin 用户层
-- **当前状态：** 已声明并通过完整 macOS system build，等待真实机器验收
+- **当前状态：** 已声明、完成真实 Mac activation 和维护者基础验收
 
 ## 1. 目标与边界
 
@@ -121,3 +121,23 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 Homebrew `Brewfile` 仍为空，`homebrew.onActivation.cleanup` 仍为 `none`。生成的
 `home-files` 没有新增任何目标应用的配置或数据链接。精确 unfree predicate 对
 Discord、Mos、Obsidian、VS Code 返回 true，对反例 Spotify 返回 false。
+
+## 7. 真实机器验收记录
+
+2026-07-28，维护者对精确提交
+`8c7992a1e37e08f279a715dd5823d6b8af9321ce` 执行 `darwin-rebuild switch`，activation
+完成且无报错。机器侧确认：
+
+- `/run/current-system` 指向离线验证的精确 build；
+- 九个 Nix 应用均存在于 `~/Applications/Home Manager Apps`，版本和 bundle ID 正确；
+- 九个 `/Applications` 旧副本全部保留；
+- Discord 与 Obsidian 主配置相对私有备份哈希未变；
+- Homebrew cleanup 仍为 `none`；
+- 已观察到 IINA、MonitorControl、Mos 与 Nix xbar 从 Home Manager Apps 路径运行。
+
+维护者反馈初步使用良好，并明确接受不逐项完成全部 GUI checklist、将低概率问题延后到
+真实使用时处理。该决定不扩大配置所有权：旧应用和 `0700` 私有备份继续作为回退入口，
+后续发现单应用问题时按第 5 节处理。
+
+旧 Homebrew `obsidian-cli` 当前仍在 PATH 中优先于 Nix package 附带的官方 CLI；这不
+影响 Obsidian GUI 验收，也不在 #45 中清理，留给后续定向清理批次。

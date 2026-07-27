@@ -147,8 +147,8 @@
 | `pearcleaner` | 5.4.3 | Homebrew cask | 保留 |
 | `scratch` | 0.4.0 | Homebrew cask | 保留 |
 | `topnotch` | 1.3.2 | Homebrew cask | 保留 |
-| `localsend` | 1.17.0 | Nix / Home Manager | 已声明待验收；cask 待 Nix 实机验收后定向清理 |
-| `xbar` | 2.1.7-beta | Nix / Home Manager | 已声明待验收；plugins 与缓存保持可写 |
+| `localsend` | 1.17.0 | Nix / Home Manager | 已声明并验收；cask 待后续定向清理 |
+| `xbar` | 2.1.7-beta | Nix / Home Manager | 已声明并验收；plugins 与缓存保持可写 |
 | `visual-studio-code` | 1.107.1 | Nix / Home Manager | Nix 版已验收；旧 cask 与 `/Applications` 副本待清理 |
 | `zed` | 0.219.4 | 官方 Zed Flake Nightly | Nightly 已验收；旧 cask与 Preview 待独立清理 |
 | `aionui` | 1.8.17 | 退役 | 未发现应用实体；待清理登记 |
@@ -226,19 +226,19 @@ App Store 登录是人工前置条件。`mas` 仅由 nix-darwin 在 Homebrew act
 | Visual Studio Code | Nix / Home Manager | Git/Nix 基线 + 可写 live settings | 扩展、登录、History、workspaceStorage 外部 |
 | Zed Nightly | 官方 Flake + Home Manager | Git/Nix 基线 + 可写 live settings | 扩展、登录、workspace/session 外部 |
 
-### 7.2 已声明待验收
+### 7.2 已声明并验收
 
 | 应用 | 目标安装所有者 | 说明 |
 | --- | --- | --- |
-| Atuin Desktop | Nix / Home Manager | 0.2.20；已声明待验收；Runbook、workspace、Hub 登录和连接状态外部 |
-| Discord | Nix / Home Manager | 已声明待验收；登录态与缓存外部；使用精确 unfree allowlist |
-| IINA | Nix / Home Manager | 已声明待验收；播放历史和媒体文件外部 |
-| LocalSend | Nix / Home Manager | 已声明待验收；设备、历史与接收目录外部 |
-| MonitorControl | Nix / Home Manager | 已声明待验收；显示器设备状态与偏好可写 |
-| Mos | Nix / Home Manager | 已声明待验收；鼠标设备状态与偏好可写 |
-| Obsidian | Nix / Home Manager | 已声明待验收；vault、插件和应用状态外部；使用精确 unfree allowlist |
-| Upscayl | Nix / Home Manager | 已声明待验收；模型、缓存和输出外部 |
-| xbar | Nix / Home Manager | 已声明待验收；plugins、缓存和运行态外部 |
+| Atuin Desktop | Nix / Home Manager | 0.2.20；Runbook、workspace、Hub 登录和连接状态外部 |
+| Discord | Nix / Home Manager | 登录态与缓存外部；使用精确 unfree allowlist |
+| IINA | Nix / Home Manager | 播放历史和媒体文件外部 |
+| LocalSend | Nix / Home Manager | 设备、历史与接收目录外部 |
+| MonitorControl | Nix / Home Manager | 显示器设备状态与偏好可写 |
+| Mos | Nix / Home Manager | 鼠标设备状态与偏好可写 |
+| Obsidian | Nix / Home Manager | vault、插件和应用状态外部；使用精确 unfree allowlist |
+| Upscayl | Nix / Home Manager | 模型、缓存和输出外部 |
+| xbar | Nix / Home Manager | plugins、缓存和运行态外部 |
 
 具体版本、应用身份、双安装验收与回滚步骤见
 [`phase-4-nix-gui.md`](phase-4-nix-gui.md)。
@@ -381,7 +381,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 1. **Nix CLI 与静态用户配置：** 新增批准的 CLI、Atuin 配置、`.hushlogin`，并为
    mise Elixir/Erlang 单独修订运行时合同。
 2. **Nix GUI：** Atuin Desktop、Discord、IINA、LocalSend、MonitorControl、Mos、
-   Obsidian、Upscayl、xbar 已由 #45 声明；完成双安装实机验收前不清理旧应用。
+   Obsidian、Upscayl、xbar 已由 #45 声明并完成基础实机验收；旧应用留到后续定向清理。
 3. **Homebrew 与 MAS 声明：** 写入批准的 casks 和 11 个 `masApps`；upgrade 关闭，
    cleanup 保持 `none`。
 4. **外部应用恢复表：** 补齐厂商 URL、签名身份和人工恢复步骤，不接管可变状态。
