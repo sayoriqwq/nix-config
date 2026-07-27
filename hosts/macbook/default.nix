@@ -7,6 +7,7 @@
 
 {
   imports = [
+    ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
     ../../modules/darwin/homebrew.nix
     ../../modules/darwin/shell.nix
