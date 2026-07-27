@@ -182,7 +182,7 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | Linear | `linear` | 账号、workspace 和缓存外部 |
 | MEGAsync | `megasync` | 账号、同步映射、目录和数据库外部 |
 | 网易云音乐 | `neteasemusic` | 账号、下载、播放历史和缓存外部 |
-| OBS Studio | `obs` | profile、scene、插件和录制输出外部 |
+| OBS Studio | `homebrew/cask/obs` | 使用完整 token 绕开旧 `yakitrak/yakitrak` 的 `obs` formula migration；profile、scene、插件和录制输出外部 |
 | QQ | `qq` | 账号、聊天、文件和缓存外部 |
 | WeChat | `wechat` | 账号、聊天、文件和缓存外部 |
 | 腾讯会议 | `tencent-meeting` | 账号、会议状态与缓存外部 |
@@ -366,7 +366,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 | `erictli/tap` | 已确认只为 `com.scratch.app` Markdown 应用提供 `erictli/tap/scratch`；#46 限定 trust |
 | `farion1231/ccswitch` | 未决：`cc-switch` 已退役，但移除 tap 仍需依赖核对与批准 |
 | `steipete/tap` | 未决：待确认仍由哪个直接安装项使用 |
-| `yakitrak/yakitrak` | 未决：待确认仍由哪个直接安装项使用 |
+| `yakitrak/yakitrak` | `obsidian-cli` / `notesmd-cli` 已退役；旧 tap 把 `obs` 错误迁移到 `notesmd-cli`，#46 使用 `homebrew/cask/obs` 绕开，tap 待后续定向清理 |
 
 ## 14. 明确未决项
 

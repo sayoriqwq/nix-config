@@ -25,7 +25,7 @@
       "linear"
       "megasync"
       "neteasemusic"
-      "obs"
+      "homebrew/cask/obs"
       "orbstack"
       "paseo"
       "pearcleaner"

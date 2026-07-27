@@ -43,6 +43,14 @@ Homebrew `chatgpt` cask 下载自 OpenAI 的 `codex-app-prod` 通道，只对应
 使用完整 token `erictli/tap/scratch`；该应用 bundle 为 `com.scratch.app`，当前版本
 为 0.10.0。`erictli/tap` 是唯一为 #46 新增并显式信任的第三方 tap。
 
+### 2.3 OBS Studio 与旧 tap migration
+
+本机遗留的未受信任 tap `yakitrak/yakitrak` 把裸名称 `obs` 迁移到已退役的 formula
+`notesmd-cli`。Homebrew Bundle fetch 不附加 `--cask`，因此裸 token 会在 activation
+中错误加载该 formula 并触发 trust 拒绝。本仓库使用完整 token
+`homebrew/cask/obs`，强制解析官方 OBS Studio cask；不信任、不修改也不删除旧 tap。
+旧 tap 与 notesmd-cli 的定向清理留给后续清理 Issue。
+
 ## 3. 首次 Homebrew Bundle 行为
 
 本机已有 8 个目标 cask 由 Caskroom 登记；其余目标多数已有 `/Applications` 应用，
@@ -90,10 +98,11 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 1. 正好包含 1 个 tap、30 个 cask、9 个 MAS 应用和 0 个 formula；
 2. Scratch 使用 `erictli/tap/scratch`，不存在裸 `scratch`；
-3. ChatGPT 使用 `chatgpt` cask，ChatGPT Classic 不在声明中；
-4. Xcode、Xcode Beta 与 XcodeGen 不在 Homebrew/MAS 声明中；
-5. activation 使用 `HOMEBREW_NO_AUTO_UPDATE=1` 与 `brew bundle --no-upgrade`；
-6. 不存在 cleanup 或 zap 参数。
+3. OBS Studio 使用 `homebrew/cask/obs`，不存在会触发旧 migration 的裸 `obs`；
+4. ChatGPT 使用 `chatgpt` cask，ChatGPT Classic 不在声明中；
+5. Xcode、Xcode Beta 与 XcodeGen 不在 Homebrew/MAS 声明中；
+6. activation 使用 `HOMEBREW_NO_AUTO_UPDATE=1` 与 `brew bundle --no-upgrade`；
+7. 不存在 cleanup 或 zap 参数。
 
 ## 6. activation 前私有备份
 
