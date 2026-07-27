@@ -65,8 +65,10 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
 
 ## 4. Mac App Store 边界
 
-10 个目标应用在盘点时均存在有效 App Store receipt，`mas list` 能识别其 App ID。
-由于 `upgrade = false`，首次 activation 不应升级已安装 MAS 应用。
+10 个目标中有 9 个在 activation 前存在有效 App Store receipt，`mas list` 能识别其
+App ID；`The Unarchiver`（ID `425424353`）当前没有应用实体或 MAS receipt，首次
+activation 预期从 App Store 安装它。由于 `upgrade = false`，其余 9 个已安装目标不应
+升级。Xcode 仍能被 `mas list` 识别，但保持外部 Swift 工具链所有，不在 `masApps` 中。
 
 `mas` 6.x 不再提供可用于脚本化确认账号的 `mas account`。activation 前由维护者人工
 确认 Mac App Store 已登录；本仓库不保存 Apple ID、账号标识或凭据，也不清除 receipt。
@@ -113,7 +115,8 @@ Agent 不执行真实 activation。备份完成后只把绑定精确 commit 的
 activation 后逐项确认：
 
 1. Homebrew Bundle 完成且没有升级、cleanup 或卸载输出；
-2. 30 个目标 cask 与 10 个 MAS ID 均可由声明解释；
+2. 30 个目标 cask 与 10 个 MAS ID 均可由声明解释；9 个既有 MAS 应用没有升级，
+   `The Unarchiver` 已作为唯一缺失 MAS 目标安装；
 3. 既有应用账号、偏好和数据仍可用；
 4. `ChatGPT.app` 仍是 `com.openai.codex`，`ChatGPT Classic.app` 仍是
    `com.openai.chat`；
