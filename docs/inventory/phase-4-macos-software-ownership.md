@@ -6,6 +6,7 @@
 - **决策来源：** [Issue #36](https://github.com/sayoriqwq/nix-config/issues/36)
 - **文档实施：** [Issue #38](https://github.com/sayoriqwq/nix-config/issues/38)
 - **Nix GUI 实施：** [Issue #45](https://github.com/sayoriqwq/nix-config/issues/45)
+- **Homebrew / MAS 实施：** [Issue #46](https://github.com/sayoriqwq/nix-config/issues/46)
 - **macOS defaults：** 独立由 [Issue #37](https://github.com/sayoriqwq/nix-config/issues/37) 处理
 
 本文统一记录 macOS 软件的安装、稳定配置、版本更新和可变状态所有权。
@@ -48,8 +49,8 @@
 | `/System/Applications` 与 Utilities | 64 | macOS 核心内建应用 |
 | `/Applications` 顶层应用 | 70 | 包含 MAS、Homebrew、Setapp、厂商和手工应用 |
 | `~/Applications` 顶层应用 | 4 | 用户级手工/PWA/Steam/helper 应用 |
-| Home Manager Apps | 4 | 当前为 Ghostty、VS Code、WezTerm、Zed Nightly |
-| 已识别 MAS 应用 | 11 | App Store ID 已逐项确认 |
+| Home Manager Apps | 13 | 既有编辑器/终端与 #45 的九个 Nix GUI 应用 |
+| 已识别 MAS 应用 | 10 | App Store ID 与本机 receipt 已逐项确认；Xcode 已改为外部所有 |
 | Setapp 保留应用 | 14 | 维护者清理后重新扫描的最终集合 |
 
 本快照不包含账号、序列号、token、Cookie、私有主机、代理、数据库内容、
@@ -93,6 +94,7 @@
 | `python@3.12` | 3.12.13 | uv / 项目 | Nix 只提供 uv；项目选择 Python，Homebrew 副本待清理 |
 | `nginx` | 1.29.8 | 项目 dev shell | 不进入全局 profile；已在实际项目用 ignored 本地 dev shell 验证 |
 | `pkgconf` | 2.5.1 | 项目 dev shell | 按项目需要提供，不全局声明 |
+| `xcodegen` | 2.46.0 | macbook 外部 Swift 工具链 | 与 Xcode Stable/Beta、CLT 一并由维护者和 Apple/Homebrew 手工管理，不进入声明 |
 | `postgresql@16` | 16.11 | Homebrew 外部服务 | 当前运行并拥有数据；待独立迁移，须含备份、恢复、停机和回滚 |
 | `chezmoi` | 2.70.0 | 临时外部所有 | 保留到最后一个活动 dotfiles 目标完成 handoff |
 
@@ -139,14 +141,14 @@
 
 | Cask | 当前登记版本 | 批准终态 | 状态 / 说明 |
 | --- | --- | --- | --- |
-| `claude-code` | 2.1.153 | Homebrew cask | 保留；账号、session 与 URL helper 状态可写 |
-| `easyfind` | 5.0.2 | Homebrew cask | 保留 |
-| `figma` | 125.11.6 | Homebrew cask | 保留；账号与项目缓存不入库 |
-| `fuse-t` | 1.2.1 | Homebrew cask | 保留；依赖 macOS 文件系统集成 |
-| `orbstack` | 2.0.5 / 19905 | Homebrew cask，待独立迁移 | 不改变 VM、容器、镜像、volume、网络或 helper |
-| `pearcleaner` | 5.4.3 | Homebrew cask | 保留 |
-| `scratch` | 0.4.0 | Homebrew cask | 保留 |
-| `topnotch` | 1.3.2 | Homebrew cask | 保留 |
+| `claude-code` | 2.1.153 | Homebrew cask | 已声明待验收；账号、session 与 URL helper 状态可写 |
+| `easyfind` | 5.0.2 | Homebrew cask | 已声明待验收 |
+| `figma` | 125.11.6 | Homebrew cask | 已声明待验收；账号与项目缓存不入库 |
+| `fuse-t` | 1.2.1 | Homebrew cask | 已声明待验收；依赖 macOS 文件系统集成 |
+| `orbstack` | 2.0.5 / 19905 | Homebrew cask，待独立迁移 | 已声明 presence 待验收；不改变 VM、容器、镜像、volume、网络或 helper |
+| `pearcleaner` | 5.4.3 | Homebrew cask | 已声明待验收 |
+| `erictli/tap/scratch` | 0.10.0 | Homebrew cask | 已声明待验收；这是 `com.scratch.app` Markdown 应用，不是 Homebrew Core 的 MIT Scratch 3 |
+| `topnotch` | 1.3.2 | Homebrew cask | 已声明待验收 |
 | `localsend` | 1.17.0 | Nix / Home Manager | 已声明并验收；cask 待后续定向清理 |
 | `xbar` | 2.1.7-beta | Nix / Home Manager | 已声明并验收；plugins 与缓存保持可写 |
 | `visual-studio-code` | 1.107.1 | Nix / Home Manager | Nix 版已验收；旧 cask 与 `/Applications` 副本待清理 |
@@ -164,9 +166,9 @@
 `Google Antigravity.app` 与 `antigravity-tools` 是不同产品；两者都已决定弃用，
 但不得把一个产品的数据或清理命令应用到另一个产品。
 
-## 5. 已批准的未来 Homebrew cask
+## 5. 已声明待验收的 Homebrew cask
 
-以下应用已批准由 nix-darwin `homebrew.casks` 声明安装存在，但当前仓库尚未实施。
+以下应用已由 #46 写入 nix-darwin `homebrew.casks`，等待离线构建与真实机器验收。
 Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由应用自身拥有。
 
 | 应用 | Cask | 主要边界 |
@@ -177,7 +179,6 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | Steam | `steam` | 游戏库、兼容状态和自更新外部 |
 | Transmission | `transmission` | Nix 主程序形态不等价于原生 App |
 | 百度网盘 | `baidunetdisk` | 账号、同步/下载目录和传输状态外部 |
-| Lark | `lark` | 账号、聊天、本地文件和缓存外部 |
 | Linear | `linear` | 账号、workspace 和缓存外部 |
 | MEGAsync | `megasync` | 账号、同步映射、目录和数据库外部 |
 | 网易云音乐 | `neteasemusic` | 账号、下载、播放历史和缓存外部 |
@@ -189,14 +190,19 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | Typeless | `typeless` | 账号、语音数据、历史和模型状态外部 |
 | balenaEtcher | `balenaetcher` | 原始磁盘写入始终是人工动作 |
 | iZip | `izip` | 归档内容和历史外部 |
+| ChatGPT（原 Codex App） | `chatgpt` | 官方 cask 使用 `codex-app-prod`，bundle 为 `com.openai.codex`；不得覆盖 ChatGPT Classic |
+| Clash Verge | `clash-verge-rev` | 订阅、代理、凭据和日志外部 |
+| Docker Desktop | `docker-desktop` | VM、镜像、容器、volume、网络和 helper 外部 |
+| Paseo | `paseo` | Agent session 与 workspace 外部 |
+| Vorssaint | `vorssaint` | 菜单栏状态和偏好外部 |
 
-已批准的 `easyfind`、`figma`、`fuse-t`、`pearcleaner`、`scratch`、`topnotch`、
+已批准的 `easyfind`、`figma`、`fuse-t`、`pearcleaner`、`erictli/tap/scratch`、`topnotch`、
 `claude-code` 已在当前 Caskroom 表中，不重复列出。
 
 ## 6. Mac App Store
 
-macOS 核心内建应用不进入 `masApps`。以下可独立恢复的 Apple 与第三方应用已批准
-使用 nix-darwin 原生 `homebrew.masApps`；当前尚未实施。
+macOS 核心内建应用不进入 `masApps`。以下可独立恢复的 Apple 与第三方应用已写入
+nix-darwin 原生 `homebrew.masApps`，等待真实机器验收。
 
 | 分类 | 应用 | App Store ID | 可变边界 |
 | --- | --- | ---: | --- |
@@ -204,7 +210,6 @@ macOS 核心内建应用不进入 `masApps`。以下可独立恢复的 Apple 与
 | Apple 可选应用 | Keynote | 409183694 | 文稿和 iCloud 状态外部 |
 | Apple 可选应用 | Numbers | 409203825 | 表格和 iCloud 状态外部 |
 | Apple 可选应用 | Pages | 409201541 | 文稿和 iCloud 状态外部 |
-| Apple 开发工具 | Xcode | 497799835 | 许可证、组件、DerivedData 和工程外部 |
 | 第三方 | Amphetamine | 937984704 | 运行状态和本机偏好可写 |
 | 第三方 | HazeOver | 430798174 | 本机偏好可写 |
 | 第三方 | KeyScreen | 6753302381 | 本机状态和权限外部 |
@@ -296,17 +301,17 @@ Desktop workspace 是三个不同状态域，不因 CLI/应用交给 Nix 就自�
 | LiteEdit | 手工安装，来源待确认 | 有意试用 | 当前 app 为 ad-hoc/未确认签名；待补恢复来源 |
 | Mole | tw93 厂商应用 / 内置更新 | 有意试用 | `com.tw93.MoleApp`；Nixpkgs 同名 `mole` 是 Darwin 上 broken 的 SSH tunnel CLI，不得替代；状态与偏好外部 |
 | Multica | 厂商应用，adapter 待定 | 有意试用 | workspace、本地 daemon、账号和 Agent 状态外部 |
-| Paseo | 上游提供 cask 与 Flake，尚未选择 | 有意试用 | 不提前决定 adapter；Agent session 与 workspace 外部 |
+| Paseo | Homebrew `paseo` cask | 有意试用，已声明待验收 | Agent session 与 workspace 外部 |
 | Syncless | LangGenius 签名应用，来源待确认 | 有意试用 | 待补恢复来源；账号、项目和运行态外部 |
-| Vorssaint | 上游/厂商，adapter 待定 | 有意试用 | 菜单栏工具状态和偏好外部 |
-| Codex Desktop (`com.openai.codex`) | 当前厂商应用，恢复来源待确认 | 外部所有，保留 | 任务、账号与缓存外部 |
+| Vorssaint | Homebrew `vorssaint` cask | 有意试用，已声明待验收 | 菜单栏工具状态和偏好外部 |
+| ChatGPT（原 Codex App，`com.openai.codex`） | Homebrew `chatgpt` cask | 已声明待验收 | 任务、账号与缓存外部 |
 | ChatGPT Classic (`com.openai.chat`) | 当前厂商应用，恢复来源待确认 | 外部所有，保留 | 对话、账号与缓存外部 |
-| Clash Verge | 当前安装来源待确认 | 外部所有，保留 | 订阅、代理、凭据和日志外部 |
-| Docker Desktop | 当前厂商应用，adapter 待定 | 外部所有，保留 | context、VM、镜像、容器、volume、网络和 helper 外部 |
+| Clash Verge | Homebrew `clash-verge-rev` cask | 已声明待验收 | 订阅、代理、凭据和日志外部 |
+| Docker Desktop | Homebrew `docker-desktop` cask | 已声明 presence 待验收 | context、VM、镜像、容器、volume、网络和 helper 外部 |
 | OrbStack | Homebrew cask | 待独立迁移 | 与 Docker 分开盘点；不假设二者数据可互换 |
 
-OpenAI 两个应用必须按 bundle ID 区分。在确认 Homebrew `chatgpt` cask 对应哪个
-bundle 前，不得自动声明、替换或合并它们。
+OpenAI 两个应用必须按 bundle ID 区分。Homebrew `chatgpt` cask 已确认下载自 OpenAI
+`codex-app-prod`，只对应 `com.openai.codex`；`com.openai.chat` 继续外部保留。
 
 ## 11. macOS 内建应用与用户级 helper
 
@@ -316,8 +321,10 @@ bundle 前，不得自动声明、替换或合并它们。
 `com.apple.Safari` 的 Safari 由 macOS 拥有。当前只记录 64 个系统应用的类别和来源，
 不把它们加入 Nix、Homebrew 或 MAS，也不把系统版本携带的应用增删当作配置 drift。
 
-GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通过 App Store
-独立恢复，因此归入前述 MAS 表，不混入核心内建类别。
+GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App Store 独立恢复，
+因此归入前述 MAS 表，不混入核心内建类别。Xcode Stable、Xcode Beta、Command Line
+Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录事实与恢复入口，
+不声明安装、版本选择、许可证、SDK/Simulator/组件或 `xcode-select`。
 
 ### 11.2 `~/Applications` 当前 helper
 
@@ -338,6 +345,7 @@ GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通
   两个第三方菜单栏应用后续定向清理；
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
 - SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
+- Lark；不再声明 `lark` cask，现有 `Lark.app` 的账号、聊天、本地文件和缓存须在定向清理前单独审查；
 - Clash Nyanpasu 与 Clash Party；
 - Zed Preview、旧 Zed cask和旧 Preview CLI；
 - 旧 Homebrew VS Code cask与 `/Applications/Visual Studio Code.app`；
@@ -355,7 +363,7 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 | --- | --- |
 | `lbjlaq/antigravity-manager` | 已批准待清理；当前不受信任，不能为盘点而 trust |
 | `antoniorodr/memo` | 未决：待确认仍由哪个直接安装项使用 |
-| `erictli/tap` | 未决：待确认仍由哪个直接安装项使用 |
+| `erictli/tap` | 已确认只为 `com.scratch.app` Markdown 应用提供 `erictli/tap/scratch`；#46 限定 trust |
 | `farion1231/ccswitch` | 未决：`cc-switch` 已退役，但移除 tap 仍需依赖核对与批准 |
 | `steipete/tap` | 未决：待确认仍由哪个直接安装项使用 |
 | `yakitrak/yakitrak` | 未决：待确认仍由哪个直接安装项使用 |
@@ -365,14 +373,12 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 以下项目阻止 #6 宣称“未分类项为零”，但不阻止本清单作为当前事实来源：
 
 1. Collaborator、LiteEdit、Syncless 的可靠恢复来源。
-2. Multica、Paseo、Vorssaint 的最终安装 adapter。
-3. OpenAI 两个桌面应用分别对应的官方恢复入口与 Homebrew cask 身份。
-4. Clash Verge 与 Docker Desktop 的目标安装 adapter。
-5. 五个尚未批准 disposition 的 Homebrew tap。
-6. EVPlayer 与夸克网盘的官方恢复入口。
-7. OrbStack 与 PostgreSQL 的独立迁移 Issue、数据备份和回滚计划。
-8. Chezmoi 最后 handoff 与全部待清理项的精确卸载批次。
-9. macOS defaults 由 #37 独立完成。
+2. Multica 的最终安装 adapter。
+3. 四个尚未批准 disposition 的 Homebrew tap。
+4. EVPlayer 与夸克网盘的官方恢复入口。
+5. OrbStack 与 PostgreSQL 的独立迁移 Issue、数据备份和回滚计划。
+6. Chezmoi 最后 handoff 与全部待清理项的精确卸载批次。
+7. macOS defaults 由 #37 独立完成。
 
 ## 15. 建议实施批次
 
@@ -382,8 +388,8 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
    mise Elixir/Erlang 单独修订运行时合同。
 2. **Nix GUI：** Atuin Desktop、Discord、IINA、LocalSend、MonitorControl、Mos、
    Obsidian、Upscayl、xbar 已由 #45 声明并完成基础实机验收；旧应用留到后续定向清理。
-3. **Homebrew 与 MAS 声明：** 写入批准的 casks 和 11 个 `masApps`；upgrade 关闭，
-   cleanup 保持 `none`。
+3. **Homebrew 与 MAS 声明：** #46 已写入批准的 casks 和 10 个 `masApps`；upgrade 关闭，
+   cleanup 保持 `none`，Swift 工具链保持外部所有。
 4. **外部应用恢复表：** 补齐厂商 URL、签名身份和人工恢复步骤，不接管可变状态。
 5. **defaults：** 按 #37 逐组设计、实现与验证。
 6. **定向清理：** 只有替代版本完成真实机器验收后，按 formula、cask、app、tap
