@@ -8,6 +8,8 @@
 let
   forbiddenRuntimePackages = [
     "bun"
+    "elixir"
+    "erlang"
     "nodejs"
     "nodejs-slim"
   ];
@@ -37,8 +39,9 @@ in
     {
       assertion = conflictingRuntimePackages == [ ];
       message = ''
-        Node and Bun are owned exclusively by mise. Remove these packages from
-        Home Manager home.packages: ${lib.concatStringsSep ", " conflictingRuntimePackages}
+        Node, Bun, Erlang and Elixir runtimes are owned exclusively by mise.
+        Remove these packages from Home Manager home.packages:
+        ${lib.concatStringsSep ", " conflictingRuntimePackages}
       '';
     }
     {
