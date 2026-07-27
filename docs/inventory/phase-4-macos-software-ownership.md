@@ -192,12 +192,12 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | iZip | `izip` | 归档内容和历史外部 |
 | ChatGPT（原 Codex App） | `chatgpt` | 官方 cask 使用 `codex-app-prod`，bundle 为 `com.openai.codex`；不得覆盖 ChatGPT Classic |
 | Clash Verge | `clash-verge-rev` | 订阅、代理、凭据和日志外部 |
-| Docker Desktop | `docker-desktop` | VM、镜像、容器、volume、网络和 helper 外部 |
 | Paseo | `paseo` | Agent session 与 workspace 外部 |
 | Vorssaint | `vorssaint` | 菜单栏状态和偏好外部 |
 
 已批准的 `easyfind`、`figma`、`fuse-t`、`pearcleaner`、`erictli/tap/scratch`、`topnotch`、
-`claude-code` 已在当前 Caskroom 表中，不重复列出。
+`claude-code` 与 `orbstack` 已在当前 Caskroom 表中，不重复列出。OrbStack 是唯一容器
+运行时；Docker Desktop 已明确退役。
 
 ## 6. Mac App Store
 
@@ -306,8 +306,10 @@ Desktop workspace 是三个不同状态域，不因 CLI/应用交给 Nix 就自�
 | ChatGPT（原 Codex App，`com.openai.codex`） | Homebrew `chatgpt` cask | 已声明待验收 | 任务、账号与缓存外部 |
 | ChatGPT Classic (`com.openai.chat`) | 当前厂商应用，恢复来源待确认 | 外部所有，保留 | 对话、账号与缓存外部 |
 | Clash Verge | Homebrew `clash-verge-rev` cask | 已声明待验收 | 订阅、代理、凭据和日志外部 |
-| Docker Desktop | Homebrew `docker-desktop` cask | 已声明 presence 待验收 | context、VM、镜像、容器、volume、网络和 helper 外部 |
-| OrbStack | Homebrew cask | 待独立迁移 | 与 Docker 分开盘点；不假设二者数据可互换 |
+| OrbStack | Homebrew `orbstack` cask | 已声明并完成实机验收 | 唯一容器运行时；context、VM、镜像、容器、volume、网络和 helper 外部 |
+
+Docker Desktop 已由维护者明确退役，`Docker.app` 与 Caskroom 登记均不存在。两个指向
+旧 `Docker.app` 的悬空 helper 链接由 #51 单独跟踪；本批不删除链接或容器数据。
 
 OpenAI 两个应用必须按 bundle ID 区分。Homebrew `chatgpt` cask 已确认下载自 OpenAI
 `codex-app-prod`，只对应 `com.openai.codex`；`com.openai.chat` 继续外部保留。
@@ -376,7 +378,8 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 2. Multica 的最终安装 adapter。
 3. 四个尚未批准 disposition 的 Homebrew tap。
 4. EVPlayer 与夸克网盘的官方恢复入口。
-5. OrbStack 与 PostgreSQL 的独立迁移 Issue、数据备份和回滚计划。
+5. PostgreSQL 的独立迁移 Issue、数据备份和回滚计划；OrbStack 的应用 presence 已由
+   #46 声明并验收，其可变容器数据继续保持外部所有。
 6. Chezmoi 最后 handoff 与全部待清理项的精确卸载批次。
 7. macOS defaults 由 #37 独立完成。
 
@@ -394,7 +397,8 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 5. **defaults：** 按 #37 逐组设计、实现与验证。
 6. **定向清理：** 只有替代版本完成真实机器验收后，按 formula、cask、app、tap
    分批列出精确目标并再次批准。
-7. **数据型迁移：** OrbStack 与 PostgreSQL 分别建 Issue，不与普通应用批次混合。
+7. **数据型迁移：** PostgreSQL 单独建 Issue；OrbStack 可变数据不随应用 presence
+   声明迁移，也不与普通应用批次混合。
 8. **最终 handoff：** Chezmoi 退出最后活动目标，更新 Mac runbook、激活前后差异和
    Phase 4 完成摘要。
 

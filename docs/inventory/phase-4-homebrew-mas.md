@@ -9,7 +9,7 @@
 nix-darwin 只声明已由维护者批准的恢复入口：
 
 - 1 个限定 Homebrew tap：`erictli/tap`；
-- 30 个 Homebrew cask；
+- 29 个 Homebrew cask；
 - 9 个 Mac App Store 应用；
 - 0 个 Homebrew formula；
 - `homebrew.onActivation.autoUpdate = false`；
@@ -59,11 +59,12 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
 
 首次 activation 需要特别观察：
 
-- **Docker Desktop：** `docker-desktop` 会登记 `Docker.app`，并管理若干
-  `/usr/local/bin` CLI 链接。当前 `docker`、`kubectl` 和部分 credential helper
-  链接由 OrbStack 占用，另一些链接已指向 Docker Desktop。真实 activation 前必须
-  保存链接清单，activation 后逐项确认最终指向；不得据此删除 Docker VM、镜像、
-  容器、volume、context 或 OrbStack 数据。
+- **OrbStack：** 首次 activation 曾因 `docker-desktop` 与 OrbStack 争用
+  `/usr/local/bin/docker-credential-osxkeychain` 而失败并安全回滚。维护者随后明确选择
+  OrbStack 作为唯一容器运行时，并从声明中移除 `docker-desktop`。精确 commit
+  `98a94c76ef58679bbc108067e7bf622a892d30fa` 已完成重新 activation；`docker`、
+  `kubectl` 与 `docker-credential-osxkeychain` 均由 OrbStack 提供。Docker Desktop 的
+  两个悬空 helper 链接只记录于 #51，未经独立批准不得删除。
 - **Paseo：** cask 除应用外还可暴露 CLI；activation 后需要确认 CLI 来源，但 Agent
   session 与 workspace 继续作为可变状态。
 
@@ -96,7 +97,7 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 还必须检查生成 Brewfile：
 
-1. 正好包含 1 个 tap、30 个 cask、9 个 MAS 应用和 0 个 formula；
+1. 正好包含 1 个 tap、29 个 cask、9 个 MAS 应用和 0 个 formula；
 2. Scratch 使用 `erictli/tap/scratch`，不存在裸 `scratch`；
 3. OBS Studio 使用 `homebrew/cask/obs`，不存在会触发旧 migration 的裸 `obs`；
 4. ChatGPT 使用 `chatgpt` cask，ChatGPT Classic 不在声明中；
@@ -111,9 +112,9 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 - 当前 nix-darwin generation；
 - `brew tap`、`brew list --formula`、`brew list --cask` 与 `mas list`；
-- 30 个目标应用的路径、bundle ID、版本和签名摘要；
+- 29 个目标应用的路径、bundle ID、版本和签名摘要；
 - `/usr/local/bin` 中 Docker、kubectl、credential helper 与 Paseo 相关链接；
-- Docker Desktop 和 ChatGPT 两个应用的精确身份；
+- OrbStack 与 ChatGPT 两个应用的精确身份；
 - 必要时的应用偏好路径清单，但不复制或输出 token、账号、数据库、容器或 VM 内容。
 
 Agent 不执行真实 activation。备份完成后只把绑定精确 commit 的
@@ -124,11 +125,12 @@ Agent 不执行真实 activation。备份完成后只把绑定精确 commit 的
 activation 后逐项确认：
 
 1. Homebrew Bundle 完成且没有升级、cleanup 或卸载输出；
-2. 30 个目标 cask 与 9 个 MAS ID 均可由声明解释，既有 MAS 应用没有升级；
+2. 29 个目标 cask 与 9 个 MAS ID 均可由声明解释，既有 MAS 应用没有升级；
 3. 既有应用账号、偏好和数据仍可用；
 4. `ChatGPT.app` 仍是 `com.openai.codex`，`ChatGPT Classic.app` 仍是
    `com.openai.chat`；
-5. Docker Desktop 可以启动，Docker/OrbStack CLI 链接没有造成日常工作流回归；
+5. OrbStack 可以启动，`docker`、`kubectl` 与 `docker-credential-osxkeychain` 均解析到
+   OrbStack；`Docker.app` 与 Docker Desktop Caskroom 均不存在；
 6. Scratch 仍是 `com.scratch.app` Markdown 应用；
 7. Xcode Stable、Xcode Beta、Command Line Tools 与 XcodeGen 没有被改变。
 
@@ -144,5 +146,20 @@ nix-darwin generation 回滚只能撤回声明，不能保证撤销 Homebrew 已
 4. 不运行 `brew cleanup`、`brew uninstall --zap` 或批量删除 `/Applications`；
 5. 不把应用卸载等同于数据删除，也不声称 generation 能回滚应用可变状态。
 
-Docker/OrbStack CLI 所有权、旧 Nix 替代 cask、退役应用与无主 tap 均留给
-后续窄 Issue 逐项处理。
+Docker Desktop 的两个悬空 helper 链接由 #51 单独跟踪；旧 Nix 替代 cask、退役应用
+与无主 tap 均留给后续窄 Issue 逐项处理。
+
+## 9. 实机验收结果
+
+维护者已对精确 commit `98a94c76ef58679bbc108067e7bf622a892d30fa` 执行
+`darwin-rebuild switch`。Homebrew Bundle 报告 39 个 Brewfile dependency 已安装，
+Home Manager activation 完成且没有失败项。
+
+只读收口审计确认：
+
+- 声明的 29 个 cask 全部存在；
+- 声明的 9 个 MAS receipt 全部存在；Xcode 是额外的外部 Swift 工具链 receipt；
+- 使用锁定的 `mas` 执行 `brew bundle check --no-upgrade` 通过；
+- `ChatGPT.app` 为 `com.openai.codex`，`ChatGPT Classic.app` 为 `com.openai.chat`；
+- `Docker.app` 与 Docker Desktop Caskroom 均不存在，OrbStack 是唯一声明的容器运行时；
+- `cleanup = "none"` 继续保留，未执行应用卸载、zap 或数据清理。
