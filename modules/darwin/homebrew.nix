@@ -15,7 +15,6 @@
       "chatgpt"
       "clash-verge-rev"
       "claude-code"
-      "docker-desktop"
       "easyfind"
       "erictli/tap/scratch"
       "figma"
