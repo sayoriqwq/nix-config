@@ -324,7 +324,6 @@ GarageBand、Keynote、Numbers、Pages 和 Xcode 虽由 Apple 提供，但可通
 | Claude Code URL Handler | bundle `com.anthropic.claude-code-url-handler` | Claude Code 生成的集成 helper，不单独声明安装 |
 | Excalidraw | Chrome app bundle | 由 Chrome/PWA 环境拥有；浏览器 profile 不入库 |
 | VTube Studio | 本地 wrapper 打开 Steam app ID 1325860 | 由 Steam 与本地游戏库拥有，不单独声明 package |
-| AliceInCradle 0.29j | bundle `com.NanameHacha.AliceInCradle` | **未决：** 尚未出现在 #36 批准清单，待维护者确认保留与恢复来源 |
 
 ## 12. 已决定弃用或待清理的应用
 
@@ -360,16 +359,15 @@ tap 或文件删除必须使用独立 Issue、精确目标和当次人工批准�
 
 以下项目阻止 #6 宣称“未分类项为零”，但不阻止本清单作为当前事实来源：
 
-1. AliceInCradle 是否保留，以及官方/手工恢复入口。
-2. Collaborator、LiteEdit、Syncless 的可靠恢复来源。
-3. Mole、Multica、Paseo、Vorssaint 的最终安装 adapter。
-4. OpenAI 两个桌面应用分别对应的官方恢复入口与 Homebrew cask 身份。
-5. Clash Verge 与 Docker Desktop 的目标安装 adapter。
-6. 五个尚未批准 disposition 的 Homebrew tap。
-7. EVPlayer 与夸克网盘的官方恢复入口。
-8. OrbStack 与 PostgreSQL 的独立迁移 Issue、数据备份和回滚计划。
-9. Chezmoi 最后 handoff 与全部待清理项的精确卸载批次。
-10. macOS defaults 由 #37 独立完成。
+1. Collaborator、LiteEdit、Syncless 的可靠恢复来源。
+2. Mole、Multica、Paseo、Vorssaint 的最终安装 adapter。
+3. OpenAI 两个桌面应用分别对应的官方恢复入口与 Homebrew cask 身份。
+4. Clash Verge 与 Docker Desktop 的目标安装 adapter。
+5. 五个尚未批准 disposition 的 Homebrew tap。
+6. EVPlayer 与夸克网盘的官方恢复入口。
+7. OrbStack 与 PostgreSQL 的独立迁移 Issue、数据备份和回滚计划。
+8. Chezmoi 最后 handoff 与全部待清理项的精确卸载批次。
+9. macOS defaults 由 #37 独立完成。
 
 ## 15. 建议实施批次
 
