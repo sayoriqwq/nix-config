@@ -42,8 +42,10 @@ Homebrew `chatgpt` cask 下载自 OpenAI 的 `codex-app-prod` 通道，只对应
 ### 2.2 Scratch
 
 裸名称 `scratch` 当前指向 MIT Scratch 3，不是本机使用的 Markdown 应用。本仓库必须
-使用完整 token `erictli/tap/scratch`；该应用 bundle 为 `com.scratch.app`，当前版本
-为 0.10.0。`erictli/tap` 是唯一为 #46 新增并显式信任的第三方 tap。
+使用完整 token `erictli/tap/scratch`；该应用 bundle 为 `com.scratch.app`。Issue
+[#64](https://github.com/sayoriqwq/nix-config/issues/64) 已把实际 bundle 与 Homebrew
+receipt 从漂移状态定向对齐到 1.0.0。`erictli/tap` 是唯一为 #46 新增并显式信任的
+第三方 tap。
 
 ### 2.3 OBS Studio 与旧 tap migration
 
@@ -135,7 +137,8 @@ activation 后逐项确认：
    `com.openai.chat`；
 5. OrbStack 可以启动，`docker`、`kubectl` 与 `docker-credential-osxkeychain` 均解析到
    OrbStack；`Docker.app` 与 Docker Desktop Caskroom 均不存在；
-6. Scratch 仍是 `com.scratch.app` Markdown 应用；
+6. Scratch 仍是 `com.scratch.app` Markdown 应用；涉及版本检查时必须使用完整 token
+   `erictli/tap/scratch`，避免解析到同名的 MIT Scratch；
 7. Xcode Beta、Command Line Tools 与 XcodeGen 没有被改变，Xcode Stable 保持退役。
 
 ## 8. 回滚与后续清理
@@ -175,3 +178,15 @@ Home Manager activation 完成且没有失败项。
 Home Manager activation 完成且没有失败项。在新的精确批准后，使用绝对路径执行
 `brew uninstall --cask typeless`；Homebrew 登记、Caskroom 与应用路径均已消失，
 私有备份继续保留。该定向卸载没有启用 cleanup 或 zap，也没有处理其他 cask。
+
+Issue #64 升级前确认 Homebrew receipt 为 0.4.0、实际 app bundle 为 0.10.0。维护者在
+Issue 中批准当次定向升级后，先正常退出 Scratch，把签名有效的 0.10.0 bundle 保存到
+仓库外权限受限的 `~/.local/state/nix-config-backups/scratch-issue-64-pre-1.0/`，再执行
+Homebrew 元数据更新和 `brew upgrade --cask erictli/tap/scratch`。升级输出只包含 Scratch
+`0.4.0 -> 1.0.0`，没有升级同时报告为 outdated 的其他 8 个 formula 与 5 个 cask，也没有
+执行 cleanup、zap、卸载或 autoremove。
+
+升级后实际 bundle 与 Homebrew receipt 均为 1.0.0；完整 token 的 outdated JSON 中 cask
+集合为空。`CFBundleIdentifier` 仍为 `com.scratch.app`，Team Identifier 仍为
+`38H4DN8A25`，深度签名验证和启动探针均通过。裸 `brew outdated scratch` 会误解析到
+MIT Scratch 3.32.0，因此后续安装、升级和 outdated 验证都必须使用完整 token。
