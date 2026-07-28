@@ -94,7 +94,7 @@
 | `python@3.12` | 3.12.13 | uv / 项目 | Nix 只提供 uv；项目选择 Python，Homebrew 副本待清理 |
 | `nginx` | 1.29.8 | 项目 dev shell | 不进入全局 profile；已在实际项目用 ignored 本地 dev shell 验证 |
 | `pkgconf` | 2.5.1 | 项目 dev shell | 按项目需要提供，不全局声明 |
-| `xcodegen` | 2.46.0 | macbook 外部 Swift 工具链 | 与 Xcode Stable/Beta、CLT 一并由维护者和 Apple/Homebrew 手工管理，不进入声明 |
+| `xcodegen` | 2.46.0 | macbook 外部 Swift 工具链 | 与 Xcode Beta、CLT 一并由维护者和 Apple/Homebrew 手工管理，不进入声明；Xcode Stable 已退役 |
 | `postgresql@16` | 16.11 | Homebrew 外部服务 | 当前运行并拥有数据；待独立迁移，须含备份、恢复、停机和回滚 |
 | `chezmoi` | 2.70.0 | 临时外部所有 | 保留到最后一个活动 dotfiles 目标完成 handoff |
 
@@ -187,7 +187,6 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | WeChat | `wechat` | 账号、聊天、文件和缓存外部 |
 | 腾讯会议 | `tencent-meeting` | 账号、会议状态与缓存外部 |
 | Termius | `termius` | hosts、密钥、凭据和同步状态不入库 |
-| Typeless | `typeless` | 账号、语音数据、历史和模型状态外部 |
 | balenaEtcher | `balenaetcher` | 原始磁盘写入始终是人工动作 |
 | iZip | `izip` | 归档内容和历史外部 |
 | ChatGPT（原 Codex App） | `chatgpt` | 官方 cask 使用 `codex-app-prod`，bundle 为 `com.openai.codex`；不得覆盖 ChatGPT Classic |
@@ -323,9 +322,10 @@ OpenAI 两个应用必须按 bundle ID 区分。Homebrew `chatgpt` cask 已确�
 不把它们加入 Nix、Homebrew 或 MAS，也不把系统版本携带的应用增删当作配置 drift。
 
 GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App Store 独立恢复，
-因此归入前述 MAS 表，不混入核心内建类别。Xcode Stable、Xcode Beta、Command Line
-Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录事实与恢复入口，
-不声明安装、版本选择、许可证、SDK/Simulator/组件或 `xcode-select`。
+因此归入前述 MAS 表，不混入核心内建类别。Xcode Beta、Command Line Tools 与 XcodeGen
+共同构成 macbook 外部 Swift 工具链；Xcode Stable 已退役，Beta 是唯一保留的完整 Xcode
+渠道。仓库只记录事实与恢复入口，不声明安装、版本选择、许可证、SDK/Simulator/组件
+或 `xcode-select`。
 
 ### 11.2 `~/Applications` 当前 helper
 
@@ -345,6 +345,8 @@ Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录
 - Itsycal 与 Battery Buddy；原生菜单栏时钟和电池百分比已通过实机体验，
   两个第三方菜单栏应用后续定向清理；
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
+- Typeless；维护者已删除应用，`typeless` 不再进入 Homebrew 声明；Homebrew Caskroom
+  收据与内部副本如仍存在，只能在新的精确批准后定向清理；
 - SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
 - Lark；不再声明 `lark` cask，现有 `Lark.app` 的账号、聊天、本地文件和缓存须在定向清理前单独审查；
 - The Unarchiver；功能与保留的 iZip 高度重叠，不再声明 MAS 安装；

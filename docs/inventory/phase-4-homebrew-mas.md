@@ -9,7 +9,7 @@
 nix-darwin 只声明已由维护者批准的恢复入口：
 
 - 1 个限定 Homebrew tap：`erictli/tap`；
-- 29 个 Homebrew cask；
+- 28 个 Homebrew cask；
 - 9 个 Mac App Store 应用；
 - 0 个 Homebrew formula；
 - `homebrew.onActivation.autoUpdate = false`；
@@ -19,9 +19,9 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 应用账号、许可证、登录态、偏好、缓存、数据库、容器、虚拟机、项目和其他可变状态
 不由 Homebrew Bundle 或 Nix 接管。
 
-Xcode Stable、Xcode Beta、Command Line Tools 与 Homebrew XcodeGen 是 macbook 的外部
-Swift 工具链。本 Issue 只记录其存在，不声明版本、不运行 `xcode-select`，也不改变
-许可证、SDK、Simulator 或工程状态。
+Xcode Beta、Command Line Tools 与 Homebrew XcodeGen 是 macbook 的外部 Swift 工具链；
+Xcode Stable 已明确退役，Beta 是唯一保留的完整 Xcode 渠道。本 Issue 只记录目标边界，
+不声明版本、不运行 `xcode-select`，也不改变许可证、SDK、Simulator 或工程状态。
 
 ## 2. 特殊身份与恢复入口
 
@@ -97,11 +97,11 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 还必须检查生成 Brewfile：
 
-1. 正好包含 1 个 tap、29 个 cask、9 个 MAS 应用和 0 个 formula；
+1. 正好包含 1 个 tap、28 个 cask、9 个 MAS 应用和 0 个 formula；
 2. Scratch 使用 `erictli/tap/scratch`，不存在裸 `scratch`；
 3. OBS Studio 使用 `homebrew/cask/obs`，不存在会触发旧 migration 的裸 `obs`；
 4. ChatGPT 使用 `chatgpt` cask，ChatGPT Classic 不在声明中；
-5. Xcode、Xcode Beta 与 XcodeGen 不在 Homebrew/MAS 声明中；
+5. Xcode Beta 与 XcodeGen 不在 Homebrew/MAS 声明中，Xcode Stable 已退役；
 6. activation 使用 `HOMEBREW_NO_AUTO_UPDATE=1` 与 `brew bundle --no-upgrade`；
 7. 不存在 cleanup 或 zap 参数。
 
@@ -112,7 +112,7 @@ nix build .#darwinConfigurations.macbook.system --no-link --print-out-paths
 
 - 当前 nix-darwin generation；
 - `brew tap`、`brew list --formula`、`brew list --cask` 与 `mas list`；
-- 29 个目标应用的路径、bundle ID、版本和签名摘要；
+- 28 个目标应用的路径、bundle ID、版本和签名摘要；
 - `/usr/local/bin` 中 Docker、kubectl、credential helper 与 Paseo 相关链接；
 - OrbStack 与 ChatGPT 两个应用的精确身份；
 - 必要时的应用偏好路径清单，但不复制或输出 token、账号、数据库、容器或 VM 内容。
@@ -125,14 +125,14 @@ Agent 不执行真实 activation。备份完成后只把绑定精确 commit 的
 activation 后逐项确认：
 
 1. Homebrew Bundle 完成且没有升级、cleanup 或卸载输出；
-2. 29 个目标 cask 与 9 个 MAS ID 均可由声明解释，既有 MAS 应用没有升级；
+2. 28 个目标 cask 与 9 个 MAS ID 均可由声明解释，既有 MAS 应用没有升级；
 3. 既有应用账号、偏好和数据仍可用；
 4. `ChatGPT.app` 仍是 `com.openai.codex`，`ChatGPT Classic.app` 仍是
    `com.openai.chat`；
 5. OrbStack 可以启动，`docker`、`kubectl` 与 `docker-credential-osxkeychain` 均解析到
    OrbStack；`Docker.app` 与 Docker Desktop Caskroom 均不存在；
 6. Scratch 仍是 `com.scratch.app` Markdown 应用；
-7. Xcode Stable、Xcode Beta、Command Line Tools 与 XcodeGen 没有被改变。
+7. Xcode Beta、Command Line Tools 与 XcodeGen 没有被改变，Xcode Stable 保持退役。
 
 ## 8. 回滚与后续清理
 
@@ -157,8 +157,8 @@ Home Manager activation 完成且没有失败项。
 
 只读收口审计确认：
 
-- 声明的 29 个 cask 全部存在；
-- 声明的 9 个 MAS receipt 全部存在；Xcode 是额外的外部 Swift 工具链 receipt；
+- 声明的 28 个 cask 全部存在；
+- 声明的 9 个 MAS receipt 全部存在；Xcode Beta 是声明外的 Swift 工具链渠道；
 - 使用锁定的 `mas` 执行 `brew bundle check --no-upgrade` 通过；
 - `ChatGPT.app` 为 `com.openai.codex`，`ChatGPT Classic.app` 为 `com.openai.chat`；
 - `Docker.app` 与 Docker Desktop Caskroom 均不存在，OrbStack 是唯一声明的容器运行时；
