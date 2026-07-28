@@ -63,8 +63,10 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
   `/usr/local/bin/docker-credential-osxkeychain` 而失败并安全回滚。维护者随后明确选择
   OrbStack 作为唯一容器运行时，并从声明中移除 `docker-desktop`。精确 commit
   `98a94c76ef58679bbc108067e7bf622a892d30fa` 已完成重新 activation；`docker`、
-  `kubectl` 与 `docker-credential-osxkeychain` 均由 OrbStack 提供。Docker Desktop 的
-  两个悬空 helper 链接只记录于 #51，未经独立批准不得删除。
+  `kubectl` 与 `docker-credential-osxkeychain` 均由 OrbStack 提供。维护者随后在 #51
+  明确批准并删除 Docker Desktop 遗留的 `docker-credential-desktop` 与 `hub-tool`
+  两个悬空链接；删除后 OrbStack 的三个 CLI 入口与版本检查仍正常。维护者启动
+  OrbStack 后再次执行 `docker ps`，确认 daemon 与现有容器工作流正常。
 - **Paseo：** cask 除应用外还可暴露 CLI；activation 后需要确认 CLI 来源，但 Agent
   session 与 workspace 继续作为可变状态。
 
@@ -162,4 +164,6 @@ Home Manager activation 完成且没有失败项。
 - 使用锁定的 `mas` 执行 `brew bundle check --no-upgrade` 通过；
 - `ChatGPT.app` 为 `com.openai.codex`，`ChatGPT Classic.app` 为 `com.openai.chat`；
 - `Docker.app` 与 Docker Desktop Caskroom 均不存在，OrbStack 是唯一声明的容器运行时；
+- Docker Desktop 遗留的两个悬空 CLI helper 链接已按 #51 的精确批准删除；
+- 维护者启动 OrbStack 后执行 `docker ps`，确认 daemon 与现有容器工作流正常；
 - `cleanup = "none"` 继续保留，未执行应用卸载、zap 或数据清理。
