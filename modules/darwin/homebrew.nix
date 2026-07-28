@@ -36,7 +36,6 @@
       "termius"
       "topnotch"
       "transmission"
-      "typeless"
       "vorssaint"
       "wechat"
     ];

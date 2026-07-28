@@ -94,7 +94,7 @@
 | `python@3.12` | 3.12.13 | uv / 项目 | Nix 只提供 uv；项目选择 Python，Homebrew 副本待清理 |
 | `nginx` | 1.29.8 | 项目 dev shell | 不进入全局 profile；已在实际项目用 ignored 本地 dev shell 验证 |
 | `pkgconf` | 2.5.1 | 项目 dev shell | 按项目需要提供，不全局声明 |
-| `xcodegen` | 2.46.0 | macbook 外部 Swift 工具链 | 与 Xcode Stable/Beta、CLT 一并由维护者和 Apple/Homebrew 手工管理，不进入声明 |
+| `xcodegen` | 2.46.0 | macbook 外部 Swift 工具链 | 与 Xcode Beta、CLT 一并由维护者和 Apple/Homebrew 手工管理，不进入声明；Xcode Stable 已退役 |
 | `postgresql@16` | 16.11 | Homebrew 外部服务 | 当前运行并拥有数据；待独立迁移，须含备份、恢复、停机和回滚 |
 | `chezmoi` | 2.70.0 | 临时外部所有 | 保留到最后一个活动 dotfiles 目标完成 handoff |
 
@@ -187,7 +187,6 @@ Homebrew 是受控的 macOS 应用 adapter；应用账号和可变数据仍由�
 | WeChat | `wechat` | 账号、聊天、文件和缓存外部 |
 | 腾讯会议 | `tencent-meeting` | 账号、会议状态与缓存外部 |
 | Termius | `termius` | hosts、密钥、凭据和同步状态不入库 |
-| Typeless | `typeless` | 账号、语音数据、历史和模型状态外部 |
 | balenaEtcher | `balenaetcher` | 原始磁盘写入始终是人工动作 |
 | iZip | `izip` | 归档内容和历史外部 |
 | ChatGPT（原 Codex App） | `chatgpt` | 官方 cask 使用 `codex-app-prod`，bundle 为 `com.openai.codex`；不得覆盖 ChatGPT Classic |
@@ -326,9 +325,12 @@ OpenAI 两个应用必须按 bundle ID 区分。Homebrew `chatgpt` cask 已确�
 不把它们加入 Nix、Homebrew 或 MAS，也不把系统版本携带的应用增删当作配置 drift。
 
 GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App Store 独立恢复，
-因此归入前述 MAS 表，不混入核心内建类别。Xcode Stable、Xcode Beta、Command Line
-Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录事实与恢复入口，
-不声明安装、版本选择、许可证、SDK/Simulator/组件或 `xcode-select`。
+因此归入前述 MAS 表，不混入核心内建类别。Xcode Beta、Command Line Tools 与 XcodeGen
+共同构成 macbook 外部 Swift 工具链；Xcode Stable 已退役，Beta 是唯一保留的完整 Xcode
+渠道。仓库只记录事实与恢复入口，不声明安装、版本选择、许可证、SDK/Simulator/组件
+或 `xcode-select`。当前实机为 Xcode Beta 27.0（Build `27A5228h`），使用临时
+`DEVELOPER_DIR` 的版本探针通过；`xcode-select` 仍指向 Command Line Tools，XcodeGen
+2.46.0 与 CLT clang 21.0.0 均保持可用。
 
 ### 11.2 `~/Applications` 当前 helper
 
@@ -339,6 +341,10 @@ Tools 与 XcodeGen 共同构成 macbook 外部 Swift 工具链；仓库只记录
 | VTube Studio | 本地 wrapper 打开 Steam app ID 1325860 | 由 Steam 与本地游戏库拥有，不单独声明 package |
 
 ## 12. 已决定弃用或待清理的应用
+
+Typeless 已由 #53 完成退役：维护者先删除应用，activation 确认声明不再包含
+`typeless`，随后在独立批准后定向卸载 Homebrew cask。Homebrew 登记、Caskroom 与
+应用路径均已消失，私有备份继续保留；没有运行 cleanup 或 zap。
 
 以下决定只表示未来 disposition，不授权当前删除：
 
