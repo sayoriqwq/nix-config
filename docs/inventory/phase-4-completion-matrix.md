@@ -56,7 +56,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | 无重复应用实体 | 完成 | 旧 cask、Preview 与七个 `/Applications` rollback bundle 均已清理 |
 | 全部子项完成或明确延期 | 完成 | PostgreSQL 16 由 #60 明确延期；OrbStack 数据保持外部；#61 已完成 |
 | 总体 runbook、差异和回滚完成 | 完成 | #59 的 inventory、runbook 与本矩阵 |
-| 文档 PR 经维护者合并 | 待 #59 PR | 合并后记录 commit，关闭 #59、#36、#6 |
+| 文档 PR 经维护者合并 | 由 PR #62 完成 | 本矩阵所在 PR 合并即满足；merge commit 记录在 #59、#36 与 #6 的完成摘要 |
 
 ## 4. 有意延期
 
