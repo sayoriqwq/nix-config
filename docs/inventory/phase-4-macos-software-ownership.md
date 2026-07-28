@@ -95,6 +95,9 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 
 - `chatgpt` 对应 `com.openai.codex`（现 `ChatGPT.app`）；`ChatGPT Classic.app`
   是单独的 `com.openai.chat`，保持外部所有；
+- `erictli/tap/scratch` 对应 Markdown 应用 `com.scratch.app`。Issue #64 已把 Homebrew
+  receipt 与实际 bundle 定向对齐到 1.0.0；裸 `scratch` 会解析到同名 MIT 应用，安装、
+  升级和 outdated 验证必须使用完整 token；
 - `homebrew/cask/obs` 强制选择官方 OBS Studio，避免旧第三方 tap 的同名迁移；
 - OrbStack 是唯一容器运行时。Nix/Homebrew 只声明应用 presence，VM、镜像、容器、
   volume、网络、context 与凭据不由仓库接管。
