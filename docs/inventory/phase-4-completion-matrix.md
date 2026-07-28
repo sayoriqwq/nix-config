@@ -1,7 +1,7 @@
 # Phase 4 完成矩阵
 
-本矩阵把父 Issue #6 的任务和完成标准映射到仓库证据。Phase 4 的声明实现已完成；Issue
-#61 清理最后七个旧 GUI rollback bundle，#59 文档 PR 合并并记录人工审阅后，#36 与 #6
+本矩阵把父 Issue #6 的任务和完成标准映射到仓库证据。Phase 4 的声明实现与旧 GUI
+rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人工审阅后，#36 与 #6
 才可关闭，之后才能进入 Phase 5 / #7。
 
 ## 1. 父 Issue #6 任务
@@ -38,6 +38,7 @@
 | cask 清理 | #56 | 无仓库实现 PR | 13 cask、2 tap 定向卸载；Nix 替代应用验证 |
 | 退役应用与数据 | #57 | 无仓库实现 PR | Battery Buddy、Lark、Zed Preview 移入可恢复 Trash，保留共享 Zed 数据 |
 | Chezmoi/dotfiles handoff | #58 | 无仓库实现 PR | Chezmoi 已卸载；旧仓库冻结，Nix 配置链接验证 |
+| 旧 Nix GUI rollback bundle | #61 | 无仓库实现 PR | 七个旧 `/Applications` bundle 移入可恢复 Trash；Nix 应用与共享数据验证通过 |
 
 所有真实 `darwin-rebuild switch` 均由维护者执行。部分工作流经历了安全中止、修订 commit
 和重新 activation；最终通过状态以对应 Issue/PR 的最新验收评论为准，不能只看首次命令。
@@ -52,8 +53,8 @@
 | 维护者记录 activation 与关键行为 | 完成 | 各子 Issue/PR 已记录真实机器输出和人工体验 |
 | 旧 dotfiles 活动路径完成 handoff | 完成 | #58；Chezmoi 卸载，旧 source/仓库冻结 |
 | 无重复配置所有权 | 完成 | 旧 bundle 不再拥有配置；Nix 是唯一声明所有者 |
-| 无重复应用实体 | 待 #61 | 七个 `/Applications` rollback bundle 仍待可恢复清理 |
-| 全部子项完成或明确延期 | 待 #61 | PostgreSQL 16 由 #60 明确延期；OrbStack 数据保持外部；#61 尚待完成 |
+| 无重复应用实体 | 完成 | 旧 cask、Preview 与七个 `/Applications` rollback bundle 均已清理 |
+| 全部子项完成或明确延期 | 完成 | PostgreSQL 16 由 #60 明确延期；OrbStack 数据保持外部；#61 已完成 |
 | 总体 runbook、差异和回滚完成 | 完成 | #59 的 inventory、runbook 与本矩阵 |
 | 文档 PR 经维护者合并 | 待 #59 PR | 合并后记录 commit，关闭 #59、#36、#6 |
 
@@ -72,10 +73,9 @@
 只有满足以下顺序才可开始 #7：
 
 1. #59 文档 PR 合并并记录人工审阅；
-2. #61 完成七个旧 GUI bundle 的可恢复清理和 Nix 应用验收；
-3. #59 关闭；
-4. #36 更新为最终完成状态并关闭；
-5. #6 写入完成摘要并关闭；
-6. 从 ThinkPad 重新采集实时主机、boot、filesystem、GPU、service、generation 与回滚证据。
+2. #59 关闭；
+3. #36 更新为最终完成状态并关闭；
+4. #6 写入完成摘要并关闭；
+5. 从 ThinkPad 重新采集实时主机、boot、filesystem、GPU、service、generation 与回滚证据。
 
 Phase 1 的旧 ThinkPad 快照不能直接部署，其中的 `trusted-public-keys` 等事实必须重新核对。

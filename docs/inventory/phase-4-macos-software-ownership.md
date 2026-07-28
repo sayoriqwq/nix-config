@@ -69,10 +69,10 @@ syntax highlighting 也来自 Nix，而不是 Homebrew formula。
 Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager Apps`。编辑器
 只在 live 配置缺失时初始化 baseline，之后通过人工审查回流，不做双向自动同步。
 
-最终审计发现 Atuin、Discord、IINA、MonitorControl、Mos、Obsidian 与 Upscayl 仍各有一份
-activation 前保留的 `/Applications` rollback bundle。它们不再拥有配置，但仍是重复应用
-实体；Issue #61 负责在不删除共享数据的前提下完成可恢复清理。LocalSend 与 xbar 的旧
-Homebrew 副本已由 #56 清理。
+最终审计发现 Atuin、Discord、IINA、MonitorControl、Mos、Obsidian 与 Upscayl 曾各有
+一份 activation 前保留的 `/Applications` rollback bundle。Issue #61 已在不删除共享
+配置、账号、vault、history 或缓存的前提下把七个旧 bundle 移入可恢复 Trash；对应 Nix
+应用与数据路径均通过验证。LocalSend 与 xbar 的旧 Homebrew 副本此前已由 #56 清理。
 
 ## 4. Homebrew 所有权
 
@@ -190,7 +190,7 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 | 迁移前 | Phase 4 终态 |
 | --- | --- |
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
-| VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明所有者；旧 cask已清理，七个 Nix GUI rollback bundle 由 #61 完成最后清理 |
+| VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
 | GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner |
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时，旧 Docker Desktop helper 已清理 |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
@@ -207,8 +207,6 @@ Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明�
 - PostgreSQL 16 的 package、service 与数据迁移由 Issue #60 负责。明确延期不会使其变成
   “未分类软件”，也不授权 Phase 5 自动迁移数据库。
 - OrbStack 的应用由 Homebrew cask声明；其可变容器数据永远需要独立备份/恢复流程。
-- 七个 Nix GUI 的旧 `/Applications` rollback bundle 由 Issue #61 精确清理；在 #61
-  完成前，不宣称 Phase 4 已消除全部重复应用实体。
 - Nix generation 回滚只恢复声明和 Nix-owned package 链接；不能回滚 Homebrew adoption、
   MAS receipt、Setapp 登录、厂商应用数据、数据库或容器。
 - Homebrew/MAS/Setapp/厂商应用的具体恢复和故障顺序见 Mac 总体 runbook。
