@@ -166,4 +166,10 @@ Home Manager activation 完成且没有失败项。
 - `Docker.app` 与 Docker Desktop Caskroom 均不存在，OrbStack 是唯一声明的容器运行时；
 - Docker Desktop 遗留的两个悬空 CLI helper 链接已按 #51 的精确批准删除；
 - 维护者启动 OrbStack 后执行 `docker ps`，确认 daemon 与现有容器工作流正常；
-- `cleanup = "none"` 继续保留，未执行应用卸载、zap 或数据清理。
+- `cleanup = "none"` 继续保留，未执行批量应用卸载、zap 或数据清理。
+
+维护者随后对精确 commit `289dd6077b2ccf096e64d4cc35c8aeb614a7c83e`
+执行 activation。Homebrew Bundle 报告 38 个 dependency，输出不再包含 Typeless，
+Home Manager activation 完成且没有失败项。在新的精确批准后，使用绝对路径执行
+`brew uninstall --cask typeless`；Homebrew 登记、Caskroom 与应用路径均已消失，
+私有备份继续保留。该定向卸载没有启用 cleanup 或 zap，也没有处理其他 cask。

@@ -340,6 +340,10 @@ GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App 
 
 ## 12. 已决定弃用或待清理的应用
 
+Typeless 已由 #53 完成退役：维护者先删除应用，activation 确认声明不再包含
+`typeless`，随后在独立批准后定向卸载 Homebrew cask。Homebrew 登记、Caskroom 与
+应用路径均已消失，私有备份继续保留；没有运行 cleanup 或 zap。
+
 以下决定只表示未来 disposition，不授权当前删除：
 
 - cmux 应用与配置；
@@ -348,8 +352,6 @@ GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App 
 - Itsycal 与 Battery Buddy；原生菜单栏时钟和电池百分比已通过实机体验，
   两个第三方菜单栏应用后续定向清理；
 - AltTab；原生 Command-Tab 与 Raycast 工作流已覆盖其用途；
-- Typeless；维护者已删除应用，`typeless` 不再进入 Homebrew 声明；Homebrew Caskroom
-  收据与内部副本如仍存在，只能在新的精确批准后定向清理；
 - SideNotes；Apple Notes 作为苹果生态捕获箱，Obsidian 作为长期知识库；清理前先审查并迁移需要保留的笔记；
 - Lark；不再声明 `lark` cask，现有 `Lark.app` 的账号、聊天、本地文件和缓存须在定向清理前单独审查；
 - The Unarchiver；功能与保留的 iZip 高度重叠，不再声明 MAS 安装；
