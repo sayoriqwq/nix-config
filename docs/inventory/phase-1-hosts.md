@@ -30,21 +30,24 @@
 - OS / 版本：NixOS 26.05，采集时版本为 `26.05.1947.a0374025a863 (Yarara)`
 - 架构：`x86_64-linux`
 - 内核：Linux 6.18.35
-- Nix：由 NixOS 系统管理，版本 `2.34.7`；`nix-command`/Flakes 当前未启用；channel/profile 尚未采集
-- 主用户：`sayori`；home 路径和默认 shell 尚未由只读命令确认
+- Nix：由 NixOS 系统管理，版本 `2.34.7`；接入前仅启用 `nix-command`，Phase 5 声明将同时启用 Flakes
+- 主用户与 home：`sayori`，`/home/sayori`；默认 shell 为 Bash；UID 1000，属于 `wheel` 与 `networkmanager`
 - 现有配置位置：`/etc/nixos/configuration.nix` 与 `/etc/nixos/hardware-configuration.nix`
 - `system.stateVersion`：`26.05`，来源为现有 `configuration.nix`
 - `home.stateVersion`：未发现 Home Manager 配置
-- 启动配置：现有配置启用 systemd-boot 和 EFI variables，`/boot` 为 1 GiB vfat；实时启动模式仍需用 `/sys/firmware/efi` 确认
+- 启动配置：实时确认使用 UEFI；现有配置启用 systemd-boot 和 EFI variables，`/boot` 为 1 GiB vfat
 - 存储摘要：约 512 GB NVMe；1 GiB vfat `/boot`，其余为 ext4 根文件系统；无 swap
 - 图形硬件：Intel Iris Xe，采集时使用 `i915` 驱动
 - 网络硬件：Intel Wi-Fi，采集时使用 `iwlwifi`；NetworkManager 已启用；网络名称和地址不提交
-- 桌面与基础服务：GNOME + GDM、PipeWire、CUPS、Firefox
-- 原始硬件配置：已在维护者本地保存，包含文件系统 UUID，因此 Phase 1 不复制进本仓库；Phase 5 接入时必须保持原样并重新审查
-- 已知快照缺陷：传输到 Mac 的 `configuration.nix` 仍含一条无效的自定义 `trusted-public-keys` 值（以 `RwA=` 结尾）。该副本早于真实机器上的修复，不得直接用于构建或部署；Phase 5 前必须重新同步修复后的 `/etc/nixos/configuration.nix`
-- 未确认事实：home 路径、默认 shell、实时 UEFI/BIOS 状态、enabled services、当前 generation 与回滚路径；这些事实不影响 Phase 1 的 evaluation，正式接入前在 Phase 5 重新采集
-- 证据采集日期：2026-06-21 与 2026-07-20
-- 证据来源：维护者提供的本地快照 `thinkpad-initial`，包括 NixOS 配置、`nixos-version`、`uname`、`lsblk`、`lspci` 和 NetworkManager 设备摘要
+- 桌面与基础服务：GNOME 50.1 + GDM、PipeWire/PipeWire Pulse/WirePlumber、Bluetooth、CUPS、NetworkManager、Avahi、Firefox；实时检查无 failed units
+- SSH：Phase 5 已永久声明维护者批准的公钥，并关闭密码、keyboard-interactive 与 root SSH 登录；generation 5 重启后已验证 key-only SSH 正常
+- 原始硬件配置：Phase 5 已从目标机重新采集并逐项核对；维护者批准将根分区与 EFI 分区 UUID 作为必要硬件事实写入 `hosts/nixbox/hardware-configuration.nix`
+- generation：Phase 5 通过 `test` 验收后由维护者执行 `switch`，目标配置成为 generation 5；真实重启后 `/run/current-system`、`/run/booted-system` 与永久 system profile 均指向同一目标 closure
+- 回滚边界：generation 3 保留为首次 Flake 接入前已知可启动的 generation；持久化后发生问题时从 systemd-boot 选择 generation 3，再在可登录系统中恢复
+- 用户 profile：目标机未安装 Home Manager，也没有用户 channel/package；一次只读盘点命令意外留下空的 `~/.nix-profile` 符号链接与空 profile 目录，未安装任何包，Phase 5 不擅自删除
+- 延后项：Home Manager 与 LocalSend 留到 Phase 6；不在首次系统接入中修改 shell、用户文件或 LAN 应用端口
+- 证据采集日期：2026-07-28
+- 证据来源：维护者授权后由 Mac 经临时 key-only SSH 通道执行的脱敏只读盘点；原始配置私有备份保留在维护者 Mac
 
 ## Ubuntu Server
 

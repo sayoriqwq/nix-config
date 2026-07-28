@@ -46,6 +46,15 @@
         ];
       };
 
+      nixosConfigurations.nixbox = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs self; };
+        modules = [
+          ./hosts/nixbox
+          ./modules/nixos/base.nix
+          ./modules/nixos/desktop.nix
+        ];
+      };
+
       # Explicit package outputs give CI and future hosts a stable validation
       # target without importing Zed's internal Flake modules.
       packages = {
