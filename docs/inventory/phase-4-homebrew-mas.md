@@ -22,6 +22,8 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 Xcode Beta、Command Line Tools 与 Homebrew XcodeGen 是 macbook 的外部 Swift 工具链；
 Xcode Stable 已明确退役，Beta 是唯一保留的完整 Xcode 渠道。本 Issue 只记录目标边界，
 不声明版本、不运行 `xcode-select`，也不改变许可证、SDK、Simulator 或工程状态。
+当前实机已恢复 Xcode Beta 27.0（Build `27A5228h`）；使用临时 `DEVELOPER_DIR` 的
+版本探针通过，系统 `xcode-select` 继续指向 Command Line Tools。
 
 ## 2. 特殊身份与恢复入口
 

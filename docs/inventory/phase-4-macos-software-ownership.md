@@ -328,7 +328,9 @@ GarageBand、Keynote、Numbers 和 Pages 虽由 Apple 提供，但可通过 App 
 因此归入前述 MAS 表，不混入核心内建类别。Xcode Beta、Command Line Tools 与 XcodeGen
 共同构成 macbook 外部 Swift 工具链；Xcode Stable 已退役，Beta 是唯一保留的完整 Xcode
 渠道。仓库只记录事实与恢复入口，不声明安装、版本选择、许可证、SDK/Simulator/组件
-或 `xcode-select`。
+或 `xcode-select`。当前实机为 Xcode Beta 27.0（Build `27A5228h`），使用临时
+`DEVELOPER_DIR` 的版本探针通过；`xcode-select` 仍指向 Command Line Tools，XcodeGen
+2.46.0 与 CLT clang 21.0.0 均保持可用。
 
 ### 11.2 `~/Applications` 当前 helper
 
