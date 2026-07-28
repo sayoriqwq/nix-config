@@ -110,15 +110,15 @@
 - 重做 boot、磁盘、swap、加密、桌面、GPU、Wi-Fi、音频或替换 USTC 镜像：这些会改变已验证事实，且 Issue #7 禁止或未授权。
 - flake-parts、Clan、deploy-rs、Colmena、impermanence、ZFS/LUKS：与 ADR-0001 和路线图的延后决策冲突。
 
-## 6. 落地前的人工关卡、回滚与未决项
+## 6. 人工关卡、回滚与实施结果
 
-1. **公开性关卡：** 维护者确认两个 filesystem UUID 可作为必要硬件事实提交；若不同意，Phase 5 不能宣称仓库具备完整可重建的主机输出，需先决定私有仓库/替代托管边界。
-2. **SSH 关卡：** 维护者明确决定是否将临时 SSH 变为永久声明；若批准，首轮采用 OpenSSH 模块默认的服务级 firewall 行为，不增加接口规则。
-3. **构建关卡：** 先离线/CI build；build 不授权 activation。
-4. **真实机器关卡：** 维护者执行一次 `test` 并记录完整桌面、网络、SSH、generation 回滚证据；test 失败则重启回永久 generation，不做临场架构改造。
-5. **持久化关卡：** 只有 test 通过且维护者明确批准时，才选择 `boot` 或 `switch`。systemd-boot 中已知好的 generation 与安装介质救援是最后恢复路径。
+1. **公开性关卡：已完成。** 维护者批准将两个 filesystem UUID 作为必要硬件事实提交。
+2. **SSH 关卡：已完成。** 临时通道已转为永久 key-only SSH；首轮采用 OpenSSH 模块默认的服务级 firewall 行为，不增加接口规则。
+3. **构建关卡：已完成。** 目标 NixOS 主机对精确 commit 完整 build 成功；build 本身没有被当作 activation 授权。
+4. **真实机器关卡：已完成。** 维护者执行 `dry-activate` 与 `test`，自动检查及 GNOME、网络、SSH、声音、蓝牙、亮度、输入设备和 Firefox 人工验收均通过。
+5. **持久化关卡：已完成。** 维护者明确批准并执行 `switch`；generation 5 真实重启成功，运行、booted 与永久 profile 均指向目标 closure。
 
-仍不确定但不会由 Agent 猜测的项目：原始 `/etc/nixos/configuration.nix` 中每个当前启用项应归入 host、base 还是 desktop 的逐行映射；两个 UUID 的公开策略；永久 SSH 是否接管；LocalSend 的真实长期需求和端口。USTC substituter 首轮只原样保留实时配置，并由实际 build 验证可用性，不在 Phase 5 对其做供应链重设计。
+原始配置的 host/base/desktop 归属已经通过扁平忠实基线与机械拆分后的相同 system derivation 验证。USTC substituter 首轮原样保留，并由目标机完整 build 验证可用。Home Manager、LocalSend 和其他用户层配置继续留到 Phase 6；generation 3 与 systemd-boot 菜单构成当前已知回滚入口。
 
 ## 7. 一手来源清单
 

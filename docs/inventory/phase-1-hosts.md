@@ -40,10 +40,10 @@
 - 图形硬件：Intel Iris Xe，采集时使用 `i915` 驱动
 - 网络硬件：Intel Wi-Fi，采集时使用 `iwlwifi`；NetworkManager 已启用；网络名称和地址不提交
 - 桌面与基础服务：GNOME 50.1 + GDM、PipeWire/PipeWire Pulse/WirePlumber、Bluetooth、CUPS、NetworkManager、Avahi、Firefox；实时检查无 failed units
-- SSH：Phase 5 盘点时使用一次可重启撤销的 `nixos-rebuild test` 通道；维护者已批准在仓库中永久声明同一把公钥，并关闭密码、keyboard-interactive 与 root SSH 登录
+- SSH：Phase 5 已永久声明维护者批准的公钥，并关闭密码、keyboard-interactive 与 root SSH 登录；generation 5 重启后已验证 key-only SSH 正常
 - 原始硬件配置：Phase 5 已从目标机重新采集并逐项核对；维护者批准将根分区与 EFI 分区 UUID 作为必要硬件事实写入 `hosts/nixbox/hardware-configuration.nix`
-- generation：永久 system profile 为 generation 4，盘点时启动的永久 generation 为 3；当前盘点运行态另叠加临时 SSH test generation，重启即可回到永久 generation
-- 回滚边界：首次 Flake 接入先使用 `nixos-rebuild test`；失败时重启回永久 generation。持久化后可从 systemd-boot 选择已知好的 generation
+- generation：Phase 5 通过 `test` 验收后由维护者执行 `switch`，目标配置成为 generation 5；真实重启后 `/run/current-system`、`/run/booted-system` 与永久 system profile 均指向同一目标 closure
+- 回滚边界：generation 3 保留为首次 Flake 接入前已知可启动的 generation；持久化后发生问题时从 systemd-boot 选择 generation 3，再在可登录系统中恢复
 - 用户 profile：目标机未安装 Home Manager，也没有用户 channel/package；一次只读盘点命令意外留下空的 `~/.nix-profile` 符号链接与空 profile 目录，未安装任何包，Phase 5 不擅自删除
 - 延后项：Home Manager 与 LocalSend 留到 Phase 6；不在首次系统接入中修改 shell、用户文件或 LAN 应用端口
 - 证据采集日期：2026-07-28
