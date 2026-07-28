@@ -308,8 +308,11 @@ Desktop workspace 是三个不同状态域，不因 CLI/应用交给 Nix 就自�
 | Clash Verge | Homebrew `clash-verge-rev` cask | 已声明待验收 | 订阅、代理、凭据和日志外部 |
 | OrbStack | Homebrew `orbstack` cask | 已声明并完成实机验收 | 唯一容器运行时；context、VM、镜像、容器、volume、网络和 helper 外部 |
 
-Docker Desktop 已由维护者明确退役，`Docker.app` 与 Caskroom 登记均不存在。两个指向
-旧 `Docker.app` 的悬空 helper 链接由 #51 单独跟踪；本批不删除链接或容器数据。
+Docker Desktop 已由维护者明确退役，`Docker.app` 与 Caskroom 登记均不存在。维护者
+在 #51 明确批准删除两个指向旧 `Docker.app` 的悬空 helper 链接；删除后 OrbStack 的
+`docker`、`kubectl` 与 `docker-credential-osxkeychain` 入口仍保持正常。维护者启动
+OrbStack 后通过 `docker ps` 验证 daemon 与现有容器工作流。该清理没有触及 OrbStack
+的 context、VM、镜像、容器、volume、网络或其他可变数据。
 
 OpenAI 两个应用必须按 bundle ID 区分。Homebrew `chatgpt` cask 已确认下载自 OpenAI
 `codex-app-prod`，只对应 `com.openai.codex`；`com.openai.chat` 继续外部保留。
