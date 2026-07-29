@@ -1,3 +1,0 @@
-{
-  programs.atuin.enableZshIntegration = true;
-}

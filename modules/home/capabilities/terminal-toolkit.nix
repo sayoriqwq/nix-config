@@ -1,5 +1,6 @@
 {
   imports = [
+    ../common/shortcut-reference.nix
     ../common/cli/bat.nix
     ../common/cli/eza.nix
     ../common/cli/fd.nix

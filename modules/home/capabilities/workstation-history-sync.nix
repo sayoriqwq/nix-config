@@ -1,5 +1,3 @@
 {
-  imports = [
-    ../common/cli/atuin-sync.nix
-  ];
+  programs.atuin.settings.sync.records = true;
 }

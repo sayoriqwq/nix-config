@@ -1,9 +1,12 @@
+{ pkgs, ... }:
+
 {
-  imports = [
-    ../common/cli/git-ai.nix
-    ../common/cli/graphviz.nix
-    ../common/cli/poppler.nix
-    ../common/cli/rtk.nix
-    ../darwin/cli/oh-my-pi.nix
+  home.packages = with pkgs; [
+    graphviz
+    (pkgs.callPackage ../../../packages/oh-my-pi { })
+    poppler-utils
+    rtk
   ];
+
+  programs.git.ignores = [ "**/.claude/settings.local.json" ];
 }

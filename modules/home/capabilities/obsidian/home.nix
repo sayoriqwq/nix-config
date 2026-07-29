@@ -1,6 +1,9 @@
+{ pkgs, ... }:
+
 {
   imports = [
     ../../common/state-paths.nix
-    ../../desktop/apps/obsidian.nix
   ];
+
+  home.packages = [ pkgs.obsidian ];
 }

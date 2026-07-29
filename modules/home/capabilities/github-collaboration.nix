@@ -1,13 +1,14 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
     ../common/state-paths.nix
     ../common/cli/gh.nix
     ../common/cli/git-github.nix
-    ../common/cli/gitleaks.nix
     ../common/cli/lazygit
   ];
+
+  home.packages = [ pkgs.gitleaks ];
 
   sayori.statePaths = [
     {

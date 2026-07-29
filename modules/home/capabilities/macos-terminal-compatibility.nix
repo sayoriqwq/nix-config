@@ -4,18 +4,21 @@
   imports = [
     ../common/state-paths.nix
     ../common/shell/zsh.nix
-    ../common/cli/atuin-zsh.nix
-    ../common/cli/direnv-zsh.nix
-    ../common/cli/eza-zsh.nix
-    ../common/cli/fzf/zsh.nix
-    ../common/cli/lazygit/zsh.nix
-    ../common/cli/mise-zsh.nix
-    ../common/cli/pay-respects-zsh.nix
-    ../common/cli/starship-zsh.nix
     ../common/cli/zoxide/zsh.nix
     ../darwin/hushlogin.nix
     ../desktop/terminal/adapters/wezterm.nix
   ];
+
+  programs = {
+    atuin.enableZshIntegration = true;
+    direnv.enableZshIntegration = true;
+    eza.enableZshIntegration = true;
+    fzf.enableZshIntegration = true;
+    lazygit.enableZshIntegration = true;
+    mise.enableZshIntegration = true;
+    pay-respects.enableZshIntegration = true;
+    starship.enableZshIntegration = true;
+  };
 
   sayori.statePaths = [
     {

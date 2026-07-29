@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../common/shortcut-reference.nix
     ../common/state-paths.nix
     ../common/cli/atuin.nix
   ];

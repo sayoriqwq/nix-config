@@ -1,10 +1,11 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
     ../common/state-paths.nix
-    ../common/cli/rclone.nix
   ];
+
+  home.packages = [ pkgs.rclone ];
 
   sayori.statePaths = [
     {

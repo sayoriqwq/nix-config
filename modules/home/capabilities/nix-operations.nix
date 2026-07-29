@@ -1,3 +1,3 @@
 {
-  imports = [ ../common/cli/nh.nix ];
+  programs.nh.enable = true;
 }

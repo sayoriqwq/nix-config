@@ -1,3 +1,0 @@
-{
-  programs.lazygit.enableZshIntegration = true;
-}

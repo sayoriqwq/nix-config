@@ -1,3 +1,0 @@
-{
-  programs.direnv.enableZshIntegration = true;
-}

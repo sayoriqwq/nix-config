@@ -1,7 +1,12 @@
+{ pkgs, ... }:
+
 {
-  imports = [
-    ../desktop/apps/discord.nix
-    ../desktop/apps/upscayl.nix
-    ../darwin/applications.nix
+  home.packages = with pkgs; [
+    discord
+    iina
+    monitorcontrol
+    mos
+    upscayl
+    xbar
   ];
 }

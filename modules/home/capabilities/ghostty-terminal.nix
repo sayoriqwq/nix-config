@@ -5,6 +5,7 @@ let
 in
 {
   imports = [
+    ../common/shortcut-reference.nix
     ../desktop/terminal/adapters/ghostty.nix
   ];
 

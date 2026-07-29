@@ -1,3 +1,0 @@
-{
-  programs.eza.enableZshIntegration = true;
-}

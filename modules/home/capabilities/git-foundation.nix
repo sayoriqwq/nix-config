@@ -1,11 +1,12 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
     ../common/state-paths.nix
-    ../common/cli/delta.nix
     ../common/cli/git.nix
   ];
+
+  home.packages = [ pkgs.delta ];
 
   sayori.statePaths = [
     {

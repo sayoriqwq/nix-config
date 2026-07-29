@@ -1,6 +1,6 @@
+{ pkgs, ... }:
+
 {
-  imports = [
-    ../common/cli/btop.nix
-    ../common/cli/fastfetch.nix
-  ];
+  programs.btop.enable = true;
+  home.packages = [ pkgs.fastfetch ];
 }
