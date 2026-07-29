@@ -38,7 +38,10 @@
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs self; };
+        specialArgs = {
+          inherit inputs self;
+          username = "sayori";
+        };
         modules = [
           ./hosts/macbook
           ./modules/darwin/base.nix

@@ -2,10 +2,11 @@
 
 {
   home.packages = with pkgs; [
-    atuin-desktop
     discord
-    localsend
-    obsidian
+    iina
+    monitorcontrol
+    mos
     upscayl
+    xbar
   ];
 }

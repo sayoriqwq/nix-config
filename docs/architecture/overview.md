@@ -2,15 +2,15 @@
 
 ## 1. 架构目标
 
-本仓库采用“**一个 Flake、多个主机输出、分层复用**”的结构。目标不是让三台机器拥有完全相同的软件，而是让共享部分只有一个定义，同时保留操作系统、硬件和角色差异。
+本仓库采用“**一个 Flake、多个主机输出、按能力组合**”的结构。目标不是让三台机器拥有完全相同的软件，而是让同一项真实能力只有一个定义，并由各主机按角色显式选择。
 
 Phase 1 已确认的 output 与平台边界如下：
 
 | output | 平台 | 当前角色 |
 | --- | --- | --- |
-| `macbook` | `aarch64-darwin` | 首个接入目标，承载主要个人配置 |
-| `nixbox` | `x86_64-linux` | NixOS 工作站，保留现有硬件与状态版本事实 |
-| `server` | `x86_64-linux` | Ubuntu 过渡主机，最终迁移到 NixOS |
+| `macbook` | `aarch64-darwin` | 主工作站，组合完整工作站、Darwin 与兼容能力 |
+| `nixbox` | `x86_64-linux` | 次级工作站、Linux 试验站与 Server 预生产验证站 |
+| `server` | `x86_64-linux` | 当前运行 Ubuntu，后续直接替换为 Headless NixOS |
 
 ```text
 flake.nix + flake.lock
@@ -18,34 +18,25 @@ flake.nix + flake.lock
 ├── darwinConfigurations.<mac-host>
 │   ├── hosts/<mac-host>
 │   ├── modules/darwin/*
-│   └── Home Manager
-│       ├── modules/home/common/
-│       ├── modules/home/desktop/
-│       └── modules/home/darwin/
+│   ├── modules/capabilities/*/darwin.nix
+│   └── Home Manager: 显式 capability imports
 │
 ├── nixosConfigurations.<workstation-host>
 │   ├── hosts/<workstation-host>
 │   ├── modules/nixos/base.nix
 │   ├── modules/nixos/desktop.nix
-│   └── Home Manager
-│       ├── modules/home/common/
-│       ├── modules/home/desktop/
-│       └── modules/home/linux.nix
-│
-├── homeConfigurations."<user>@<ubuntu-host>"       # 过渡期
-│   ├── modules/home/common/
-│   ├── modules/home/linux.nix
-│   └── modules/home/server.nix
+│   ├── modules/capabilities/*/nixos.nix
+│   └── Home Manager: 已批准的 capability subset
 │
 └── nixosConfigurations.<server-host>               # 最终状态
     ├── hosts/<server-host>
     ├── modules/nixos/base.nix
     ├── modules/nixos/server.nix
-    └── Home Manager
-        ├── modules/home/common/
-        ├── modules/home/linux.nix
-        └── modules/home/server.nix
+    ├── modules/capabilities/*/nixos.nix
+    └── Home Manager: headless capability subset
 ```
+
+当前 Ubuntu server 不暴露 standalone Home Manager output。它先接受只读盘点，再通过最小 NixOS、隔离 VM 测试和人工批准的正式替换阶段进入上述终态。
 
 ## 2. 配置事实来源
 
@@ -89,20 +80,21 @@ flake.nix + flake.lock
 
 ### 3.3 系统模块层
 
-- `modules/darwin/`：macOS defaults、系统包、Homebrew 集成、系统用户和 Darwin 服务。
+- `modules/darwin/`：macOS defaults、系统用户、Shell 注册和通用 Darwin 系统行为；按需求选择的 Homebrew 应用进入对应 capability adapter。
 - `modules/nixos/`：Nix 设置、系统用户、SSH、基础防火墙、桌面、服务器服务与通用 Linux 系统行为。
 
 系统模块应按角色复用，不得依赖某一台机器的磁盘名、网卡名或硬件事实。
 
-### 3.4 用户模块层
+### 3.4 能力模块与基础配置
 
-- `common/default.nix`：真正跨平台、可用于 headless server 的基础用户环境；
-- `desktop/default.nix`：桌面工作站共有的用户设置；
-- `darwin/default.nix`：macOS 专属用户设置；
-- `linux.nix`：Linux 专属用户设置；
-- `server.nix`：服务器最小用户环境。
+- `modules/home/capabilities/` 保存 host 可直接选择的纯用户能力，例如可移植 Shell、终端历史、Git 基础或编辑器；
+- `modules/home/common/`、`modules/home/desktop/` 与 `modules/home/darwin/` 中的细粒度文件是基础配置实现，不再通过大 `default.nix` 作为 host bundle；
+- `modules/capabilities/<name>/` 保存真实跨层能力，内部可同时提供 `home.nix` 与平台 adapter；
+- host 显式 import 即表示采用能力，不再设置第二套 `capabilities.*.enable` 注册值。
 
-用户模块不配置 bootloader、系统防火墙、系统 daemon 或磁盘。
+能力 module 的 interface 必须公开其软件与稳定配置所有权、可变状态路径、系统服务或网络影响及人工关卡。只有两个真实平台行为确实不同，才形成 adapter seam。LocalSend 是当前示例：Home Manager 拥有 package；Darwin adapter 记录可写容器状态；Phase 6 的 NixOS adapter 还必须公开 TCP/UDP 53317 firewall 合同。纯用户能力不为了形式统一创建空 system adapter。
+
+能力内部的 Home Manager 实现不配置 bootloader、磁盘或未公开的系统副作用。
 
 ### 3.5 Dotfiles 层
 
@@ -136,7 +128,7 @@ flake.nix + flake.lock
 | Flakes | inputs、lock file、多主机 outputs | 仓库骨架 |
 | Lix | `macbook` 的 Nix 实现与 bootstrap；见 ADR-0005 | macOS 最小接入 |
 | nix-darwin | macOS 系统层 | macOS 最小接入 |
-| Home Manager | 跨平台用户层 | macOS 用户层与后续主机 |
+| Home Manager | 能力模块中的用户配置实现 | macOS 用户能力与后续主机组合 |
 | nix-homebrew / nix-darwin Homebrew options | 迁移期遗留 Homebrew 声明；终态逐项退出 | Mac 基础稳定后 |
 | `nh` | 友好的构建命令与 diff 展示 | 基础用户工具阶段 |
 | sops-nix + age | 机密部署 | 两台本地机器稳定后 |
@@ -206,8 +198,8 @@ v1 完成时应达到：
 
 - 三台机器的配置都来自同一个仓库；
 - 每台机器可以独立 build 自己的 output；
-- macOS 与 NixOS 共享真正可移植的 Home Manager 模块；
-- Ubuntu 过渡配置可被最终 NixOS server output 替代；
+- 三台主机通过需求驱动的能力模块复用配置，不从 macbook 继承整套 bundle；
+- 当前 Ubuntu server 已按人工关卡直接替换为可恢复的 NixOS output；
 - 机密不以明文进入 Git；
 - 服务器具备可验证的备份、恢复和救援手册；
 - 新机器或重装流程有文档，但破坏性执行仍保留人工关卡。

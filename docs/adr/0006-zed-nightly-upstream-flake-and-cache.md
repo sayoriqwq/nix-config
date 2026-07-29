@@ -114,7 +114,7 @@ Zed 应用自身的自动更新必须关闭。Git PR、`flake.lock` 与 Nix gene
 Zed 与 VS Code 在同一个 #25 中推进，因为它们共享默认编辑器角色、外部工具链、
 项目规则和人工配置回流流程；但二者不共享一份完整 settings 或扩展 schema。
 
-- `modules/home/desktop/` 只承载桌面编辑器组合和确实共用的使用语义；
+- `modules/home/desktop/` 保存编辑器基础配置；host 通过 `zed-editor`、`macos-vscode-compatibility` 等能力模块选择编辑器角色；
 - Zed 与 VS Code 分别保留原生 settings、keymap、task、debug 与 extension ID；
 - Darwin、Linux 和 local-only 差异显式分类；
 - live settings 与扩展状态保持可写；

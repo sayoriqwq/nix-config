@@ -7,10 +7,11 @@
 
 ## 1. 目标与边界
 
-本批次把九个可靠的 GUI package 交给 Nix/Home Manager 管理。跨平台桌面应用放在
-`modules/home/desktop/applications.nix`，Darwin 专属应用放在
-`modules/home/darwin/applications.nix`。二者都复用 Home Manager 现有的
-`home.packages` 与 `copyApps`，不新增自定义复制或 activation 脚本。
+本批次最初把九个可靠的 GUI package 分别放在
+`modules/home/desktop/applications.nix` 与 `modules/home/darwin/applications.nix`，交给
+Home Manager 的 `home.packages` 与 `copyApps`，没有新增自定义复制或 activation 脚本。
+Phase 5.5 后，当前所有权已按能力移入 `modules/home/capabilities/` 与
+`modules/capabilities/`；本文件保留当时的迁移证据，不再把旧聚合路径描述为当前接口。
 
 Nix 只拥有应用本体和版本。账号、许可证、vault、插件、历史、缓存、设备状态、
 接收目录、模型、输出、workspace 与数据库继续由应用或用户拥有。仓库不创建、链接、

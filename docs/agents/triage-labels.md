@@ -32,7 +32,7 @@
 | `area:darwin` | nix-darwin 与 macOS 系统层 |
 | `area:home` | Home Manager 与用户配置 |
 | `area:nixos` | NixOS 工作站或通用 NixOS 模块 |
-| `area:server` | Ubuntu 过渡、NixOS Server 与服务恢复 |
+| `area:server` | Ubuntu→NixOS 前置盘点、直接替换与服务恢复 |
 | `area:secrets` | sops-nix、age 与 secret 权限模型 |
 | `area:storage` | disko、分区、文件系统和挂载 |
 

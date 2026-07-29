@@ -1,3 +1,0 @@
-{
-  programs.fzf.enableZshIntegration = true;
-}

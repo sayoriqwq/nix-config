@@ -1,14 +1,14 @@
+{ lib, ... }:
+
 {
   programs.atuin = {
     enable = true;
     enableFishIntegration = true;
-    enableZshIntegration = true;
+    enableZshIntegration = lib.mkDefault false;
     flags = [ "--disable-up-arrow" ];
     settings = {
       key_path = "~/.local/share/atuin/key";
       search_mode = "daemon-fuzzy";
-
-      sync.records = true;
 
       daemon = {
         enabled = true;

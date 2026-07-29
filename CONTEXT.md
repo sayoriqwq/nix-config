@@ -12,9 +12,9 @@
 
 | 逻辑角色 | 当前状态 | 目标状态 | 主要管理层 |
 | --- | --- | --- | --- |
-| `macbook` | Apple Silicon macOS，主要个人配置目前在此 | nix-darwin + Home Manager | Darwin 系统层、共享用户层、Mac 专属用户层 |
-| `nixbox` | `x86_64-linux` NixOS，已有自身硬件与系统配置 | NixOS + Home Manager | NixOS 系统层、共享用户层、Linux 桌面用户层 |
-| `server` | `x86_64-linux` Ubuntu Server | 先独立 Home Manager，后迁移到 NixOS | 过渡用户层、最终 NixOS 服务器层 |
+| `macbook` | Apple Silicon macOS 主工作站 | nix-darwin + Home Manager | 全量工作站能力、Darwin 系统能力、Mac 专属兼容能力 |
+| `nixbox` | `x86_64-linux` NixOS 次级工作站 | NixOS + Home Manager | 按需工作站能力、Linux 试验能力、Server 同平台预生产验证 |
+| `server` | 当前运行 `x86_64-linux` Ubuntu Server | 直接替换为 NixOS | Headless 生产能力、Server 主机事实与业务运行能力 |
 
 脱敏后的已确认事实与明确延后项记录在 `docs/inventory/phase-1-hosts.md`。真实主机名、地址和其他不影响 output 组合的敏感值不进入仓库。
 
@@ -28,25 +28,101 @@
 
 对软件安装、稳定配置与可变状态分别由谁负责的明确划分。记录本地状态的位置不代表 Git 或 Nix 管理其内容。
 
+### 基础配置（Configuration primitive）
+
+实现某一项声明责任的细粒度配置材料。基础配置是能力模块内部的实现，不是主机直接选择的组合单位。
+
+### 托管配置（Managed configuration）
+
+由 Nix 对软件安装或稳定配置内容承担所有权的声明。它不因此取得数据库、缓存、登录态或用户内容的所有权。
+
+### 状态路径声明（State path declaration）
+
+只记录可变状态的位置、内容所有者与备份边界的声明。它不把路径内容链接到 Nix Store，也不代表 Nix 管理其中数据。
+
+### 能力模块（Capability module）
+
+主机可直接选择的纵向配置单位，由实现该能力所需的基础配置组成，并共同封装系统与用户层的托管配置、状态路径声明及平台 adapter。主机只选择一次能力，不重复组装其内部实现。
+
+### 能力合同（Capability contract）
+
+能力模块对主机公开的完整 interface，包括提供的行为、软件与配置所有权、状态路径、系统服务或网络影响，以及必要的人工关卡。安全影响必须明确可见，不能因纵向封装而隐藏。
+
+### AI 辅助运维能力（AI-assisted operations capability）
+
+为本地 coding agent 提供命令输出压缩、内容检查、文档解析与关系图生成的工具集合。具体 AI 客户端及其凭据是否存在，由各主机组合决定。
+
+### Nix 运维能力（Nix operations capability）
+
+三台 Nix 管理主机共有的构建、检查、generation 检视与回滚操作界面。它是配置一致性的基础能力，而不是某个桌面角色的便利工具。
+
+### 交互式 Shell 辅助能力（Interactive shell assistance capability）
+
+三台主机共有的交互式命令行纠错与操作辅助能力。`pay-respects` 属于该能力；server 虽然没有 GUI，仍然是用户直接操作的终端环境，因此不应被排除。
+
+### 终端文件工作流（Terminal file workflow）
+
+以终端界面浏览、预览和操作文件的用户能力。低使用频率不等于无需求；是否组合取决于明确的未来迁移方向。
+
+### 终端历史能力（Terminal history capability）
+
+跨三台机器一致的交互式命令历史记录与搜索体验。历史数据库、key 和 session 是每台机器各自的可变状态。
+
+### 跨设备历史同步能力（Cross-device history sync capability）
+
+在明确选择的工作站之间同步终端历史记录的附加能力。它不默认应用于 production server，也不等同于终端历史能力本身。
+
+### 开发运行时能力（Development runtime capability）
+
+供工作站选择语言版本、创建项目环境和进入开发上下文的能力。Production server 的运行时由 Nix closure、容器或服务声明提供，不继承工作站的可变运行时管理器。
+
+### 主机组合（Host composition）
+
+一台主机通过显式 `import` 对能力模块、系统能力与主机事实作出选择。`import` 本身就是采用该能力的唯一组合接口，不再增加全局 `capabilities.*.enable` 注册层。macbook 使用全量工作站能力；nixbox 和 server 按各自需求选择子集并增加自身能力。
+
+### 配置一致性（Configuration consistency）
+
+同一个能力模块在本地工作站构建和验证后，被 server 原样组合使用。它不表示磁盘、启动、网络、Secret、生产服务和数据恢复可以跳过主机级验证。
+
+### Closure 推送部署（Closure push deployment）
+
+nixbox 拉取锁定输入、构建并验证 server closure，再把不可变 closure 推送给 server。Server 是运行者，不依赖带 GitHub 写权限的工作树或自行拉取构建。
+
+### Server 直接管理链路（Direct server management path）
+
+macbook 到 server 的独立 SSH 管理与救援路径，用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
+
+### Git 基础能力（Git foundation capability）
+
+三台机器共有的版本读取、差异检查与稳定 Git 行为。它不包含 GitHub 登录态、PR/Issue 操作或可写远程仓库凭据。
+
+### GitHub 协作能力（GitHub collaboration capability）
+
+工作站用于认证 GitHub、操作远程仓库与参与协作流程的能力。它不默认组合到 production server。
+
+### 主机概览能力（Host overview capability）
+
+让用户在登录后快速识别主机、系统、架构与资源概况的能力。它不替代服务状态、日志、端口、容量趋势或告警等运行状态检查。
+
 ### 主机输出（Host output）
 
-Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.<host>`、`nixosConfigurations.<host>` 或过渡期的 `homeConfigurations."<user>@<host>"`。
+Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.<host>` 或 `nixosConfigurations.<host>`。
 
-### 共享用户层（Portable user layer）
+### 可移植用户能力（Portable user capability）
 
-由 Home Manager 管理、可以跨 macOS 与 Linux 使用的用户工具和配置，例如 Git、shell、编辑器、tmux、direnv 和通用 CLI。共享层不得包含桌面、硬件、系统服务或平台专属假设。
+由 Home Manager 实现、可被多个主机显式选择的用户能力。可移植表示能力实现没有平台假设，不表示所有主机必须采用，也不形成强制全选 bundle。
 
 ### 可移植 Shell 环境（Portable shell environment）
 
-共享用户层中跨平台一致的交互式 Shell 体验，涵盖主用 Fish 与兼容 Zsh 的共同语义。平台专属路径和应用集成不属于该概念。
+跨主机一致的 Fish 交互体验。Zsh 是 macOS 的兼容能力，不属于可移植 Shell 环境。
 
-### 桌面用户层（Desktop user layer）
+### 桌面用户能力（Desktop user capability）
 
-由 Home Manager 管理、供 macOS 与 Linux 图形工作站复用的用户应用和交互行为。依赖图形会话或桌面应用的配置不进入共享用户层，也不应用于 headless 主机。
+由 Home Manager 管理的图形用户能力集合。macbook 与 nixbox 分别选择所需能力，不把 macbook 的完整桌面应用集合自动复制到 nixbox，也不应用于 headless 主机。
 
 ### 桌面终端环境（Desktop terminal environment）
 
-桌面用户层中统一维护的终端体验，以 Ghostty 为主终端、WezTerm 为兼容终端。两者共享用户可感知的主题与高频操作语义，但不要求支持其他终端与 Shell 的任意组合。
+桌面用户能力中的终端体验，以 Ghostty + Fish 为两台工作站的主路径。WezTerm + Zsh 只作为 macOS 兼容能力保留。
 
 ### 主编辑器角色（Primary editor role）
 
@@ -64,9 +140,9 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 无法由 Nix 可靠管理、因而完全位于仓库声明范围之外的应用。仓库不管理其安装、配置、内容或集成，最多记录一份不参与构建的事实说明。
 
-### 平台用户层（Platform user layer）
+### 平台 Adapter（Platform adapter）
 
-仍由 Home Manager 管理，但只适用于 Darwin、Linux Desktop 或 Server 的用户配置。
+能力在已证明的平台 seam 上提供的具体适配。平台名称本身不构成需求；adapter 不能隐藏 system service、network、firewall、login shell 或其他安全副作用。
 
 ### 系统层（System layer）
 
@@ -104,10 +180,10 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 
 1. Git 仓库是配置事实来源，`flake.lock` 是依赖事实来源。
 2. 现有 NixOS 的 `system.stateVersion` 与硬件配置在缺乏证据时保持不变。
-3. `modules/home/common/default.nix` 必须跨平台并适用于无桌面的服务器。
-4. 系统配置与用户配置分层，平台特有内容不得泄漏到共享层。
+3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
+4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. 服务器先恢复到最小可 SSH 的 NixOS，再恢复业务；系统迁移与业务重构不同时进行。
+6. Server 从当前 Ubuntu 直接替换为最小可 SSH 的 NixOS，再建立 Secret 能力并恢复业务；不创建 Ubuntu standalone Home Manager 过渡配置。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责
