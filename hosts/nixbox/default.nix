@@ -7,6 +7,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
     ../../modules/capabilities/google-chrome/nixos.nix
     ../../modules/capabilities/clash-verge-rev/nixos.nix

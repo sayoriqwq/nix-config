@@ -18,6 +18,7 @@
 
 `hosts/nixbox/default.nix` 只选择 Issue #8 已批准的能力：
 
+- 常开工作站：GDM 与登录后的 GNOME 会话都不因空闲熄屏或自动 suspend；
 - 通用终端：Fish、终端工具箱、Atuin 本地历史、Git、`nh`、`pay-respects`、`fastfetch`、`btop`；
 - 工作站附加：Atuin 同步、GitHub 协作、mise/uv/direnv、Yazi；
 - 编辑与终端：Zed、Helix、Ghostty；
@@ -29,6 +30,7 @@
 
 | 能力 | package / 稳定配置所有者 | NixOS 影响 | 可变状态边界 |
 | --- | --- | --- | --- |
+| 常开工作站 | NixOS 管 GDM；Home Manager 管 `sayori` 的 GNOME idle/power 设置 | GDM 不自动 suspend；登录与锁屏会话不因 idle 熄屏或 suspend | 不禁用手动 suspend，不改变合盖或电源键行为 |
 | 可移植 Shell | Home Manager 管 Fish 配置；NixOS 管 package 注册与用户登录 shell | `programs.fish.enable`；`sayori.shell = pkgs.fish` | Fish history 与 universal variables 只声明、不接管 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
@@ -59,11 +61,36 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 
 以下事项在 build 前后都不由 Agent 推断：
 
-1. GNOME/GDM 仍与 Phase 5 基线一致，且当前没有异常 failed unit；
+1. GNOME/GDM 仍与 Phase 5 基线一致；当前实机没有 failed unit；
 2. Termius 首次启动后的实际 user-data 路径与锁定 package 证据一致；
 3. Phase 5 `p5-test`、`p5-switch`、`p5-back` 遗留目标的精确绝对路径、类型、所有者和内容；
 4. Zed 从 macbook 到 nixbox 的 SSH remote workflow；
 5. LocalSend 在真实 LAN 上的发现和双向传输。
+
+### 6.1 空闲 suspend 实机证据
+
+2026-07-29 唤醒后确认：GNOME 当前 `idle-delay` 为 300 秒；system journal 记录 GDM 无人登录时约 15 分钟后触发 `The system will suspend now!`，并在人工唤醒后返回。该行为同时解释了屏幕熄灭与 SSH 不可达。
+
+本阶段因此新增 `always-on-workstation` 能力：
+
+- `services.displayManager.gdm.autoSuspend = false` 只关闭 GDM 登录屏的空闲 suspend；
+- GDM 的 `idle-delay = 0` 阻止登录屏空闲熄屏；
+- `sayori` 的 Home Manager dconf 将 GNOME `idle-delay` 设为 0，并把 AC/电池空闲 suspend 都设为 `nothing`；
+- 不 mask systemd sleep targets，不改变 lid switch、电源键或人工 suspend。
+
+### 6.2 Phase 5 遗留与 Home Manager 冲突审计
+
+2026-07-29 的只读审计确认：
+
+| 路径 | 类型与目标 | 当前判断 |
+| --- | --- | --- |
+| `/home/sayori/p5-test` | symlink，指向当前已启动 closure 的 `switch-to-configuration` | 与当前 system 相同，已无独立 test 回滚价值 |
+| `/home/sayori/p5-back` | symlink，经 `/run/booted-system` 指向同一当前 closure | 与 `p5-test` 重合，已无独立回滚价值 |
+| `/home/sayori/p5-switch` | mode 0700 的脚本，固定 Phase 5 commit `6c541608d44bfbe000284a73f07b7918319044c4` | 只保留旧 switch 快捷入口，不是 generation 本身 |
+
+三者都没有删除。删除前仍须向维护者展示三个精确绝对路径与命令，并获得当次批准，不使用通配符。
+
+已批准能力对应的 `~/.config/fish`、Atuin、Git、Lazygit、Helix、Ghostty、Zed 与 mise 路径当前均不存在，因此没有发现首次 Home Manager activation 的同名文件冲突。只存在 Phase 5 已记录的空 `~/.nix-profile` symlink；Nix 不会据此推断或删除任何用户 package。
 
 目标机不可达时，上述项保持为显式 blocker。不得因此猜路径、扩大端口、引入 OrbStack builder 或删除疑似遗留文件。
 
