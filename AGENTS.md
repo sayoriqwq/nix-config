@@ -6,10 +6,10 @@ This file is the **normative instruction set** for AI agents working in this rep
 
 Build and maintain one auditable, reproducible Nix configuration repository for:
 
-- one macOS workstation managed by `nix-darwin`;
-- one NixOS workstation;
-- one Ubuntu server during transition, then a NixOS server;
-- a portable user environment managed by Home Manager.
+- one primary macOS workstation managed by `nix-darwin` and Home Manager;
+- one secondary NixOS workstation and Linux experiment station;
+- one server that currently runs Ubuntu and will be replaced directly by NixOS;
+- requirement-driven capability modules shared across those hosts.
 
 The repository manages **configuration**, not mutable application data or backups.
 
@@ -51,13 +51,14 @@ If no implementation issue exists, do not start implementation. Limit work to in
 - Use Home Manager for the portable user layer.
 - Use `nix-darwin` for macOS system configuration.
 - Use NixOS modules for NixOS system configuration.
-- Use standalone Home Manager on Ubuntu only as a transition mechanism.
+- Do not introduce a standalone Home Manager layer on the Ubuntu server; inventory it, validate a minimal NixOS replacement, and migrate through the approved server phases.
 - Keep host and hardware facts under `hosts/<host>/`.
 - Keep reusable macOS system modules under `modules/darwin/`.
 - Keep reusable NixOS system modules under `modules/nixos/`.
 - Keep reusable user modules under `modules/home/`.
-- `modules/home/common/default.nix` must remain platform-neutral and suitable for headless hosts.
-- Desktop-only, Darwin-only, Linux-only, and server-only user configuration must remain in separate modules.
+- Compose hosts through explicit imports of requirement-driven capability modules. An import is the selection mechanism; do not add a global capability registry.
+- Keep configuration primitives internal to capability implementations. Hosts must not import `common`, `desktop`, Darwin, Linux, or server bundles as substitutes for requirements.
+- Create a platform adapter only for a proven platform seam. Cross-layer adapters must expose package ownership, managed configuration, mutable-state paths, services, network effects, and human approval gates.
 - Prefer existing Home Manager, NixOS, and nix-darwin options over custom activation scripts or generated shell code.
 - Put project-specific development dependencies in each project's dev shell, not in the global user profile.
 - Git synchronizes declarations. Mutable data, databases, browser profiles, service state, and backups require separate data-management procedures.
@@ -119,8 +120,6 @@ nix build .#darwinConfigurations.<host>.system
 # NixOS
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
-# standalone Home Manager
-nix build .#homeConfigurations."<user>@<host>".activationPackage
 ```
 
 Use the actual output names defined by the issue. A build is not permission to activate it.

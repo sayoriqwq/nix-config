@@ -1,6 +1,6 @@
 # 模块与目录边界
 
-本文定义未来 Nix 实现中各路径的职责。Agent 必须优先遵守当前 Issue 的允许范围；Issue 未说明时，以本文件为默认边界。
+本文定义能力化基线的路径职责。Agent 必须优先遵守当前 Issue 的允许范围；Issue 未说明时，以本文件为默认规则。
 
 ## 1. 目标目录结构
 
@@ -9,124 +9,101 @@
 ├── flake.nix
 ├── flake.lock
 ├── hosts/
-│   ├── <mac-host>/
-│   │   └── default.nix
-│   ├── <nixos-workstation>/
-│   │   ├── default.nix
-│   │   └── hardware-configuration.nix
-│   └── <server-host>/
-│       ├── default.nix
-│       ├── disko.nix
-│       └── hardware-configuration.nix 或 facter.json
+│   ├── macbook/
+│   ├── nixbox/
+│   └── server/                    # 只在对应 server Phase 建立
 ├── modules/
 │   ├── home/
-│   │   ├── common/
-│   │   │   ├── default.nix
-│   │   │   ├── shell/
-│   │   │   └── cli/
-│   │   ├── desktop/
-│   │   │   ├── default.nix
-│   │   │   └── terminal/
-│   │   ├── darwin/
-│   │   │   └── default.nix
-│   │   ├── linux.nix
-│   │   └── server.nix
-│   ├── darwin/
-│   │   ├── base.nix
-│   │   └── homebrew.nix
-│   └── nixos/
-│       ├── base.nix
-│       ├── desktop.nix
-│       └── server.nix
+│   │   ├── capabilities/          # host 可直接 import 的用户能力
+│   │   ├── common/                # 跨平台基础配置，不是 host bundle
+│   │   ├── desktop/               # GUI 基础配置，不是 host bundle
+│   │   └── darwin/                # Darwin 用户基础配置，不是 host bundle
+│   ├── capabilities/
+│   │   └── <cross-layer>/         # home.nix + 已证明的平台 adapter
+│   ├── darwin/                    # 可复用 nix-darwin 系统模块
+│   └── nixos/                     # 可复用 NixOS 系统模块
 ├── dotfiles/
 ├── secrets/
 └── docs/
 ```
 
-只有对应阶段真的需要时才创建路径。不要为了满足结构图而提前加入空模块。
+只有真实需求出现时才创建路径。不得为未来假设预建 `linux.nix`、`server.nix`、空 adapter 或 capability registry。
 
-## 2. 路径职责矩阵
+## 2. 两级组合模型
+
+### 基础配置
+
+基础配置只实现一项窄责任，例如安装 `gh`、配置 Git、声明 Fish integration、提供 Zed seed helper 或安装一个 GUI package。它可以放在现有 `home/common/`、`home/desktop/`、`home/darwin/` 内部目录，但不成为 host interface。
+
+### 能力模块
+
+能力模块是 host 的选择单位。它可以组合多个基础配置，并公开完整能力合同：
+
+- 提供的用户行为；
+- package 与稳定配置所有权；
+- `sayori.statePaths` 中仅声明、不接管的可变状态；
+- system service、network/firewall、login shell 等跨层影响；
+- activation 或破坏性动作的人工关卡。
+
+Host 显式 import 一项能力即表示采用。不得再要求 host 同时设置 `capabilities.<name>.enable = true`，也不得让 host 直接拼能力内部 primitives。
+
+## 3. 路径职责矩阵
 
 | 路径 | 允许内容 | 禁止内容 |
 | --- | --- | --- |
-| `flake.nix` | inputs、outputs、少量组合 helper、checks/formatter | 大量程序配置、主机硬件细节、明文机密 |
-| `hosts/<host>/` | 主机平台、硬件、boot、磁盘、主机名、专属网络、state version、模块组合 | 可被多主机复用的通用软件配置 |
-| `modules/home/common/` | 跨平台且适用于 headless host 的 Shell、Git、编辑器、tmux、direnv 与通用 CLI | GUI、Homebrew、systemd、launchd、Linux/macOS 专属路径、服务器 daemon |
-| `modules/home/common/shell/` | Fish/Zsh 自身的 history、颜色、编辑模式与原生键位 | 第三方 CLI 的安装、alias、hook 或配置 |
-| `modules/home/common/cli/` | 跨平台 CLI 的软件、稳定配置及 Fish/Zsh integration；目录由 `default.nix` 显式导出 | GUI、平台应用、可变数据、项目私有版本文件 |
-| `modules/home/desktop/` | 两台桌面机器共有的用户级桌面配置 | boot、GPU 驱动、系统桌面服务、服务器工具 |
-| `modules/home/desktop/terminal/` | Ghostty + Fish 主环境、WezTerm + Zsh 兼容环境及共享终端语义 | 任意终端/Shell 交叉组合、编辑器配置 |
-| `modules/home/darwin/` | macOS 专属用户设置与用户级应用 integration | nix-darwin 系统 defaults、Linux 配置 |
-| `modules/home/linux.nix` | Linux 专属用户设置 | NixOS 系统服务、磁盘、bootloader |
-| `modules/home/server.nix` | headless 用户工具、最小 shell/编辑环境 | 桌面软件、浏览器、系统 daemon、业务数据 |
-| `modules/darwin/` | macOS defaults、系统设置、Homebrew 声明、Darwin 服务 | NixOS 选项、主机硬件事实 |
-| `modules/nixos/base.nix` | 多台 NixOS 可复用的基础 Nix、用户、sudo、SSH 和安全默认值 | 某台主机的磁盘、GPU、网卡名 |
-| `modules/nixos/desktop.nix` | NixOS 桌面角色的通用系统服务 | 某个桌面的私人 dotfiles、服务器业务 |
-| `modules/nixos/server.nix` | NixOS 服务器角色的系统服务与 hardening | 生产数据、明文 `.env`、provider 专属磁盘名 |
+| `flake.nix` | inputs、outputs、少量组合 helper、formatter/checks | 大量程序配置、主机硬件细节、明文机密 |
+| `hosts/<host>/` | 主机事实、系统角色与显式 capability imports | 可被多主机复用的能力实现 |
+| `modules/home/capabilities/` | 纯用户能力 interface 与内部 primitive imports | boot、磁盘、隐蔽 firewall 或系统 daemon |
+| `modules/home/common/` | 跨平台 CLI、Shell 与用户配置 primitives | GUI、Homebrew、systemd、launchd、host bundle |
+| `modules/home/desktop/` | GUI 应用、终端与编辑器 primitives | Server bundle、boot、GPU、系统桌面服务 |
+| `modules/home/darwin/` | Darwin 用户配置 primitives 与现有 integration | nix-darwin system defaults、Linux 配置 |
+| `modules/capabilities/<name>/home.nix` | 跨层能力的用户实现 | 平台系统选项 |
+| `modules/capabilities/<name>/darwin.nix` | 已证明的 nix-darwin adapter 与 HM attachment | NixOS 选项、虚构的统一 interface |
+| `modules/capabilities/<name>/nixos.nix` | 已证明的 NixOS adapter、HM attachment与公开安全副作用 | 未经 Issue 批准的 firewall/SSH/服务变化 |
+| `modules/darwin/` | macOS defaults、系统设置、Shell 注册与通用 Darwin 服务 | 按应用需求选择的 Homebrew cask、NixOS 选项、主机硬件事实 |
+| `modules/nixos/` | NixOS 基础、桌面或 server 系统能力 | 主机磁盘/GPU/网卡事实、生产数据 |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
-| `secrets/` | sops 加密后的文件 | 任何明文 secret、age 私钥 |
-| `docs/` | 架构、ADR、计划、runbook、维护说明 | 真实 secret、未脱敏 inventory |
+| `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
-### Phase 3 首次采用范围
+旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
-`macbook` 首次接入 Home Manager 时，共享用户层只声明 Git、Fish、Helix、tmux、direnv 和一组已在 Mac 使用的跨平台 CLI。Git 身份通过本机私有的 `~/.config/git/identity.inc` 提供，仓库不保存邮箱等账户标识。
-
-Phase 3 曾通过 `modules/home/darwin.nix` 为 Homebrew Fish 补充 Nix profile 与未迁移工具路径。Issue #23 让 nix-darwin 注册稳定的 Nix Fish 登录路径，并通过单独批准的 macOS `chsh` 账户事实完成切换；管理员账户不加入 `users.knownUsers`。同时删除通用 Homebrew、OpenClaw、pnpm、Rust 与 Haskell PATH，只保留有独立所有权的 Darwin integration。Atuin 数据库与 key、GitHub CLI 登录状态、Fish universal variables、缓存、history 和其他运行时状态仍在可写目录中，由独立备份流程负责。
-
-### 目录入口约定
-
-- 目录模块只通过 `default.nix` 暴露，不使用 `index.nix`；
-- 不允许同一路径同时存在 `name.nix` 与 `name/`；
-- import 必须显式列出，不使用递归目录扫描；
-- 简单能力使用单个 `.nix`，只有确实存在多个稳定子域或 Shell adapter 时才创建目录；
-- 能力模块负责软件、稳定配置、集成与状态边界；快捷键元数据只是生成使用指南的最小投影。
-
-## 3. Import 方向
-
-允许的依赖方向：
+## 4. Import 方向
 
 ```text
-flake.nix
-  └── host output
-       ├── hosts/<host>/
-       ├── modules/<platform-or-role>/
-       └── Home Manager integration
-            └── modules/home/*
+flake output
+  └── hosts/<host>
+       ├── system modules
+       ├── cross-layer capability adapters
+       │    └── capability home implementation
+       └── Home Manager capability imports
+            └── configuration primitives
 ```
 
-推荐规则：
+- Host 只选择 system module、cross-layer adapter 或用户 capability；不选择 primitive。
+- 能力实现不得反向 import host。
+- Home Manager primitive 不 import nix-darwin/NixOS system module。
+- Darwin 与 NixOS adapter 不互相 import。
+- import 必须显式列出，不使用递归扫描。
+- 一个 adapter 表示假设，两个真实变化才证明 seam；但已经批准、将在下一 Phase 组合的第二平台 adapter 可以先在合同文档中记录，不能提前启用其副作用。
 
-- 主机组合通用模块；通用模块不反向 import 某台主机。
-- Home Manager 模块不 import 系统模块。
-- Darwin 模块不 import NixOS 模块，反之亦然。
-- `common/default.nix` 不通过运行时判断偷偷承载平台配置；平台差异应通过显式模块组合表达。
-- 可使用少量 `lib.optionals pkgs.stdenv.isDarwin` 处理真正细小的包可用性差异，但不能借此绕过模块边界。
-- 不建立循环 import，不依赖隐式递归扫描来决定安全关键主机配置。
+## 5. 状态、参数与共享值
 
-## 4. 参数与共享值
+- `sayori.statePaths` 只记录 path、内容 owner、backup 边界与原因；它不创建、链接、备份或清理该路径。
+- 可变数据库、key、登录态、缓存、session、浏览器 profile 与用户内容不得整体链接到 Nix Store。
+- 多个 module 确实需要的用户名或 input 可以通过 `specialArgs` / `extraSpecialArgs` 传入；secret 不通过 args 传递。
+- Host 与硬件事实保留在 `hosts/<host>/`；不创建巨大、无类型的 `vars` 属性集。
 
-共享用户名、inputs 或仓库级常量可以通过 `specialArgs` / `extraSpecialArgs` 传入，但应遵循：
+## 6. 软件归属判断
 
-- 只有多个模块确实需要的值才提升为参数；
-- secret 不通过 args 传递；
-- 主机硬件事实优先留在主机模块；
-- 不创建无类型、无文档的巨大 `vars` 属性集；
-- 当共享数据增长到需要校验时，创建带 options 的正式 Nix module，而不是继续传任意 attrset。
+1. 项目开发依赖进入项目 dev shell。
+2. 只有 package 或单项稳定配置时，先建立细粒度 primitive。
+3. Host 真正要选择的用户行为，由 `modules/home/capabilities/` 组合。
+4. 同一能力同时需要用户与系统声明时，建立 `modules/capabilities/<name>/`。
+5. 只有真实平台行为不同才增加 adapter；平台名称本身不是需求。
+6. 硬件、boot、磁盘、网卡和 provider 事实进入 `hosts/<host>/`。
+7. 可变数据与 secret 不作为普通配置提交，分别使用数据与机密流程。
 
-## 5. 软件归属判断
-
-新增一个软件或配置时按以下顺序判断：
-
-1. 是项目开发依赖吗？放入项目自己的 dev shell。
-2. 是用户级且跨平台吗？放入 `modules/home/common/`。
-3. 是桌面用户级且两台工作站共享吗？放入 `modules/home/desktop/`。
-4. 只属于某个平台的用户吗？放入 `home/darwin/` 或 `home/linux.nix`。
-5. 只属于服务器用户环境吗？放入 `home/server.nix`。
-6. 是操作系统服务或全局设置吗？放入对应 Darwin/NixOS 系统模块。
-7. 是硬件、boot、磁盘或 provider 事实吗？放入 `hosts/<host>/`。
-8. 是可变数据或 secret 吗？不要作为普通 Nix 配置提交，使用对应数据/机密流程。
-
-## 6. Homebrew 边界
+## 7. Homebrew 边界
 
 Mac 上遵循：
 
@@ -136,50 +113,45 @@ Mac 上遵循：
 - 迁移期不启用会批量删除软件的 cleanup/zap；
 - 任何定向卸载都必须先在 Issue 中列出精确目标并由维护者当次批准。
 
-### 6.1 语言运行时所有权
+### 7.1 语言运行时所有权
 
-Node 与 Bun 的版本切换是 mise 的核心职责，不按普通全局 CLI 处理：
+Node 与 Bun 的版本切换是 mise 的核心职责：
 
 - Nix/Home Manager 只安装 mise 本体、管理稳定默认值和 shell integration；
-- Node、Bun 的安装、全局默认和项目版本切换全部由 mise 管理；
-- `home.packages` 不得直接包含 `nodejs`、`nodejs-slim` 或 `bun`，违反时必须在求值阶段失败；
-- 共享默认值放在 Nix 管理的 mise `conf.d` 文件，`mise use -g` 的个人可写结果留在 `~/.config/mise/config.toml`；
-- 项目版本事实由项目自己的 `mise.toml` 管理，个人项目覆盖使用不提交的 `mise.local.toml`；
-- mise 的 runtime、cache、state 和已安装版本属于可变数据，不进入 Nix Store，也不因切换安装来源而删除。
+- Node、Bun 与 pnpm 的安装、全局默认和项目版本切换由 mise 管理；
+- `home.packages` 不得直接包含 `nodejs`、`nodejs-slim` 或 `bun`；
+- mise runtime、cache、state 与已安装版本属于可变数据。
 
-当前机器证据、清理关卡与验收命令见 `docs/inventory/mise-runtime-ownership.md`。
+Python 使用不同模型：
 
-Python 使用不同的所有权模型：
+- Nix/Home Manager 只提供 `uv` 可执行文件，不全局安装 Python interpreter；
+- uv 根据项目事实获取 Python，项目 `.venv`、依赖与 lock file 不进入全局 profile；
+- mise 不声明 Python 或 uv；
+- `~/.local/bin` 是用户可变工具的低优先级兼容路径，Nix 不扫描、同步或清理其内容。
 
-- Nix/Home Manager 只提供 `uv` 可执行文件，不在全局用户 profile 安装 Python 解释器；
-- uv 根据项目的 `.python-version` 与 `requires-python` 选择并获取 Python；
-- 项目的 `.venv`、依赖与 `uv.lock` 由 uv 和项目共同管理，不进入全局 Home Manager profile；
-- mise 不得声明 Python 或 uv；Node、Bun 与 pnpm 的既有所有权不变；
-- `~/.local/bin` 是用户可变工具的低优先级兼容路径，必须排在 Nix profile 之后，Nix 不扫描、同步或清理其中内容。
+详细证据见 `docs/inventory/mise-runtime-ownership.md` 与 `docs/inventory/uv-python-ownership.md`。
 
-当前机器事实、验收关卡与回滚方式见 `docs/inventory/uv-python-ownership.md`。
+## 8. 服务与容器边界
 
-## 7. 服务与容器边界
+Server 从 Ubuntu 直接替换为最小 NixOS，但系统替换与业务重构仍然分开：
 
-服务器迁移初期优先恢复现有、已验证的容器/Compose 服务，不在同一阶段重写全部服务：
+- 首次替换只保证 boot、disk、network、SSH、sudo、基础 firewall 与救援能力；
+- 最小系统稳定后，优先恢复已验证的 Compose/容器与数据；
+- 成熟 NixOS module 的采用另建 Issue，不顺带重写全部服务；
+- 容器 image tag、volume、环境变量、备份与健康检查必须显式记录；
+- production database upgrade 不作为 OS migration 的附带动作。
 
-- 系统迁移与业务重构分开；
-- 有成熟 NixOS module 且迁移收益明确的服务，可在后续独立 Issue 迁移；
-- 复杂第三方栈继续使用 Compose 是可接受的；
-- 容器镜像 tag、volume、环境变量、备份和健康检查必须显式记录；
-- 生产数据库升级不得作为操作系统迁移的顺带动作。
+## 9. 示例
 
-## 8. 变更边界示例
+合法：
 
-### 合法
+- macbook 在 Home Manager composition 中显式 import `git-foundation.nix` 与 `github-collaboration.nix`，server 只选择前者。
+- LocalSend Darwin adapter 附加用户 package 与状态路径；Phase 6 的 NixOS adapter 还公开 TCP/UDP 53317 firewall 规则。
+- Phase 5.5 重构 macbook 能力 interface，同时保持 nixbox Phase 5 output 不变。
 
-- Phase 2 只新增 macOS output、Darwin base module 和最小构建检查。
-- Phase 5 导入 NixOS 原有硬件配置，并把可复用系统设置移到 `modules/nixos/base.nix`。
-- Phase 8 只引入 sops-nix、加密策略和非生产演示 secret。
+不合法：
 
-### 不合法
-
-- 做 macOS shell 迁移时顺便修改服务器磁盘布局。
-- 为减少三行 Flake 代码引入大型自动发现框架。
-- 把 `if isDarwin then ... else ...` 写满 `common/default.nix`，声称它仍是共享模块。
-- 为通过构建而猜一个 `system.stateVersion` 或直接复制网上的 `disko.nix`。
+- nixbox import 完整 `desktop/default.nix`，再逐项排除 macbook 软件。
+- 建立 `linux.nix` 后让所有 Linux host 自动继承。
+- 为减少显式 imports 引入 capability registry 或自动目录扫描。
+- 为通过 build 猜 `stateVersion`、disk、network 或 firewall 事实。

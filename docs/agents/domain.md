@@ -36,8 +36,11 @@
 Issue、PR、代码和文档应使用 `CONTEXT.md` 定义的词汇，例如：
 
 - 主机输出（Host output）；
-- 共享用户层（Portable user layer）；
-- 平台用户层（Platform user layer）；
+- 基础配置（Configuration primitive）；
+- 能力模块（Capability module）；
+- 能力合同（Capability contract）；
+- 主机组合（Host composition）；
+- 平台 Adapter（Platform adapter）；
 - 系统层（System layer）；
 - 主机层（Host layer）；
 - 可变状态（Mutable state）；
@@ -51,9 +54,9 @@ Issue、PR、代码和文档应使用 `CONTEXT.md` 定义的词汇，例如：
 开始修改某个领域前，必须阅读影响它的 ADR。当前至少包括：
 
 - 单一 Flake 与多主机输出；
-- Home Manager 的层级边界；
+- 主机按能力模块显式组合；
 - sops-nix 机密管理；
-- 服务器分阶段迁移；
+- Server 从 Ubuntu 直接替换为 NixOS；
 - macOS 使用的 Nix 实现与 bootstrap 边界。
 
 如果提案与已接受 ADR 冲突，不能静默覆盖。必须在 Issue 和 PR 中明确写出：

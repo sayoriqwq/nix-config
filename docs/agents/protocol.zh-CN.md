@@ -6,10 +6,10 @@
 
 在一个可审计、可复现的 Nix 配置仓库中长期维护：
 
-- 一台由 nix-darwin 管理的 macOS 工作站；
-- 一台 NixOS 工作站；
-- 一台先运行 Ubuntu、最终迁移到 NixOS 的服务器；
-- 一套由 Home Manager 管理的可移植用户环境。
+- 一台由 nix-darwin 与 Home Manager 管理的 macOS 主工作站；
+- 一台作为次级工作站与 Linux 试验站的 NixOS 主机；
+- 一台当前运行 Ubuntu、后续直接替换为 NixOS 的服务器；
+- 一组由三台主机按真实需求组合的能力模块。
 
 本仓库管理配置声明，不负责保存可变应用数据或充当备份系统。
 
@@ -51,13 +51,14 @@ Agent 修改文件前必须依次阅读：
 - Home Manager 管理可移植用户层。
 - nix-darwin 管理 macOS 系统层。
 - NixOS Modules 管理 NixOS 系统层。
-- Ubuntu 上的 standalone Home Manager 只作为过渡方案。
+- 不为当前 Ubuntu server 引入 standalone Home Manager 层；先盘点，再按已批准的服务器阶段验证并直接替换为最小 NixOS。
 - `hosts/<host>/` 保存主机与硬件事实。
 - `modules/darwin/` 保存可复用的 macOS 系统模块。
 - `modules/nixos/` 保存可复用的 NixOS 系统模块。
 - `modules/home/` 保存可复用的用户模块。
-- `modules/home/common/default.nix` 必须与平台无关，并可用于无桌面的服务器。
-- Desktop、Darwin、Linux 和 Server 的用户配置必须拆分。
+- 主机通过显式 import 按需求组合能力模块；import 就是采用机制，不增加全局 capability registry。
+- 基础配置只作为能力模块内部实现；主机不得用 `common`、`desktop`、Darwin、Linux 或 server bundle 代替需求选择。
+- 只有已证明的平台差异才建立 adapter；跨层 adapter 必须公开软件所有权、托管配置、可变状态路径、服务、网络影响与人工关卡。
 - 优先使用 Home Manager、NixOS 和 nix-darwin 的成熟选项，最后才考虑 activation script 或生成 shell 脚本。
 - 项目专用开发依赖进入各项目 dev shell，不进入全局用户 profile。
 - Git 同步声明；数据库、浏览器资料、容器卷、运行状态和备份采用独立流程。
@@ -118,8 +119,6 @@ nix build .#darwinConfigurations.<host>.system
 # NixOS
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
-# standalone Home Manager
-nix build .#homeConfigurations."<user>@<host>".activationPackage
 ```
 
 使用 Issue 中确认的真实 output 名称。构建成功不等于获得激活许可。

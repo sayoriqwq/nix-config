@@ -9,8 +9,12 @@
   imports = [
     ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
-    ../../modules/darwin/homebrew.nix
     ../../modules/darwin/shell.nix
+    ../../modules/capabilities/macos-legacy-applications/darwin.nix
+    ../../modules/capabilities/google-chrome/darwin.nix
+    ../../modules/capabilities/clash-verge-rev/darwin.nix
+    ../../modules/capabilities/termius/darwin.nix
+    ../../modules/capabilities/localsend/darwin.nix
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -49,9 +53,30 @@
 
     users.sayori = {
       imports = [
-        ../../modules/home/common
-        ../../modules/home/darwin
-        ../../modules/home/desktop
+        ../../modules/home/capabilities/portable-shell.nix
+        ../../modules/home/capabilities/terminal-toolkit.nix
+        ../../modules/home/capabilities/terminal-history.nix
+        ../../modules/home/capabilities/workstation-history-sync.nix
+        ../../modules/home/capabilities/macos-atuin-desktop.nix
+        ../../modules/home/capabilities/git-foundation.nix
+        ../../modules/home/capabilities/github-collaboration.nix
+        ../../modules/home/capabilities/nix-operations.nix
+        ../../modules/home/capabilities/interactive-shell-assistance.nix
+        ../../modules/home/capabilities/host-observability.nix
+        ../../modules/home/capabilities/development-runtime.nix
+        ../../modules/home/capabilities/macos-development-runtime-extras.nix
+        ../../modules/home/capabilities/terminal-file-workflow.nix
+        ../../modules/home/capabilities/helix-editor.nix
+        ../../modules/home/capabilities/zed-editor.nix
+        ../../modules/home/capabilities/macos-vscode-compatibility.nix
+        ../../modules/home/capabilities/ghostty-terminal.nix
+        ../../modules/home/capabilities/macos-terminal-compatibility.nix
+        ../../modules/home/capabilities/obsidian/darwin.nix
+        ../../modules/home/capabilities/macos-user-applications.nix
+        ../../modules/home/capabilities/macos-integrations.nix
+        ../../modules/home/capabilities/ai-assisted-operations.nix
+        ../../modules/home/capabilities/cloud-storage.nix
+        ../../modules/home/capabilities/shortcut-reference.nix
       ];
 
       home = {

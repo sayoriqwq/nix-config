@@ -4,319 +4,157 @@
 
 **名称：** `声明式个人基础设施 v1 / Declarative Personal Infrastructure v1`
 
-**完成目标：** macOS、NixOS 工作站和服务器均由同一仓库提供可构建的配置；共享用户层经过两种平台验证；服务器完成可回滚迁移与业务恢复；机密、数据和危险操作均有明确边界。
+**完成目标：** macOS、NixOS 工作站和 NixOS server 均由同一仓库提供可构建配置；主机按需求组合能力；server 完成可回滚替换与业务恢复；机密、数据和危险操作具有明确边界。
 
-该 Milestone 按“完成标准”而不是随意日期关闭。每个 Phase 使用一个独立 Issue 和一个 Draft PR。
+每个 Phase 使用一个独立 Issue 和一个 Draft PR。Phase 完成取决于验收，不取决于日期。
 
 ## 2. 总体依赖关系
 
 ```text
-Phase 0  治理协议
+Phase 0   治理协议                         #2
    ↓
-Phase 1  主机盘点与 Flake 骨架
+Phase 1   主机盘点与 Flake 骨架            #3
    ↓
-Phase 2  macOS 最小 nix-darwin
+Phase 2   macOS 最小 nix-darwin            #4
    ↓
-Phase 3  macOS Home Manager 用户层
+Phase 3   macOS Home Manager               #5
    ↓
-Phase 4  macOS 应用与系统偏好
+Phase 4   macOS 应用与系统偏好              #6
    ↓
-Phase 5  接入现有 NixOS 工作站
+Phase 5   接入现有 NixOS 工作站             #7
    ↓
-Phase 6  跨平台共享层验证
+Phase 5.5 能力模块与主机组合新基线          #66
    ↓
-Phase 7  Ubuntu Server 过渡 Home Manager
+Phase 6   按能力组合 nixbox 用户环境         #8
    ↓
-Phase 8  sops-nix 机密管理
+Phase 7   Ubuntu→NixOS 迁移前置盘点          #9
    ↓
-Phase 9  NixOS Server 最小配置与 disko
+Phase 8   NixOS Server 最小配置与 disko     #11
    ↓
-Phase 10 nixos-anywhere VM 安装测试
+Phase 9   nixos-anywhere VM 安装测试        #12
    ↓
-Phase 11 经批准的服务器正式迁移
+Phase 10  经批准的 Ubuntu→NixOS 正式替换    #13
    ↓
-Phase 12 业务恢复、加固与 v1 收尾
+Phase 11  最小 NixOS 稳定后引入 sops-nix    #10
+   ↓
+Phase 12  业务恢复、加固与 v1 收尾           #14
 ```
 
-默认按顺序推进。只有某阶段 Issue 明确证明无依赖并经维护者同意时，才允许并行。
+默认按顺序推进。macOS AI 配置审计 #67 不阻塞主线，但在审计完成前 AI 能力只留在 macbook。
 
-## 3. Phase 定义
+## 3. 已完成基线
 
 ### Phase 0 — 建立治理协议与项目文档
 
-**目标**
-
-让维护者和 Codex 对架构、语言、范围、验证、人工关卡和完成定义拥有同一套可审计协议。
-
-**允许修改**
-
-- `AGENTS.md`
-- `README.md`
-- `CONTEXT.md`
-- `docs/**`
-- `.github/**`
-
-**明确不做**
-
-- 不创建可部署的 `flake.nix`；
-- 不猜任何主机事实；
-- 不触碰真实机器。
-
-**完成标准**
-
-- 英文规范协议与中文译文一致；
-- 架构、模块边界、ADR、路线图、Issue/PR 模板齐全；
-- GitHub 中建立 v1 跟踪 Issue 和各 Phase Issue；
-- 维护者审阅并合并 Draft PR。
+建立规范、上下文、架构、ADR、Issue/PR 流程与人工关卡。
 
 ### Phase 1 — 主机盘点与最小 Flake 骨架
 
-**目标**
-
-收集三台机器的非秘密事实，确定逻辑 output 名称、用户名、平台、现有 Nix 安装和 state version，并建立只做 evaluation 的 Flake 骨架。
-
-**允许修改**
-
-- `flake.nix`、`flake.lock`
-- inventory 文档中的脱敏结果
-- 最小 `hosts/` 与 `modules/` 占位实现（必须可解释，不创建空壳目录）
-- formatter/checks
-
-**人工输入**
-
-维护者或机器本地 Codex 按 `docs/runbooks/host-inventory.md` 收集输出并脱敏。
-
-**验证**
-
-- `nix flake metadata`
-- `nix flake show`
-- 可用时执行 formatter/check；
-- 不激活任何配置。
-
-**完成标准**
-
-每个主机事实有来源；没有猜测的磁盘、网络或 state version；lock file 已提交。
+确认三个逻辑 output、平台和非秘密事实，建立顶层 Flake 与 lock file，不激活机器。
 
 ### Phase 2 — macOS 最小 nix-darwin 接入
 
-**目标**
-
-建立只包含 Nix 基础设置、主用户与最小安全配置的 macOS output，并可离线构建。
-
-**允许修改**
-
-- macOS host 模块
-- `modules/darwin/base.nix`
-- Flake 中的 Darwin output
-
-**明确不做**
-
-- 不迁移全部 dotfiles；
-- 不清理 Homebrew；
-- 不改大量 `system.defaults`。
-
-**验证**
-
-先 build；真实 Mac 上第一次 `darwin-rebuild switch` 是人工关卡，必须记录回滚和当前配置备份。
+建立 macbook 的 Lix、nix-darwin 与最小安全基线；真实 activation 经过单独人工批准。
 
 ### Phase 3 — 迁移 macOS Home Manager 用户层
 
-**目标**
-
-从最小集合开始声明 Git、shell、编辑器、tmux、direnv 和通用 CLI，建立未来共享层。
-
-**允许修改**
-
-- `modules/home/common/`
-- `modules/home/darwin/`
-- 静态 dotfiles 的最小集合
-- macOS Home Manager integration
-
-**明确不做**
-
-- 不一次接管整个 `$HOME`；
-- 不链接缓存、数据库、session 或会被程序写入的目录；
-- 不引入服务器服务。
-
-**验证**
-
-构建 macOS output，人工比较迁移前后 shell、Git、编辑器与 PATH。
+接入现有 Git、Shell、编辑器、终端与 CLI 配置，保留可变状态边界。
 
 ### Phase 4 — 声明 macOS 应用与系统偏好
 
-**目标**
-
-在基础稳定后，迁移 GUI 应用、Homebrew/cask/MAS 与明确需要的 `system.defaults`。
-
-**安全要求**
-
-- CLI 优先 Nixpkgs；
-- 初期不启用 destructive cleanup/zap；
-- 每项系统偏好应说明当前值、目标值和回滚方式。
-
-**完成标准**
-
-应用来源清晰，无意外卸载；Mac 重登/重启后关键行为经过人工验证。
+声明现有 GUI、Homebrew/MAS 与系统 defaults，不启用 destructive cleanup。
 
 ### Phase 5 — 接入现有 NixOS 工作站
 
-**目标**
+保留原始 `hardware-configuration.nix`、boot、filesystem 与 `system.stateVersion`，建立 GNOME/GDM 系统基线。
 
-把 NixOS 现有的硬件和系统配置原样纳入 host 层，再逐步抽出可复用 NixOS 模块。
+## 4. 当前与后续 Phase
 
-**必须保留**
-
-- `hardware-configuration.nix`
-- 原始 bootloader 与文件系统事实
-- 现有 `system.stateVersion`
-
-**验证顺序**
-
-1. build；
-2. 人工在目标机执行 `nixos-rebuild test`；
-3. 验证登录、网络、桌面、音频、GPU 与回滚；
-4. 再决定是否 `boot`/`switch`。
-
-### Phase 6 — 验证跨平台共享用户层
+### Phase 5.5 — 建立能力模块与主机组合新基线（#66）
 
 **目标**
 
-让 macOS 与 NixOS 工作站使用同一个 `home/common/`，把平台差异移入明确模块。
+修复 Phase 6 暴露的复用边界错误：把 macbook 现有配置封装成 host 可显式 import 的纵向能力，并撤回 nixbox 对完整 desktop bundle 的错误 WIP。
 
 **完成标准**
 
-- 共享模块不包含平台路径、GUI 或系统服务；
-- 两台机器都能 build；
-- Git、shell、编辑器和通用 CLI 行为一致或差异有文档；
-- 没有为了“共享”而堆积大量隐式平台判断。
+- 主机角色与能力矩阵固化；
+- host 不再使用 `common`、`desktop` 或泛化 Linux bundle 作为需求接口；
+- macbook 全量 package、稳定配置与软件所有权不回退；
+- Git/GitHub、Atuin 本地历史/同步、Fish/Zsh 主兼容路径拆开；
+- LocalSend 等跨层能力合同公开状态与安全影响；
+- macbook build 与未改变的 nixbox Phase 5 build 通过；
+- 不 activation、不触碰 server、不清理真实可变数据。
 
-### Phase 7 — Ubuntu Server 过渡期 Home Manager
-
-**目标**
-
-在不改变 Ubuntu boot、apt、systemd 系统服务和网络的前提下，让服务器用户使用共享的最小 CLI 环境。
-
-**允许范围**
-
-- standalone `homeConfigurations."<user>@<server>"`
-- `home/common/`、`home/linux.nix`、`home/server.nix`
-
-**明确不做**
-
-- 不用 Home Manager 接管 nginx、Docker daemon、数据库、防火墙或内核；
-- 不重装系统。
-
-### Phase 8 — 引入 sops-nix 与 age
+### Phase 6 — 按能力组合 nixbox 用户环境（#8）
 
 **目标**
 
-建立管理员 key、每机 recipient、`.sops.yaml`、加密文件和权限模型，不提交真实明文。
+按 `docs/architecture/capability-matrix.md` 的批准清单，把 nixbox 作为 macbook 的需求驱动子集组合；不复制完整桌面。
 
-**安全要求**
+**关键范围**
 
-- age 私钥独立离线备份；
-- PR 中只出现 public recipient 与加密内容；
-- 先用非生产示例验证解密路径与 owner/mode；
-- 不把 secret 插值为普通 Nix Store 字符串。
+- Fish 主 Shell、Atuin、Git、GitHub 协作、终端工具、Ghostty、Zed、Helix、Yazi、LocalSend、Obsidian、Chrome、Clash、Termius 与工作站开发运行时；
+- LocalSend NixOS adapter 显式增加 TCP/UDP 53317，并保留 Home Manager package 单一所有权；
+- 不安装 WezTerm、VS Code、Atuin Desktop 或已排除 GUI；
+- build 后停在独立 activation 人工关卡前。
 
-### Phase 9 — NixOS Server 最小配置与 disko
-
-**目标**
-
-根据真实服务器 inventory 编写最小可 SSH 的 NixOS output 与声明式磁盘布局。
-
-**首轮仅包含**
-
-- boot、磁盘和挂载；
-- 网络；
-- SSH、公钥、管理用户与 sudo；
-- 基础防火墙；
-- provider 必需设置；
-- 最小监测/救援能力。
-
-**明确不做**
-
-不同时迁移数据库、反向代理、业务容器和复杂存储方案。
-
-### Phase 10 — nixos-anywhere VM 安装测试
+### Phase 7 — Ubuntu→NixOS 迁移前置盘点（#9）
 
 **目标**
 
-在虚拟机中验证 Flake、disko、启动和 SSH 最小系统，形成正式迁移 runbook。
+只读收集当前 Ubuntu server 的 boot、disk、network、SSH、provider、service、data、backup、restore 与 rescue 事实。此阶段不建立 standalone Home Manager output，也不修改 server。
 
-**验证**
+**完成标准**
 
-- nixos-anywhere `--vm-test`；
-- 检查分区、挂载、用户、SSH 和启动；
-- 记录构建日志与已知差异；
-- 演练失败后的修复路径。
+- 目标 disk、boot mode、network model、SSH recovery path 与 provider console 有证据；
+- backup location、异机副本与 restore test 状态明确；
+- production service、container、volume、database 与入口清单脱敏记录；
+- 未知事实保持显式 blocker，不猜测。
 
-此阶段不对生产服务器运行安装。
-
-### Phase 11 — 经批准的服务器正式迁移
+### Phase 8 — NixOS Server 最小配置与 disko（#11）
 
 **目标**
 
-在完整人工关卡后，把 Ubuntu Server 安装为最小 NixOS，并确认可通过 SSH 与 provider console 恢复。
+根据 Phase 7 证据编写最小 NixOS output 与 disko，只包含 boot、disk、mount、network、SSH、管理用户、sudo、基础 firewall 与 provider 必需设置。
 
-**执行前必须全部满足**
+在 nixbox 原生 build server closure；不修改 production server，不恢复业务，不引入 Secret。
 
-- 独立备份完成；
-- 数据库原生 dump 已验证可读；
-- 至少一个异机副本；
-- provider snapshot/rescue/VNC 可用；
-- 目标磁盘和 boot mode 二次确认；
-- 网络、SSH key 与防火墙审阅；
-- VM test 通过；
-- 维护者在当前 Issue 明确批准执行窗口。
+### Phase 9 — nixos-anywhere VM 安装测试（#12）
 
-Agent 默认停在命令与检查清单准备完成处。实际清盘、重装、重启由维护者执行或实时监督。
+在 nixbox 的隔离 VM 中验证 Flake、disko、启动、用户与 SSH，形成正式迁移 runbook。此阶段不对 production server 运行安装，也不为构建扩大 OrbStack 或 macOS builder 边界。
 
-### Phase 12 — 业务恢复、加固与 v1 收尾
+### Phase 10 — 经批准的 Ubuntu→NixOS 正式替换（#13）
 
-**目标**
+只有 backup/restore、异机副本、provider console/rescue、target disk、boot mode、network、SSH key、firewall、VM test 与执行窗口全部确认后，才可在维护者实时监督下替换为最小 NixOS。
 
-先原样恢复现有业务，再把适合的服务分批声明化；验证备份、监控、更新和回滚。
+Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得当次批准。Agent 默认停在执行关卡前，不无人值守运行 disko、nixos-anywhere、format、reboot 或 production restore。
 
-**顺序**
+### Phase 11 — 最小 NixOS 稳定后引入 sops-nix 与 age（#10）
 
-1. 恢复原有容器/Compose 与数据；
-2. 验证业务功能和数据完整性；
-3. 再为简单服务创建独立迁移 Issue；
-4. 配置备份、恢复演练、监控和安全更新；
-5. 更新最终 runbook 与架构文档；
-6. 关闭 v1 Milestone。
+先用非 production secret 验证 recipient、解密、owner/mode、轮换与恢复，再接入真实服务。明文不得进入 Git、Issue、PR、log 或 Nix Store。
 
-**明确不做**
+### Phase 12 — 业务恢复、加固与 v1 收尾（#14）
 
-不在操作系统迁移同一变更中顺带升级数据库大版本或重写整个业务栈。
+先原样恢复已验证的 Compose/容器与数据，分别验收系统和业务；再通过独立 Issue 逐项声明化适合的服务，并完成 backup、restore drill、monitoring、update 与 rollback runbook。
 
-## 4. v1 之后的候选工作
+## 5. 控制链路与部署方向
 
-以下内容进入后续 Milestone，不作为 v1 必需条件：
+```text
+macbook ──SSH 管理/救援──▶ server
+   │
+   └──remote development──▶ nixbox ──build/test/push closure──▶ server
+```
 
-- Clan、deploy-rs 或 Colmena 等 fleet deployment 层；
-- flake-parts 或其他 Flake 组织框架；
-- 自动更新 PR 与二进制缓存；
-- impermanence、ZFS、LUKS 或更复杂的服务器存储；
-- 多用户、多服务器和灾备自动化。
+- nixbox 是 server closure 的主要构建与验证节点；
+- macbook→server 直连保证 nixbox 故障时仍有 production 控制面；
+- server 不保存 GitHub 协作凭据，不依赖 mutable checkout 自行构建；
+- 配置一致性提高复用与测试置信度，但不取消 host-specific 的 disk、boot、network、SSH、Secret、service 与 data 验证。
 
-每项候选工作必须以当前痛点和可量化收益为依据，不因为“社区流行”直接引入。
+## 6. v1 之后候选工作
 
-## 5. Phase Issue 必备字段
+Clan、deploy-rs、Colmena、flake-parts、impermanence、ZFS、LUKS、自动更新与额外 fleet abstraction 都必须从真实需求与可量化收益出发，另建 Issue 与 ADR；不得因为社区惯例盲目扩大边界。
 
-每个阶段 Issue 必须包括：
+## 7. Phase Issue 必备字段
 
-- 目标；
-- 背景与已知事实；
-- 前置依赖和阻塞项；
-- 允许修改；
-- 禁止修改；
-- 实施任务；
-- 验证命令；
-- 人工关卡；
-- 回滚方式；
-- 完成标准；
-- 简短、规范性的英文 Agent Contract。
-
-模板位于 `.github/ISSUE_TEMPLATE/implementation-phase.md`。
+每个阶段 Issue 必须包括目标、已知事实、依赖、允许/禁止修改、任务、验证、人工关卡、回滚、完成标准和英文 Agent Contract。模板位于 `.github/ISSUE_TEMPLATE/implementation-phase.md`。

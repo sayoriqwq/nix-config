@@ -72,7 +72,7 @@ in
   programs.mise = {
     enable = true;
     enableFishIntegration = true;
-    enableZshIntegration = true;
+    enableZshIntegration = lib.mkDefault false;
     package = pkgs.mise;
   };
 }

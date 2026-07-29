@@ -1,7 +1,6 @@
 {
   imports = [
     ./fish.nix
-    ./zsh.nix
   ];
 
   programs.lazygit = {

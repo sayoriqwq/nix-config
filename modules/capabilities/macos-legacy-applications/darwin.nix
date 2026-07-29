@@ -13,13 +13,11 @@
       "baidunetdisk"
       "balenaetcher"
       "chatgpt"
-      "clash-verge-rev"
       "claude-code"
       "easyfind"
       "erictli/tap/scratch"
       "figma"
       "fuse-t"
-      "google-chrome"
       "izip"
       "linear"
       "megasync"
@@ -33,7 +31,6 @@
       "steam"
       "telegram"
       "tencent-meeting"
-      "termius"
       "topnotch"
       "transmission"
       "vorssaint"
@@ -54,13 +51,7 @@
 
     onActivation = {
       autoUpdate = false;
-
-      # Existing apps and App Store receipts must not be upgraded during an
-      # ordinary system activation.
       upgrade = false;
-
-      # Old Nix-owned casks and explicitly retired software are removed only
-      # by a targeted, separately approved cleanup batch.
       cleanup = "none";
     };
   };

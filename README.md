@@ -5,27 +5,29 @@
 - 一台 macOS 工作站；
 - 一台 NixOS 工作站；
 - 一台当前运行 Ubuntu、最终迁移到 NixOS 的服务器；
-- 三台机器之间可共享但不过度耦合的用户环境。
+- 三台机器按真实需求显式选择的能力模块。
 
 ## 当前状态
 
-仓库目前处于 **Phase 3：迁移 macOS Home Manager 用户层**。
+仓库目前处于 **Phase 5.5：建立能力模块与主机组合新基线**。
 
-Phase 1 已完成三台主机的脱敏盘点与 Flake 骨架；Phase 2 已建立并由维护者激活 `darwinConfigurations.macbook`。Phase 3 从 Git、Fish、Helix、tmux、direnv 与通用 CLI 的最小集合开始，把 Home Manager 作为 nix-darwin module 集成。维护者已在 macOS 27 上完成首次 activation 与人工行为验收；chezmoi 重复所有权已进入独立 Draft PR，当前等待两边 PR 的最终审阅和人工合并。
+Phase 0–5 已完成治理、主机盘点、macbook 的 nix-darwin/Home Manager/应用接入，以及 nixbox 的原有 NixOS 系统基线。Phase 6 实施中发现 `common` / `desktop` / 平台 bundle 会让 nixbox 隐式继承 macbook 全量配置，因此先用 #66 把 macbook 重组为显式 capability imports，并保持 nixbox Phase 5 不变。
 
 ## 目标模型
 
 ```text
-                    Git repository + flake.lock
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-  macOS workstation     NixOS workstation        server
-  nix-darwin             NixOS modules       Ubuntu transition
-  Home Manager           Home Manager          → NixOS modules
-        │                     │                     │
-        └────────── portable Home Manager layer ───┘
+                  Git repository + flake.lock
+                             │
+                    capability modules
+                 ┌───────────┼───────────┐
+                 │           │           │
+             macbook       nixbox      server
+             全量组合       按需子集     headless 子集
+            nix-darwin      NixOS       NixOS 终态
+          + Home Manager + Home Manager + Home Manager
 ```
+
+当前 server 仍运行 Ubuntu，但不建立 standalone Home Manager 过渡层：按只读盘点、最小 NixOS、隔离 VM 测试、人工批准直接替换、Secret、业务恢复的顺序推进。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 
@@ -33,7 +35,7 @@ Git 只同步声明式配置。数据库、浏览器资料、服务数据、备�
 
 1. **一个 Flake，多台主机输出。** 每台机器只构建自己的 output。
 2. **用户层与系统层分离。** Home Manager 管用户环境；nix-darwin 和 NixOS Modules 管操作系统。
-3. **共享不等于复制。** 只共享真正跨平台的内容，硬件、启动、网络和平台应用保持主机专属。
+3. **能力组合不等于继承。** Host 显式 import 需求能力；基础配置留在能力内部，不使用 `common`、`desktop` 或泛化 Linux bundle 全选。
 4. **每个阶段一个 Issue、一个 Draft PR。** 当前阶段完成并经过人工验收后才进入下一阶段。
 5. **危险操作必须人工批准。** 磁盘、启动、网络、防火墙、远程重装、重启和数据迁移不能由 Agent 自主执行。
 6. **优先使用成熟模块。** 先查 Home Manager、NixOS 和 nix-darwin 现有选项，再考虑脚本或自定义模块。
@@ -44,6 +46,7 @@ Git 只同步声明式配置。数据库、浏览器资料、服务数据、备�
 - [项目上下文与术语](CONTEXT.md)
 - [整体架构](docs/architecture/overview.md)
 - [模块与目录边界](docs/architecture/module-boundaries.md)
+- [主机角色与能力矩阵](docs/architecture/capability-matrix.md)
 - [迁移路线图](docs/plans/migration-roadmap.md)
 - [主机盘点手册](docs/runbooks/host-inventory.md)
 - [macOS 最小 nix-darwin 接入手册](docs/runbooks/bootstrap-macos.md)
@@ -86,7 +89,12 @@ hosts/
   nixbox/
   server/
 modules/
+  capabilities/
   home/
+    capabilities/
+    common/       # internal primitives
+    desktop/      # internal primitives
+    darwin/       # internal primitives
   darwin/
   nixos/
 dotfiles/

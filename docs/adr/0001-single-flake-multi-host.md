@@ -17,7 +17,7 @@
 - 主机通过模块组合共享配置，不复制完整配置；
 - macOS 使用 `darwinConfigurations`；
 - NixOS 工作站与最终服务器使用 `nixosConfigurations`；
-- Ubuntu 过渡期使用 standalone `homeConfigurations`；
+- 当前 Ubuntu server 不建立过渡 output；完成盘点与验证后直接增加最终 `nixosConfigurations.server`；
 - `flake.nix` 只负责 inputs、outputs 和少量组合逻辑，具体配置进入模块。
 
 初期使用普通 Flake 代码，不立即引入 flake-parts、Blueprint 或自动主机发现框架。
@@ -27,7 +27,7 @@
 ### 正面
 
 - 所有机器共享同一个依赖锁和审计历史；
-- 可在一台机器上 build 另一台机器的配置（架构允许时）；
+- 可在合适的同架构节点 build 另一台机器的配置；nixbox 是 server 的主要预生产构建节点；
 - 共享边界通过 import 关系显式表达；
 - 更新 inputs 可以在一个 PR 中比较三台机器的影响；
 - Codex 只需理解一个仓库和一套治理协议。
