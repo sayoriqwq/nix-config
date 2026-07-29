@@ -1,16 +1,16 @@
 # Phase 6 nixbox 能力与状态边界
 
-本文记录 Issue #8 的声明结果、证据和仍需真实机器确认的关卡。它不表示配置已经在 `nixbox` 激活。
+本文记录 Issue #8 的声明结果、构建与真实机器激活证据，以及仍需人工完成的应用级验证。2026-07-29，维护者明确批准跳过独立 `dry-activate` / `test` 轮次，已将不可变 commit `3393e842b78c7580c39a99d0927514ed1ac1d3c1` 对应 generation 永久切换到 `nixbox`。
 
 ## 1. 已确认主机事实
 
 - output：`nixbox`
 - 平台：`x86_64-linux`
 - 用户与 home：`sayori`、`/home/sayori`
-- 当前默认 shell：Bash；Phase 6 声明的目标为 Fish
+- 当前默认 shell：Fish（Phase 6 激活后由 `/run/current-system/sw/bin/fish` 提供）
 - 当前稳定桌面：GNOME + GDM
 - `system.stateVersion`：保持 Phase 5 接入时的 `26.05`
-- Home Manager：此前未采用；本阶段为第一次接入
+- Home Manager：此前未采用；本阶段第一次接入并已成功激活
 
 上述事实来自 `docs/inventory/phase-1-hosts.md` 和 Phase 5 的真实机器验收，不以 macbook 配置推断 nixbox。
 
@@ -62,11 +62,12 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 
 以下事项在 build 前后都不由 Agent 推断：
 
-1. GNOME/GDM 仍与 Phase 5 基线一致；当前实机没有 failed unit；
-2. Termius 首次启动后的实际 user-data 路径与锁定 package 证据一致；
-3. Phase 5 `p5-test`、`p5-switch`、`p5-back` 遗留目标的精确绝对路径、类型、所有者和内容；
-4. Zed 从 macbook 到 nixbox 的 SSH remote workflow；
-5. LocalSend 在真实 LAN 上的发现和双向传输。
+1. Termius 首次启动后的实际 user-data 路径与锁定 package 证据一致；
+2. Phase 5 `p5-test`、`p5-switch`、`p5-back` 遗留入口的最终删除；
+3. Zed 从 macbook 到 nixbox 的 SSH remote workflow；
+4. LocalSend 在真实 LAN 上的发现和双向传输。
+
+激活后已确认：Home Manager unit 为 active、系统没有 failed unit、GNOME 用户 idle delay 为 0，AC/电池空闲动作均为 `nothing`，GDM `autoSuspend = false`；当前 firewall generation 包含 TCP/UDP `53317`。
 
 ### 6.1 空闲 suspend 实机证据
 
@@ -101,12 +102,14 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 
 首次 build 暴露出 Zed 能力的跨层缺口：macOS 已声明 ADR-0006 批准的 Zed Cachix，但 nixbox 只导入 Home Manager 配置，没有同时声明 NixOS daemon 的 substituter 与签名公钥，因此 Nix 按上游 Flake 的合法 fallback 开始源码编译 LiveKit/WebRTC。精确 store path 随后确认在 `https://zed.cachix.org` 命中、在 `cache.nixos.org` 不命中。
 
-修正后，`zed-editor/nixos.nix` 一次 import 同时选择 Home Manager Zed 配置及限定的官方缓存信任。当前 generation 尚未激活该 daemon 设置，因此 bootstrap 通过维护者运行的短入口临时 helper 完成签名成品导入；helper 使用后已从 `/tmp` 删除。最终配置的整机 build 只剩 18 个 Home Manager/NixOS 集成 derivation，没有继续源码编译 Zed 或 LiveKit。
+修正后，`zed-editor/nixos.nix` 一次 import 同时选择 Home Manager Zed 配置及限定的官方缓存信任。首次 switch 前的 bootstrap 通过维护者运行的短入口临时 helper 完成签名成品导入；最终配置的整机 build 只剩 18 个 Home Manager/NixOS 集成 derivation，没有继续源码编译 Zed 或 LiveKit。当前 generation 已激活该 daemon 设置，`nix show-config` 可见 `https://zed.cachix.org`。
 
-## 7. 激活与回滚关卡
+## 7. 激活结果与回滚
 
-构建成功不授权 activation。首次 `dry-activate`、`test`、登录 shell 切换以及遗留文件删除前，必须基于已推送的不可变 commit 向维护者展示精确命令与目标，并获得当次批准。
+维护者明确批准直接永久 `switch`，不再单独执行 `dry-activate` / `test`。切换后 `/run/current-system` 指向本阶段 output `/nix/store/xpr6pi8shz5n7dyyjbf1f2yfkwdansf1-nixos-system-nixos-26.05.20260719.fd14620`；`/run/booted-system` 在重启前仍指向 Phase 5 generation，这是 NixOS 的预期行为。
 
-人工验证至少包括：现有 console/SSH 回滚通道、Fish 登录与 PATH、Atuin 本地历史及同步、Git/GitHub 工具、Ghostty/Zed/Helix/Yazi、全部批准 GUI 应用，以及 LocalSend firewall 与互传。
+首次 switch 的系统部分已经生效，但 Home Manager unit 因远端一个未注册且内容不完整的 Flake source store path 失败。诊断通过同一路径在 macbook 校验成功、在 nixbox 报 `is not valid` 的确定性检查锁定原因；随后仅通过 Nix store 协议补齐该 source path 并重启 Home Manager，没有重复整套 switch。第二次激活返回 `status=0/SUCCESS`，系统 failed unit 为 0。两端临时 helper 均已删除。
 
-若 test 失败，重启回到当前永久 generation；若后续持久化失败，从 systemd-boot 选择 Phase 5 已知良好的 generation，再移除对应 capability adapter。回滚不删除任何应用可变数据。
+仍需人工完成的应用级验证包括：Atuin 同步、Ghostty/Zed/Helix/Yazi、全部批准 GUI 应用、Zed remote workflow，以及 LocalSend 真实 LAN 发现与双向互传。这些不阻塞声明与系统激活结果，但应在 Issue #8 完成总结中逐项记录。
+
+若后续发现系统级回归，从 systemd-boot 选择 Phase 5 已知良好的 generation；也可在当前可用 console/SSH 通道中切回上一 generation。回滚不删除任何应用可变数据。
