@@ -32,6 +32,7 @@
 | --- | --- | --- | --- |
 | 常开工作站 | NixOS 管 GDM；Home Manager 管 `sayori` 的 GNOME idle/power 设置 | GDM 不自动 suspend；登录与锁屏会话不因 idle 熄屏或 suspend | 不禁用手动 suspend，不改变合盖或电源键行为 |
 | 可移植 Shell | Home Manager 管 Fish 配置；NixOS 管 package 注册与用户登录 shell | `programs.fish.enable`；`sayori.shell = pkgs.fish` | Fish history 与 universal variables 只声明、不接管 |
+| Zed | Home Manager 管 Nightly package 与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
 | Clash Verge Rev | Home Manager 管 Linux package | 不启用 service、TUN、system proxy 或额外端口 | profiles、配置与日志保持可写 |
@@ -93,6 +94,14 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 已批准能力对应的 `~/.config/fish`、Atuin、Git、Lazygit、Helix、Ghostty、Zed 与 mise 路径当前均不存在，因此没有发现首次 Home Manager activation 的同名文件冲突。只存在 Phase 5 已记录的空 `~/.nix-profile` symlink；Nix 不会据此推断或删除任何用户 package。
 
 目标机不可达时，上述项保持为显式 blocker。不得因此猜路径、扩大端口、引入 OrbStack builder 或删除疑似遗留文件。
+
+### 6.3 原生 build 与 Zed 缓存 bootstrap
+
+2026-07-29 在真实 `x86_64-linux` nixbox 上完成原生整机 build；不可变 commit 对应的最终 output path 记录在 PR #69 的验证结果中，避免把会随仓库内容变化的临时 dirty-tree store path 固化为配置事实。
+
+首次 build 暴露出 Zed 能力的跨层缺口：macOS 已声明 ADR-0006 批准的 Zed Cachix，但 nixbox 只导入 Home Manager 配置，没有同时声明 NixOS daemon 的 substituter 与签名公钥，因此 Nix 按上游 Flake 的合法 fallback 开始源码编译 LiveKit/WebRTC。精确 store path 随后确认在 `https://zed.cachix.org` 命中、在 `cache.nixos.org` 不命中。
+
+修正后，`zed-editor/nixos.nix` 一次 import 同时选择 Home Manager Zed 配置及限定的官方缓存信任。当前 generation 尚未激活该 daemon 设置，因此 bootstrap 通过维护者运行的短入口临时 helper 完成签名成品导入；helper 使用后已从 `/tmp` 删除。最终配置的整机 build 只剩 18 个 Home Manager/NixOS 集成 derivation，没有继续源码编译 Zed 或 LiveKit。
 
 ## 7. 激活与回滚关卡
 

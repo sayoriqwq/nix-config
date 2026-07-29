@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
+    ../../modules/capabilities/zed-editor/nixos.nix
     ../../modules/capabilities/google-chrome/nixos.nix
     ../../modules/capabilities/clash-verge-rev/nixos.nix
     ../../modules/capabilities/termius/nixos.nix
@@ -57,7 +58,6 @@
         ../../modules/home/capabilities/development-runtime.nix
         ../../modules/home/capabilities/terminal-file-workflow.nix
         ../../modules/home/capabilities/helix-editor.nix
-        ../../modules/home/capabilities/zed-editor.nix
         ../../modules/home/capabilities/ghostty-terminal.nix
         ../../modules/home/capabilities/obsidian/linux.nix
         ../../modules/home/capabilities/shortcut-reference.nix

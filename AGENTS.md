@@ -83,6 +83,7 @@ Additional hard rules:
 - Never weaken SSH access or firewall safety to make a deployment easier.
 - Never introduce `flake-parts`, Blueprint, Clan, deploy-rs, Colmena, impermanence, ZFS, LUKS, or another major framework/storage design without a dedicated issue and accepted ADR.
 - Never run remote installation or destructive commands as part of unattended agent work.
+- Design maintainer-run commands for human input on the target machine. Never require the maintainer to type hashes, store paths, public keys, or long argument lists by hand. When an exact action cannot be expressed as a short command, transfer and verify a narrowly scoped temporary helper, expose a short entry command, and remove the helper after use.
 
 ## 7. Evidence and inventory
 
