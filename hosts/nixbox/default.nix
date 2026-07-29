@@ -1,5 +1,20 @@
 {
-  imports = [ ./hardware-configuration.nix ];
+  inputs,
+  username,
+  ...
+}:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../../modules/capabilities/always-on-workstation/nixos.nix
+    ../../modules/capabilities/portable-shell/nixos.nix
+    ../../modules/capabilities/zed-editor/nixos.nix
+    ../../modules/capabilities/google-chrome/nixos.nix
+    ../../modules/capabilities/clash-verge-rev/nixos.nix
+    ../../modules/capabilities/termius/nixos.nix
+    ../../modules/capabilities/localsend/nixos.nix
+  ];
 
   boot.loader = {
     systemd-boot.enable = true;
@@ -22,6 +37,40 @@
       LC_PAPER = "zh_CN.UTF-8";
       LC_TELEPHONE = "zh_CN.UTF-8";
       LC_TIME = "zh_CN.UTF-8";
+    };
+  };
+
+  home-manager = {
+    extraSpecialArgs = { inherit inputs; };
+    useGlobalPkgs = true;
+    useUserPackages = true;
+
+    users.${username} = {
+      imports = [
+        ../../modules/home/capabilities/terminal-toolkit.nix
+        ../../modules/home/capabilities/terminal-history.nix
+        ../../modules/home/capabilities/workstation-history-sync.nix
+        ../../modules/home/capabilities/git-foundation.nix
+        ../../modules/home/capabilities/github-collaboration.nix
+        ../../modules/home/capabilities/nix-operations.nix
+        ../../modules/home/capabilities/interactive-shell-assistance.nix
+        ../../modules/home/capabilities/host-observability.nix
+        ../../modules/home/capabilities/development-runtime.nix
+        ../../modules/home/capabilities/terminal-file-workflow.nix
+        ../../modules/home/capabilities/helix-editor.nix
+        ../../modules/home/capabilities/ghostty-terminal.nix
+        ../../modules/home/capabilities/obsidian/linux.nix
+        ../../modules/home/capabilities/shortcut-reference.nix
+      ];
+
+      home = {
+        inherit username;
+        homeDirectory = "/home/${username}";
+
+        # This is nixbox's first Home Manager adoption. Keep the initial
+        # value unchanged after activation.
+        stateVersion = "26.05";
+      };
     };
   };
 

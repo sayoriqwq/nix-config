@@ -83,6 +83,7 @@ Agent 修改文件前必须依次阅读：
 - 不得为了部署方便而削弱 SSH 或防火墙安全。
 - 未经独立 Issue 与已接受 ADR，不得引入 flake-parts、Blueprint、Clan、deploy-rs、Colmena、impermanence、ZFS、LUKS 或其他重大框架/存储设计。
 - 无人值守的 Agent 不得执行远程重装或破坏性命令。
+- 必须按维护者在目标机器上的实际输入能力设计人工命令。不得要求维护者手打 hash、Nix store path、公钥或长参数列表。精确动作无法写成短命令时，Agent 必须安全传输并校验范围收窄的临时 helper，只向维护者提供短入口，并在使用后删除 helper。
 
 ## 7. 证据与盘点
 

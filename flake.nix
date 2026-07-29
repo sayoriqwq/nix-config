@@ -50,11 +50,15 @@
       };
 
       nixosConfigurations.nixbox = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs self; };
+        specialArgs = {
+          inherit inputs self;
+          username = "sayori";
+        };
         modules = [
           ./hosts/nixbox
           ./modules/nixos/base.nix
           ./modules/nixos/desktop.nix
+          home-manager.nixosModules.home-manager
         ];
       };
 
