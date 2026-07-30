@@ -49,7 +49,6 @@
       imports = [
         ../../modules/home/capabilities/terminal-toolkit.nix
         ../../modules/home/capabilities/terminal-history.nix
-        ../../modules/home/capabilities/workstation-history-sync.nix
         ../../modules/home/capabilities/git-foundation.nix
         ../../modules/home/capabilities/github-collaboration.nix
         ../../modules/home/capabilities/nix-operations.nix

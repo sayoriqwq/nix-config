@@ -94,7 +94,8 @@ Phase 12  业务恢复、加固与 v1 收尾           #14
 
 **关键范围**
 
-- Fish 主 Shell、Atuin、Git、GitHub 协作、终端工具、Ghostty、Zed、Helix、Yazi、LocalSend、Obsidian、Chrome、Clash、Termius 与工作站开发运行时；
+- Fish 主 Shell、Atuin 本地历史、Git、GitHub 协作、终端工具、Ghostty、Zed、Helix、Yazi、LocalSend、Obsidian、Chrome、Clash、Termius 与工作站开发运行时；
+- nixbox 不参与 Atuin 跨设备同步，不接收 macbook 的 key、session 或历史数据库；
 - LocalSend NixOS adapter 显式增加 TCP/UDP 53317，并保留 Home Manager package 单一所有权；
 - 不安装 WezTerm、VS Code、Atuin Desktop 或已排除 GUI；
 - build 后停在独立 activation 人工关卡前。
