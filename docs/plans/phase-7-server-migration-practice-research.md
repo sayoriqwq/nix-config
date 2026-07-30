@@ -172,7 +172,7 @@ Phase 8 的 server output 应分成两个互不倒置的层次：
 - 冻结已经在 nixbox 通过 VM test 的 commit 与 `flake.lock`；提前构建 kexec、disko 与 system closure；
 - 从可信 SSH 再次核对 BIOS、唯一 disk stable alias/容量、单一 `virtio_net` NIC、静态双栈 route/DNS、RAM 与 kexec runtime；任何差异都停止；
 - macbook 直连 SSH、Clash `/32` 排除、nixbox 网络与两把 key 认证均需在窗口开始前成功；
-- 实际连接 Contabo VNC，而不只是看到“enabled”；现场确认 Rescue 入口可用，临时凭据不记录；
+- 实际连接 Contabo VNC，而不只是看到“enabled”；在单独批准的 preflight 窗口短暂启动 Rescue，确认维护者可登录且目标磁盘可见，再退出 Rescue、从磁盘启动回 Ubuntu 并重新验证可信 SSH；临时凭据不记录；
 - 屏幕上明确展示 target host、stable disk alias、commit 与将运行的 command，维护者再给当次批准。
 
 #### B. 安装
