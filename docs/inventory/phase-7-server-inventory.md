@@ -88,7 +88,7 @@ Contabo 当前官方文档给出以下 provider 能力：
 - VNC 当前已启用，VNC Information 与现场取用 VNC Password 的入口可见；本次没有打开、保存或记录凭据，也没有切换 VNC 状态；
 - Reinstall 页面明确提示会删除全部数据；可见标准镜像列表没有 NixOS，但 Advanced/Custom Image Installation 支持为 Admin 选择 SSH public key 与 Cloud-Init template；
 - Linux-based Rescue System 入口真实存在，需要现场设置密码才能启动；本次没有填写密码、启动 Rescue 或触发 reboot；
-- IP Management 只给出已分配地址和 provider 通用 DNS 信息，未给出完整 prefix/gateway。所缺值已通过无 `sudo` 的 guest runtime 查询复核，只保存在仓库外私有文档。
+- IP Management 只给出已分配地址和 provider 通用 DNS 信息，未给出完整 prefix/gateway。所缺 routing facts 已通过无 `sudo` 的 guest runtime 查询复核，并经维护者批准记录在 2.1；账号与 VNC 等私有控制面事实仍只保存在仓库外私有文档。
 
 据此，失去普通 SSH 后的恢复顺序可定义为：先用已启用的 VNC 观察 boot/network 状态；若 guest 无法修复，再经当次批准启动 Rescue；只有在明确 destructive target 和 SSH/network 安装输入且取得正式批准后，才进入 Reinstall。面板核验本身未执行上述动作。
 
