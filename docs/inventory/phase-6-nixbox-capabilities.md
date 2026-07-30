@@ -1,6 +1,6 @@
 # Phase 6 nixbox 能力与状态边界
 
-本文记录 Issue #8 的声明结果、构建、真实机器运行态与仍待完成的持久 generation 关卡。2026-07-29，维护者明确批准跳过独立 `dry-activate` / `test` 轮次，不可变 commit `3393e842b78c7580c39a99d0927514ed1ac1d3c1` 对应 closure 已进入 `nixbox` 的当前运行态。2026-07-30 的复核发现该 closure 没有注册到正式 system profile，因此此前的“永久切换”结论不成立；Issue #8 已重新打开，修正后的 closure 必须通过独立人工关卡注册为可启动 generation。
+本文记录 Issue #8 的声明结果、构建、真实机器运行态与持久 generation 验证。2026-07-29，维护者明确批准跳过独立 `dry-activate` / `test` 轮次，不可变 commit `3393e842b78c7580c39a99d0927514ed1ac1d3c1` 对应 closure 已进入 `nixbox` 的当前运行态。2026-07-30 的复核发现该 closure 没有注册到正式 system profile，因此此前的“永久切换”结论不成立；Issue #8 随即重新打开。修正后的 commit `2b1b0c3e8b62b3197efb98d9adc6f818b472f4fe` 已在真实 nixbox 原生构建，并在逐项人工批准下注册为 generation 6、设为 boot default、完成重启与三路径一致性验证。
 
 ## 1. 已确认主机事实
 
@@ -47,7 +47,7 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 | LocalSend | `~/.local/share/org.localsend.localsend_app` | 锁定 LocalSend 源码的 Linux application ID 为 `org.localsend.localsend_app`；锁定 `shared_preferences_linux` 通过 `path_provider_linux` 写入 XDG data home/application ID。 |
 | Google Chrome | `~/.config/google-chrome`、`~/.cache/google-chrome` | Chromium 官方 Linux user-data/cache 路径规则；浏览器可通过环境或参数覆盖，当前声明记录默认值。 |
 | Clash Verge Rev | `~/.local/share/io.github.clash-verge-rev.clash-verge-rev` | 锁定源码定义同名 `APP_ID`，并使用 Tauri Linux data directory；Nix 不管理目录内容。 |
-| Termius | `~/.config/Termius` | 解包锁定的 9.36.2 Snap 后，根 `package.json` 的应用名为 `Termius`；主进程读取 Electron 默认 `userData`，且没有 `setPath("userData", ...)` 覆盖。结合 Electron Linux 默认规则得到该路径；首次启动仍核对实际落盘结果。 |
+| Termius | `~/.config/Termius` | 解包锁定的 9.36.2 Snap 后，根 `package.json` 的应用名为 `Termius`；主进程读取 Electron 默认 `userData`，且没有 `setPath("userData", ...)` 覆盖。结合 Electron Linux 默认规则得到该路径，实机首次启动已确认实际落盘位置一致。 |
 | Obsidian | `~/.config/obsidian` | 现有 Linux capability 声明；vault 位置由用户选择，完全位于 Nix 配置之外。 |
 | Zed | `~/.config/zed` | Nix 只 seed 缺失的基线文件，live settings、extensions 与 session 保持可写。 |
 | Atuin | `~/.local/share/atuin` | 数据库、key 与 daemon state 属于每台机器的可变状态；nixbox 不登录 macbook 的账号、不接收其 key/session/database，也不参与跨设备同步。 |
@@ -69,12 +69,14 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 
 LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计数增长且包未到达 Mac `en0` 抓包点；没有证据表明 NixOS firewall 或本仓库 adapter 阻断该路径。当前以 favorite/手动地址作为稳定通道，不为自动发现扩大仓库、firewall 或 macOS privacy 边界。
 
-仍待完成的人工关卡只有：
+随后完成了全部持久关卡：
 
-1. 构建移除 nixbox Atuin 同步能力后的修正 closure，并把它注册到正式 system profile/boot default；
-2. 验证 running system、system profile 与 booted system 一致后，删除 Phase 5 `p5-test`、`p5-switch`、`p5-back` 三个精确遗留入口。
+1. 在真实 nixbox 原生构建移除 Atuin 同步能力后的修正 closure；
+2. 经单独批准，把该 closure 注册为 `system-6-link` 并执行 `switch-to-configuration boot`；
+3. 经单独批准重启，确认 running system、booted system、system profile 与 systemd-boot 当前条目都进入 generation 6；
+4. 展示三个 Phase 5 临时路径并取得当次删除批准后，精确删除 `p5-test`、`p5-switch` 与 `p5-back`，不删除 `system-5-link`。
 
-当前运行态已确认：Home Manager unit 为 active、系统没有 failed unit、GNOME 用户 idle delay 为 0，AC/电池空闲动作均为 `nothing`，GDM `autoSuspend = false`；active firewall generation 包含 TCP/UDP `53317`。
+最终运行态已确认：Home Manager unit 为 active、系统没有 failed unit、GNOME 用户 idle delay 为 0，AC/电池空闲动作均为 `nothing`，GDM `autoSuspend = false`；active firewall generation 包含 TCP/UDP `53317`。Atuin 运行态配置只有本地 key、daemon 与本地搜索模式，没有 `sync` 或 `records`。
 
 ### 6.1 空闲 suspend 实机证据
 
@@ -93,15 +95,13 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 
 | 路径 | 类型与目标 | 当前判断 |
 | --- | --- | --- |
-| `/home/sayori/p5-test` | symlink，指向 Phase 5 booted closure 的 `switch-to-configuration` | 与 `p5-back` 重合；在 Phase 6 generation 尚未持久注册时仍承担临时回滚入口 |
-| `/home/sayori/p5-back` | symlink，经 `/run/booted-system` 指向 Phase 5 booted closure | 与 `p5-test` 重合；待修正 generation 启动验证后才失去回滚价值 |
-| `/home/sayori/p5-switch` | mode 0700 的脚本，固定 Phase 5 commit `6c541608d44bfbe000284a73f07b7918319044c4` | 只保留旧 switch 快捷入口，不是 generation 本身 |
+| `/home/sayori/p5-test` | symlink，指向 Phase 5 closure 的 `switch-to-configuration` | generation 6 重启验证后，经当次批准删除 |
+| `/home/sayori/p5-back` | symlink，经 `/run/booted-system` 指向当前 booted closure | generation 6 重启验证后，经当次批准删除 |
+| `/home/sayori/p5-switch` | mode 0700 的脚本，固定 Phase 5 commit `6c541608d44bfbe000284a73f07b7918319044c4` | 存在误部署旧 commit 风险，经当次批准删除 |
 
-三者都没有删除。只有修正后的 Phase 6 closure 已注册到 system profile、成为 boot default 并完成重启验证后，才能再次判断其回滚价值；删除前仍须向维护者展示三个精确绝对路径与命令并获得当次批准，不使用通配符。
+删除使用三个精确绝对路径，不使用通配符或递归参数；删除后分别确认文件与 symlink 均不存在。正式 `/nix/var/nix/profiles/system-5-link` 继续指向 Phase 5 closure，系统级回滚能力没有因用户目录清理而丢失。
 
 首次 Home Manager activation 前没有发现已批准能力的同名文件冲突。激活与首启后，各应用按预期创建了自己的可写状态；这些内容仍不由 Nix 接管。Phase 5 已记录的空 `~/.nix-profile` symlink 也不会被据此推断或删除。
-
-目标机不可达时，上述项保持为显式 blocker。不得因此猜路径、扩大端口、引入 OrbStack builder 或删除疑似遗留文件。
 
 ### 6.3 原生 build 与 Zed 缓存 bootstrap
 
@@ -111,7 +111,9 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 
 修正后，`zed-editor/nixos.nix` 一次 import 同时选择 Home Manager Zed 配置及限定的官方缓存信任。首次 switch 前的 bootstrap 通过维护者运行的短入口临时 helper 完成签名成品导入；最终配置的整机 build 只剩 18 个 Home Manager/NixOS 集成 derivation，没有继续源码编译 Zed 或 LiveKit。当前 generation 已激活该 daemon 设置，`nix show-config` 可见 `https://zed.cachix.org`。
 
-## 7. 运行态、generation 注册缺口与回滚
+2026-07-30，真实 nixbox 针对修正 commit `2b1b0c3e8b62b3197efb98d9adc6f818b472f4fe` 再次完成原生整机 build，输出 `/nix/store/lribk269i2n29vxd964n7rf2i2vdfh4l-nixos-system-nixos-26.05.20260719.fd14620`。该轮只构建 9 个 Atuin、Home Manager 与系统集成 derivation，没有重新编译 Zed。
+
+## 7. 运行态、generation 修复与回滚
 
 维护者于 2026-07-29 批准跳过独立 `dry-activate` / `test`，直接切换 Phase 6 closure。`/run/current-system` 随后指向 `/nix/store/xpr6pi8shz5n7dyyjbf1f2yfkwdansf1-nixos-system-nixos-26.05.20260719.fd14620`，系统与 Home Manager 行为已按前文完成验证。
 
@@ -121,4 +123,8 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 
 诊断期间，`nix-store -q --roots` 在查询 root 时自动移除了已经失效的临时 auto-GC-root symlink 与 temproot；没有删除有效 closure、配置或用户数据。后续不再把该命令当作纯只读探针。
 
-修复必须使用新构建的、已移除 nixbox Atuin 同步能力的 closure，在维护者当次批准下完成 system profile 注册与 `switch-to-configuration boot`/等价持久切换。修复前不要重启；修复后先验证 running/profile/boot default，再单独批准重启。Phase 5 generation 与三个快捷入口在重启验收前继续保留，回滚不删除任何应用可变数据。
+修复使用前述新 closure。经维护者当次批准，校验过 SHA-256 的短 helper 按 `nixos-rebuild-ng` 的原生顺序执行 `nix-env -p /nix/var/nix/profiles/system --set` 与新 closure 的 `switch-to-configuration boot`；journal 记录该 transient unit 成功退出。system profile 随后成为 `system-6-link`，临时 helper 已删除。
+
+维护者再次单独批准重启后，`/run/current-system`、`/run/booted-system` 与 `/nix/var/nix/profiles/system` 全部解析到 `/nix/store/lribk269i2n29vxd964n7rf2i2vdfh4l-nixos-system-nixos-26.05.20260719.fd14620`，systemd-boot 当前条目为 `nixos-generation-6.conf`。系统状态为 `running`、failed unit 为 0，Home Manager 在本次 boot 成功激活。
+
+Phase 5 的三个用户目录快捷入口已在单独批准后精确删除；正式 `system-5-link` 仍保留并指向 Phase 5 closure，作为系统级回滚路径。该修复与清理均未删除应用可变数据。
