@@ -58,7 +58,7 @@ LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5
 
 真实 nixbox 没有既有 Home Manager 配置，因此没有可保留的历史值。仓库锁定 Home Manager release 26.05，本阶段第一次采用 `home.stateVersion = "26.05"`，并要求首次激活后保持不变。它不是根据当前 NixOS 版本自动升级出的值。
 
-## 6. 实机验证与待完成关卡
+## 6. 实机验证与持久关卡
 
 2026-07-30 已由维护者在真实机器完成以下使用层验证：
 
