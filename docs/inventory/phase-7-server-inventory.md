@@ -1,6 +1,6 @@
 # Phase 7 Server 迁移前置盘点
 
-本文记录 Issue #9 的脱敏证据、维护者决策、未知事实与 Phase 8 阻塞项。当前阶段只盘点 Ubuntu source state，不建立 `nixosConfigurations.server`、standalone Home Manager、`disko` 或生产服务声明，也不修改 server。
+本文记录 Issue #9 的脱敏证据、维护者决策、未知事实与 Phase 8 阻塞项。Phase 8–10 的低风险设计结论另见 [`docs/plans/phase-7-server-migration-practice-research.md`](../plans/phase-7-server-migration-practice-research.md)。当前阶段只盘点 Ubuntu source state，不建立 `nixosConfigurations.server`、standalone Home Manager、`disko` 或生产服务声明，也不修改 server。
 
 ## 1. 证据与批准边界
 
@@ -17,12 +17,14 @@
 | --- | --- | --- |
 | 角色 / provider | 逻辑 output 为 `server`；Contabo KVM 虚拟服务器；当前 Ubuntu，目标 Headless NixOS | provider 与当前实例的 Reinstall、Rescue、VPS Control、VNC 入口均已在面板实时确认 |
 | OS / 架构 | Ubuntu 24.04.3 LTS、`x86_64`、Linux 6.8.0-90-generic；未安装 Nix | 已实时确认 |
+| RAM / kexec | 约 8 GiB RAM 且无 swap；当前 kernel 启用 `KEXEC` / `KEXEC_FILE`，运行态未禁用 kexec | 满足 `nixos-anywhere` 当前官方 target requirements；正式窗口仍须重复 preflight |
 | 当前用户 | SSH alias 使用 `root`；UID 0、home `/root`、shell `/bin/bash` | 只记录 source state；未来 NixOS 管理用户不从 root 模型推断 |
 | boot | 运行态未暴露 EFI firmware，记录为 BIOS；`grub-pc` 已安装；磁盘仍有已挂载的 vfat `/boot/efi`，并存在 EFI 相关 package | 当前启动证据指向 BIOS；EFI 分区可能是镜像残留，Phase 8 不得据其猜 UEFI |
-| disk / filesystem | 唯一可写虚拟磁盘 `/dev/sda`，约 75 GiB；ext4 `/`、独立 ext4 `/boot`、vfat `/boot/efi`；另有只读虚拟光驱 | `/dev/sda` 是唯一 target 候选；维护者接受其内容全部丢失，但正式 target 批准留到安装 Issue |
+| disk / filesystem | 唯一可写虚拟磁盘 `/dev/sda`，约 75 GiB；稳定 QEMU SCSI `by-id` 指向该磁盘；ext4 `/`、独立 ext4 `/boot`、vfat `/boot/efi`；另有只读虚拟光驱 | Phase 8 的 disko/GRUB 目标应使用 stable `by-id`；正式执行仍需核对 alias、容量、唯一性与底层 device 并取得当次批准 |
+| storage driver | Virtio SCSI controller；当前 kernel 内建 Virtio PCI/SCSI 与 SCSI disk 支持 | Phase 8 initrd 与 Phase 9 BIOS VM 必须覆盖同一启动链路，不能从空 `lsmod` 猜 driver 不需要 |
 | 容量 | `/` 约 72 GiB，盘点时使用约 38%；`/boot` 与 `/boot/efi` 均有充足剩余空间 | 只作 source-state 摘要，不形成未来分区设计 |
-| network | `eth0` 同时承载 IPv4/IPv6 默认路由，均为静态模型；systemd-networkd、cloud-init Netplan 与 systemd-resolved 参与配置 | address、prefix、gateway、route 与 DNS 已实时复核并保存为仓库外私有 Phase 8 输入；本文只记录模型 |
-| SSH | `ssh.socket` 与 `ssh.service` active；public-key 登录实时成功；当前还允许 root 与密码认证，keyboard-interactive 已关闭 | 当前 macbook 管理链路已验证；未来最小 NixOS 不应无意复制宽松 source policy |
+| network | 单一 `virtio_net` NIC；当前名为 `eth0`，但 udev 给出其他 predictable-name 候选；同时承载静态 IPv4/IPv6 默认路由；systemd-networkd、cloud-init Netplan 与 systemd-resolved 参与配置 | address、prefix、gateway、route 与 DNS 已保存为仓库外私有输入；Phase 8 不能硬编码 `eth0`，推荐按 driver 匹配并断言单 NIC |
+| SSH | `ssh.socket` 与 `ssh.service` active；public-key 登录实时成功；root authorized-keys mode/owner 正确；`nixos-anywhere` bootstrap 所需的 `tar` 与 `setsid` 可用；当前还允许 root 与密码认证，keyboard-interactive 已关闭 | 当前 macbook 管理链路与 bootstrap 前置工具已验证；未来最小 NixOS 不应无意复制宽松 source policy |
 | firewall | UFW unit 虽 enabled，但 `ufw status` 为 inactive，运行态规则数为 0 | 撤回 Phase 1 的“UFW 已启用”摘要；Phase 8 必须显式设计最小 firewall，不能假定已有保护 |
 | 健康 | `cloud-init.service`、`nginx.service` 与 `systemd-networkd-wait-online.service` failed；cloud-init 总状态为 error | 3 个 failed units 已实时确认；现有业务不要求修复或迁移 |
 | service / ports | Docker、containerd 与 1Panel active；PM2 root unit inactive；SSH、DNS、HTTP/HTTPS 与若干高位 TCP 端口监听 | 只用于确认将被清除的 source workload；高位端口不在公开 inventory 展开 |
@@ -86,16 +88,29 @@ Contabo 当前官方文档给出以下 provider 能力：
 
 因此当前仓库没有提前实施 Phase 8，也没有需要在 Phase 7 回滚的越界 server 配置。
 
+2026-07-30 又基于一手资料与新增只读硬件证据完成 [`Phase 7 server migration practice research`](../plans/phase-7-server-migration-practice-research.md)。调研推荐从现有 Ubuntu 经 `nixos-anywhere` kexec 直接安装，以 nixbox local build/push、BIOS GPT/disko、static networkd、双管理 key、临时 key-only root break-glass、保留现有 SSH host identity 和 Contabo VNC → Rescue → Reinstall 逐级恢复作为 Phase 8–10 基线；这些仍是待维护者确认的设计，不是生产执行授权。
+
 ## 6. 已执行的只读采集
 
 实际命令通过 macbook 的现有 SSH alias 执行；下面以 `<server-alias>` 隐去本地连接名称：
 
 ```text
 ssh -o BatchMode=yes -o ConnectTimeout=8 <server-alias> true
+command -v tar
+command -v setsid
+stat -c <authorized-keys-mode-and-owner> /root/.ssh/authorized_keys
 systemd-detect-virt
 test -d /sys/firmware/efi
+free -b
+grep <kexec-and-virtio-options> /boot/config-<running-kernel>
+cat /proc/sys/kernel/kexec_load_disabled
 lsblk -b -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS,MODEL -e 7
+find -L /dev/disk/by-id /dev/disk/by-path -samefile /dev/sda
+readlink -f /sys/class/block/sda/device/driver
+lspci -nnk
 findmnt -n -o TARGET,SOURCE,FSTYPE,OPTIONS --target <system-mount>
+readlink -f /sys/class/net/eth0/device/driver
+udevadm info --query=property --path=/sys/class/net/eth0
 ip -4 route show default
 ip -6 route show default
 ip -brief address show dev eth0
@@ -125,11 +140,13 @@ docker inspect <running-container>
 
 Provider 控制面、静态网络私有输入与 macbook 的 Clash 直连恢复说明已完成。以下项目仍需在 Phase 8 实现或正式替换前关闭：
 
-1. Phase 8 必须明确正式替换使用的 SSH public key、首次登录用户与 root/sudo 恢复路径；不能只依赖当前 Ubuntu root 登录行为；
-2. `/dev/sda` 已有唯一 target 候选证据，但任何真实格式化/安装 Issue 仍须再次给出精确 destructive target 并取得当次批准；当前“数据可全部丢失”不是格式化授权；
-3. nixbox → server 的 TCP 22 已可达，但仍需建立经 host-key 验证的 SSH authentication/deployment 方式；本阶段不接受 host key、不创建 key 或修改 SSH；
-4. Phase 8 需基于私有网络证据生成不泄露实际地址的 NixOS 声明，并由维护者在提交前确认 host-specific 值的处理方式；
-5. 正式替换 runbook 必须把 VNC → Rescue → Reinstall 的升级顺序与每一步的实时人工批准写清楚，且不得保存临时 VNC/Rescue 密码。
+1. Phase 8 必须由维护者确认正式管理用户、macbook maintenance public key、nixbox 专用 deploy key、passwordless sudo 与首次 key-only root break-glass 设计；不能只依赖当前 Ubuntu root 登录行为；
+2. 维护者已说明 public IP 本身不构成顾虑，但 Issue #13 仍禁止 IP 进入 Git。进入 Phase 8 前必须明确批准 public route facts 入库，或先通过 ADR 建立版本化 private flake input；不得使用 untracked/impure 现场注入；
+3. nixbox → server 的 TCP 22 已可达，但仍需经 macbook 可信路径 pin host identity 并建立专用 SSH authentication/deployment key；本阶段不接受 host key、不创建 key 或修改 SSH；
+4. 当前无 host identity 泄露证据。调研推荐首次安装保留现有 SSH host keys，以减少首启访问变量；该策略和 Issue #13 的“新 host key”措辞仍需维护者确认；
+5. stable disk alias 已指向唯一 `/dev/sda`，但任何真实格式化/安装 Issue 仍须再次给出 alias、底层 device、容量与 exact command，并取得当次批准；当前“数据可全部丢失”不是格式化授权；
+6. roadmap 与 Issue #13 仍把备份/恢复测试列为强制条件，必须在 Phase 10 前改成维护者已记录的数据丢失 waiver 与“重新建立最小 NixOS”的失败恢复目标；
+7. 正式替换 runbook 必须把 VNC → Rescue → Reinstall 的升级顺序与每一步的实时人工批准写清楚，且不得保存临时 VNC/Rescue 密码。
 
 备份、异机副本、恢复测试、现有业务恢复和停机窗口不再是未知 blocker：维护者已明确接受无备份、全量数据丢失、无限停机且不恢复现有业务。该 waiver 只缩小数据恢复范围，不放宽 disk、boot、network、SSH 与 provider rescue 关卡。
 
@@ -139,5 +156,6 @@ Provider 控制面、静态网络私有输入与 macbook 的 Clash 直连恢复�
 - macbook → server 的 OpenSSH 与 Termius 链路已修复并验证；
 - server 仍未发生配置、服务、package、disk、boot、network、firewall、SSH 或 reboot 变更；
 - 当前实例的 provider 控制面与静态双栈网络私有输入已完成实证；
-- Phase 8 仍需完成正式 SSH key/用户/recovery 设计、host-specific 网络声明边界与 nixbox 的 host-key/authentication 部署链路；真实 target disk 操作继续保留当次批准关卡；
+- 当前实机满足 `nixos-anywhere` 的架构、RAM 与 kexec 基本条件，并已有 stable disk identity、Virtio storage/network driver 证据；
+- Phase 8 仍需由维护者确认 public route facts、SSH key/用户/root recovery、host identity 与 waiver 对齐，并建立 nixbox 的 host-key/authentication 部署链路；真实 target disk 操作继续保留当次批准关卡；
 - 本文是 inventory，不声称 NixOS build、VM install 或 production replacement 已通过。
