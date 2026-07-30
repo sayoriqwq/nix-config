@@ -150,7 +150,7 @@ docker network ls
 docker inspect <running-container>
 ```
 
-采集脚本只输出必要字段；network address、gateway、DNS value、SSH key、容器 path、环境变量与 secret 均未进入仓库。Docker inspect 只提取 Compose project 和 mount 类型，没有读取 mount source 或环境变量。
+采集脚本只输出必要字段；维护者批准版本化的 public address、prefix、gateway 与 DNS 仅以上文结论进入仓库，原始网络输出、SSH key、容器 path、环境变量与 secret 均未进入仓库。Docker inspect 只提取 Compose project 和 mount 类型，没有读取 mount source 或环境变量。
 
 ## 7. Phase 8 前的剩余关卡
 
@@ -169,7 +169,7 @@ Provider 控制面、public routing facts、SSH/recovery 设计与 macbook 的 C
 - Phase 7 已取得当前 OS、虚拟化、boot、disk、network model、SSH、firewall、service、port、container 与 data ownership 的实时只读证据；
 - macbook → server 的 OpenSSH 与 Termius 链路已修复并验证；
 - server 仍未发生配置、服务、package、disk、boot、network、firewall、SSH 或 reboot 变更；
-- 当前实例的 provider 控制面与静态双栈网络私有输入已完成实证；
+- 当前实例的 provider 控制面与获准版本化的 public routing facts 已完成实证；
 - 当前实机满足 `nixos-anywhere` 的架构、RAM 与 kexec 基本条件，并已有 stable disk identity、Virtio storage/network driver 证据；
 - public routing facts、`sayori`/双 key/root recovery、保留 host identity 与 source-data waiver 已获维护者批准；无需建立第二个本地配置仓库；
 - Phase 8 仍需实现并 build 上述设计，建立 nixbox 的严格 host-key/authentication 部署链路；真实 target disk 操作继续保留当次批准关卡；

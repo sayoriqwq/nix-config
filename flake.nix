@@ -15,6 +15,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    disko = {
+      url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ADR-0006: consume only the upstream Nightly package output. Zed keeps
     # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
     zed.url = "github:zed-industries/zed";
@@ -27,6 +32,7 @@
       nix-darwin,
       nixpkgs,
       nixpkgs-darwin,
+      disko,
       ...
     }:
     let
@@ -58,6 +64,20 @@
           ./hosts/nixbox
           ./modules/nixos/base.nix
           ./modules/nixos/desktop.nix
+          home-manager.nixosModules.home-manager
+        ];
+      };
+
+      nixosConfigurations.server = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs self;
+          username = "sayori";
+        };
+        modules = [
+          ./hosts/server
+          ./modules/nixos/base.nix
+          ./modules/nixos/server.nix
+          disko.nixosModules.disko
           home-manager.nixosModules.home-manager
         ];
       };

@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  username,
+  ...
+}:
 
 {
   nix = {
@@ -25,13 +29,10 @@
     usbutils
   ];
 
-  users.users.sayori = {
+  users.users.${username} = {
     isNormalUser = true;
-    description = "sayori";
+    description = username;
     extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIILj3vb/coYALTSiSSrCE5+wFeTwPBGUKjbrY1Ap7XOM sayori@nixbox-codex"
-    ];
   };
 
   services.openssh = {
@@ -39,7 +40,6 @@
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
-      PermitRootLogin = "no";
     };
   };
 }

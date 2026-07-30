@@ -136,7 +136,7 @@ Python 使用不同模型：
 Server 从 Ubuntu 直接替换为最小 NixOS，但系统替换与业务重构仍然分开：
 
 - 首次替换只保证 boot、disk、network、SSH、sudo、基础 firewall 与救援能力；
-- 最小系统稳定后，优先恢复已验证的 Compose/容器与数据；
+- 最小系统稳定后，只按届时的新需求从空白状态逐项引入业务；不恢复当前 Ubuntu 的 Compose、容器与数据；
 - 成熟 NixOS module 的采用另建 Issue，不顺带重写全部服务；
 - 容器 image tag、volume、环境变量、备份与健康检查必须显式记录；
 - production database upgrade 不作为 OS migration 的附带动作。

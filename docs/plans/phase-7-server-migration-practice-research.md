@@ -53,7 +53,7 @@ Contabo Reinstall／Custom Image ──最后重建手段
 
 首版采用一块磁盘、GPT、1 MiB `EF02` BIOS boot partition 与单一 ext4 `/`：
 
-- disko target 和 `boot.loader.grub.device` 都使用已验证的稳定 `by-id`，不把 `/dev/sda` 当长期身份；
+- disko target 使用已验证的稳定 `by-id`，不把 `/dev/sda` 当长期身份；固定版本的 disko 会由 `EF02` 分区为 GRUB 生成同一设备列表，不再重复声明 `boot.loader.grub.device`；
 - 不创建 swap、LVM、RAID、LUKS、ZFS、impermanence 或独立业务分区；这些都没有当前需求，只会扩大无法启动或无法修复的状态空间；
 - 不为“也许是 UEFI”建立混合 boot。运行态证据是 BIOS，Phase 9 应用 BIOS VM 真实完成首次启动和第二次重启；
 - initrd 显式包含 Virtio PCI/SCSI 所需模块；不要从 Ubuntu 的 `lsmod` 为空推断模块不需要，因为当前 Ubuntu 内核把相关 driver 编为 built-in；
@@ -234,7 +234,7 @@ Contabo 官方说明 VNC 可在网络或 OS 启动异常时连接 guest console�
 ## 7. 已批准的 Phase 8 设计选择
 
 1. **Public routing facts（已批准）：** server 的 public address、prefix、gateway 与 nameserver 作为非凭据 host facts 进入 Git；账号 ID、Contabo/VNC endpoint、MAC、SSH fingerprint、private key 与 host-key private material 继续留在 Git 外。
-2. **SSH identity（已批准）：** 普通管理用户为 `sayori`；声明 macbook maintenance public key；Phase 8 在 nixbox 新建专用 deploy key后声明其 public half；首次保留仅 key-only 的 root break-glass。
+2. **SSH identity（已批准）：** 普通管理用户为 `sayori`；声明 macbook maintenance public key；Phase 8 在 nixbox 新建专用 deploy key 后声明其 public half；首次保留仅 key-only 的 root break-glass。
 3. **Host identity 与 waiver（已批准）：** 首次安装保留现有 SSH host keys；后续验收“已批准的预期 host key”；以维护者记录的全量 source-data loss waiver 替代 source backup/restore gate，失败恢复目标为重新建立最小 NixOS。
 
 批准不覆盖当前 Phase 7 的 nixbox/server 状态变更，也不是 production 执行授权。Phase 10 仍必须针对精确 host、stable disk alias、commit、command 与当次窗口取得新的明确批准。
