@@ -18,7 +18,7 @@
 | 可移植 Shell | 是 | 是 | 是 | Fish 主路径；登录 Shell 的系统事实由各平台 adapter 负责。 |
 | 终端工具箱 | 是 | 是 | 是 | `bat`、`eza`、`fd`、`fzf`、`jq`、`ripgrep`、`starship`、`tmux`、`tree`、`zoxide`。 |
 | 终端历史 | 是 | 是 | 是 | Atuin 本地历史；数据库、key 与 daemon state 保持可写。 |
-| 跨设备历史同步 | 是 | 是 | 否 | Atuin 同步策略；server 只保留本地历史。Atuin Desktop 只留在 macbook。 |
+| 跨设备历史同步 | 是 | 否 | 否 | macbook 保留既有 Atuin 同步行为；nixbox 与 server 只保留各自本地历史。Atuin Desktop 只留在 macbook。 |
 | Git 基础 | 是 | 是 | 是 | Git 行为与私有 identity include；不含 GitHub 登录态。 |
 | GitHub 协作 | 是 | 是 | 否 | `gh`、GitHub credential helper、lazygit、gitleaks；凭据不进入 server。 |
 | 交互式 Shell 辅助 | 是 | 是 | 是 | `pay-respects` 及 Fish integration。 |
@@ -41,6 +41,7 @@
 ## 明确排除或延后
 
 - nixbox 不安装 WezTerm、VS Code、Atuin Desktop 或其他未批准 GUI，也不复制 macbook 的完整 Homebrew/MAS 集合。
+- nixbox 不参与 Atuin 跨设备同步；数据库、key、session 与历史都只留在本机。
 - nixbox 当前明确排除 Discord、Upscayl、OBS、Telegram、QQ、WeChat、腾讯会议、Transmission、balenaEtcher、网易云音乐、Scratch、原生 Figma/Linear/ChatGPT；Steam、MEGAsync 与百度网盘延后决定。
 - 桌面环境实验放在 NixOS 基线与核心迁移之后，不作为 nix-config 当前第一性目标。
 - server 不保存 GitHub 协作凭据，不使用工作站可变运行时管理 production workload；运行时来自 Nix closure、容器或服务声明。
