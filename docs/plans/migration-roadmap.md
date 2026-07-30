@@ -121,6 +121,8 @@ Phase 12  业务按需重建、加固与 v1 收尾       #14
 
 在 nixbox 原生 build server closure；不修改 production server，不恢复业务，不引入 Secret。
 
+实现证据映射见 [`Phase 8 server 最小声明`](../inventory/phase-8-server-minimal.md)，后续 VM 与 production 人工关卡见 [`Server 替换 runbook`](../runbooks/replace-server-with-nixos.md)。
+
 ### Phase 9 — nixos-anywhere VM 安装测试（#12）
 
 在 nixbox 的隔离 VM 中验证 Flake、disko、启动、用户与 SSH，形成正式迁移 runbook。此阶段不对 production server 运行安装，也不为构建扩大 OrbStack 或 macOS builder 边界。

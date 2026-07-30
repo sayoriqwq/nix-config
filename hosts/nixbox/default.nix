@@ -23,6 +23,12 @@
 
   networking.hostName = "nixos";
 
+  users.users.${username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIILj3vb/coYALTSiSSrCE5+wFeTwPBGUKjbrY1Ap7XOM sayori@nixbox-codex"
+  ];
+
+  services.openssh.settings.PermitRootLogin = "no";
+
   time.timeZone = "Asia/Shanghai";
 
   i18n = {
