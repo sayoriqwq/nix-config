@@ -29,7 +29,9 @@
 | containers / data | 7 个运行容器，包括应用栈、MongoDB 7、Redis、反向代理/控制面；4 个 Docker volumes，并存在 bind mounts | 服务和数据全部按维护者决策舍弃；不读取或迁移 volume、bind path、database、`.env` 与 secret |
 | lifecycle | 系统报告 55 个可用更新并要求重启 | Phase 7 不执行 apt upgrade、服务 restart 或 reboot |
 
-## 3. macbook → server 管理链路
+## 3. 管理与部署链路
+
+### 3.1 macbook → server
 
 最初的失败信号为：TCP 22 可建立，但 SSH 在取得 server banner 前被关闭。到 server 的路由当时进入 Clash Verge TUN 的 GVisor 虚拟接口。
 
@@ -44,6 +46,12 @@
 经维护者针对当前动作明确批准，已在 Clash Verge TUN 的“排除自定义网段”中加入 server IPv4 的单一 `/32`。保存后 TUN 继续开启，但 server 路由改走 macbook 物理接口；普通 OpenSSH 和 Termius 均已实际登录成功。
 
 该 `/32` 是 macbook 上 Clash Verge 的可变本地状态，不由 nix-config 声明。macbook 重装或 Clash 状态重置后，必须先恢复这一窄排除，或使用另一条经验证的直连路径，才能把 macbook 视为独立 server recovery path。仓库不记录实际地址。
+
+### 3.2 nixbox → server
+
+2026-07-30 的只读验证确认 macbook 可用既有 public-key 链路进入 nixbox，且 nixbox 到 server 的 TCP 22 可达。nixbox 当前没有该 server 的 known-host 记录，因此没有绕过 host-key 校验继续尝试 SSH authentication，也没有写入 `known_hosts`、复制 key 或修改 SSH 配置。
+
+结论是网络路径已建立，但部署认证链路尚未建立。Phase 8/9 必须明确 host-key 验证与最小部署凭据的提供方式；server 不保存 GitHub 协作凭据，nixbox 也不能靠关闭 host-key 检查来部署。
 
 ## 4. Contabo 恢复能力
 
@@ -95,6 +103,9 @@ ip -4 route show
 ip -6 route show
 resolvectl dns eth0
 resolvectl domain eth0
+ssh -o BatchMode=yes -o ConnectTimeout=8 <nixbox-alias> true
+ssh <nixbox-alias> "ssh-keygen -F <server-address> -f ~/.ssh/known_hosts"
+ssh <nixbox-alias> "nc -z -w 5 <server-address> 22"
 sshd -T
 ufw status
 systemctl list-units --failed --no-legend --no-pager
@@ -116,7 +127,7 @@ Provider 控制面、静态网络私有输入与 macbook 的 Clash 直连恢复�
 
 1. Phase 8 必须明确正式替换使用的 SSH public key、首次登录用户与 root/sudo 恢复路径；不能只依赖当前 Ubuntu root 登录行为；
 2. `/dev/sda` 已有唯一 target 候选证据，但任何真实格式化/安装 Issue 仍须再次给出精确 destructive target 并取得当次批准；当前“数据可全部丢失”不是格式化授权；
-3. 验证 nixbox → server 的只读 SSH 可达性，或明确建立该链路所缺的认证步骤；本阶段不创建 key 或修改 SSH；
+3. nixbox → server 的 TCP 22 已可达，但仍需建立经 host-key 验证的 SSH authentication/deployment 方式；本阶段不接受 host key、不创建 key 或修改 SSH；
 4. Phase 8 需基于私有网络证据生成不泄露实际地址的 NixOS 声明，并由维护者在提交前确认 host-specific 值的处理方式；
 5. 正式替换 runbook 必须把 VNC → Rescue → Reinstall 的升级顺序与每一步的实时人工批准写清楚，且不得保存临时 VNC/Rescue 密码。
 
@@ -128,5 +139,5 @@ Provider 控制面、静态网络私有输入与 macbook 的 Clash 直连恢复�
 - macbook → server 的 OpenSSH 与 Termius 链路已修复并验证；
 - server 仍未发生配置、服务、package、disk、boot、network、firewall、SSH 或 reboot 变更；
 - 当前实例的 provider 控制面与静态双栈网络私有输入已完成实证；
-- Phase 8 仍需完成正式 SSH key/用户/recovery 设计、host-specific 网络声明边界与 nixbox 管理链路；真实 target disk 操作继续保留当次批准关卡；
+- Phase 8 仍需完成正式 SSH key/用户/recovery 设计、host-specific 网络声明边界与 nixbox 的 host-key/authentication 部署链路；真实 target disk 操作继续保留当次批准关卡；
 - 本文是 inventory，不声称 NixOS build、VM install 或 production replacement 已通过。
