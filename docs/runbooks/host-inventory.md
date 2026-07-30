@@ -141,7 +141,7 @@ command -v podman >/dev/null && podman ps
 - TLS 证书、DNS、反向代理和外部依赖；
 - provider 的 Rescue、VNC/Console、snapshot 和重装能力；
 - 目标磁盘、boot mode、网络模式和 SSH 恢复路径；
-- 至少一个异机备份及最近一次恢复测试结果。
+- 至少一个异机备份及最近一次恢复测试结果；若维护者明确声明现有数据全部可丢失，可改为记录该 waiver、适用范围和失败恢复目标。waiver 不放宽 target disk、boot、network、SSH 或 provider console/rescue 关卡。
 
 不得把 `.env`、数据库 dump、TLS 私钥、SSH 私钥或 provider 凭据提交到此仓库。
 

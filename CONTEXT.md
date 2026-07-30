@@ -183,7 +183,7 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
 4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. Server 从当前 Ubuntu 直接替换为最小可 SSH 的 NixOS，再建立 Secret 能力并恢复业务；不创建 Ubuntu standalone Home Manager 过渡配置。
+6. Server 从当前 Ubuntu 直接替换为最小可 SSH 的 NixOS，再建立 Secret 能力并按新需求从空白状态引入业务；不创建 Ubuntu standalone Home Manager 过渡配置，也不恢复当前 Ubuntu 的业务或数据。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责

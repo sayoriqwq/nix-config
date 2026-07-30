@@ -3,10 +3,12 @@
 > 范围：为 Issue #9 收敛 Phase 8–10 的实现与执行方案。本文依据 2026-07-30 的脱敏实机证据和一手资料，不授权对 production server 执行 kexec、disko、安装、网络/SSH 修改或重启。
 >
 > 维护者已接受现有系统、服务与数据全部丢失，不要求备份、恢复测试、业务恢复或有限停机窗口。唯一强制的生产验收目标是：替换后仍能从 macbook 取得 SSH 控制权。该 waiver 不替代 boot、network、SSH、provider rescue 与精确 destructive target 的人工关卡。
+>
+> 维护者于 2026-07-30 批准本文推荐的 public routing facts、双管理 key、首次 key-only root break-glass、保留 SSH host identity 与 source-data waiver 方案。该批准是 Phase 8–10 的设计输入，不是 production 执行授权。
 
 ## 1. 结论
 
-**推荐主路径：从当前 Ubuntu 的可信 root SSH 入口运行 `nixos-anywhere`，由 nixbox 在本地预构建并推送完整 closure；kexec 进入临时 NixOS installer 后，以 disko 创建 BIOS/GPT 最小磁盘布局，最终安装最小 NixOS。macbook 保留独立管理路径，Contabo VNC 与 Rescue 作为带外恢复。**
+**已批准的主路径：从当前 Ubuntu 的可信 root SSH 入口运行 `nixos-anywhere`，由 nixbox 在本地预构建并推送完整 closure；kexec 进入临时 NixOS installer 后，以 disko 创建 BIOS/GPT 最小磁盘布局，最终安装最小 NixOS。macbook 保留独立管理路径，Contabo VNC 与 Rescue 作为带外恢复。**
 
 这条路径的变量最少：当前系统已经满足 `nixos-anywhere` 的架构、RAM、SSH 和 kexec 要求；官方 kexec installer 会把当前地址、路由、authorized keys 与 SSH host keys 带入临时 initrd。Contabo Custom Image/Reinstall 需要额外处理镜像格式、Cloud-Init 与 provider 安装语义，适合作为最后重建手段，不应成为首选安装路径。
 
@@ -76,9 +78,9 @@ systemd 对 `GatewayOnLink=` 的定义是：即使 kernel 尚未把 gateway 判�
 
 #### 公网路由事实的版本化边界
 
-**最不容易踩坑的方案是：经维护者明确批准后，把 public address、prefix、gateway 与 nameserver 作为非凭据 host facts 写入 `hosts/server/`。** 它们决定 early boot 是否可达，必须和接受验证的 closure 一起冻结，才能保证 nixbox build、VM variant、production install 与后续 recovery 使用同一输入。
+**维护者已批准把 public address、prefix、gateway 与 nameserver 作为非凭据 host facts 写入 Git。** 它们决定 early boot 是否可达，必须和接受验证的 closure 一起冻结，才能保证 nixbox build、VM variant、production install 与后续 recovery 使用同一输入。Phase 7 inventory 已记录 exact values；Phase 8 将其移入 `hosts/server/` 的声明式网络配置。
 
-当前 Issue #13 仍禁止把 IP 写入 Git，而维护者已说明 public IP 本身不构成顾虑；这两个口径必须在 Phase 8 前显式对齐。若仍要求 exact values 不进公开 Git，次选方案应是一个独立版本化、带内容 hash、同时存在于 macbook 与 nixbox 的 private flake input，并另写 ADR。不要采用以下伪私有方案：
+因此不建立第二个本地配置仓库或 private flake input；单一顶层 Flake 继续是 source of truth。若未来出现确实必须参与 Nix evaluation、又不能进入公开仓库的非 secret host input，再以独立 Issue/ADR 评估本地 Git input。private key、passphrase、token、VNC/Rescue credential 和 host-key private material 即使在本地 Git 中也仍然禁止提交。不要采用以下伪私有方案：
 
 - untracked `network.nix`：Git flake 默认看不到未跟踪文件；
 - `--impure` 环境变量或现场字符串替换：精确 commit 不再能重建相同 closure；
@@ -138,14 +140,14 @@ Phase 8 的 server output 应分成两个互不倒置的层次：
 在合并当前 Draft PR 前：
 
 1. 记录本调研及新增的 kexec、driver、stable disk identity 证据；
-2. 由维护者确认本节第 7 章列出的三项设计选择；
-3. 对齐 roadmap 与 Issue #13 的 backup waiver、public routing facts 与 host-key wording；
+2. 记录维护者对本节第 7 章三项设计选择的批准；
+3. 对齐 architecture、ADR、roadmap 与后续 Issues 的 source-data waiver、public routing facts、按需业务重建和 host-key wording；
 4. 不在 server、nixbox 或 Contabo 创建 key、接受 host key、启动 VNC/Rescue 或运行安装。
 
 ### Phase 8 / Issue #11：只构建，不接触 production
 
 1. 固定 disko input；新增 `nixosConfigurations.server` 与 host-specific BIOS/disk/network/SSH 模块；
-2. 仅在维护者明确批准该 nixbox 本地状态变更后，创建专用 deploy key；经审阅后只把 public half 纳入 server authorized keys，private half 不离开 nixbox；
+2. 维护者已批准创建 nixbox 专用 deploy key；实际动作只在 Phase 7 合并并进入 Phase 8 后执行，经审阅后只把 public half 纳入 server authorized keys，private half 不离开 nixbox；
 3. macbook maintenance public key 进入 server 声明；不复制 private key；
 4. 在 nixbox 完成 format check、flake check 与 server toplevel build；
 5. 按 Issue #11 显式组合已批准的 headless CLI capabilities，并验证 Atuin 不同步、Git 不带 GitHub collaboration；
@@ -229,13 +231,13 @@ Phase 8 的 server output 应分成两个互不倒置的层次：
 
 Contabo 官方说明 VNC 可在网络或 OS 启动异常时连接 guest console，Rescue 是内存中的临时系统；Reinstall 会删除现有数据。它们支持上述逐级恢复，但不能替代真实连接与现场凭据验证。[VNC](https://help.contabo.com/en/support/solutions/articles/103000407800-how-to-connect-to-your-server-using-vnc)，[Rescue](https://help.contabo.com/en/support/solutions/articles/103000295053-how-do-i-boot-a-rescue-system-for-my-server-)，[Reinstall](https://help.contabo.com/en/support/solutions/articles/103000271913-how-do-i-install-my-contabo-server-)
 
-## 7. 进入 Phase 8 前需要维护者确认的设计选择
+## 7. 已批准的 Phase 8 设计选择
 
-1. **Public routing facts（推荐批准）：** 允许把 server 的 public address、prefix、gateway 与 nameserver 作为非凭据 host facts 写入 Git；继续禁止账号 ID、VNC endpoint/credential、MAC、private key 与 host-key private material。若不批准，先做 private flake input ADR，不能退化为 untracked/impure 注入。
-2. **SSH identity（推荐批准）：** 普通管理用户为 `sayori`；声明 macbook maintenance public key，并在 nixbox 新建专用 deploy key后声明其 public half；首次保留仅 key-only 的 root break-glass。
-3. **Host identity 与 waiver（推荐批准）：** 首次安装保留现有 SSH host keys；把 Issue #13 的“新 host key”改成“已批准的预期 host key”；同时把 roadmap/#13 的强制 backup/restore 条件改为维护者已记录的全量数据丢失 waiver，失败恢复目标改为重新建立最小 NixOS。
+1. **Public routing facts（已批准）：** server 的 public address、prefix、gateway 与 nameserver 作为非凭据 host facts 进入 Git；账号 ID、Contabo/VNC endpoint、MAC、SSH fingerprint、private key 与 host-key private material 继续留在 Git 外。
+2. **SSH identity（已批准）：** 普通管理用户为 `sayori`；声明 macbook maintenance public key；Phase 8 在 nixbox 新建专用 deploy key后声明其 public half；首次保留仅 key-only 的 root break-glass。
+3. **Host identity 与 waiver（已批准）：** 首次安装保留现有 SSH host keys；后续验收“已批准的预期 host key”；以维护者记录的全量 source-data loss waiver 替代 source backup/restore gate，失败恢复目标为重新建立最小 NixOS。
 
-这三项都不是当前 production 执行授权。Phase 10 仍必须针对精确 host、stable disk alias、commit、command 与当次窗口取得新的明确批准。
+批准不覆盖当前 Phase 7 的 nixbox/server 状态变更，也不是 production 执行授权。Phase 10 仍必须针对精确 host、stable disk alias、commit、command 与当次窗口取得新的明确批准。
 
 ## 8. 一手来源清单
 
