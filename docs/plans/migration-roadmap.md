@@ -4,7 +4,7 @@
 
 **名称：** `声明式个人基础设施 v1 / Declarative Personal Infrastructure v1`
 
-**完成目标：** macOS、NixOS 工作站和 NixOS server 均由同一仓库提供可构建配置；主机按需求组合能力；server 完成可回滚替换与业务恢复；机密、数据和危险操作具有明确边界。
+**完成目标：** macOS、NixOS 工作站和 NixOS server 均由同一仓库提供可构建配置；主机按需求组合能力；server 完成可救援替换与业务按需重建；机密、数据和危险操作具有明确边界。
 
 每个 Phase 使用一个独立 Issue 和一个 Draft PR。Phase 完成取决于验收，不取决于日期。
 
@@ -37,7 +37,7 @@ Phase 10  经批准的 Ubuntu→NixOS 正式替换    #13
    ↓
 Phase 11  最小 NixOS 稳定后引入 sops-nix    #10
    ↓
-Phase 12  业务恢复、加固与 v1 收尾           #14
+Phase 12  业务按需重建、加固与 v1 收尾       #14
 ```
 
 默认按顺序推进。macOS AI 配置审计 #67 不阻塞主线，但在审计完成前 AI 能力只留在 macbook。
@@ -104,12 +104,12 @@ Phase 12  业务恢复、加固与 v1 收尾           #14
 
 **目标**
 
-只读收集当前 Ubuntu server 的 boot、disk、network、SSH、provider、service、data、backup、restore 与 rescue 事实。此阶段不建立 standalone Home Manager output，也不修改 server。
+只读收集当前 Ubuntu server 的 boot、disk、network、SSH、provider、service、data disposition、backup/restore 状态与 rescue 事实。此阶段不建立 standalone Home Manager output，也不修改 server。
 
 **完成标准**
 
 - 目标 disk、boot mode、network model、SSH recovery path 与 provider console 有证据；
-- backup location、异机副本与 restore test 状态明确；
+- backup location、异机副本与 restore test 状态或维护者明确的数据丢失 waiver 已记录；当前实例采用全量 source-data loss waiver；
 - production service、container、volume、database 与入口清单脱敏记录；
 - 未知事实保持显式 blocker，不猜测。
 
@@ -127,7 +127,7 @@ Phase 12  业务恢复、加固与 v1 收尾           #14
 
 ### Phase 10 — 经批准的 Ubuntu→NixOS 正式替换（#13）
 
-只有 backup/restore、异机副本、provider console/rescue、target disk、boot mode、network、SSH key、firewall、VM test 与执行窗口全部确认后，才可在维护者实时监督下替换为最小 NixOS。
+只有数据恢复方案或明确 waiver、provider console/rescue、target disk、boot mode、network、SSH key、firewall、VM test 与执行窗口全部确认后，才可在维护者实时监督下替换为最小 NixOS。当前实例已记录全量 source-data loss waiver，因此不创建 Ubuntu/业务 backup、dump 或 restore test；失败恢复目标是重新建立最小 NixOS。
 
 Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得当次批准。Agent 默认停在执行关卡前，不无人值守运行 disko、nixos-anywhere、format、reboot 或 production restore。
 
@@ -135,9 +135,9 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 
 先用非 production secret 验证 recipient、解密、owner/mode、轮换与恢复，再接入真实服务。明文不得进入 Git、Issue、PR、log 或 Nix Store。
 
-### Phase 12 — 业务恢复、加固与 v1 收尾（#14）
+### Phase 12 — 业务按需重建、加固与 v1 收尾（#14）
 
-先原样恢复已验证的 Compose/容器与数据，分别验收系统和业务；再通过独立 Issue 逐项声明化适合的服务，并完成 backup、restore drill、monitoring、update 与 rollback runbook。
+不恢复当前 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。若没有业务需要，Phase 12 只完成系统加固、运维与 v1 收尾。
 
 ## 5. 控制链路与部署方向
 

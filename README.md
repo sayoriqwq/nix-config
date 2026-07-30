@@ -27,7 +27,7 @@ Phase 0–5 已完成治理、主机盘点、macbook 的 nix-darwin/Home Manager
           + Home Manager + Home Manager + Home Manager
 ```
 
-当前 server 仍运行 Ubuntu，但不建立 standalone Home Manager 过渡层：按只读盘点、最小 NixOS、隔离 VM 测试、人工批准直接替换、Secret、业务恢复的顺序推进。
+当前 server 仍运行 Ubuntu，但不建立 standalone Home Manager 过渡层：按只读盘点、最小 NixOS、隔离 VM 测试、人工批准直接替换、Secret、业务按需重建的顺序推进。维护者已明确放弃当前 Ubuntu 的业务与数据恢复。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 
@@ -106,4 +106,4 @@ docs/
 
 ## 安全提示
 
-不要从这个仓库中复制并执行磁盘或远程安装命令，除非对应 Issue 已明确记录：完整备份、恢复验证、目标磁盘、启动模式、网络方案、SSH 恢复路径以及维护者的当次批准。
+不要从这个仓库中复制并执行磁盘或远程安装命令，除非对应 Issue 已明确记录：完整备份与恢复验证，或维护者对可丢弃 source data 的明确 waiver；以及目标磁盘、启动模式、网络方案、SSH 恢复路径和维护者的当次批准。数据 waiver 不构成格式化或安装授权。
