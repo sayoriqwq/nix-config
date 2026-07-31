@@ -1,5 +1,6 @@
 {
   lib,
+  phase9NetworkDriver,
   pkgs,
   username,
   ...
@@ -22,7 +23,7 @@ in
     enable = lib.mkForce true;
     networks = lib.mkForce {
       "10-phase9-uplink" = {
-        matchConfig.Driver = "virtio_net";
+        matchConfig.Driver = phase9NetworkDriver;
 
         addresses = [
           { Address = values.ipv4Address; }

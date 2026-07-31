@@ -1,4 +1,4 @@
-{ lib, username, ... }:
+{ username, ... }:
 
 let
   values = import ./values.nix;
@@ -13,7 +13,7 @@ in
       # not expose a virtualisation option for that manually-created machine.
       # The separate network test keeps the production-equivalent virtio_net
       # topology and fail-closed preflight.
-      systemd.network.networks."10-phase9-uplink".matchConfig.Driver = lib.mkForce "e1000";
+      _module.args.phase9NetworkDriver = "e1000";
     };
     extraChecks = ''
       with subtest("BIOS, GPT, EF02, ext4 root and no swap"):
