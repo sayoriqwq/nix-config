@@ -68,11 +68,21 @@ Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 
 
 1. 在 nixbox checkout 精确已审阅 commit，验证 clean tree 与 flake lock；
 2. 原生重跑 evaluate、build 与 Phase 9 VM suite，记录 closure 与结果；
-3. 运行只读 `preflight` 短入口，逐项比较 host、architecture、BIOS、disk、NIC、network、RAM、kexec、SSH host identity；
+3. 在 macbook 的 clean checkout 对精确 commit 运行不接受参数的短入口 `nix run .#phase10-preflight`；它固定 `ssh sayori`、物理直连路由与 strict host pin，并逐项比较 host、architecture、BIOS、disk、NIC、network、RAM、kexec、SSH bootstrap 与近期 kernel health；
 4. macbook 与 nixbox 各自以严格 host checking 验证当前可信 SSH 路径；
 5. 实际连接 Contabo VNC，并确认 Rescue/Reinstall 入口；
 6. 在 Issue #13 记录精确 host、stable disk alias、commit、短 install command、窗口、观察人、停止条件和全量数据丢失 waiver；
 7. 维护者对该次动作明确批准。任何上一轮或设计批准都不能代替。
+
+`phase10-preflight` 的 expected disk 与 routing facts 直接从同一 commit 的 `nixosConfigurations.server` 派生，远端 probe 只经 stdin 执行，不创建文件。它会输出 exact disk device/capacity 和脱敏事实；不输出 key、fingerprint、credential、private path 或原始 journal。helper 的实现与实时记录见 [`Phase 10 正式替换现场记录`](../inventory/phase-10-server-replacement.md)。
+
+#### 当前 Ubuntu 到 nixbox 的 bootstrap authentication
+
+Phase 8 的 nixbox deploy public key 只存在于未来 NixOS 声明，当前 Ubuntu 尚未授权它。因而 macbook preflight 之后还必须先关闭这项真实缺口，不能直接声称 nixbox 已能安装。
+
+推荐方案是在单独行动卡和批准下，由可信 macbook root 会话把已声明的 nixbox deploy public key 原子、幂等地追加到当前 Ubuntu root `authorized_keys`。不得删除现有 macbook key、复制任何 private key、关闭 strict checking 或改用 password root。若正式安装前中止，使用另一次批准移除该单行；最终 NixOS 的声明式 root key 集合仍只保留 macbook break-glass。
+
+这个临时授权是 production SSH access 修改，不由 VNC、preflight、Phase 8/9 或本文自动批准。完成后，nixbox 还必须使用专用 deploy identity 与专用 known-hosts file 做一次 strict、只读登录验证，才允许冻结 install helper。
 
 ### B. 安装
 

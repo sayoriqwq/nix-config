@@ -81,6 +81,20 @@
         inherit nixosAnywherePackage;
         pkgs = phase9Pkgs;
       };
+      phase10Pkgs = packagesFor "aarch64-darwin";
+      phase10Preflight = import ./tools/phase-10/preflight.nix {
+        pkgs = phase10Pkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+      };
+      phase10RemotePreflightCheck =
+        phase10Pkgs.runCommand "phase10-remote-preflight-shellcheck"
+          {
+            nativeBuildInputs = [ phase10Pkgs.shellcheck ];
+          }
+          ''
+            shellcheck ${./tools/phase-10/remote-preflight.sh}
+            touch "$out"
+          '';
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -116,13 +130,21 @@
       # Explicit package outputs give CI and future hosts a stable validation
       # target without importing Zed's internal Flake modules.
       packages = {
-        aarch64-darwin.zed-nightly = inputs.zed.packages.aarch64-darwin.default;
+        aarch64-darwin = {
+          phase10-preflight = phase10Preflight;
+          zed-nightly = inputs.zed.packages.aarch64-darwin.default;
+        };
         x86_64-linux = {
           inherit phase9Preflight;
           nixos-anywhere = nixosAnywherePackage;
           phase9-test = phase9TestRunner;
           zed-nightly = inputs.zed.packages.x86_64-linux.default;
         };
+      };
+
+      apps.aarch64-darwin.phase10-preflight = {
+        type = "app";
+        program = "${phase10Preflight}/bin/phase10-preflight";
       };
 
       apps.x86_64-linux = {
@@ -134,6 +156,11 @@
           type = "app";
           program = "${phase9TestRunner}/bin/phase9-test";
         };
+      };
+
+      checks.aarch64-darwin = {
+        phase10-preflight = phase10Preflight;
+        phase10-remote-preflight-shellcheck = phase10RemotePreflightCheck;
       };
 
       checks.x86_64-linux = {
