@@ -120,13 +120,13 @@ macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 ev
 
 维护者随后批准在 clean commit `bab95ad9e5509aeab97dd095c7308e35ffa4d5c4` 执行 add、macbook/nixbox strict verification，并仅在 verification 失败时回滚。bootstrap 入口先完整重跑 production preflight 且再次 PASS，但 state-changing 远端脚本随即以 `internal argument contract mismatch` 失败关闭。失败发生在脚本读取 `/root/.ssh` 或构造临时文件之前，因此没有修改 `authorized_keys`，也无需执行回滚。根因是 OpenSSH 会把本地多个远端命令参数重新拼成 shell command string，包含空格的 public key 因而被拆成多个远端参数。
 
-修复后 action 与 public key 改为固化在 stdin 脚本内部，SSH argv 不再携带 key；隔离 VM test 也改为执行实际生成的 add/remove stdin 脚本，而不是只直接调用底层脚本。本地已通过生成脚本参数合同、add/remove 额外参数失败关闭、wrapper build、ShellCheck、格式检查与全系统 evaluation；新的 x86 VM derivation 已成功求值，仍须在 nixbox 对修复后的精确 clean commit 完整构建。代码变化使上一轮 production 批准失效，任何再次 add 都必须绑定新 commit 重新取得明确批准。
+修复后 action 与 public key 改为固化在 stdin 脚本内部，SSH argv 不再携带 key；隔离 VM test 也改为执行实际生成的 add/remove stdin 脚本，而不是只直接调用底层脚本。本地已通过生成脚本参数合同、add/remove 额外参数失败关闭、wrapper build、ShellCheck、格式检查与全系统 evaluation。2026-07-31 又在 nixbox 对精确 clean commit `7e304e5fd7fd032e2e6f8c59b7ac32e03a0b6fb3` 的不可变 source 完整构建新 VM derivation，add、重复 add、remove、重复 remove 与全部失败注入均 PASS；传输和构建没有连接 production。代码变化使上一轮 production 批准失效，任何再次 add 都必须绑定包含本记录的新 commit 重新取得明确批准。
 
 ## 5. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
-3. **进行中：** 旧版隔离 bootstrap VM test 已在 nixbox 通过；首次 production add 在任何写入前暴露 SSH 参数边界缺陷，须先在 nixbox 对修复版重跑 VM test，再对新精确 commit 重新批准；
+3. **待批准：** 首次 production add 在任何写入前暴露的 SSH 参数边界缺陷已修复，修复版隔离 VM test 已在 nixbox 通过；现在须对包含最终记录的新精确 commit 重新批准；
 4. bootstrap 后从 nixbox 以专用 key、专用 known-hosts 与 strict checking 只读验证当前 Ubuntu；
 5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
 6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；
