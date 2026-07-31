@@ -41,6 +41,14 @@ pkgs.writeShellApplication {
       exit 1
     fi
 
+    echo "phase9-test: declarative dummy-target boundary check"
+    nix build \
+      --no-link \
+      --print-build-logs \
+      --max-jobs 2 \
+      --cores 2 \
+      "path:$repo_root#checks.x86_64-linux.phase9-policy"
+
     echo "phase9-test: production server closure build without activation"
     nix build \
       --no-link \
@@ -64,14 +72,6 @@ pkgs.writeShellApplication {
       --max-jobs 2 \
       --cores 2 \
       "path:$repo_root#checks.x86_64-linux.phase9-network"
-
-    echo "phase9-test: declarative boundary check"
-    nix build \
-      --no-link \
-      --print-build-logs \
-      --max-jobs 2 \
-      --cores 2 \
-      "path:$repo_root#checks.x86_64-linux.phase9-policy"
 
     echo "phase9-test: PASS; no production target was accepted or contacted"
   '';
