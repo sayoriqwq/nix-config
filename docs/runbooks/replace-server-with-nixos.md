@@ -39,18 +39,26 @@ Phase 8 build 只证明 closure 可构建，不证明真实 disk 可以清空、
 
 ## 4. Phase 9：隔离 VM 演练
 
-Phase 9 使用 [`Phase 8 inventory`](../inventory/phase-8-server-minimal.md#4-phase-9-隔离-vm-输入) 中的 dummy topology，至少覆盖：
+Phase 9 使用 [`Phase 8 inventory`](../inventory/phase-8-server-minimal.md#4-phase-9-隔离-vm-输入) 中的 dummy topology；设计、版本与结果记录在 [`Phase 9 隔离 VM 安装演练`](../inventory/phase-9-server-vm-test.md)。nixbox 只需在 clean checkout 运行不接受额外参数的短入口：
+
+```text
+nix run .#phase9-test
+```
+
+该入口先拒绝错误 architecture、不可用 KVM、dirty tree、空间不足与任何 target 参数，再依次覆盖：
 
 1. preflight 对一张 `virtio_net` NIC 与测试 stable disk 成功，对第二张同 driver NIC 或 alias 漂移明确失败；
 2. nixos-anywhere 在测试 disk 上完成 BIOS/GPT/EF02/ext4 安装；
-3. VNC 等价 console 可观察 GRUB、kernel 与 login target；
+3. QEMU serial/test console 可观察 boot 与 login target，并在 preflight 拒绝后保持恢复路径；
 4. `sayori` key login、`sudo -n true`、key-only root break-glass 成功；password 与 keyboard-interactive 失败；
 5. dummy IPv4/IPv6、link-local gateway、DNS、TCP 22 和 firewall 符合声明；
 6. 首次启动和一次独立的第二次重启后重复全部关键验收；
 7. installer 不依赖 destination DNS/substitute；最终 server 不依赖 GitHub checkout；
-8. 生成 production helper、冻结参数清单和完整失败注入记录，但不连接 production target。
+8. 记录 Phase 10 helper contract、参数清单和失败注入结果，但不生成可连接 production 的入口，也不连接 production target。
 
-Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 helper 不提交 Git。清理只针对测试创建并在执行前解析确认的临时路径。
+upstream `nixos-anywhere --vm-test` 只构建并运行 `system.build.installTest`，不进入 remote `--copy-host-keys` 路径。Phase 9 因此用独立的一次性 VM 模拟 copy 后的 strict host identity 与 reboot persistence；真实 copy 仍是 Phase 10 人工关卡，不得把模拟结果写成 production 已验证。
+
+Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 helper 不提交 Git。清理只针对测试创建并在执行前解析确认的临时路径。`phase9-test` 不能复用于 production；Phase 10 的 `preflight` 与 `install` 必须另行冻结并重新批准。
 
 ## 5. Phase 10：现场顺序
 

@@ -127,6 +127,8 @@ Phase 12  业务按需重建、加固与 v1 收尾       #14
 
 在 nixbox 的隔离 VM 中验证 Flake、disko、启动、用户与 SSH，形成正式迁移 runbook。此阶段不对 production server 运行安装，也不为构建扩大 OrbStack 或 macOS builder 边界。
 
+Phase 9 的测试结构、固定版本、资源/秘密边界与验证记录见 [`Server 隔离 VM 安装演练`](../inventory/phase-9-server-vm-test.md)。唯一维护者入口为不接受 target 参数的 `nix run .#phase9-test`；演练通过不构成 Phase 10 授权。
+
 ### Phase 10 — 经批准的 Ubuntu→NixOS 正式替换（#13）
 
 只有数据恢复方案或明确 waiver、provider console/rescue、target disk、boot mode、network、SSH key、firewall、VM test 与执行窗口全部确认后，才可在维护者实时监督下替换为最小 NixOS。当前实例已记录全量 source-data loss waiver，因此不创建 Ubuntu/业务 backup、dump 或 restore test；失败恢复目标是重新建立最小 NixOS。
