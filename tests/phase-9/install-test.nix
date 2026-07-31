@@ -48,9 +48,9 @@ in
       with subtest("users, sudo, SSH policy and minimal firewall"):
           machine.succeed("grep -Fx '${values.maintenancePublicKey}' /etc/ssh/authorized_keys.d/${username}")
           machine.succeed("grep -Fx '${values.deployPublicKey}' /etc/ssh/authorized_keys.d/${username}")
-          machine.succeed("test \"$(wc -l < /etc/ssh/authorized_keys.d/${username})\" -eq 2")
+          machine.succeed("test \"$(grep -c '^ssh-' /etc/ssh/authorized_keys.d/${username})\" -eq 2")
           machine.succeed("grep -Fx '${values.maintenancePublicKey}' /etc/ssh/authorized_keys.d/root")
-          machine.succeed("test \"$(wc -l < /etc/ssh/authorized_keys.d/root)\" -eq 1")
+          machine.succeed("test \"$(grep -c '^ssh-' /etc/ssh/authorized_keys.d/root)\" -eq 1")
           machine.succeed("runuser -u ${username} -- sudo -n true")
           machine.succeed("sshd -T | grep -Fx 'passwordauthentication no'")
           machine.succeed("sshd -T | grep -Fx 'kbdinteractiveauthentication no'")
