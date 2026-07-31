@@ -150,12 +150,26 @@ VNC 自动键盘输入受远端 Caps Lock 状态影响，最初长探针只产�
 
 本演练只证明 provider Rescue、VNC、目标盘可见性与回到原 Ubuntu 后的双管理路径可用。它不授权 closure build、kexec、disko、nixos-anywhere、安装、再次 reboot、网络/SSH 修改或 Reinstall。
 
-## 6. 后续顺序
+## 6. Nixbox 最终回归与 closure 冻结
+
+2026-07-31 在 nixbox 对精确 clean commit `c57899f0d644ec6768f5acb944b34551c0f0cfd5` 完成最终非 production 构建。macbook 先把只含该 commit 的临时 Git bundle 传到 nixbox 的已校验 `/tmp` 目录，nixbox 从 bundle 建立 detached clean checkout；整个流程没有接受 production target，也没有连接 production server。
+
+本轮依次完成：
+
+- `nix run .#phase9-test` 全部 PASS，包括 policy、server closure 非激活构建、BIOS/disko install test 与双栈 SSH/firewall test；
+- 强制重新构建 Phase 9 policy、BIOS install test、双栈 network test，而不是只接受既有 store 结果；
+- 强制重新构建 `checks.x86_64-linux.phase10-nixbox-bootstrap`，正常 add/remove、幂等性与全部失败注入再次 PASS；
+- 重新求值并构建 server toplevel，冻结 derivation 为 `/nix/store/wzag8v8iv686cz62qcy6zaxas97c5nhv-nixos-system-server-26.05.20260719.fd14620.drv`，output 为 `/nix/store/8zy753v5xl4vfrq0ndwvzj3mw0mggyjg-nixos-system-server-26.05.20260719.fd14620`。
+
+运行结束后，macbook 与 nixbox 两端的 `phase10-final-build.*` 临时目录均为空；临时 bundle、detached checkout 与本地派发 helper 已清理。此结果关闭最终 Phase 9 回归和 server closure 预构建关卡，但不授权生成中的 install helper 联系 production，也不授权 kexec、disko、nixos-anywhere、安装或 reboot。
+
+## 7. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
 3. **已完成：** 首次 production add 在任何写入前暴露的 SSH 参数边界缺陷已修复，修复版隔离 VM test 已在 nixbox 通过；
 4. **已完成：** 对最终精确 commit 批准并执行 bootstrap，随后从 macbook 与 nixbox 以各自 identity 和 strict host pin 只读验证当前 Ubuntu；两端均 PASS，未触发 rollback；
 5. **已完成：** 用独立行动卡启动 Rescue，实际登录并确认目标磁盘；再经第二次批准回到 Ubuntu，VNC、macbook、nixbox 与完整 preflight 均 PASS；
-6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；
-7. 维护者对该次 destructive install 重新明确批准后，才进入 kexec/disko/安装。
+6. **已完成：** 在 nixbox 对 Rescue 证据 commit 重跑 Phase 9、强制重建隔离测试并预构建 server closure；全套 PASS，临时文件已清理；
+7. 实现并隔离验证不接受参数的 install helper，再冻结精确 commit、disk、closure、完整底层命令、窗口与停止条件；
+8. 维护者对该次 destructive install 重新明确批准后，才进入 kexec/disko/安装。
