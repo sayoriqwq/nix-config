@@ -82,6 +82,9 @@ ambiguous VM 关闭后，再同时启动 1536 MiB server 与 512 MiB gateway。�
 - gateway 内的隔离 dnsmasq；
 - 每台 VM 1 vCPU。
 
+该层对三台 VM 都显式清空测试框架默认的 QEMU networking options，不创建隐式 SLiRP NIC，也不提供默认外网出口。
+ambiguous VM 只连接两张测试 VLAN NIC；server 与 gateway 各只连接双方共享的一张测试 VLAN NIC。
+
 该层验证真实 TCP/SSH 交互：双栈 TCP 22、DNS、`sayori` 两类 key、`sudo -n`、仅 maintenance key 的 root
 break-glass、password 与 keyboard-interactive 拒绝，以及 firewall 对未声明 TCP 8080 listener 的阻断。
 
@@ -132,7 +135,57 @@ nixbox 对 clean checkout 的精确 commit 执行：
 nix run .#phase9-test
 ```
 
-最终验证结果、精确 commit、开始/结束时间与清理确认将在实际 VM 演练后记录到本节、Issue #12 和 Draft PR。
+### 6.1 首次完整通过记录
+
+| 项目 | 结果 |
+| --- | --- |
+| 执行节点 | nixbox，`x86_64-linux`，KVM 可用；未使用 `sudo` |
+| 精确 commit | `41f17684cfbf8079374bbfaf9050362d8d80d280` |
+| 执行时间 | 2026-07-31 11:57–11:59 CST（UTC+08:00） |
+| checkout | clean，且与上述 commit 精确一致 |
+| 资源 | 单次最多 2 vCPU / 2 GiB VM RAM；安装层仅一块 4096 MiB sparse test disk |
+| 结果 | `phase9-test: PASS; no production target was accepted or contacted` |
+| 清理检查 | 测试退出后 `qemu-system-x86_64` 与 `qemu-kvm` 均无残留进程 |
+
+完整入口依次通过：
+
+1. 声明边界检查；
+2. production server closure 的无 activation build；
+3. BIOS/GPT/EF02/ext4 的 destructive disko 安装、冷启动及真实 reboot；
+4. 无默认 SLiRP 出口的隔离双栈、DNS、SSH、sudo、host identity persistence 与 firewall 测试；
+5. 错误 NIC 数、错误 firmware 预期和缺失 disk 的失败关闭检查；
+6. runtime key、host key、known-hosts、VM 与 test disk 的测试内清理。
+
+nixbox 当时无法通过 HTTPS 访问 GitHub，因此没有修改其网络。macOS 从精确 commit 创建临时 Git bundle，传输后在
+nixbox 校验并导入；每个 bundle 导入后即删除。最终 guest 不依赖 GitHub checkout，production server 也没有被解析为
+destination、探测或连接。
+
+### 6.2 演练中发现并固定的陷阱
+
+首次完整通过前的失败都发生在同一批准边界内的一次性 QEMU VM；每次失败后都确认无 QEMU 残留，未连接 production。
+
+| 现象 | 原因 | 固定后的处理 |
+| --- | --- | --- |
+| disko 启动机的 NIC 与 production `virtio_net` 断言不符 | upstream disko test 用手工 QEMU command 重建机器，隐式采用 `e1000` | 安装层只验证 disk/boot；production 等价 `virtio_net` 在独立网络层验证 |
+| 子层修改 NIC driver 没有生效 | 父层的 module 值已使用 `mkForce` | 不覆盖 production 声明，改为明确拆分两层职责 |
+| 安装层静态网络等不到 carrier | 重建的 `e1000` 只承载 dummy network | 仅测试覆盖层启用 `ConfigureWithoutCarrier`；production 配置不变 |
+| `authorized_keys` 数量误判为 0 | 单行文件没有结尾换行，`wc -l` 不适合作为条目计数 | 用 `grep -c` 按实际 key slot 计数 |
+| `sshd -T` 没反映生成配置 | 裸命令没有读取 NixOS 生成的 sshd config | 显式传入 `/etc/ssh/sshd_config` |
+| effective config 检查因 host key 缺失失败 | 真实 systemd service 会传 host key，独立探针没有 | 探针显式提供测试 host key |
+| OpenSSH 10.4 输出大小写变化导致文本比较失败 | effective directive 保留了值的大小写 | 使用精确、大小写不敏感匹配，不放宽配置语义 |
+| 测试驱动的 reboot 后 VM 不再启动 | disko 重建命令默认带 `-no-reboot` | 先冷关机并以 `allow_reboot` 重启，再执行一次真实 reboot |
+| 网络层出现未声明的额外 NIC/外网路径 | NixOS test driver 默认注入 SLiRP NIC | 对全部节点强制清空默认 networking options，只保留显式测试 VLAN |
+
+### 6.3 验证边界与最终 HEAD 复跑
+
+固定 disko test 与 NixOS integration test 都通过 9p 暴露 `/nix/store`。该挂载的 ownership 语义会使
+Home Manager activation service 的运行态所有权检查失真；因此本阶段不把该 service 的运行态作为 PASS 证据。
+Home Manager capability 只由 production closure build 与纯求值 policy check 覆盖，真实文件所有权和 activation
+仍须在 Phase 10 首启验收。
+
+本节记录的是产生文档变更前的首次完整 PASS。包含本记录的最终 branch HEAD 还必须在 clean nixbox checkout 上重跑同一
+短入口；精确 HEAD、时间、结果与最终临时目录清理写入 Issue #12 和 Draft PR，避免为了把 commit 自身写进文件而形成
+自引用提交。
 
 ## 7. 不能由 VM 证明的事项
 
