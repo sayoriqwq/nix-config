@@ -16,6 +16,10 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 - `homebrew.onActivation.upgrade = false`；
 - `homebrew.onActivation.cleanup = "none"`。
 
+以上 28 个 cask 是 Issue #46 的原始实施与验收基线。Issue #74 在 2026-07-31 恢复
+Lark 声明后，当前目标为 29 个 cask；原始 build/activation 记录仍按当时 28 个条目
+解释，后续修订见第 10 节。
+
 应用账号、许可证、登录态、偏好、缓存、数据库、容器、虚拟机、项目和其他可变状态
 不由 Homebrew Bundle 或 Nix 接管。
 
@@ -75,8 +79,9 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
   session 与 workspace 继续作为可变状态。
 
 `cleanup = "none"` 保证未列入本次声明的旧 cask 和应用不会被批量移除。
-维护者已决定退役 Lark，因此 `lark` 不在声明中；本次不会安装 `LarkSuite.app`，
-现有 `Lark.app` 只进入后续定向清理清单。
+Issue #46 当时依据维护者决定未声明 `lark`，随后 #57 将旧 `Lark.app` 与专属数据移入
+可恢复 Trash。该历史决定已由 #74 修正；当前声明加入 `lark`，但原始 #46 activation
+仍只包含 28 个 cask。
 
 ## 4. Mac App Store 边界
 
@@ -91,7 +96,7 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
 macOS 核心内建应用不写入 `masApps`。Xcode 虽有 App Store 版本，但根据维护者批准的
 Swift 工具链边界保持外部所有，因此也不写入 `masApps`。
 
-## 5. 离线验证
+## 5. Issue #46 原始离线验证
 
 activation 前运行：
 
@@ -190,3 +195,39 @@ Homebrew 元数据更新和 `brew upgrade --cask erictli/tap/scratch`。升级�
 集合为空。`CFBundleIdentifier` 仍为 `com.scratch.app`，Team Identifier 仍为
 `38H4DN8A25`，深度签名验证和启动探针均通过。裸 `brew outdated scratch` 会误解析到
 MIT Scratch 3.32.0，因此后续安装、升级和 outdated 验证都必须使用完整 token。
+
+## 10. Issue #74：恢复 Lark 声明与数据边界
+
+2026-07-31 的只读检查确认：
+
+- live `/Applications/Lark.app` 与 `~/Library/Application Support/LarkShell` 均不存在；
+- `~/.Trash/nix-config-phase4-retired-apps.sTa1Cr` 仍存在，总计约 8.3 GB；
+- 其中旧 `Lark.app` 约 1.3 GB，`Application Support/LarkShell` 约 4.7 GB；
+- bundle-specific preferences、HTTPStorage、cache 与字体 workaround 仍在隔离目录；
+- 未打开聊天、账号、数据库或其他用户内容。
+
+当前官方 Homebrew token 为 `lark`。对 Homebrew API 所列 DMG 做 SHA-256 校验和只读
+挂载后，确认 artifact 为 `LarkSuite.app`，bundle ID 为 `com.larksuite.larkApp`，
+Team ID 为 `JBRN9C6V7T`。Trash 中旧 `Lark.app` 的 bundle ID 为
+`com.electron.lark`，Team ID 为 `XY6NLV7YTS`。两者的
+`CFBundleShortVersionString` 均为 `131.0.6778.268`，二进制均引用 `LarkShell` 和旧新
+bundle identity，但 Keychain access group 随 Team/bundle 改变；因此文件数据具有迁移
+路径，登录凭据不能假定可直接继承。
+
+Homebrew 还提供 `feishu` cask，但它面向 `feishu.cn` 并安装 `Feishu.app`，不是本次维护者
+明确要求的 Lark 全球产品渠道，故不声明。配置只恢复 `LarkSuite.app` presence，不安装
+固定版本，也不接管应用自更新或可变状态。
+
+人工恢复必须遵循：
+
+1. 验收前不要清空上述 Trash；先在仓库外建立可恢复的私有副本；
+2. 在目标 live 路径不存在时，恢复旧 `Lark.app`、`LarkShell`、字体 workaround、
+   preferences 与 HTTPStorage；cache 可选，过期的 `com.ebus.lark.nf_ipc.sock` 不恢复；
+3. 由维护者启动旧 `Lark.app`，先验证账号、登录态、聊天和本地文件，并完成必要同步或
+   导出；随后完全退出旧应用；
+4. 再对合并后的精确 commit 单独批准并执行 nix-darwin activation，由 Homebrew 安装
+   可并存的 `LarkSuite.app`；
+5. 维护者首次启动新应用并完成可能需要的重新登录，确认数据迁移后再另行决定旧
+   `Lark.app` 的处置；两份应用不得同时运行，验收前继续保留私有回滚副本。
+
+Agent 在 #74 中只修改声明、文档并 build，不执行恢复、activation、安装或应用启动。

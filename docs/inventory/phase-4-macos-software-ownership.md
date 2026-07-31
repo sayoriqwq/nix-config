@@ -2,6 +2,7 @@
 
 - **机器：** `macbook`
 - **收口日期：** 2026-07-28
+- **维护修订：** 2026-07-31，Issue #74 恢复 Lark 的声明与可变数据边界
 - **决策来源：** Issue #6、#36 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -22,7 +23,7 @@
 | 来源 | 最终职责 | 声明/恢复入口 |
 | --- | --- | --- |
 | Nix / Home Manager | 通用 CLI、Shell、终端、编辑器及可靠 GUI | 顶层 Flake 与 `modules/home/` |
-| nix-darwin Homebrew | 28 个 cask、1 个限定 tap；无声明 formula | `modules/darwin/homebrew.nix` |
+| nix-darwin Homebrew | 29 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
 | Mac App Store | 9 个可独立恢复的 Apple/第三方应用 | `homebrew.masApps` |
 | Setapp | 14 个订阅应用与 Setapp 客户端 | Setapp 官方客户端、人工登录 |
 | macOS / Apple | 核心系统应用、Command Line Tools | 系统更新或 Apple 官方安装流程 |
@@ -79,11 +80,11 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 ### 4.1 nix-darwin 声明
 
 唯一允许的第三方 tap 是 `erictli/tap`，只为 Markdown 应用 Scratch 提供
-`erictli/tap/scratch`。声明的 28 个 cask 为：
+`erictli/tap/scratch`。声明的 29 个 cask 为：
 
 | 分类 | cask |
 | --- | --- |
-| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
+| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`lark`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
 | 创作与媒体 | `balenaetcher`、`figma`、`neteasemusic`、`homebrew/cask/obs` |
 | 开发与 AI | `chatgpt`、`claude-code`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
 | 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`steam`、`topnotch`、`vorssaint` |
@@ -99,6 +100,12 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
   receipt 与实际 bundle 定向对齐到 1.0.0；裸 `scratch` 会解析到同名 MIT 应用，安装、
   升级和 outdated 验证必须使用完整 token；
 - `homebrew/cask/obs` 强制选择官方 OBS Studio，避免旧第三方 tap 的同名迁移；
+- `lark` 当前安装 `LarkSuite.app`（`com.larksuite.larkApp`，Team ID
+  `JBRN9C6V7T`）。Trash 中的旧 `Lark.app` 是另一签名身份
+  （`com.electron.lark`，Team ID `XY6NLV7YTS`）；两者均引用
+  `~/Library/Application Support/LarkShell`，但 Keychain access group 不同，不能假设
+  登录态可直接迁移。Homebrew 只拥有新应用 presence；数据与迁移验收按 #74 的人工关卡
+  处理；
 - OrbStack 是唯一容器运行时。Nix/Homebrew 只声明应用 presence，VM、镜像、容器、
   volume、网络、context 与凭据不由仓库接管。
 
@@ -194,16 +201,22 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 | --- | --- |
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
 | VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
-| GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner |
+| GUI 来源散落且缺少统一恢复说明 | 29 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner |
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时，旧 Docker Desktop helper 已清理 |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
 | 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置源；旧仓库冻结归档 |
 
 已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、Google Antigravity、
-Itsycal、Lark、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Preview、
+Itsycal、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Preview、
 Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明确批准完成；Trash
 或私有备份是否最终清空不属于配置仓库职责。
+
+Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移动到可恢复 Trash。#74
+已纠正该决定：当前声明恢复 `lark` cask，但在 activation 前应先恢复并人工验收旧
+`Lark.app` 与可变数据，再把 `LarkSuite.app` 作为独立新身份迁移验证。两者可以并存，
+但不得同时运行或在无备份时共享写入 `LarkShell`。这项修正不把聊天、登录态或数据库
+交给 Nix，也不把 build 结果当作数据恢复成功。
 
 ## 10. 已知延期与回滚边界
 
