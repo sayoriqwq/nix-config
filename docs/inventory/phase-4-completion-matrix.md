@@ -10,7 +10,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | --- | --- | --- |
 | 将软件分为 Nixpkgs、Homebrew、MAS 与手工保留 | 完成 | [`phase-4-macos-software-ownership.md`](phase-4-macos-software-ownership.md) |
 | CLI 优先使用 Nix，并记录例外 | 完成 | #41、#43、#55；[`phase-4-cli-static.md`](phase-4-cli-static.md)、[`mise-runtime-ownership.md`](mise-runtime-ownership.md)、[`uv-python-ownership.md`](uv-python-ownership.md) |
-| 声明 Homebrew/tap/cask/formula 边界 | 完成 | #46、#55、#56；`modules/darwin/homebrew.nix` 与总体 inventory |
+| 声明 Homebrew/tap/cask/formula 边界 | 完成 | #46、#55、#56；当前 `modules/capabilities/macos-legacy-applications/darwin.nix` 与总体 inventory |
 | 逐项声明 defaults 并记录当前值、目标值和回滚 | 完成 | #37 / PR #40；[`phase-4-macos-defaults.md`](phase-4-macos-defaults.md) |
 | 检查应用数据目录与登录态 | 完成 | 总体 inventory 的每类可变状态边界与各迁移记录 |
 | 生成 activation 前后差异 | 完成 | 总体 inventory 第 9 节 |
@@ -36,7 +36,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | Typeless 与 Xcode 渠道 | #53 / #54 | `4397cd6e9db4459cb941298310b5bca72d45bc6a` | Typeless 已卸载；Xcode Beta 外部边界确认 |
 | formula/tap 清理 | #55 | 无仓库实现 PR | 35 formula、3 tap 定向清理并完成替代入口验证 |
 | cask 清理 | #56 | 无仓库实现 PR | 13 cask、2 tap 定向卸载；Nix 替代应用验证 |
-| 退役应用与数据 | #57 | 无仓库实现 PR | Battery Buddy、Lark、Zed Preview 移入可恢复 Trash，保留共享 Zed 数据 |
+| 退役应用与数据 | #57 | 无仓库实现 PR | Battery Buddy、Lark、Zed Preview 移入可恢复 Trash，保留共享 Zed 数据；Lark 后由 #74 纠正为保留 |
 | Chezmoi/dotfiles handoff | #58 | 无仓库实现 PR | Chezmoi 已卸载；旧仓库冻结，Nix 配置链接验证 |
 | 旧 Nix GUI rollback bundle | #61 | 无仓库实现 PR | 七个旧 `/Applications` bundle 移入可恢复 Trash；Nix 应用与共享数据验证通过 |
 
@@ -79,3 +79,9 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 5. 从 ThinkPad 重新采集实时主机、boot、filesystem、GPU、service、generation 与回滚证据。
 
 Phase 1 的旧 ThinkPad 快照不能直接部署，其中的 `trusted-public-keys` 等事实必须重新核对。
+
+## 6. Phase 4 后续维护修正
+
+Issue #74 在 Phase 4 已完成后纠正了 Lark 的退役决定：配置重新声明 `lark` cask，旧应用
+与专属数据继续留在可恢复 Trash，等待独立人工恢复和 activation 验收。该维护项不重开
+Phase 4、不改变 #57 当时执行过的历史事实，也不与 Server Phase 7/8 实现混合。

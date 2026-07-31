@@ -19,6 +19,7 @@
       "figma"
       "fuse-t"
       "izip"
+      "lark"
       "linear"
       "megasync"
       "neteasemusic"

@@ -26,7 +26,23 @@ key/history、浏览器 profile、编辑器登录态与 workspace、数据库、
 3. 记录现有 `/Applications`、Homebrew/MAS receipts、当前 Nix generation 和外部应用身份。
 4. 不运行 `brew cleanup`、`brew autoremove`、`brew uninstall --zap` 或批量删除应用。
 
-### 2.2 安装 Nix 系统层
+### 2.2 当前机器的 Lark 恢复关卡
+
+Issue #74 确认旧 `Lark.app` 与专属数据仍在
+`~/.Trash/nix-config-phase4-retired-apps.sTa1Cr`。在当前机器恢复时：
+
+1. 不清空 Trash，也不先启动或安装新的 Lark；
+2. 先在仓库外建立隔离目录的私有副本，再把旧 `Lark.app`、`LarkShell`、字体
+   workaround、preferences 与 HTTPStorage 恢复到原位置；cache 可选，不恢复过期 socket；
+3. 由维护者先启动旧 `Lark.app`，验证账号、聊天和本地文件，完成必要同步或导出后退出；
+4. 再执行绑定精确 commit 的 nix-darwin activation，安装当前 `LarkSuite.app`；
+5. 新旧应用 bundle/Team/Keychain identity 不同；维护者首次启动新应用、完成可能需要的
+   重新登录并验证迁移。两份应用不得同时运行，验收前不删除旧应用或私有回滚副本。
+
+Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark 可变数据逻辑完整。若任何目标
+路径已存在，停止恢复并先建立私有备份/比较，不覆盖。
+
+### 2.3 安装 Nix 系统层
 
 1. 按 [`bootstrap-macos.md`](bootstrap-macos.md) 安装 Lix，并只构建目标
    `darwinConfigurations.macbook.system`。
@@ -38,7 +54,7 @@ key/history、浏览器 profile、编辑器登录态与 workspace、数据库、
 首次 activation 将同时恢复 Nix/Home Manager 应用、CLI、静态配置、Homebrew cask、
 MAS 声明和 defaults。它不会自动恢复外部数据。
 
-### 2.3 验证声明式层
+### 2.4 验证声明式层
 
 在全新登录 shell 中检查：
 
@@ -56,7 +72,7 @@ echo $VISUAL
 Quick Note、菜单栏时钟和电池。应用设置与 Shell PATH 必须在真实终端会话验证，不能用
 Codex 进程继承的 PATH 代替。
 
-### 2.4 恢复外部软件
+### 2.5 恢复外部软件
 
 按所有权逐层恢复，避免同一路径出现两个写入者：
 
@@ -75,7 +91,7 @@ Codex 进程继承的 PATH 代替。
 
 - Nix 应用只来自 Home Manager Apps，不存在旧 VS Code、Zed Preview 或 #61 所列七个
   `/Applications` rollback bundle；
-- Homebrew Bundle 恰好声明 1 个 tap、28 个 cask、9 个 MAS app、0 个 formula；
+- Homebrew Bundle 恰好声明 1 个 tap、29 个 cask、9 个 MAS app、0 个 formula；
 - `homebrew.onActivation.cleanup = "none"`；
 - `ChatGPT.app` 是 `com.openai.codex`，`ChatGPT Classic.app` 是 `com.openai.chat`；
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；
