@@ -6,7 +6,15 @@ in
 {
   disko.tests = {
     efi = false;
-    extraConfig = ./server-overlay.nix;
+    extraConfig = {
+      imports = [ ./server-overlay.nix ];
+
+      # disko's boot reconstruction uses QEMU's implicit e1000 NIC and does
+      # not expose a virtualisation option for that manually-created machine.
+      # The separate network test keeps the production-equivalent virtio_net
+      # topology and fail-closed preflight.
+      systemd.network.networks."10-phase9-uplink".matchConfig.Driver = lib.mkForce "e1000";
+    };
     extraChecks = ''
       with subtest("BIOS, GPT, EF02, ext4 root and no swap"):
           machine.wait_for_unit("multi-user.target")
@@ -18,11 +26,11 @@ in
           machine.succeed("test \"$(lsblk -no FSTYPE /dev/vda2)\" = ext4")
           machine.succeed("test -z \"$(swapon --show --noheadings)\"")
 
-      with subtest("dummy dual-stack network and one virtio_net NIC"):
+      with subtest("dummy dual-stack network on disko's single e1000 boot NIC"):
           nic = machine.succeed(
               """for nic_path in /sys/class/net/*; do
                     driver_path="$(readlink -f "$nic_path/device/driver" 2>/dev/null || true)"
-                    if test "$(basename "$driver_path")" = virtio_net; then
+                    if test "$(basename "$driver_path")" = e1000; then
                       basename "$nic_path"
                     fi
                  done"""

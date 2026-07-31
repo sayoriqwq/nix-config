@@ -56,6 +56,11 @@ Phase 9 只给 `server` output 增加 `disko.tests` 定义；普通 production �
 - 在最终系统检查 GPT `EF02`、ext4 `/`、无 swap、dummy network、SSH policy、firewall 与 capability boundary；
 - 再执行一次独立 reboot，复查 boot ID、SSH host identity、filesystem、route 与 sudo。
 
+固定 disko 的 `installTest` 会用手工 QEMU command 重建 booted machine，未暴露该机器的 NIC model 配置，因此使用
+QEMU implicit `e1000`。安装层只用它承载 dummy network 并验证 disk/boot 与配置能启动；不会把它写成
+production NIC 已验证。production 等价的单张 `virtio_net`、driver match、失败关闭 preflight 与实际双栈 TCP/SSH
+全部由下一层覆盖。这个拆分避免为测试修改或放宽 production server 的 `virtio_net` 声明。
+
 upstream `--vm-test` 分支在构建 `installTest` 后直接结束，不接收 SSH destination，也不会运行 remote
 `--copy-host-keys` 路径。因此 host-key copy 不能伪装成已由 nixos-anywhere 覆盖；本阶段在第二层单独做行为等价的
 ephemeral simulation，并把这项差异保留到 Phase 10 人工关卡。
