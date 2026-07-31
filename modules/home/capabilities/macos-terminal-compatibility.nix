@@ -18,6 +18,7 @@
     mise.enableZshIntegration = true;
     pay-respects.enableZshIntegration = true;
     starship.enableZshIntegration = true;
+    zoxide.enableZshIntegration = true;
   };
 
   sayori.statePaths = [
