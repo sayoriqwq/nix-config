@@ -67,16 +67,24 @@ in
           machine.fail("systemctl list-unit-files --no-legend | grep -E '^(display-manager|docker|podman)\\.'")
           machine.fail("runuser -u ${username} -- grep -Eq '^[[:space:]]*sync([._]|[[:space:]]*=)' /home/${username}/.config/atuin/config.toml")
 
-      with subtest("second boot preserves access-critical state"):
+      with subtest("power cycle and reboot preserve access-critical state"):
           first_boot_id = machine.succeed("cat /proc/sys/kernel/random/boot_id").strip()
           first_host_key = machine.succeed("ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub").strip()
-          machine.reboot()
+          machine.shutdown()
+          machine.start(allow_reboot=True)
           machine.wait_for_unit("multi-user.target")
           machine.wait_for_unit("sshd.service")
           second_boot_id = machine.succeed("cat /proc/sys/kernel/random/boot_id").strip()
           second_host_key = machine.succeed("ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub").strip()
           assert first_boot_id != second_boot_id
           assert first_host_key == second_host_key
+          machine.reboot()
+          machine.wait_for_unit("multi-user.target")
+          machine.wait_for_unit("sshd.service")
+          third_boot_id = machine.succeed("cat /proc/sys/kernel/random/boot_id").strip()
+          third_host_key = machine.succeed("ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub").strip()
+          assert second_boot_id != third_boot_id
+          assert first_host_key == third_host_key
           machine.succeed("test \"$(findmnt -n -o FSTYPE /)\" = ext4")
           machine.succeed("test -z \"$(swapon --show --noheadings)\"")
           machine.succeed("ip -4 route show default | grep -F 'via ${values.ipv4Gateway}'")
