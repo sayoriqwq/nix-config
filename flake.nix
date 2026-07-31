@@ -77,9 +77,8 @@
         serverConfiguration = self.nixosConfigurations.server;
       };
       phase10NixboxBootstrapTest = import ./tests/phase-10/nixbox-bootstrap-test.nix {
-        inherit username;
+        bootstrapTestData = phase10NixboxBootstrap.testData;
         pkgs = phase9Pkgs;
-        serverConfiguration = self.nixosConfigurations.server;
       };
       nixosAnywherePackage = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
       phase9TestRunner = import ./tests/phase-9/runner.nix {

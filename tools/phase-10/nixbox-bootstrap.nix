@@ -31,9 +31,12 @@ let
     else
       throw "phase10-nixbox-bootstrap: expected exactly one final root public key";
 
-  remoteAction = pkgs.writeText "phase10-remote-nixbox-bootstrap.sh" (
-    builtins.readFile ./remote-nixbox-bootstrap.sh
-  );
+  remoteActionText = action: ''
+    set -- ${lib.escapeShellArg action} ${lib.escapeShellArg deployKey} ${lib.escapeShellArg macbookKey}
+    ${builtins.readFile ./remote-nixbox-bootstrap.sh}
+  '';
+  remoteAction =
+    action: pkgs.writeText "phase10-remote-nixbox-bootstrap-${action}.sh" (remoteActionText action);
 
   makeAction =
     {
@@ -88,11 +91,8 @@ let
         printf 'phase10-nixbox-bootstrap: local commit=%s action=%s target-alias=%s host=%s user=root strict-host-key=yes\n' \
           "$commit" ${lib.escapeShellArg action} "$target" "$expected_host"
 
-        "$ssh_binary" "''${ssh_options[@]}" "$target" bash -s -- \
-          ${lib.escapeShellArg action} \
-          ${lib.escapeShellArg deployKey} \
-          ${lib.escapeShellArg macbookKey} \
-          < ${remoteAction}
+        "$ssh_binary" "''${ssh_options[@]}" "$target" bash -s \
+          < ${remoteAction action}
       '';
     };
 in
@@ -104,5 +104,12 @@ in
   remove = makeAction {
     action = "remove";
     name = "phase10-rollback-nixbox-bootstrap";
+  };
+  testData = {
+    inherit deployKey macbookKey;
+    remoteActionTexts = {
+      add = remoteActionText "add";
+      remove = remoteActionText "remove";
+    };
   };
 }

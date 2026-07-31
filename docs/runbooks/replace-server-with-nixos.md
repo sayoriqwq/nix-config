@@ -91,7 +91,7 @@ nix run .#phase10-bootstrap-nixbox
 nix run .#phase10-rollback-nixbox-bootstrap
 ```
 
-add 与 rollback 都先自动重跑 production preflight。底层 SSH 强制 system SSH、声明式 host、root/22、无 forwarding/proxy/jump/connection sharing 与 strict host checking；远端只接受从同一 NixOS configuration 派生的两把 public key。它在任何写入前验证 root SSH 目录/文件不是 symlink、权限 owner 正确、macbook key 精确保留且 deploy key 无重复或 metadata 漂移，再通过同目录临时文件、候选解析与原子 rename 更新。两种 action 均幂等；rollback 只移除精确 deploy key，但仍必须单独批准。
+add 与 rollback 都先自动重跑 production preflight。底层 SSH 强制 system SSH、声明式 host、root/22、无 forwarding/proxy/jump/connection sharing 与 strict host checking；远端命令只发送 `bash -s`，action 与从同一 NixOS configuration 派生的两把 public key 经 shell escaping 固化在 stdin 脚本内部，避免 OpenSSH 重组远端参数时拆分 key。它在任何写入前验证 root SSH 目录/文件不是 symlink、权限 owner 正确、macbook key 精确保留且 deploy key 无重复或 metadata 漂移，再通过同目录临时文件、候选解析与原子 rename 更新。两种 action 均幂等；rollback 只移除精确 deploy key，但仍必须单独批准。
 
 production 前必须在 nixbox 运行隔离的 `checks.x86_64-linux.phase10-nixbox-bootstrap`，覆盖正常 add/rollback、幂等性以及 duplicate、metadata drift、unsafe mode、symlink 失败注入。测试通过只证明文件更新算法，不授权 production 修改；当前实例的精确 commit 与结果记录在 [`Phase 10 正式替换现场记录`](../inventory/phase-10-server-replacement.md#4-nixbox-bootstrap-authentication-未闭合关卡)。
 

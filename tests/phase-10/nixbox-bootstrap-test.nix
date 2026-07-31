@@ -1,26 +1,16 @@
 {
+  bootstrapTestData,
   pkgs,
-  serverConfiguration,
-  username,
 }:
 
 let
-  inherit (pkgs) lib;
-  serverConfig = serverConfiguration.config;
-  deployKeys = lib.filter (
-    key: lib.hasSuffix " nixbox-server-deploy-2026-07-30" key
-  ) serverConfig.users.users.${username}.openssh.authorizedKeys.keys;
-  deployKey =
-    if builtins.length deployKeys == 1 then
-      builtins.head deployKeys
-    else
-      throw "phase10-nixbox-bootstrap-test: expected exactly one nixbox deploy public key";
-  rootKeys = serverConfig.users.users.root.openssh.authorizedKeys.keys;
-  macbookKey =
-    if builtins.length rootKeys == 1 then
-      builtins.head rootKeys
-    else
-      throw "phase10-nixbox-bootstrap-test: expected exactly one final root public key";
+  inherit (bootstrapTestData) deployKey macbookKey;
+  remoteAddScript = pkgs.writeText "phase10-remote-nixbox-bootstrap-add.sh" (
+    bootstrapTestData.remoteActionTexts.add
+  );
+  remoteRemoveScript = pkgs.writeText "phase10-remote-nixbox-bootstrap-remove.sh" (
+    bootstrapTestData.remoteActionTexts.remove
+  );
 in
 pkgs.testers.runNixOSTest {
   name = "phase10-nixbox-bootstrap";
@@ -42,7 +32,9 @@ pkgs.testers.runNixOSTest {
 
     deploy_key = ${builtins.toJSON deployKey}
     macbook_key = ${builtins.toJSON macbookKey}
-    remote_script = ${builtins.toJSON "${../../tools/phase-10/remote-nixbox-bootstrap.sh}"}
+    raw_remote_script = ${builtins.toJSON "${../../tools/phase-10/remote-nixbox-bootstrap.sh}"}
+    remote_add_script = ${builtins.toJSON "${remoteAddScript}"}
+    remote_remove_script = ${builtins.toJSON "${remoteRemoveScript}"}
     ssh_directory = "/root/.ssh"
     authorized_keys = f"{ssh_directory}/authorized_keys"
     newline = chr(10)
@@ -63,14 +55,15 @@ pkgs.testers.runNixOSTest {
         machine.succeed(f"chown root:root {quoted(authorized_keys)}")
 
     def run(action):
+        script = {
+            "add": remote_add_script,
+            "remove": remote_remove_script,
+        }[action]
         return machine.succeed(
             " ".join(
                 [
                     "bash",
-                    quoted(remote_script),
-                    quoted(action),
-                    quoted(deploy_key),
-                    quoted(macbook_key),
+                    quoted(script),
                 ]
             )
         )
@@ -80,7 +73,7 @@ pkgs.testers.runNixOSTest {
             " ".join(
                 [
                     "bash",
-                    quoted(remote_script),
+                    quoted(raw_remote_script),
                     quoted(action),
                     quoted(deploy),
                     quoted(macbook),
