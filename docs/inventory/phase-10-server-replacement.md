@@ -94,11 +94,33 @@ macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相�
 
 这是 production SSH access 修改，必须另给中文行动卡、完整底层命令、验证与撤销步骤，并取得当前明确批准。本文只记录缺口与推荐方案，不执行该动作。
 
+仓库提供两个不接受参数的 macbook 短入口：
+
+```text
+nix run .#phase10-bootstrap-nixbox
+nix run .#phase10-rollback-nixbox-bootstrap
+```
+
+两个入口都先重跑同一 commit 的完整只读 `phase10-preflight`，随后固定 macOS system SSH、`sayori` alias、声明式 production host、root、TCP 22、无 forwarding、无 proxy/jump、无 connection sharing 与 strict host checking。deploy public key 和当前 macbook root public key 都直接从同一 server configuration 派生，维护者不手抄 key 或长参数。
+
+远端 state-changing helper 的失败关闭合同：
+
+1. 只接受内部固定的 `add` 或 `remove` action，以及两把已声明的 canonical ED25519 public key；
+2. `/root/.ssh` 必须是 mode `0700` 的 root-owned 实体目录，`authorized_keys` 必须是 mode `0600` 的 root-owned 实体文件；任一 symlink、权限或 owner 漂移都拒绝；
+3. 当前 macbook root key 必须精确出现一次；nixbox key 的 payload、comment 或重复数量异常都拒绝；
+4. 使用同目录 mode `0600` 临时文件，保留原文件属性，只构造预期候选内容；候选文件必须再次保留 macbook key、满足精确 deploy-key count 并通过 `ssh-keygen` 解析；
+5. 候选内容先同步，再以同目录 rename 原子替换；成功输出只包含 action、是否实际改变、macbook key 已保留和 deploy-key count，不输出 key 或 fingerprint；
+6. `add` 已存在和 `remove` 已不存在均为无写入的幂等 PASS；回滚只移除精确 deploy public-key 行，不删除 macbook key。
+
+回滚入口的存在不是自动执行授权。bootstrap 后若 nixbox strict verification 失败，保持 macbook SSH 会话与 VNC 可用，停止后续步骤；是否立即回滚仍由维护者单独批准。
+
+macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 evaluation。另有 `checks.x86_64-linux.phase10-nixbox-bootstrap` 隔离 NixOS VM test，覆盖 add、重复 add、rollback、重复 rollback，以及 duplicate payload、changed metadata、unsafe mode 和 symlink 失败注入；它必须在 nixbox 对冻结 commit 实际运行通过，才可请求 production bootstrap 批准。
+
 ## 5. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
-3. 维护者理解并批准或否决临时 nixbox root deploy-key bootstrap；
+3. 在 nixbox 运行隔离 bootstrap VM test；维护者理解并批准或否决临时 nixbox root deploy-key bootstrap；
 4. bootstrap 后从 nixbox 以专用 key、专用 known-hosts 与 strict checking 只读验证当前 Ubuntu；
 5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
 6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；

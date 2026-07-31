@@ -84,6 +84,17 @@ Phase 8 的 nixbox deploy public key 只存在于未来 NixOS 声明，当前 Ub
 
 这个临时授权是 production SSH access 修改，不由 VNC、preflight、Phase 8/9 或本文自动批准。完成后，nixbox 还必须使用专用 deploy identity 与专用 known-hosts file 做一次 strict、只读登录验证，才允许冻结 install helper。
 
+该动作只暴露两个不接受参数的短入口：
+
+```text
+nix run .#phase10-bootstrap-nixbox
+nix run .#phase10-rollback-nixbox-bootstrap
+```
+
+add 与 rollback 都先自动重跑 production preflight。底层 SSH 强制 system SSH、声明式 host、root/22、无 forwarding/proxy/jump/connection sharing 与 strict host checking；远端只接受从同一 NixOS configuration 派生的两把 public key。它在任何写入前验证 root SSH 目录/文件不是 symlink、权限 owner 正确、macbook key 精确保留且 deploy key 无重复或 metadata 漂移，再通过同目录临时文件、候选解析与原子 rename 更新。两种 action 均幂等；rollback 只移除精确 deploy key，但仍必须单独批准。
+
+production 前必须在 nixbox 运行隔离的 `checks.x86_64-linux.phase10-nixbox-bootstrap`，覆盖正常 add/rollback、幂等性以及 duplicate、metadata drift、unsafe mode、symlink 失败注入。测试通过只证明文件更新算法，不授权 production 修改。
+
 ### B. 安装
 
 1. macbook 保持 VNC 与独立 SSH 观察，不作为构建来源；

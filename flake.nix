@@ -76,6 +76,11 @@
         inherit phase9Pkgs username;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      phase10NixboxBootstrapTest = import ./tests/phase-10/nixbox-bootstrap-test.nix {
+        inherit username;
+        pkgs = phase9Pkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+      };
       nixosAnywherePackage = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
       phase9TestRunner = import ./tests/phase-9/runner.nix {
         inherit nixosAnywherePackage;
@@ -86,6 +91,11 @@
         pkgs = phase10Pkgs;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      phase10NixboxBootstrap = import ./tools/phase-10/nixbox-bootstrap.nix {
+        inherit phase10Preflight username;
+        pkgs = phase10Pkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+      };
       phase10RemotePreflightCheck =
         phase10Pkgs.runCommand "phase10-remote-preflight-shellcheck"
           {
@@ -93,6 +103,15 @@
           }
           ''
             shellcheck ${./tools/phase-10/remote-preflight.sh}
+            touch "$out"
+          '';
+      phase10RemoteNixboxBootstrapCheck =
+        phase10Pkgs.runCommand "phase10-remote-nixbox-bootstrap-shellcheck"
+          {
+            nativeBuildInputs = [ phase10Pkgs.shellcheck ];
+          }
+          ''
+            shellcheck ${./tools/phase-10/remote-nixbox-bootstrap.sh}
             touch "$out"
           '';
     in
@@ -131,7 +150,9 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
+          phase10-bootstrap-nixbox = phase10NixboxBootstrap.add;
           phase10-preflight = phase10Preflight;
+          phase10-rollback-nixbox-bootstrap = phase10NixboxBootstrap.remove;
           zed-nightly = inputs.zed.packages.aarch64-darwin.default;
         };
         x86_64-linux = {
@@ -142,9 +163,19 @@
         };
       };
 
-      apps.aarch64-darwin.phase10-preflight = {
-        type = "app";
-        program = "${phase10Preflight}/bin/phase10-preflight";
+      apps.aarch64-darwin = {
+        phase10-bootstrap-nixbox = {
+          type = "app";
+          program = "${phase10NixboxBootstrap.add}/bin/phase10-bootstrap-nixbox";
+        };
+        phase10-preflight = {
+          type = "app";
+          program = "${phase10Preflight}/bin/phase10-preflight";
+        };
+        phase10-rollback-nixbox-bootstrap = {
+          type = "app";
+          program = "${phase10NixboxBootstrap.remove}/bin/phase10-rollback-nixbox-bootstrap";
+        };
       };
 
       apps.x86_64-linux = {
@@ -159,13 +190,17 @@
       };
 
       checks.aarch64-darwin = {
+        phase10-bootstrap-nixbox = phase10NixboxBootstrap.add;
         phase10-preflight = phase10Preflight;
+        phase10-remote-nixbox-bootstrap-shellcheck = phase10RemoteNixboxBootstrapCheck;
         phase10-remote-preflight-shellcheck = phase10RemotePreflightCheck;
+        phase10-rollback-nixbox-bootstrap = phase10NixboxBootstrap.remove;
       };
 
       checks.x86_64-linux = {
         phase9-network = phase9NetworkTest;
         phase9-policy = phase9PolicyCheck;
+        phase10-nixbox-bootstrap = phase10NixboxBootstrapTest;
       };
 
       formatter = {
