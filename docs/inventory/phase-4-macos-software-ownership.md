@@ -2,7 +2,7 @@
 
 - **机器：** `macbook`
 - **收口日期：** 2026-07-28
-- **维护修订：** 2026-07-31，Issue #74 恢复 Lark 的声明与可变数据边界
+- **维护修订：** 2026-07-31，Issue #74 恢复 Lark 数据；Issue #81 将当前渠道更正为中国区 Feishu
 - **决策来源：** Issue #6、#36 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -84,7 +84,7 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 
 | 分类 | cask |
 | --- | --- |
-| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`lark`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
+| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`feishu`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
 | 创作与媒体 | `balenaetcher`、`figma`、`neteasemusic`、`homebrew/cask/obs` |
 | 开发与 AI | `chatgpt`、`claude-code`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
 | 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`steam`、`topnotch`、`vorssaint` |
@@ -100,12 +100,13 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
   receipt 与实际 bundle 定向对齐到 1.0.0；裸 `scratch` 会解析到同名 MIT 应用，安装、
   升级和 outdated 验证必须使用完整 token；
 - `homebrew/cask/obs` 强制选择官方 OBS Studio，避免旧第三方 tap 的同名迁移；
-- `lark` 当前安装 `LarkSuite.app`（`com.larksuite.larkApp`，Team ID
-  `JBRN9C6V7T`）。Trash 中的旧 `Lark.app` 是另一签名身份
-  （`com.electron.lark`，Team ID `XY6NLV7YTS`）；两者均引用
-  `~/Library/Application Support/LarkShell`，但 Keychain access group 不同，不能假设
-  登录态可直接迁移。Homebrew 只拥有新应用 presence；数据与迁移验收按 #74 的人工关卡
-  处理；
+- `feishu` 是当前声明的中国区渠道，官方 cask 把 DMG 内 `Lark.app` 安装为
+  `/Applications/Feishu.app`。Homebrew 只拥有新应用 presence；其 bundle 与签名身份在
+  activation 后核验。Issue #74 已恢复的旧 `Lark.app`（`com.electron.lark`，Team ID
+  `XY6NLV7YTS`）和此前 `lark` cask 安装的 `LarkSuite.app`
+  （`com.larksuite.larkApp`，Team ID `JBRN9C6V7T`）继续作为回滚入口保留。
+  `cleanup = "none"` 不会自动卸载它们；三份应用不得同时运行，登录态和数据迁移按
+  #81 的独立人工关卡处理；
 - OrbStack 是唯一容器运行时。Nix/Homebrew 只声明应用 presence，VM、镜像、容器、
   volume、网络、context 与凭据不由仓库接管。
 
@@ -213,10 +214,10 @@ Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明�
 或私有备份是否最终清空不属于配置仓库职责。
 
 Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移动到可恢复 Trash。#74
-已纠正该决定：当前声明恢复 `lark` cask，但在 activation 前应先恢复并人工验收旧
-`Lark.app` 与可变数据，再把 `LarkSuite.app` 作为独立新身份迁移验证。两者可以并存，
-但不得同时运行或在无备份时共享写入 `LarkShell`。这项修正不把聊天、登录态或数据库
-交给 Nix，也不把 build 结果当作数据恢复成功。
+恢复并人工验收了旧应用与数据，随后全球版 `lark` cask 安装了 `LarkSuite.app`。维护者
+在 #81 明确把当前产品要求更正为中国区 Feishu，因此声明改为 `feishu`；现有两份 Lark
+应用、Trash 原件和私有备份继续保留，等待 `/Applications/Feishu.app` 安装与人工验收。
+这项更正不把聊天、登录态或数据库交给 Nix，也不把 build 结果当作数据迁移成功。
 
 ## 10. 已知延期与回滚边界
 

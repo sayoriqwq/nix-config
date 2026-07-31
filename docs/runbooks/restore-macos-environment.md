@@ -26,21 +26,25 @@ key/history、浏览器 profile、编辑器登录态与 workspace、数据库、
 3. 记录现有 `/Applications`、Homebrew/MAS receipts、当前 Nix generation 和外部应用身份。
 4. 不运行 `brew cleanup`、`brew autoremove`、`brew uninstall --zap` 或批量删除应用。
 
-### 2.2 当前机器的 Lark 恢复关卡
+### 2.2 当前机器的 Feishu 渠道更正与数据关卡
 
-Issue #74 确认旧 `Lark.app` 与专属数据仍在
-`~/.Trash/nix-config-phase4-retired-apps.sTa1Cr`。在当前机器恢复时：
+Issue #74 已从 Trash 恢复并人工验收旧 `Lark.app` 与核心数据，Trash 原件和仓库外私有
+备份仍保留；此前全球版 `lark` cask 还安装了 `LarkSuite.app`。Issue #81 已明确当前目标
+是中国区 `feishu` cask 与 `/Applications/Feishu.app`。在当前机器恢复时：
 
-1. 不清空 Trash，也不先启动或安装新的 Lark；
-2. 先在仓库外建立隔离目录的私有副本，再把旧 `Lark.app`、`LarkShell`、字体
-   workaround、preferences 与 HTTPStorage 恢复到原位置；cache 可选，不恢复过期 socket；
-3. 由维护者先启动旧 `Lark.app`，验证账号、聊天和本地文件，完成必要同步或导出后退出；
-4. 再执行绑定精确 commit 的 nix-darwin activation，安装当前 `LarkSuite.app`；
-5. 新旧应用 bundle/Team/Keychain identity 不同；维护者首次启动新应用、完成可能需要的
-   重新登录并验证迁移。两份应用不得同时运行，验收前不删除旧应用或私有回滚副本。
+1. 保留 `Lark.app`、`LarkSuite.app`、Trash 原件和私有备份，不运行 cleanup、zap 或
+   定向卸载；
+2. 确认 Lark、LarkSuite 与 Feishu 进程全部退出，再执行绑定精确 commit 的
+   nix-darwin activation；
+3. `cleanup = "none"` 意味着 activation 只安装 `Feishu.app`，不会自动删除既有两份
+   应用或 Homebrew `lark` receipt；
+4. 安装后先核验 Feishu 的 Homebrew receipt、bundle、Team ID 与签名，不启动应用；
+5. 再由维护者单独启动 Feishu，验证中国区账号、工作区、聊天、本地文件和同步，并决定
+   是否需要迁移旧数据；三份应用不得同时运行；
+6. Feishu 验收通过后，旧应用、receipt 与备份的最终处置仍需独立 Issue 和明确批准。
 
-Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark 可变数据逻辑完整。若任何目标
-路径已存在，停止恢复并先建立私有备份/比较，不覆盖。
+Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark/Feishu 可变数据逻辑完整。若
+任何目标路径已存在，停止并先建立私有备份/比较，不覆盖。
 
 ### 2.3 安装 Nix 系统层
 
@@ -92,6 +96,7 @@ Codex 进程继承的 PATH 代替。
 - Nix 应用只来自 Home Manager Apps，不存在旧 VS Code、Zed Preview 或 #61 所列七个
   `/Applications` rollback bundle；
 - Homebrew Bundle 恰好声明 1 个 tap、29 个 cask、9 个 MAS app、0 个 formula；
+- 通信应用声明为中国区 `feishu`，不再声明全球版 `lark`；
 - `homebrew.onActivation.cleanup = "none"`；
 - `ChatGPT.app` 是 `com.openai.codex`，`ChatGPT Classic.app` 是 `com.openai.chat`；
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；
