@@ -114,13 +114,15 @@ nix run .#phase10-rollback-nixbox-bootstrap
 
 回滚入口的存在不是自动执行授权。bootstrap 后若 nixbox strict verification 失败，保持 macbook SSH 会话与 VNC 可用，停止后续步骤；是否立即回滚仍由维护者单独批准。
 
-macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 evaluation。另有 `checks.x86_64-linux.phase10-nixbox-bootstrap` 隔离 NixOS VM test，覆盖 add、重复 add、rollback、重复 rollback，以及 duplicate payload、changed metadata、unsafe mode 和 symlink 失败注入；它必须在 nixbox 对冻结 commit 实际运行通过，才可请求 production bootstrap 批准。
+macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 evaluation。`checks.x86_64-linux.phase10-nixbox-bootstrap` 隔离 NixOS VM test 覆盖 add、重复 add、rollback、重复 rollback，以及 duplicate payload、changed metadata、unsafe mode 和 symlink 失败注入。
+
+2026-07-31 在 nixbox 对精确 commit `7d7778fb0fe59047593595e2397cb01e56bd7ead` 实际运行该 VM test，结果完整 PASS。nixbox 直接获取 GitHub commit 曾因连接超时在五次重试后失败，随后由 macbook 通过现有严格 SSH 的 Nix store 通道传输同一 clean flake archive，再从不可变 source path 构建；没有修改 nixbox checkout，也没有连接 production server。
 
 ## 5. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
-3. 在 nixbox 运行隔离 bootstrap VM test；维护者理解并批准或否决临时 nixbox root deploy-key bootstrap；
+3. **已完成：** 在 nixbox 运行隔离 bootstrap VM test；维护者理解并批准或否决临时 nixbox root deploy-key bootstrap；
 4. bootstrap 后从 nixbox 以专用 key、专用 known-hosts 与 strict checking 只读验证当前 Ubuntu；
 5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
 6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；
