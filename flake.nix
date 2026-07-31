@@ -189,18 +189,24 @@
         };
       };
 
-      checks.aarch64-darwin = {
-        phase10-bootstrap-nixbox = phase10NixboxBootstrap.add;
-        phase10-preflight = phase10Preflight;
-        phase10-remote-nixbox-bootstrap-shellcheck = phase10RemoteNixboxBootstrapCheck;
-        phase10-remote-preflight-shellcheck = phase10RemotePreflightCheck;
-        phase10-rollback-nixbox-bootstrap = phase10NixboxBootstrap.remove;
-      };
-
-      checks.x86_64-linux = {
-        phase9-network = phase9NetworkTest;
-        phase9-policy = phase9PolicyCheck;
-        phase10-nixbox-bootstrap = phase10NixboxBootstrapTest;
+      checks = {
+        aarch64-darwin = {
+          macbook-zsh-zoxide = import ./tests/macos/zsh-zoxide.nix {
+            pkgs = packagesFor "aarch64-darwin";
+            zshrc =
+              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
+          };
+          phase10-bootstrap-nixbox = phase10NixboxBootstrap.add;
+          phase10-preflight = phase10Preflight;
+          phase10-remote-nixbox-bootstrap-shellcheck = phase10RemoteNixboxBootstrapCheck;
+          phase10-remote-preflight-shellcheck = phase10RemotePreflightCheck;
+          phase10-rollback-nixbox-bootstrap = phase10NixboxBootstrap.remove;
+        };
+        x86_64-linux = {
+          phase9-network = phase9NetworkTest;
+          phase9-policy = phase9PolicyCheck;
+          phase10-nixbox-bootstrap = phase10NixboxBootstrapTest;
+        };
       };
 
       formatter = {
