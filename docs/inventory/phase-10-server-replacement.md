@@ -28,6 +28,8 @@ nix run .#phase10-preflight
 4. 到目标的路由不再经过 macbook 物理接口 `en0`；
 5. 不能使用 `BatchMode=yes`、`IdentitiesOnly=yes` 与 `StrictHostKeyChecking=yes` 通过现有可信 pin。
 
+入口明确调用 macOS `/usr/bin/ssh`，以兼容现有 SSH 配置中的 Apple `UseKeychain` 扩展并复用 Keychain identity；不向 `PATH` 注入 portable OpenSSH，也不读取或复制 private key。
+
 远端 probe 通过 stdin 交给 Ubuntu 的 `bash -s`，不创建远端文件。期望的 stable disk alias、IPv4/IPv6 address、gateway 与 DNS 直接从同一 commit 的 `nixosConfigurations.server` 求值结果生成，不维护第二份手写 production 参数。
 
 远端只读检查覆盖：

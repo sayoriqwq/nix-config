@@ -39,7 +39,6 @@ pkgs.writeShellApplication {
     pkgs.gawk
     pkgs.gitMinimal
     pkgs.gnugrep
-    pkgs.openssh
   ];
   text = ''
     fail() {
@@ -61,12 +60,16 @@ pkgs.writeShellApplication {
     fi
 
     target="sayori"
+    ssh_binary="/usr/bin/ssh"
     expected_host=${lib.escapeShellArg expectedHost}
     expected_user="root"
     expected_port="22"
     expected_route_interface="en0"
 
-    ssh_config="$(ssh -G "$target" 2>/dev/null)"
+    test -x "$ssh_binary" ||
+      fail "macOS system SSH is unavailable: $ssh_binary"
+
+    ssh_config="$("$ssh_binary" -G "$target" 2>/dev/null)"
     resolved_host="$(awk '$1 == "hostname" { print $2; exit }' <<<"$ssh_config")"
     resolved_user="$(awk '$1 == "user" { print $2; exit }' <<<"$ssh_config")"
     resolved_port="$(awk '$1 == "port" { print $2; exit }' <<<"$ssh_config")"
@@ -108,7 +111,7 @@ pkgs.writeShellApplication {
     printf 'phase10-preflight: local commit=%s target-alias=%s host=%s user=%s route-interface=%s strict-host-key=yes\n' \
       "$commit" "$target" "$expected_host" "$expected_user" "$route_interface"
 
-    ssh "''${ssh_options[@]}" "$target" bash -s -- \
+    "$ssh_binary" "''${ssh_options[@]}" "$target" bash -s -- \
       ${lib.escapeShellArg expectedDisk} \
       ${lib.escapeShellArg expectedIPv4Address} \
       ${lib.escapeShellArg expectedIPv4Gateway} \
