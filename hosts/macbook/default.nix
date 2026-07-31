@@ -55,6 +55,7 @@
       imports = [
         ../../modules/home/capabilities/portable-shell.nix
         ../../modules/home/capabilities/terminal-toolkit.nix
+        ../../modules/home/capabilities/herdr.nix
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/workstation-history-sync.nix
         ../../modules/home/capabilities/macos-atuin-desktop.nix
