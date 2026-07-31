@@ -54,6 +54,7 @@
     users.${username} = {
       imports = [
         ../../modules/home/capabilities/terminal-toolkit.nix
+        ../../modules/home/capabilities/herdr.nix
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/git-foundation.nix
         ../../modules/home/capabilities/github-collaboration.nix

@@ -15,6 +15,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Issue #76: consume Herdr's stable Nix package through Home Manager.
+    herdr.url = "github:herdrdev/herdr/v0.7.5";
+
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
