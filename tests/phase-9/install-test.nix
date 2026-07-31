@@ -9,10 +9,11 @@ in
     extraConfig = {
       imports = [ ./server-overlay.nix ];
 
-      # disko's boot reconstruction uses QEMU's implicit e1000 NIC and does
-      # not expose a virtualisation option for that manually-created machine.
+      # disko's boot reconstruction uses QEMU's implicit e1000 NIC without a
+      # network backend and exposes no virtualisation option for that machine.
       # The separate network test keeps the production-equivalent virtio_net
       # topology and fail-closed preflight.
+      _module.args.phase9ConfigureWithoutCarrier = true;
       _module.args.phase9NetworkDriver = "e1000";
     };
     extraChecks = ''

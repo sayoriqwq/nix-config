@@ -8,7 +8,13 @@ let
   lib = phase9Pkgs.lib;
   values = import ./values.nix;
   testConfiguration = serverConfiguration.extendModules {
-    modules = [ ./server-overlay.nix ];
+    modules = [
+      {
+        _module.args.phase9ConfigureWithoutCarrier = false;
+        _module.args.phase9NetworkDriver = "virtio_net";
+      }
+      ./server-overlay.nix
+    ];
   };
   config = testConfiguration.config;
   network = config.systemd.network.networks."10-phase9-uplink";
@@ -24,6 +30,7 @@ let
   ];
   evidence = {
     addresses = map (address: address.Address) network.addresses;
+    configureWithoutCarrier = network.networkConfig.ConfigureWithoutCarrier;
     dns = network.networkConfig.DNS;
     firewall = {
       tcp = config.networking.firewall.allowedTCPPorts;
@@ -54,6 +61,7 @@ assert
     values.ipv4Address
     values.ipv6Address
   ];
+assert !evidence.configureWithoutCarrier;
 assert
   evidence.dns == [
     values.ipv4Dns

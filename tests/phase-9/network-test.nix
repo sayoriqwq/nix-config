@@ -23,6 +23,7 @@ pkgs.testers.runNixOSTest {
       { lib, pkgs, ... }:
       {
         imports = serverModules ++ [ ./server-overlay.nix ];
+        _module.args.phase9ConfigureWithoutCarrier = false;
         _module.args.phase9NetworkDriver = "virtio_net";
 
         boot.loader.grub.enable = lib.mkForce false;

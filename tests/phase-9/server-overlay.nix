@@ -1,5 +1,6 @@
 {
   lib,
+  phase9ConfigureWithoutCarrier,
   phase9NetworkDriver,
   pkgs,
   username,
@@ -39,6 +40,7 @@ in
         ];
 
         networkConfig = {
+          ConfigureWithoutCarrier = phase9ConfigureWithoutCarrier;
           DHCP = "no";
           IPv6AcceptRA = false;
           LinkLocalAddressing = "ipv6";
