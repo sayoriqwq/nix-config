@@ -40,6 +40,7 @@ pkgs.testers.runNixOSTest {
             vlan = 9;
           };
           memorySize = 1536;
+          qemu.networkingOptions = lib.mkForce [ ];
         };
       };
 
@@ -107,11 +108,12 @@ pkgs.testers.runNixOSTest {
             vlan = 9;
           };
           memorySize = 512;
+          qemu.networkingOptions = lib.mkForce [ ];
         };
       };
 
     ambiguous =
-      { pkgs, ... }:
+      { lib, pkgs, ... }:
       {
         networking = {
           hostName = "phase9-ambiguous";
@@ -146,6 +148,7 @@ pkgs.testers.runNixOSTest {
             };
           };
           memorySize = 512;
+          qemu.networkingOptions = lib.mkForce [ ];
         };
       };
   };
