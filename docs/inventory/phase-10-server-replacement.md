@@ -10,7 +10,8 @@
 - macOS 内置“屏幕共享”已实际连接到目标控制台，窗口身份与当前实例一致；“记住密码”未启用。Agent 没有向 guest 发送鼠标、按键或命令，观察完成后主动断开。
 - VNC 画面停留在旧的 Linux `soft lockup` / RCU stall 警告。维护者随后单独批准严格 host-key 的 SSH 只读健康诊断：当前负载很低，最近 6 小时没有同类 kernel warning；VNC 中的 kernel monotonic timestamp 比当前 uptime 早约 73 天，因此判定为旧控制台日志，不是当前持续 lockup。
 - `systemctl is-system-running` 仍为 `degraded`；失败项仍是 Phase 7 已知的 cloud-init、nginx 与 networkd-wait-online，没有发现新增失败单元。本阶段不修复这些将被清除的 Ubuntu 服务。
-- 控制面与健康诊断没有执行 restart、stop、Rescue、Reinstall、guest package/service/network/SSH 修改或 reboot。敏感 endpoint、实例标识、credential、fingerprint 与 private-key path 只留在仓库外私有记录。
+- 上述控制面与健康诊断在当时没有执行 restart、stop、Rescue、Reinstall、guest package/service/network/SSH 修改或 reboot；后续经两张独立行动卡完成的 Rescue 与回盘演练见第 5 节。
+- 2026-07-31 Rescue 演练已完成：实际登录临时 Rescue、确认稳定目标盘后，经单独批准回到原 Ubuntu；VNC、macbook strict SSH、nixbox strict SSH 与完整 production preflight 均再次通过。敏感 endpoint、实例标识、credential、fingerprint 与 private-key path 只留在仓库外私有记录。
 
 ## 2. Macbook 只读 preflight 短入口
 
@@ -126,12 +127,35 @@ macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 ev
 
 当前 Ubuntu 因此临时授权了精确一条 nixbox deploy public key，macbook 原管理入口仍保持可用。这只关闭 bootstrap authentication 关卡；不授权 Rescue、closure build、install、reboot 或其他 production 修改。
 
-## 5. 后续顺序
+## 5. Rescue 登录与回盘演练
+
+维护者先批准绑定 PR HEAD `452959447028054c72b85d538d1a302069aa00df` 的 Rescue 启动行动卡。启动前，macbook 再次运行完整 `phase10-preflight` 并 PASS；控制面目标、稳定磁盘别名与 byte capacity 均未漂移。
+
+现场严格使用 Contabo 页面内导航，从首页左侧 `VPS control` 进入目标的 `Rescue system`，并等目标实例行完成加载后才处理表单。维护者亲自在 `Standard` Rescue 表单设置一次性 credential 并点击 `Start Rescue System`；Agent 没有读取、输入、保存或记录该 credential。
+
+旧控制面在提交后显示通用处理错误，但请求实际上已经生效。现场没有重试提交，而是先观察原 Ubuntu SSH 消失、strict host checking 拒绝临时 Rescue identity，再通过既有 VNC 确认进入 Debian 12 Rescue。没有覆盖 production known-hosts、接受未核验 host key、关闭 strict checking 或改用 Reinstall。
+
+维护者经 VNC 登录 Rescue 后，只运行短只读命令核对：
+
+- architecture 为 `x86_64`；
+- `/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0` 精确解析为 `/dev/sda`；
+- `/dev/sda` 为 `disk`、`RO=0`，容量为 80,530,636,800 bytes；
+- target disk 与现有各分区的 mountpoint 均为空。
+
+VNC 自动键盘输入受远端 Caps Lock 状态影响，最初长探针只产生 Bash syntax error / command-not-found，没有形成有效检查或状态修改。现场随即停止自动输入，改由维护者运行三条短只读命令；没有执行 mount、fsck、block write、分区、网络/SSH 修改或安装。
+
+磁盘检查通过后，维护者又单独批准当前 Rescue 控制台的一次 `reboot`。由于同一 VNC 键盘映射会把自动输入改为大写，Agent 在回车前取消自动输入，由维护者手动运行小写 `reboot`。VNC 随后观察到 Ubuntu 24.04 从磁盘启动并到达 login prompt；原 production host identity 恢复，macbook strict SSH no-op PASS。
+
+回盘后的完整 `phase10-preflight` 再次 PASS：system state 为 `running`，architecture、BIOS、stable disk、唯一 `virtio_net` NIC、双栈 routing、DNS、SSH bootstrap 与近期 kernel health 均符合冻结证据。nixbox 随后以专用 deploy identity、专用 known-hosts、public-key-only 与 strict checking 登录当前 Ubuntu root 并执行只读 no-op，结果 PASS。nixbox verifier 的两次 macOS Fish 私密路径解析改写都在连接 nixbox 前失败关闭；改用只验证字段数量和安全字符、且不输出路径的解析后，实际双跳验证 PASS。
+
+本演练只证明 provider Rescue、VNC、目标盘可见性与回到原 Ubuntu 后的双管理路径可用。它不授权 closure build、kexec、disko、nixos-anywhere、安装、再次 reboot、网络/SSH 修改或 Reinstall。
+
+## 6. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
 3. **已完成：** 首次 production add 在任何写入前暴露的 SSH 参数边界缺陷已修复，修复版隔离 VM test 已在 nixbox 通过；
 4. **已完成：** 对最终精确 commit 批准并执行 bootstrap，随后从 macbook 与 nixbox 以各自 identity 和 strict host pin 只读验证当前 Ubuntu；两端均 PASS，未触发 rollback；
-5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
+5. **已完成：** 用独立行动卡启动 Rescue，实际登录并确认目标磁盘；再经第二次批准回到 Ubuntu，VNC、macbook、nixbox 与完整 preflight 均 PASS；
 6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；
 7. 维护者对该次 destructive install 重新明确批准后，才进入 kexec/disko/安装。

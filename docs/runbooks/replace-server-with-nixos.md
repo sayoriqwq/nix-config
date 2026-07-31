@@ -95,6 +95,22 @@ add 与 rollback 都先自动重跑 production preflight。底层 SSH 强制 sys
 
 production 前必须在 nixbox 运行隔离的 `checks.x86_64-linux.phase10-nixbox-bootstrap`，覆盖正常 add/rollback、幂等性以及 duplicate、metadata drift、unsafe mode、symlink 失败注入。测试通过只证明文件更新算法，不授权 production 修改；当前实例的精确 commit 与结果记录在 [`Phase 10 正式替换现场记录`](../inventory/phase-10-server-replacement.md#4-nixbox-bootstrap-authentication-关卡)。
 
+#### Rescue 演练
+
+Rescue 演练是 install 前的独立 provider 关卡，不得与 destructive install 共用批准。它拆成“进入 Rescue”和“从 Rescue 回盘”两次状态变更；每次都先给出中文行动卡并取得当前明确批准。
+
+1. 启动前再次通过 macbook `phase10-preflight`、macbook/nixbox strict SSH 与既有 VNC，确认不是从已漂移或失联的 Ubuntu 出发；
+2. 从 Contabo 首页左侧菜单进入 `VPS control`，再使用目标行的 `Rescue system` 页面内入口；不得复用深层 URL、浏览器返回或刷新；
+3. 等 Rescue 页面的目标实例行从空占位完整加载为预期实例后才填写表单。若目标仍为空，不输入 credential、不提交；
+4. 一次性 Rescue credential 只由维护者在现场 UI 输入并保管，不写入聊天、Git、命令、日志、浏览器自动化或私密记录，也不得与 VNC credential 混用；
+5. 维护者点击 `Start Rescue System` 后，任何网页错误都先视为“结果未知”，不得立即重试。先检查 VNC、原 production SSH 可达性与 strict host identity：临时 Rescue identity 被既有 production pin 拒绝是预期保护，不得覆盖 pin 或关闭 strict checking；
+6. 优先通过已验证 VNC 登录 Rescue，只运行 `uname -m`、`ls -l /dev/disk/by-id` 与 `lsblk -b <expected-device>` 等短只读命令；stable alias、底层 device、byte capacity、disk/RO 类型和空 mountpoint 任一不符都停止；
+7. 不 mount、fsck、chroot、写分区、修改网络/SSH 或安装任何内容。若 VNC 键盘映射改变命令大小写或符号，取消输入并由维护者运行短命令，不猜测执行结果；
+8. 磁盘事实通过后，另给回盘行动卡。维护者批准后只运行一次 `reboot`；不得用控制面 Restart、Stop 或 Reinstall 代替；
+9. VNC 观察原系统从磁盘启动后，原 production host identity 必须在 macbook 与 nixbox 的既有 strict pin 下恢复，两条 SSH 路径和完整 `phase10-preflight` 都再次通过，才关闭演练关卡。
+
+若 Rescue 启动或回盘 10 分钟后仍无 VNC/SSH，保持当前状态并重新请求批准；不连续点击 Rescue/Restart，不用 Reinstall 作为普通重试。只有既有磁盘系统确认不可启动且失联恢复阶梯要求升级时，才单独提交下一层行动卡。
+
 ### B. 安装
 
 1. macbook 保持 VNC 与独立 SSH 观察，不作为构建来源；
