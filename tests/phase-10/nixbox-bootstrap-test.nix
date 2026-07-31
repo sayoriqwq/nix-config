@@ -45,6 +45,7 @@ pkgs.testers.runNixOSTest {
     remote_script = ${builtins.toJSON "${../../tools/phase-10/remote-nixbox-bootstrap.sh}"}
     ssh_directory = "/root/.ssh"
     authorized_keys = f"{ssh_directory}/authorized_keys"
+    newline = chr(10)
 
     def quoted(value):
         return shlex.quote(value)
@@ -52,9 +53,9 @@ pkgs.testers.runNixOSTest {
     def initialize(lines, trailing_newline=False):
         machine.succeed(f"rm -rf {quoted(ssh_directory)}")
         machine.succeed(f"install -d -m 700 -o root -g root {quoted(ssh_directory)}")
-        content = "\\n".join(lines)
+        content = newline.join(lines)
         if trailing_newline:
-            content += "\\n"
+            content += newline
         machine.succeed(
             f"printf %s {quoted(content)} > {quoted(authorized_keys)}"
         )
