@@ -75,16 +75,16 @@ git diff --check
 
 macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相应 `nix build` 时，Nix 正确拒绝在 `aarch64-darwin` 上构建一个禁用 substitute 的 `x86_64-linux` derivation。这不是 evaluation 或配置失败；server drvPath 仍与 Phase 9 已验证值一致。正式替换前必须在 nixbox 对冻结 commit 重新完成完整 build，macbook 的本地结果不能代替该关卡。
 
-## 4. Nixbox bootstrap authentication 未闭合关卡
+## 4. Nixbox bootstrap authentication 关卡
 
-当前 Ubuntu 的可信入口是 macbook 的既有 key-only root SSH。nixbox 专用 deploy key 已在 Phase 8 创建，但其 public half 只声明在未来 NixOS 的 `sayori` 用户中，当前 Ubuntu 没有授权该 key。因此：
+本关卡开始时，当前 Ubuntu 的唯一可信入口是 macbook 的既有 key-only root SSH。nixbox 专用 deploy key 已在 Phase 8 创建，但其 public half 当时只声明在未来 NixOS 的 `sayori` 用户中，当前 Ubuntu 尚未授权该 key。因此：
 
 - macbook preflight 通过不等于 nixbox 已能运行 `nixos-anywhere`；
 - 不得复制 macbook private key 到 nixbox；
 - 不得使用 password root、`StrictHostKeyChecking=no`、未核验 `ssh-keyscan` 或 SSH agent forwarding 作为捷径；
 - Issue 中“两端以 `sayori` 登录”的最终验收不能被误写成当前 Ubuntu 已具备的事实。
 
-推荐但尚未批准的最小 bootstrap 是：在 macbook preflight 全部通过后，由可信 macbook root 会话把仓库中已声明的 nixbox deploy **public key** 原子、幂等地追加到当前 Ubuntu root `authorized_keys`。该动作：
+经单独行动卡批准采用的最小 bootstrap 是：在 macbook preflight 全部通过后，由可信 macbook root 会话把仓库中已声明的 nixbox deploy **public key** 原子、幂等地追加到当前 Ubuntu root `authorized_keys`。该动作：
 
 - 不传输任何 private key；
 - 不删除或替换现有 macbook key；
@@ -92,7 +92,7 @@ macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相�
 - 若安装前中止，可用单独批准的反向动作移除该单行；
 - 正式 NixOS closure 的 root keys 只保留 macbook break-glass，因此临时 nixbox root authorization 不会进入最终系统。
 
-这是 production SSH access 修改，必须另给中文行动卡、完整底层命令、验证与撤销步骤，并取得当前明确批准。本文只记录缺口与推荐方案，不执行该动作。
+这是 production SSH access 修改，每次执行都必须另给中文行动卡、完整底层命令、验证与撤销步骤，并取得绑定精确 commit 的当前明确批准。实际执行结果记录在本节末尾。
 
 仓库提供两个不接受参数的 macbook 短入口：
 
@@ -112,7 +112,7 @@ nix run .#phase10-rollback-nixbox-bootstrap
 5. 候选内容先同步，再以同目录 rename 原子替换；成功输出只包含 action、是否实际改变、macbook key 已保留和 deploy-key count，不输出 key 或 fingerprint；
 6. `add` 已存在和 `remove` 已不存在均为无写入的幂等 PASS；回滚只移除精确 deploy public-key 行，不删除 macbook key。
 
-回滚入口的存在不是自动执行授权。bootstrap 后若 nixbox strict verification 失败，保持 macbook SSH 会话与 VNC 可用，停止后续步骤；是否立即回滚仍由维护者单独批准。
+回滚入口的存在不是自动执行授权。bootstrap 后若 nixbox strict verification 失败，保持 macbook SSH 会话与 VNC 可用并停止后续步骤；是否立即回滚必须在该次行动卡中单独批准。本轮已取得 verification 失败时的条件式回滚批准，但两端验证均通过，未触发回滚。
 
 macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 evaluation。`checks.x86_64-linux.phase10-nixbox-bootstrap` 隔离 NixOS VM test 覆盖 add、重复 add、rollback、重复 rollback，以及 duplicate payload、changed metadata、unsafe mode 和 symlink 失败注入。
 
@@ -122,12 +122,16 @@ macbook 已通过 add/rollback wrapper build、remote ShellCheck 与全系统 ev
 
 修复后 action 与 public key 改为固化在 stdin 脚本内部，SSH argv 不再携带 key；隔离 VM test 也改为执行实际生成的 add/remove stdin 脚本，而不是只直接调用底层脚本。本地已通过生成脚本参数合同、add/remove 额外参数失败关闭、wrapper build、ShellCheck、格式检查与全系统 evaluation。2026-07-31 又在 nixbox 对精确 clean commit `7e304e5fd7fd032e2e6f8c59b7ac32e03a0b6fb3` 的不可变 source 完整构建新 VM derivation，add、重复 add、remove、重复 remove 与全部失败注入均 PASS；传输和构建没有连接 production。代码变化使上一轮 production 批准失效，任何再次 add 都必须绑定包含本记录的新 commit 重新取得明确批准。
 
+维护者随后对最终 clean commit `0c9267f860e187decc32f33349b2c0b1bf758a6a` 明确批准 add、macbook/nixbox strict 只读验证，以及仅在 verification 失败时执行精确 rollback。入口再次完成 production preflight 后，add 返回 `changed=yes`、macbook key preserved、deploy-key count 1。macbook 以原有 identity 和 strict host pin 登录 production root PASS；nixbox 再以专用 deploy identity、专用 known-hosts、public-key-only 与 strict checking 登录 production root PASS。nixbox verifier 的首次本地派发因 macOS Fish 不支持一个纯解析选项而在连接 nixbox 前退出；移除该选项后实际验证 PASS。该本地派发错误没有连接任何远端，不构成 verification 失败。条件式 rollback 未触发。
+
+当前 Ubuntu 因此临时授权了精确一条 nixbox deploy public key，macbook 原管理入口仍保持可用。这只关闭 bootstrap authentication 关卡；不授权 Rescue、closure build、install、reboot 或其他 production 修改。
+
 ## 5. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
-3. **待批准：** 首次 production add 在任何写入前暴露的 SSH 参数边界缺陷已修复，修复版隔离 VM test 已在 nixbox 通过；现在须对包含最终记录的新精确 commit 重新批准；
-4. bootstrap 后从 nixbox 以专用 key、专用 known-hosts 与 strict checking 只读验证当前 Ubuntu；
+3. **已完成：** 首次 production add 在任何写入前暴露的 SSH 参数边界缺陷已修复，修复版隔离 VM test 已在 nixbox 通过；
+4. **已完成：** 对最终精确 commit 批准并执行 bootstrap，随后从 macbook 与 nixbox 以各自 identity 和 strict host pin 只读验证当前 Ubuntu；两端均 PASS，未触发 rollback；
 5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
 6. 在 nixbox 重跑 Phase 9、预构建 closure，冻结 install helper、commit、disk、完整命令、窗口与停止条件；
 7. 维护者对该次 destructive install 重新明确批准后，才进入 kexec/disko/安装。

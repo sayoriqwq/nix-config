@@ -78,9 +78,9 @@ Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 
 
 #### 当前 Ubuntu 到 nixbox 的 bootstrap authentication
 
-Phase 8 的 nixbox deploy public key 只存在于未来 NixOS 声明，当前 Ubuntu 尚未授权它。因而 macbook preflight 之后还必须先关闭这项真实缺口，不能直接声称 nixbox 已能安装。
+Phase 8 的 nixbox deploy public key 只存在于未来 NixOS 声明；Phase 10 开始时，当前 Ubuntu 尚未授权它。因而 macbook preflight 之后还必须先关闭这项真实缺口，不能直接声称 nixbox 已能安装。当前实例已按单独批准临时关闭该缺口，精确 commit 与验证结果见现场记录。
 
-推荐方案是在单独行动卡和批准下，由可信 macbook root 会话把已声明的 nixbox deploy public key 原子、幂等地追加到当前 Ubuntu root `authorized_keys`。不得删除现有 macbook key、复制任何 private key、关闭 strict checking 或改用 password root。若正式安装前中止，使用另一次批准移除该单行；最终 NixOS 的声明式 root key 集合仍只保留 macbook break-glass。
+选定方案是在单独行动卡和批准下，由可信 macbook root 会话把已声明的 nixbox deploy public key 原子、幂等地追加到当前 Ubuntu root `authorized_keys`。不得删除现有 macbook key、复制任何 private key、关闭 strict checking 或改用 password root。若正式安装前中止，使用另一次批准移除该单行；最终 NixOS 的声明式 root key 集合仍只保留 macbook break-glass。
 
 这个临时授权是 production SSH access 修改，不由 VNC、preflight、Phase 8/9 或本文自动批准。完成后，nixbox 还必须使用专用 deploy identity 与专用 known-hosts file 做一次 strict、只读登录验证，才允许冻结 install helper。
 
@@ -93,7 +93,7 @@ nix run .#phase10-rollback-nixbox-bootstrap
 
 add 与 rollback 都先自动重跑 production preflight。底层 SSH 强制 system SSH、声明式 host、root/22、无 forwarding/proxy/jump/connection sharing 与 strict host checking；远端命令只发送 `bash -s`，action 与从同一 NixOS configuration 派生的两把 public key 经 shell escaping 固化在 stdin 脚本内部，避免 OpenSSH 重组远端参数时拆分 key。它在任何写入前验证 root SSH 目录/文件不是 symlink、权限 owner 正确、macbook key 精确保留且 deploy key 无重复或 metadata 漂移，再通过同目录临时文件、候选解析与原子 rename 更新。两种 action 均幂等；rollback 只移除精确 deploy key，但仍必须单独批准。
 
-production 前必须在 nixbox 运行隔离的 `checks.x86_64-linux.phase10-nixbox-bootstrap`，覆盖正常 add/rollback、幂等性以及 duplicate、metadata drift、unsafe mode、symlink 失败注入。测试通过只证明文件更新算法，不授权 production 修改；当前实例的精确 commit 与结果记录在 [`Phase 10 正式替换现场记录`](../inventory/phase-10-server-replacement.md#4-nixbox-bootstrap-authentication-未闭合关卡)。
+production 前必须在 nixbox 运行隔离的 `checks.x86_64-linux.phase10-nixbox-bootstrap`，覆盖正常 add/rollback、幂等性以及 duplicate、metadata drift、unsafe mode、symlink 失败注入。测试通过只证明文件更新算法，不授权 production 修改；当前实例的精确 commit 与结果记录在 [`Phase 10 正式替换现场记录`](../inventory/phase-10-server-replacement.md#4-nixbox-bootstrap-authentication-关卡)。
 
 ### B. 安装
 
