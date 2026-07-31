@@ -136,9 +136,16 @@
         };
       };
 
-      checks.x86_64-linux = {
-        phase9-network = phase9NetworkTest;
-        phase9-policy = phase9PolicyCheck;
+      checks = {
+        aarch64-darwin.macbook-zsh-zoxide = import ./tests/macos/zsh-zoxide.nix {
+          pkgs = packagesFor "aarch64-darwin";
+          zshrc =
+            self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
+        };
+        x86_64-linux = {
+          phase9-network = phase9NetworkTest;
+          phase9-policy = phase9PolicyCheck;
+        };
       };
 
       formatter = {
