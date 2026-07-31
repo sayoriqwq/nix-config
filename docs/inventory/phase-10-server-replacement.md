@@ -58,7 +58,9 @@ nix flake check --no-build --all-systems path:<worktree>
 git diff --check
 ```
 
-本地构建和 ShellCheck 通过。dirty checkout 与额外 target 参数的失败关闭检查也已通过，且都在 SSH 连接前退出。production preflight 尚未对本分支的 clean commit 运行；必须等 Draft PR 给出精确 commit 与维护者当次批准。
+本地构建和 ShellCheck 通过。dirty checkout 与额外 target 参数的失败关闭检查也已通过，且都在 SSH 连接前退出。
+
+维护者批准后，首次对 clean commit `8c5ae430e238806ac40ad4c44632844a0be9a7a4` 启动 production preflight，但它在 remote probe 前以 SSH status 255 失败关闭。根因是 helper 当时向 `PATH` 注入的 portable OpenSSH 不识别 macOS 配置中的 Apple `UseKeychain` 扩展；macOS `/usr/bin/ssh` 对相同配置解析和 strict no-op SSH 均通过。修复后 helper 明确使用系统 SSH，重新通过本地构建、全系统 evaluation 与 dirty-checkout failure 测试。失败尝试没有读取 production inventory，也没有产生远端写入。修复后的 production preflight 必须绑定新的精确 commit 并重新取得维护者批准。
 
 macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相应 `nix build` 时，Nix 正确拒绝在 `aarch64-darwin` 上构建一个禁用 substitute 的 `x86_64-linux` derivation。这不是 evaluation 或配置失败；server drvPath 仍与 Phase 9 已验证值一致。正式替换前必须在 nixbox 对冻结 commit 重新完成完整 build，macbook 的本地结果不能代替该关卡。
 
