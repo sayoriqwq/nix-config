@@ -62,6 +62,17 @@ git diff --check
 
 维护者批准后，首次对 clean commit `8c5ae430e238806ac40ad4c44632844a0be9a7a4` 启动 production preflight，但它在 remote probe 前以 SSH status 255 失败关闭。根因是 helper 当时向 `PATH` 注入的 portable OpenSSH 不识别 macOS 配置中的 Apple `UseKeychain` 扩展；macOS `/usr/bin/ssh` 对相同配置解析和 strict no-op SSH 均通过。修复后 helper 明确使用系统 SSH，重新通过本地构建、全系统 evaluation 与 dirty-checkout failure 测试。失败尝试没有读取 production inventory，也没有产生远端写入。修复后的 production preflight 必须绑定新的精确 commit 并重新取得维护者批准。
 
+维护者随后单独批准 clean commit `6ea0717d3a527a40ece1a9886cc181cf0e4d1dc8`，production preflight 完整通过：
+
+- local target 仍为 `sayori`、root、TCP 22，路由经 `en0`，strict host checking 生效；
+- production 为 `x86_64`、KVM、BIOS，RAM 8,131,800 KiB，无 swap，kexec 可用；
+- stable alias 唯一解析到 `/dev/sda`，它是唯一可写磁盘，容量 80,530,636,800 bytes；
+- 唯一 provider NIC 为 `eth0` / `virtio_net`，声明式 IPv4、IPv6、双 gateway、IPv6 on-link 与三项 DNS 全部匹配；
+- system state 为已知的 `degraded`，没有新增 failed unit；bootstrap tools、root `authorized_keys` 权限与 3 份可复制 SSH host private key 均通过；
+- 最近 6 小时相关 kernel warning 为 0；probe 通过 stdin 执行且没有创建远端文件。
+
+这关闭 macbook production read-only preflight 关卡，但不授权或完成 nixbox bootstrap authentication、Rescue rehearsal、closure build、install 或 reboot。
+
 macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相应 `nix build` 时，Nix 正确拒绝在 `aarch64-darwin` 上构建一个禁用 substitute 的 `x86_64-linux` derivation。这不是 evaluation 或配置失败；server drvPath 仍与 Phase 9 已验证值一致。正式替换前必须在 nixbox 对冻结 commit 重新完成完整 build，macbook 的本地结果不能代替该关卡。
 
 ## 4. Nixbox bootstrap authentication 未闭合关卡
@@ -86,7 +97,7 @@ macbook 不能构建 `x86_64-linux` 的完整 server closure：本地执行相�
 ## 5. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
-2. 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
+2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
 3. 维护者理解并批准或否决临时 nixbox root deploy-key bootstrap；
 4. bootstrap 后从 nixbox 以专用 key、专用 known-hosts 与 strict checking 只读验证当前 Ubuntu；
 5. 用单独行动卡启动一次 Rescue，实际登录并确认目标磁盘，再回到 Ubuntu 复验两条管理路径；
