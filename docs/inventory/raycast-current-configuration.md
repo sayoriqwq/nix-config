@@ -4,6 +4,8 @@
 - **目标应用：** Raycast `1.104.24`
 - **自研源码：** [`sayoriqwq/raycast`](https://github.com/sayoriqwq/raycast/tree/2948b57472f517fc67520e8d4fb7aab167c16bb9)，盘点时 `main` 干净，revision 为 `2948b57472f517fc67520e8d4fb7aab167c16bb9`
 - **性质：** 只读、脱敏的现状证据；不是可直接 apply 的声明
+- **维护者决策：** 当前配置视为稳定基线，暂不维护或迁移；Show only customized 是
+  Raycast Settings 中所有已修改内容的权威边界；DB Tunnel 与 `autossh` 已废弃
 - **关联研究：** [Raycast 声明式配置研究](../plans/raycast-declarative-configuration-research.md)
 
 ## 1. 摘要
@@ -30,6 +32,10 @@
 - **`[FS]`：** 本机 plist、manifest、文件名、权限和尺寸；
 - **`[SRC]`：** 固定 revision 的自研源码；
 - **`[macOS]`：** `com.apple.symbolichotkeys` 等系统偏好。
+
+维护者确认 Raycast Settings 的 **Show only customized** 视图完整覆盖其中所有已修改项。因此
+本文直接将它视为 Settings 自定义边界的权威来源，包括其中显示的 command、alias 和 hotkey；
+完整 `.rayconfig` 仍可用于加密备份，但不再是确认“哪些内容被修改”的前置条件。
 
 为避免泄漏或误改，本次没有：
 
@@ -120,8 +126,8 @@ Developer Tools 当前为：
 | 系统设置 | `✦ S` |
 | 网易云音乐 | `✦ M` |
 
-这是 `[UI]` 中已观察到的应用级自定义项。Raycast 没有官方的 command-config 查询 CLI；
-若要把它作为可审计的完整快照，仍应使用一次官方导出作为回流证据。
+这是 `[UI]` Show only customized 边界中的应用级自定义项。维护者确认该视图可以直接信任；
+官方导出只作为完整恢复材料，不是验证自定义项范围的必要条件。
 
 ### 4.2 Window Management
 
@@ -173,7 +179,7 @@ Raycast 当前登记且实时监视的目录是：
 | NotebookLM (Switch or Open) | silent | `llm` | 无 |
 | YouTube (Switch or Open) | silent | `yt` | 无 |
 | Yume (Switch or Open) | silent | `ym` | 无 |
-| Toggle DB Tunnel | compact | 无 | 无 |
+| Toggle DB Tunnel（已废弃） | compact | 无 | 无 |
 
 前 8 个导航命令是薄 wrapper，全部调用同一个
 [`chrome-switch.sh`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/scripts/chrome-switch.sh)
@@ -189,9 +195,9 @@ Raycast 当前登记且实时监视的目录是：
 Raycast GUI 环境能找到 Node。
 
 `Toggle DB Tunnel` 是独立的网络副作用命令。源码含固定的生产连接事实和本地状态路径；
-本文件不记录具体值。当前 Fish PATH 中找不到 `autossh`，因此它不具备可复现的运行依赖，
-也不应进入自动 activation。它需要在后续 issue 中完成 secret/host-specific 配置拆分、
-依赖包装和人工网络审批。
+本文件不记录具体值。维护者已经将命令及其 `autossh` 依赖标记为废弃，因此不迁移、不补
+依赖、不进入 activation，也不再设计 secret/host-specific 或网络合同。现有脚本只作为遗留
+文件保留；删除仍需独立、明确批准，不能由盘点自动完成。
 
 ## 6. 本地 extensions
 
@@ -343,39 +349,42 @@ Snippets、Clipboard、Notes、favorites 和完整 command preference 仍由加�
 | `~/Library/Preferences/com.raycast.macos.plist` | 稳定偏好与大量运行态混合 | 只挑经验证的稳定键声明 |
 
 `config.json` 的顶层 key 名为 `Token`、`accesstoken`、`token`，文件大小 257 bytes、权限
-`0600`。这里只记录结构，用于提醒后续 secret ownership；任何值都没有进入终端输出或本文。
+`0600`。这里只记录敏感边界，不安排迁移；任何值都没有进入终端输出或本文。
 
 plist 记录 Desktop、Documents、Downloads、cloud storage 和 removable volumes 的 Raycast
 内部读取开关均为开启。这不等同于已经验证 macOS TCC 授权；直接读取用户 TCC 数据库被系统
 拒绝，因此 Accessibility、Automation、Full Disk Access 等实际授权仍需维护者在 System
 Settings 中人工确认。
 
-## 10. 漂移与风险优先级
+## 10. 已知差异与稳定基线
 
-| 优先级 | 发现 | 建议 |
+维护者认为当前配置相对稳定，以下项目是已知现状，不自动形成维护 backlog。只有发生实际
+故障、新机器恢复需求或维护者重新提出变更时，才打开对应窄 Issue。
+
+| 状态 | 发现 | 当前处理 |
 | --- | --- | --- |
-| 高 | DB tunnel 含固定生产连接事实，且 `autossh` 不在当前 PATH | 从公开源码拆出 host/secret，补 Nix wrapper 与人工网络 gate；在此之前不声明启用 |
-| 高 | `config.json` 含 token-like 值 | 保持 `0600`，不得提交；后续确认真正所有者和是否可迁入 Keychain/secret manager |
-| 中 | Terminal Finder 有两个可复现失效的 Cmux 命令和 hotkey | 通过官方本地 extension 重新导入/重建流程收敛，不直接改数据库 |
-| 中 | Open in Editor 已安装 7 commands，源码仅 3 | 维护者运行可回滚的重建/重新导入 helper 后复核 |
-| 中 | Counter 源码从当前 tree 删除但运行态仍在 | 决定恢复源码、迁到 Store/private extension，或人工退役；先保留数据 |
-| 中 | Ghostty → Finder 依赖错误的 `/Applications` 路径 | 改为 bundle ID / `getApplications()` / Nix 注入路径 |
-| 低 | 禁用的 Zed Store extension 仍选稳定版 Zed | 若继续用 Zed Nightly则重新配置或移除该 Store extension |
+| 已废弃 | DB tunnel 含固定生产连接事实，且 `autossh` 不在当前 PATH | 不迁移、不补依赖、不恢复；仅在批准的清理任务中删除遗留文件 |
+| 敏感边界 | `config.json` 含 token-like 值 | 保持 `0600`，不得提交；当前不迁移 |
+| 已知漂移 | Terminal Finder 有两个失效的 Cmux 命令和 hotkey | 保留现状；实际影响使用时再通过官方流程收敛，不直接改数据库 |
+| 已知漂移 | Open in Editor 已安装 7 commands，源码仅 3 | 保留现状；需要重建时再复核 |
+| 已知漂移 | Counter 源码从当前 tree 删除但运行态仍在 | 保留运行态与数据，不恢复、不退役 |
+| 已知兼容性 | Ghostty → Finder 依赖错误的 `/Applications` 路径 | 当前不维护；实际失败或迁机时再修正 |
+| 已禁用 | Zed Store extension 仍选稳定版 Zed | 保持禁用，不清理 |
 
-## 11. 后续快速盘点方法
+## 11. 未来复盘方法（当前不实施）
 
 Raycast 没有官方的 `config list` 或 `extensions list --json` CLI，因此最省时的可靠流程应是：
 
 1. 用一个仓库 helper 一次性读取 app version、plist 白名单键、manifest、Script Command
    metadata、文件权限和源码/runtime drift；
-2. UI 只查看 “Show only customized” 的短清单，不再逐页遍历全部内建命令；
+2. 直接把 “Show only customized” 作为所有已修改项的权威短清单，不再遍历全部内建命令；
 3. Snippets 与 Quicklinks 分别使用官方 JSON export，经脱敏后作为 seed；
-4. 完整 aliases/hotkeys/window layouts 若需要审计，使用一次本地加密 `.rayconfig` export，
-   文件留在仓库外，由维护者控制 passphrase；不要把整个 export 当作 Nix source；
+4. 加密 `.rayconfig` 只承担完整恢复/备份；文件留在仓库外，由维护者控制 passphrase，
+   不把它当作判断自定义范围的前置条件，也不把整个 export 当作 Nix source；
 5. 不通过读取 Keychain、破解数据库或把 token 传给 agent 来换取自动化。
 
-适合后续单独创建一个只读 `raycast-inventory` helper issue；它不应导入、删除、重建 extension
-或修改 Raycast Settings。
+当前不创建 `raycast-inventory` helper 或其他维护 Issue。若未来稳定基线发生变化，再考虑一个
+只读 helper；它不应导入、删除、重建 extension 或修改 Raycast Settings。
 
 ## 12. 本次验证
 

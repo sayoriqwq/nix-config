@@ -4,10 +4,18 @@
 - **目标机器：** `macbook`
 - **范围：** Raycast 应用、稳定偏好、Script Commands、Store Extensions、本地扩展、
   Snippets、Quicklinks、快捷键与可变状态边界
-- **性质：** 研究与后续 Issue 输入；本文不授权修改配置、导入数据、安装/卸载应用、
-  activation、TCC 变更或清理 Raycast 状态
+- **性质：** 研究与未来参考；当前配置已被维护者确认为稳定基线，暂不创建实现或维护
+  Issue。本文不授权修改配置、导入数据、安装/卸载应用、activation、TCC 变更或清理
+  Raycast 状态
 
 ## 1. 结论
+
+维护者在 2026-08-03 确认：
+
+- Raycast Settings 的 **Show only customized** 视图可以直接作为其中“所有已修改内容”的权威
+  边界，包括其中显示的 command、alias 和 hotkey；不需要用完整 `.rayconfig` 再确认范围；
+- `Toggle DB Tunnel` 及其 `autossh` 依赖已经废弃，不迁移、不补依赖、不进入 capability；
+- 当前 Raycast 配置相对稳定，以下架构与 Issue 拆分只保留为未来触发条件，不立即实施。
 
 Raycast 可以成为本仓库的一项纵向 capability，但不能把整个 Raycast 运行目录当作普通
 dotfiles 接管。推荐目标是：
@@ -72,7 +80,8 @@ Nix 意味着把版本推进责任从 Raycast updater 移交给 `flake.lock`/Nix
 
 当前可声明资产为：
 
-- 9 个 Raycast Script Commands：8 个 Chrome tab switch 命令和 1 个数据库 tunnel toggle；
+- 9 个已登记的 Raycast Script Commands：8 个 Chrome tab switch 命令，以及 1 个维护者已
+  标记废弃的 database tunnel toggle；未来声明范围只考虑前 8 个；
 - 2 个本地 Extension：
   - `terminal-finder`：4 个 Finder / WezTerm / Ghostty 命令；
   - `open-in-editor`：3 个 VS Code / Zed Nightly / Codex 命令；
@@ -86,9 +95,9 @@ Nix 意味着把版本推进责任从 Raycast updater 移交给 `flake.lock`/Nix
   `~/Applications/Home Manager Apps/Ghostty.app`；bundle ID 路径与 fallback 仍可能工作，
   但硬编码路径本身不再是可靠合同；
 - `toggle-db-tunnel.sh` 依赖 `autossh`，当前 Fish PATH 和 nix-config 都没有声明该依赖；
-- 同一脚本在公开仓库中硬编码了 production 数据库端点。本文不复述该值；后续实施前必须
-  先迁移到批准的 secret/host-specific 配置，并在 capability contract 中公开“用户触发后
-  建立本地端口和 outbound SSH tunnel”的网络影响。
+- 同一脚本在公开仓库中硬编码了 production 数据库端点。本文不复述该值。维护者已经将
+  脚本与依赖标记为废弃，因此后续不得为它补包、迁移 secret 或恢复网络行为；现有文件只
+  能在独立、明确批准的清理范围内删除。
 
 ## 3. 上游能力边界
 
@@ -144,7 +153,7 @@ Raycast 官方提供以下稳定入口：
 
 | 配置面 | 可声明程度 | 推荐所有者 | 备注 |
 | --- | --- | --- | --- |
-| Raycast app | 完整 | Homebrew 或 Nix 二选一 | 当前先保留 Homebrew，另 Issue 决定版本所有权 |
+| Raycast app | 完整 | Homebrew 或 Nix 二选一 | 当前保持现状；未来若迁移，另开 Issue 决定版本所有权 |
 | 全局 hotkey / compact / appearance | 部分 | nix-darwin adapter | 私有 plist key；只声明实机逐项验证过的稳定子集 |
 | Spotlight 让位 | 完整但有系统副作用 | Raycast Darwin adapter | 必须记录旧值、冲突与回滚 |
 | Script Commands | 高 | Home Manager | Nix 管理目录和 runtime wrapper；首次目录注册人工完成 |
@@ -181,14 +190,18 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
   Snippets/Quicklinks import files、固定 revision 的 extension source/build；
 - **mutable state：** 声明但不接管 `~/.config/raycast`、Application Support、preferences plist
   和相关 extension state；Keychain 不作为文件路径声明；
-- **network effects：** 普通 navigation 命令只操作本机应用；database tunnel command 必须
-  单独公开本地 listener、outbound SSH、PID/log 和 secret 依赖，不能在 activation 中执行；
+- **network effects：** 普通 navigation 命令只操作本机应用；已废弃的 database tunnel
+  command 明确排除在目标 capability 外，不安装 `autossh`，也不在 activation 中执行；
 - **human gates：** Raycast 完全退出后才写私有 defaults；Script Directory、local extension、
   JSON/`.rayconfig` import、TCC 和 app package migration 均需人工确认；
 - **rollback：** Nix generation 只撤销声明。Raycast import 是 additive，不能假设 generation
   rollback 会删除已导入项目；应用迁移还需单独恢复原安装渠道。
 
-## 6. 建议实施顺序
+## 6. 未来实施顺序（当前暂停）
+
+维护者当前不要求实施或维护 Raycast capability。只有出现新机器恢复、当前配置明显漂移、
+Raycast 上游提供稳定配置接口，或维护者重新提出声明需求时，才从以下窄 Issue 中选择一项
+启动；不得把它们自动转为当前 backlog。
 
 ### Issue A — Raycast capability contract 与安全基线
 
@@ -204,7 +217,7 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
 - 以 `github:sayoriqwq/raycast` 的固定 revision 作为非 flake input；
 - 把 8 个 navigation command 及其 helper/config 生成到稳定用户目录；
 - 给脚本使用绝对系统工具路径或 Nix wrapper，避免依赖 GUI app 的不确定 PATH；
-- 暂不接入 database tunnel，先移除公开的 production endpoint 并完成 secret/网络合同；
+- 永久排除已废弃的 database tunnel 和 `autossh`，不为其设计 secret/网络合同；
 - Raycast 中 Add Script Directory 保持一次性人工动作。
 
 ### Issue C — 两个自研 extension 的可复现构建与导入
@@ -240,7 +253,7 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
 
 ## 7. 验证与人工关卡
 
-后续每个实现 Issue 至少需要：
+若未来重新启动实现，每个 Issue 至少需要：
 
 ```fish
 nix fmt -- --check .
@@ -256,14 +269,15 @@ extension Issue 还需对每个 manifest 验证：
 - Raycast 启动进程的非 login PATH 下，所有 script runtime dependency 均可解析；
 - 不读取或输出 token、OAuth、Keychain、数据库内容和 export passphrase。
 
-所有真实 `darwin-rebuild switch`、Raycast import、TCC 授权、Store publish、extension prune、
-Homebrew/Nix package 移交和 production tunnel 测试都必须作为独立人工关卡记录。构建成功
-不构成执行授权。
+所有真实 `darwin-rebuild switch`、Raycast import、TCC 授权、Store publish、extension prune
+和 Homebrew/Nix package 移交都必须作为独立人工关卡记录。已废弃的 production tunnel 不在
+验证范围内，不得为了验证而恢复。构建成功不构成执行授权。
 
-## 8. 下一步需维护者决定
+## 8. 已记录的维护者决策
 
-1. 是否先实施 Issue A + B，把稳定基础和 8 个无 secret 的 navigation commands 纳入；
-2. `counter` 是保留并找回源码，还是作为旧运行态退役；
-3. 两个自研 extension 是长期保持 local development，还是准备提交 public/private Store；
-4. Snippets/Quicklinks 中哪些属于可公开/可跨机器的 baseline，哪些必须留在加密 export；
-5. production tunnel 是否仍是 Raycast 需求；若保留，必须先决定 secret 注入和网络审批边界。
+1. 当前配置是稳定基线，暂不实施 Issue A–D，也不创建 Raycast 维护 backlog；
+2. Show only customized 是自定义内容的权威盘点视图；
+3. `Toggle DB Tunnel` 与 `autossh` 已废弃，未来声明、构建和恢复流程均排除；
+4. `counter`、本地 extension 分发方式、Snippets/Quicklinks 回流和 app package owner 等问题
+   暂不决策；只有出现实际需求时才重新打开对应窄 Issue；
+5. 现有运行态不因本研究自动清理、重建或迁移。
