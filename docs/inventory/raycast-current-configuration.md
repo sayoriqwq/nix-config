@@ -2,10 +2,11 @@
 
 - **盘点日期：** 2026-08-03
 - **目标应用：** Raycast `1.104.24`
-- **自研源码：** [`sayoriqwq/raycast`](https://github.com/sayoriqwq/raycast/tree/2948b57472f517fc67520e8d4fb7aab167c16bb9)，盘点时 `main` 干净，revision 为 `2948b57472f517fc67520e8d4fb7aab167c16bb9`
+- **自研源码：** [`sayoriqwq/raycast`](https://github.com/sayoriqwq/raycast/tree/fb8e901fde16417c6a08bdd7c36beb2991e5895b)，当前 `main` 干净，revision 为 `fb8e901fde16417c6a08bdd7c36beb2991e5895b`
 - **性质：** 只读、脱敏的现状证据；不是可直接 apply 的声明
-- **维护者决策：** 当前配置视为稳定基线，暂不维护或迁移；Show only customized 是
-  Raycast Settings 中所有已修改内容的权威边界；DB Tunnel 与 `autossh` 已废弃
+- **维护者决策：** 当前配置视为稳定基线，不建立持续维护流程；Show only customized 是
+  Raycast Settings 中所有已修改内容的权威边界；DB Tunnel 与 `autossh` 已废弃，Yume command
+  已停用，三项相关源码文件均已删除
 - **关联研究：** [Raycast 声明式配置研究](../plans/raycast-declarative-configuration-research.md)
 
 ## 1. 摘要
@@ -14,7 +15,7 @@
 
 1. `⌘ Space` 启动、Compact 窗口、Caps Lock Hyper Key 等全局交互偏好；
 2. 15 个已观察到的 Hyper 应用启动键，以及 6 个窗口管理快捷键；
-3. `~/Desktop/raycast/scripts` 中 9 个 Script Commands；
+3. `~/Desktop/raycast/scripts` 中 7 个仍在使用的 Script Commands；
 4. 3 个本地 extension 和 6 个 Store extension；
 5. Quicklinks、Apple Shortcuts、aliases 和 extension preferences 等 Raycast 数据库状态。
 
@@ -167,7 +168,7 @@ Raycast 当前登记且实时监视的目录是：
 ~/Desktop/raycast/scripts
 ```
 
-目录中有 9 个启用的 Script Commands：
+目录中有 7 个仍在使用的 Script Commands：
 
 | 命令 | Mode | Alias | Hotkey |
 | --- | --- | --- | --- |
@@ -178,13 +179,11 @@ Raycast 当前登记且实时监视的目录是：
 | GitHub (Switch or Open) | silent | `gh` | 无 |
 | NotebookLM (Switch or Open) | silent | `llm` | 无 |
 | YouTube (Switch or Open) | silent | `yt` | 无 |
-| Yume (Switch or Open) | silent | `ym` | 无 |
-| Toggle DB Tunnel（已废弃） | compact | 无 | 无 |
 
-前 8 个导航命令是薄 wrapper，全部调用同一个
-[`chrome-switch.sh`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/scripts/chrome-switch.sh)
+这 7 个导航命令是薄 wrapper，全部调用同一个
+[`chrome-switch.sh`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/chrome-switch.sh)
 和 JXA
-[`chrome-switch.js`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/scripts/lib/chrome-switch.js)：
+[`chrome-switch.js`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/lib/chrome-switch.js)：
 
 - 配置只包含 `defaultURL` 与 `targetList`；
 - 匹配目标 host 或其子域名；
@@ -194,10 +193,10 @@ Raycast 当前登记且实时监视的目录是：
 这些导航脚本依赖系统 `/bin/bash`、`/usr/bin/osascript` 和 Google Chrome，不再要求
 Raycast GUI 环境能找到 Node。
 
-`Toggle DB Tunnel` 是独立的网络副作用命令。源码含固定的生产连接事实和本地状态路径；
-本文件不记录具体值。维护者已经将命令及其 `autossh` 依赖标记为废弃，因此不迁移、不补
-依赖、不进入 activation，也不再设计 secret/host-specific 或网络合同。现有脚本只作为遗留
-文件保留；删除仍需独立、明确批准，不能由盘点自动完成。
+维护者确认截图中没有 alias/hotkey 的 `Toggle DB Tunnel` 与 `Yume (Switch or Open)` 均已
+停用；前者及其 `autossh` 依赖已废弃。`toggle-db-tunnel.sh`、`yume-switch.sh` 与
+`config/yume-switch.json` 已从源码删除，也不进入 manifest、Nix capability 或 activation。
+DB tunnel 曾包含的生产连接事实不在本文记录，未来不得恢复相关源码、依赖或网络行为。
 
 ## 6. 本地 extensions
 
@@ -211,7 +210,7 @@ Raycast GUI 环境能找到 Node。
 
 两个仍在源码树中的 extension 都固定 `@raycast/api = 1.104.23`，通过 `pnpm exec ray`
 提供开发 CLI；`dev` 使用 `ray develop`，`lint` 使用 `ray lint`，构建使用
-[`build-extension.mjs`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/scripts/build-extension.mjs)
+[`build-extension.mjs`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/build-extension.mjs)
 在临时目录运行 `ray build`，再复制当前 manifest 声明的 JS 输出。
 
 ### 6.2 Terminal Finder
@@ -233,7 +232,7 @@ Settings 数据库仍额外登记：
 不是理论风险。
 
 另外，
-[`ghostty.ts`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/extensions/terminal-finder/src/ghostty.ts#L4-L5)
+[`ghostty.ts`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/extensions/terminal-finder/src/ghostty.ts#L4-L5)
 仍硬编码 `/Applications/Ghostty.app`，但本机只有
 `~/Applications/Home Manager Apps/Ghostty.app`。打开路径函数还会尝试应用名和 bundle ID，
 但 Ghostty → Finder 的 AppleScript 路径直接依赖该硬编码 bundle，因此存在明确的 Nix 安装
@@ -252,7 +251,7 @@ WezTerm 路径则通过登录 shell执行 `command -v wezterm`，当前解析为
 
 它通过 Raycast `getApplications()` 按 bundle ID 查找应用，再使用返回的实际 `app.path`，
 因此可兼容 Home Manager Apps 路径。证据见
-[`src/lib.ts`](https://github.com/sayoriqwq/raycast/blob/2948b57472f517fc67520e8d4fb7aab167c16bb9/extensions/open-in-editor/src/lib.ts#L37-L45)。
+[`src/lib.ts`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/extensions/open-in-editor/src/lib.ts#L37-L45)。
 
 live bundle 仍额外包含 AionUI、Antigravity、Kiro、OpenCode 四个命令。它们在提交
 [`f5fbf38`](https://github.com/sayoriqwq/raycast/commit/f5fbf38) 中已从源码删除，当前没有
@@ -363,7 +362,7 @@ Settings 中人工确认。
 
 | 状态 | 发现 | 当前处理 |
 | --- | --- | --- |
-| 已废弃 | DB tunnel 含固定生产连接事实，且 `autossh` 不在当前 PATH | 不迁移、不补依赖、不恢复；仅在批准的清理任务中删除遗留文件 |
+| 已完成清理 | DB tunnel 与 Yume command/config 已从源码删除 | Nix 消费者断言路径缺失；不迁移、不补依赖、不恢复 |
 | 敏感边界 | `config.json` 含 token-like 值 | 保持 `0600`，不得提交；当前不迁移 |
 | 已知漂移 | Terminal Finder 有两个失效的 Cmux 命令和 hotkey | 保留现状；实际影响使用时再通过官方流程收敛，不直接改数据库 |
 | 已知漂移 | Open in Editor 已安装 7 commands，源码仅 3 | 保留现状；需要重建时再复核 |

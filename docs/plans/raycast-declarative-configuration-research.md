@@ -15,7 +15,8 @@
 
 - Raycast Settings 的 **Show only customized** 视图可以直接作为其中“所有已修改内容”的权威
   边界，包括其中显示的 command、alias 和 hotkey；不需要用完整 `.rayconfig` 再确认范围；
-- `Toggle DB Tunnel` 及其 `autossh` 依赖已经废弃，不迁移、不补依赖、不进入 capability；
+- `Toggle DB Tunnel` 及其 `autossh` 依赖已经废弃，`Yume (Switch or Open)` 也已停用；维护者
+  已批准从源码直接删除两者及 Yume 配置，不迁移、不补依赖、不进入 capability；
 - 当前 Raycast 配置相对稳定，不需要先建立持续维护或配置回流机制；
 - 在完成盘点后，维护者明确要求按“文档落库 → Raycast 源码仓库整理 → nix-config 固定输入
   与 capability adapter”的顺序启动实施，同时继续排除数据库、导入和 activation。
@@ -83,8 +84,9 @@ Nix 意味着把版本推进责任从 Raycast updater 移交给 `flake.lock`/Nix
 
 当前可声明资产为：
 
-- 9 个已登记的 Raycast Script Commands：8 个 Chrome tab switch 命令，以及 1 个维护者已
-  标记废弃的 database tunnel toggle；未来声明范围只考虑前 8 个；
+- 7 个仍在使用的 Chrome tab switch Script Commands；维护者确认没有 alias/hotkey 的
+  `Toggle DB Tunnel` 与 `Yume (Switch or Open)` 均已停用，相关脚本和 Yume 配置已经从
+  Raycast 源码仓库删除；
 - 2 个本地 Extension：
   - `terminal-finder`：4 个 Finder / WezTerm / Ghostty 命令；
   - `open-in-editor`：3 个 VS Code / Zed Nightly / Codex 命令；
@@ -97,10 +99,9 @@ Nix 意味着把版本推进责任从 Raycast updater 移交给 `flake.lock`/Nix
 - `terminal-finder` 源码硬编码 `/Applications/Ghostty.app`，真实 Nix 安装路径是
   `~/Applications/Home Manager Apps/Ghostty.app`；bundle ID 路径与 fallback 仍可能工作，
   但硬编码路径本身不再是可靠合同；
-- `toggle-db-tunnel.sh` 依赖 `autossh`，当前 Fish PATH 和 nix-config 都没有声明该依赖；
-- 同一脚本在公开仓库中硬编码了 production 数据库端点。本文不复述该值。维护者已经将
-  脚本与依赖标记为废弃，因此后续不得为它补包、迁移 secret 或恢复网络行为；现有文件只
-  能在独立、明确批准的清理范围内删除。
+- 已删除的 `toggle-db-tunnel.sh` 曾依赖 `autossh` 并包含 production 数据库连接事实，本文
+  不复述具体值；后续消费者必须对该路径做负向断言，不得补包、迁移 secret 或恢复网络行为；
+- 已删除的 Yume wrapper 与配置同样不得由下游恢复。
 
 ## 3. 上游能力边界
 
@@ -193,8 +194,8 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
   Snippets/Quicklinks import files、固定 revision 的 extension source/build；
 - **mutable state：** 声明但不接管 `~/.config/raycast`、Application Support、preferences plist
   和相关 extension state；Keychain 不作为文件路径声明；
-- **network effects：** 普通 navigation 命令只操作本机应用；已废弃的 database tunnel
-  command 明确排除在目标 capability 外，不安装 `autossh`，也不在 activation 中执行；
+- **network effects：** 7 个 navigation 命令只操作本机应用；已删除的 database tunnel
+  明确不属于目标 capability，不安装 `autossh`、不恢复源码，也不在 activation 中执行；
 - **human gates：** Raycast 完全退出后才写私有 defaults；Script Directory、local extension、
   JSON/`.rayconfig` import、TCC 和 app package migration 均需人工确认；
 - **rollback：** Nix generation 只撤销声明。Raycast import 是 additive，不能假设 generation
@@ -222,9 +223,10 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
 ### Issue B — Script Commands 与 runtime dependency
 
 - 以 `github:sayoriqwq/raycast` 的固定 revision 作为非 flake input；
-- 把 8 个 navigation command 及其 helper/config 生成到稳定用户目录；
+- 把 7 个 navigation command 及其 helper/config 生成到稳定用户目录；
 - 给脚本使用绝对系统工具路径或 Nix wrapper，避免依赖 GUI app 的不确定 PATH；
-- 永久排除已废弃的 database tunnel 和 `autossh`，不为其设计 secret/网络合同；
+- 对已删除的 database tunnel、Yume command/config 和 `autossh` 做负向断言，不恢复文件，
+  不为其设计 secret/网络合同；
 - Raycast 中 Add Script Directory 保持一次性人工动作。
 
 ### Issue C — 两个自研 extension 的可复现构建与导入
@@ -277,17 +279,18 @@ extension Issue 还需对每个 manifest 验证：
 - 不读取或输出 token、OAuth、Keychain、数据库内容和 export passphrase。
 
 所有真实 `darwin-rebuild switch`、Raycast import、TCC 授权、Store publish、extension prune
-和 Homebrew/Nix package 移交都必须作为独立人工关卡记录。已废弃的 production tunnel 不在
-验证范围内，不得为了验证而恢复。构建成功不构成执行授权。
+和 Homebrew/Nix package 移交都必须作为独立人工关卡记录。已删除的 production tunnel 与
+Yume command/config 不在恢复范围内，验证只能确认它们保持缺失。构建成功不构成执行授权。
 
 ## 8. 已记录的维护者决策
 
 1. 当前配置是稳定基线，不创建 Raycast 持续维护或自动配置回流 backlog；
 2. Show only customized 是自定义内容的权威盘点视图；
-3. `Toggle DB Tunnel` 与 `autossh` 已废弃，未来声明、构建和恢复流程均排除；
+3. `Toggle DB Tunnel` 与 `autossh` 已废弃，`Yume (Switch or Open)` 已停用；维护者已批准并
+   完成相关脚本及 Yume 配置的源码删除，未来声明、构建和恢复流程均排除；
 4. `counter`、本地 extension 分发方式、Snippets/Quicklinks 回流和 app package owner 等问题
    暂不决策；只有出现实际需求时才重新打开对应窄 Issue；
 5. 现有运行态不因本研究自动清理、重建或迁移；
 6. 维护者随后明确启动“文档落库 → Raycast 源码仓库整理 → nix-config 固定输入与
-   capability adapter”的窄范围实施。该决定只重新打开声明归属工作，不授权数据库读取、
-   自动导入、TCC、应用安装渠道迁移、activation 或废弃 tunnel 清理。
+   capability adapter”的窄范围实施，并批准删除 DB tunnel 与 Yume 源码。该决定不授权
+   数据库读取、自动导入、TCC、应用安装渠道迁移或 activation。
