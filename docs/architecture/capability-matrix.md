@@ -36,7 +36,7 @@
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
-| AI 辅助运维 | 是 | 否 | 否 | macbook 的 `rtk`、Graphviz、Poppler、裸 Python 3.14 agent 基线，以及由 Nix/Home Manager 唯一提供 PATH 来源的 `codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4；Oh My Pi 使用固定官方 `darwin-arm64` 发布物，状态与凭据外部，详见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
+| AI 辅助运维 | 是 | 否 | 否 | macbook 的 `rtk`、Graphviz、Poppler、裸 Python 3.14 agent 基线、由 Home Manager 管理的全局 Agent 工具所有权策略，以及由 Nix/Home Manager 唯一提供 PATH 来源的 `codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4；AI 客户端状态与凭据外部，详见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
 
 ## 明确排除或延后
 

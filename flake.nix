@@ -140,6 +140,10 @@
       };
 
       checks = {
+        aarch64-darwin.macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
+          homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+          pkgs = self.darwinConfigurations.macbook.pkgs;
+        };
         aarch64-darwin.macbook-agent-python = import ./tests/macos/agent-python.nix {
           pkgs = self.darwinConfigurations.macbook.pkgs;
           profilePackages =

@@ -37,6 +37,11 @@ dev shell 或 mise activation。`python314` 因此由 AI 辅助运维能力的�
 `.venv` 和同步依赖。当前锁定版本为 Python 3.14.6；升级 minor 必须通过后续窄范围
 维护，而不是使用可变的 `latest`。
 
+Home Manager 管理的 `~/.codex/AGENTS.md` 向从 GUI 或非交互式进程启动的 Agent
+公开稳定入口 `/etc/profiles/per-user/sayori/bin/python`，并明确禁止向该基线引导
+`pip` 或写入全局第三方包。策略文件不写死 Nix Store derivation；项目 Python 与依赖
+继续按本表由 uv/项目拥有。
+
 ## 3. 未激活验证
 
 实现阶段只执行格式化、求值和构建，不改变真实机器：

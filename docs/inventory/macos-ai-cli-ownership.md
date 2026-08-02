@@ -49,11 +49,29 @@ commit 完成实机验收并获得新的人工批准后，维护者才可以逐�
 直接执行的卸载命令。不得把 `~/.codex`、`~/.claude`、`~/.claude.json`、
 `~/.gemini`、`~/.omp` 或 `~/.local/share/mise` 作为递归删除目标。
 
-## 3. 可变状态、机密与 Store 边界
+## 3. 全局 Agent 策略
 
-Nix 只拥有 package、稳定声明和 PATH 入口。以下路径及其中的 auth/token、session、
-history、skills、hooks、cache、数据库、项目内容均继续由客户端或用户拥有，保持可写，
-不读取、不迁移、不整体链接到 Nix Store：
+macbook 的 `ai-assisted-operations` capability 只把稳定策略
+`~/.codex/AGENTS.md` 纳入 Home Manager。其源码为
+`dotfiles/codex/AGENTS.md`，向所有 Codex 任务公开以下 interface：
+
+- 本机由 `nix-darwin + Home Manager` 管理，声明源为 nix-config；
+- Agent 裸 Python 使用 Home Manager profile 的稳定 `python` 入口，不写死 Store path，
+  不引导全局 `pip`；项目 Python、`.venv` 与依赖继续由 uv/项目拥有；
+- 持久全局工具先进入对应 capability、ownership 文档与检查，再通过 Git/PR 同步；
+- 项目依赖进入项目声明，一次性工具只使用 `nix shell`、`nix run` 或 uv 临时入口；
+- Agent 不执行真实机器 activation，维护者继续拥有最后的人工关卡。
+
+Home Manager 对该精确文件设置 `force`，使激活后的入口不能被手工副本静默漂移。
+源文件不包含 token、session、账号或其他机密，可以安全进入 Nix Store。回滚上一代
+generation 会恢复上一版策略，不删除任何 Codex 可变状态。
+
+## 4. 可变状态、机密与 Store 边界
+
+Nix 只拥有 package、稳定声明、PATH 入口和上节列出的全局 Agent 策略。以下路径及其中
+除 `~/.codex/AGENTS.md` 外的 auth/token、session、history、skills、hooks、cache、
+数据库、项目内容均继续由客户端或用户拥有，保持可写，不读取、不迁移、不整体链接到
+Nix Store：
 
 - `~/.codex`；
 - `~/.claude`；
@@ -66,7 +84,7 @@ history、skills、hooks、cache、数据库、项目内容均继续由客户端
 清理或接管内容。项目 Python、`.venv` 和依赖仍由 uv/项目管理；mise 不管理 Python
 或 uv。
 
-## 4. 激活顺序与干净 Fish 验收
+## 5. 激活顺序与干净 Fish 验收
 
 以下是维护者在精确合并 commit 上执行的顺序；Agent 只做格式化、求值、构建和文档
 检查，不执行真实机器 activation：
@@ -98,7 +116,7 @@ omp --version
 `~/.local/bin` 或 mise npm globals。验收同时确认 Codex/OMP 没有启动更新检查、AGY
 没有自动更新，且上述状态目录和凭据未被写入 Store。
 
-## 5. 清理关卡与回滚
+## 6. 清理关卡与回滚
 
 验收通过后，维护者另行批准以下概念目标的精确动作：Homebrew `/opt/homebrew` 的
 Claude 2.1.153、`~/.local/bin/agy` 1.0.8，以及停用 mise Node 25.8.1 树中的
@@ -112,7 +130,7 @@ mise runtime。若路径、版本或消费者与本表不符，停止并重新�
 在清理前回滚不需要重建状态；在清理后如需旧入口，维护者必须按新的批准重新安装
 对应外部副本。四个命令的 upstream 版本选择仍由仓库声明负责。
 
-## 6. 非目标与后续
+## 7. 非目标与后续
 
 - 不扩展到 nixbox 或 server，不改变 server 迁移、SSH、网络、firewall 或数据流程；
 - 不接管 AI 客户端登录、token、历史、skills/hooks、cache、数据库或项目状态；
