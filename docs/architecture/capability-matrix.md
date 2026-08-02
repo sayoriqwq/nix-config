@@ -32,7 +32,8 @@
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
-| macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；后续按真实需求拆出，不作为其他主机的继承源。 |
+| Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
+| macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |

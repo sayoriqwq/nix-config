@@ -18,6 +18,13 @@
     # Issue #76: consume Herdr's stable Nix package through Home Manager.
     herdr.url = "github:herdrdev/herdr/v0.7.5";
 
+    # Issue #90: consume only the reviewed source contract. Raycast's own
+    # extension tooling remains in the leaf repository, so this is not a Flake.
+    raycast-source = {
+      url = "github:sayoriqwq/raycast/fb8e901fde16417c6a08bdd7c36beb2991e5895b";
+      flake = false;
+    };
+
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -154,6 +161,13 @@
           pkgs = packagesFor "aarch64-darwin";
           zshrc =
             self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
+        };
+        aarch64-darwin.macbook-raycast-source = import ./tests/macos/raycast-source.nix {
+          inherit (self.darwinConfigurations.macbook.pkgs) lib;
+          casks = self.darwinConfigurations.macbook.config.homebrew.casks;
+          pkgs = self.darwinConfigurations.macbook.pkgs;
+          scriptCommands =
+            self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
         };
         x86_64-linux = {
           phase9-network = phase9NetworkTest;
