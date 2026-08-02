@@ -36,7 +36,7 @@
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
-| AI 辅助运维 | 是 | 否 | 否 | 当前只含 macbook 已有 `rtk`、Graphviz、Poppler 与客户端事实；由 #67 单独审计。 |
+| AI 辅助运维 | 是 | 否 | 否 | macbook 的 `rtk`、Graphviz、Poppler、裸 Python 3.14 agent 基线与客户端事实；由 #67 单独审计。 |
 
 ## 明确排除或延后
 

@@ -140,6 +140,11 @@
       };
 
       checks = {
+        aarch64-darwin.macbook-agent-python = import ./tests/macos/agent-python.nix {
+          pkgs = self.darwinConfigurations.macbook.pkgs;
+          profilePackages =
+            self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
+        };
         aarch64-darwin.macbook-zsh-zoxide = import ./tests/macos/zsh-zoxide.nix {
           pkgs = packagesFor "aarch64-darwin";
           zshrc =

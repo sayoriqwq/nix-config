@@ -2,7 +2,8 @@
 
 - **机器：** `macbook`
 - **收口日期：** 2026-07-28
-- **维护修订：** 2026-07-31，Issue #74 恢复 Lark 数据；Issue #81 将当前渠道更正为中国区 Feishu
+- **维护修订：** 2026-08-03，Issue #74 恢复 Lark 数据，#81 将当前渠道更正为中国区
+  Feishu，#67 增加 agent Python 基线
 - **决策来源：** Issue #6、#36 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -38,14 +39,15 @@
 ### 3.1 通用 CLI 与运行时入口
 
 Home Manager 声明 Atuin、Bat、Btop、Delta、Eza、fd、fastfetch、Fish、fzf、GitHub CLI、
-Gitleaks、Graphviz、Helix、jq、Lazygit、mise、nh、pay-respects、Poppler、rclone、ripgrep、
-rtk、Starship、tmux、tree、uv、yazi 和 zoxide 等用户工具。Zsh 的 autosuggestions 与
-syntax highlighting 也来自 Nix，而不是 Homebrew formula。
+Gitleaks、Graphviz、Helix、jq、Lazygit、mise、nh、pay-respects、Poppler、Python 3.14、
+rclone、ripgrep、rtk、Starship、tmux、tree、uv、yazi 和 zoxide 等用户工具。Zsh 的
+autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formula。
 
 运行时分工如下：
 
 - mise 固定 Node、Bun、pnpm、Erlang 29.0.3 与 Elixir 1.20.2-otp-29；
-- Nix 只提供 uv 可执行文件，Python 版本、`.venv`、依赖与 lock file 属于项目；
+- Nix 为 macbook AI 辅助运维提供一个裸 Python 3.14 agent 基线，不加入全局第三方包；
+- uv 负责项目 Python 选择，`.venv`、依赖与 lock file 属于项目；
 - nginx、pkgconf 等项目依赖进入项目 dev shell，不进入全局用户 profile；
 - PostgreSQL 16 数据服务不与普通 CLI 混合迁移，延期到 Issue #60。
 
