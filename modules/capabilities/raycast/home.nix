@@ -13,9 +13,12 @@ let
   inherit (manifest.scriptCommands) entrypoints supportExecutables supportFiles;
 
   managedPaths = entrypoints ++ supportExecutables ++ supportFiles;
-  excludedPaths = map (entry: entry.path) manifest.excluded;
   extensionPaths = map (extension: extension.path) manifest.extensions;
-  deprecatedTunnel = "scripts/toggle-db-tunnel.sh";
+  retiredPaths = [
+    "scripts/toggle-db-tunnel.sh"
+    "scripts/yume-switch.sh"
+    "scripts/config/yume-switch.json"
+  ];
 
   isSafeRelativePath =
     path: !(lib.hasPrefix "/" path) && !(builtins.elem ".." (lib.splitString "/" path));
@@ -33,8 +36,6 @@ let
     terminal-finder = "extensions/terminal-finder";
   };
 
-  deprecatedTunnelEntries = lib.filter (entry: entry.path == deprecatedTunnel) manifest.excluded;
-
   scriptCommands = pkgs.linkFarm "raycast-script-commands" (
     map (path: {
       name = targetPath path;
@@ -51,12 +52,12 @@ in
       message = "Raycast source manifest must use schema version 1.";
     }
     {
-      assertion = builtins.length entrypoints == 8;
-      message = "Raycast capability expects exactly eight active Script Command entrypoints.";
+      assertion = builtins.length entrypoints == 7;
+      message = "Raycast capability expects exactly seven active Script Command entrypoints.";
     }
     {
-      assertion = builtins.length managedPaths == 18 && builtins.length (lib.unique managedPaths) == 18;
-      message = "Raycast managed Script Command tree must contain exactly 18 unique source files.";
+      assertion = builtins.length managedPaths == 16 && builtins.length (lib.unique managedPaths) == 16;
+      message = "Raycast managed Script Command tree must contain exactly 16 unique source files.";
     }
     {
       assertion = lib.all (path: isSafeRelativePath path && lib.hasPrefix "scripts/" path) managedPaths;
@@ -78,11 +79,11 @@ in
     }
     {
       assertion =
-        !(builtins.elem deprecatedTunnel managedPaths)
-        && builtins.elem deprecatedTunnel excludedPaths
-        && builtins.length deprecatedTunnelEntries == 1
-        && (builtins.head deprecatedTunnelEntries).status == "deprecated";
-      message = "Deprecated Raycast DB tunnel must be excluded exactly once and never enter the managed tree.";
+        manifest.excluded == [ ]
+        && lib.all (
+          path: !(builtins.elem path managedPaths) && !(builtins.pathExists (sourcePath path))
+        ) retiredPaths;
+      message = "Retired Raycast DB tunnel and Yume files must remain absent from the manifest and source.";
     }
   ];
 

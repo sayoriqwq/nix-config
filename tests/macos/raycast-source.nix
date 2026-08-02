@@ -15,7 +15,6 @@ let
     "github-switch.sh"
     "notebook-switch.sh"
     "youtube-switch.sh"
-    "yume-switch.sh"
   ];
   supportFiles = [
     "chrome-switch.sh"
@@ -26,10 +25,14 @@ let
     "config/github-switch.json"
     "config/notebook-switch.json"
     "config/youtube-switch.json"
-    "config/yume-switch.json"
     "lib/chrome-switch.js"
   ];
   expectedFiles = entrypoints ++ supportFiles;
+  retiredFiles = [
+    "toggle-db-tunnel.sh"
+    "yume-switch.sh"
+    "config/yume-switch.json"
+  ];
 in
 assert lib.assertMsg (
   builtins.length raycastCasks == 1
@@ -47,11 +50,11 @@ pkgs.runCommand "macbook-raycast-source-check"
       entrypoints ++ [ "chrome-switch.sh" ]
     )}
 
-    test ! -e "${scriptCommands}/toggle-db-tunnel.sh"
+    ${lib.concatMapStringsSep "\n" (path: ''test ! -e "${scriptCommands}/${path}"'') retiredFiles}
 
     fileCount="$(find -L "${scriptCommands}" -type f | wc -l | tr -d '[:space:]')"
-    if [ "$fileCount" -ne 18 ]; then
-      echo "expected 18 Raycast Script Command files, found $fileCount" >&2
+    if [ "$fileCount" -ne 16 ]; then
+      echo "expected 16 Raycast Script Command files, found $fileCount" >&2
       exit 1
     fi
 
