@@ -10,6 +10,7 @@
     ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
     ../../modules/darwin/shell.nix
+    ../../modules/capabilities/raycast/darwin.nix
     ../../modules/capabilities/macos-legacy-applications/darwin.nix
     ../../modules/capabilities/google-chrome/darwin.nix
     ../../modules/capabilities/clash-verge-rev/darwin.nix

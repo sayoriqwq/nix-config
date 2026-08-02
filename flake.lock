@@ -271,6 +271,23 @@
         "type": "github"
       }
     },
+    "raycast-source": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785705466,
+        "narHash": "sha256-X0a+X9Cse6JvEhqkHKfS5yKjbpi+9euvl0rUcmKePls=",
+        "owner": "sayoriqwq",
+        "repo": "raycast",
+        "rev": "86679ef9a35d6605edef2c88aba033f2773384ce",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sayoriqwq",
+        "repo": "raycast",
+        "rev": "86679ef9a35d6605edef2c88aba033f2773384ce",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "disko": "disko",
@@ -280,6 +297,7 @@
         "nixos-anywhere": "nixos-anywhere",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-darwin": "nixpkgs-darwin",
+        "raycast-source": "raycast-source",
         "zed": "zed"
       }
     },
