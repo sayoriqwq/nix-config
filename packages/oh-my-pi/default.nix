@@ -1,17 +1,27 @@
 {
   fetchurl,
   lib,
+  makeWrapper,
   stdenvNoCC,
+  writeText,
 }:
 
+let
+  managedConfig = writeText "oh-my-pi-nix-managed.yml" ''
+    startup:
+      checkUpdate: false
+  '';
+in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "oh-my-pi";
-  version = "17.0.8";
+  version = "17.2.4";
 
   src = fetchurl {
     url = "https://github.com/can1357/oh-my-pi/releases/download/v${finalAttrs.version}/omp-darwin-arm64";
-    hash = "sha256-ctgYEiMLhvyxcNJze+AXOOeppK/NH0gBkZS/cgNNyck=";
+    hash = "sha256-850lbGsuzn8uuFwk/Ef/vjmheW6m7qJgWtVk/OQsQI4=";
   };
+
+  nativeBuildInputs = [ makeWrapper ];
 
   dontUnpack = true;
 
@@ -19,6 +29,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook preInstall
 
     install -Dm755 "$src" "$out/bin/omp"
+    install -Dm444 "${managedConfig}" "$out/share/oh-my-pi/nix-managed.yml"
+    wrapProgram "$out/bin/omp" \
+      --suffix PI_CONFIG_FILES : "$out/share/oh-my-pi/nix-managed.yml"
 
     runHook postInstall
   '';

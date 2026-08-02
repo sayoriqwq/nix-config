@@ -17,9 +17,9 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 - `homebrew.onActivation.cleanup = "none"`。
 
 以上 28 个 cask 是 Issue #46 的原始实施与验收基线。Issue #74 在 2026-07-31 曾恢复
-全球版 `lark` 声明，Issue #81 随后把当前渠道更正为中国区 `feishu`；当前目标仍为
-29 个 cask。原始 build/activation 记录继续按当时 28 个条目解释，后续修订见第 10、
-11 节。
+全球版 `lark` 声明，Issue #81 随后把当前渠道更正为中国区 `feishu`；Issue #67 又把
+`claude-code` 从 Homebrew 迁移到 Nix/Home Manager，因此当前目标为 28 个 cask。
+原始 build/activation 记录继续按当时 28 个条目解释，后续修订见第 10–12 节。
 
 应用账号、许可证、登录态、偏好、缓存、数据库、容器、虚拟机、项目和其他可变状态
 不由 Homebrew Bundle 或 Nix 接管。
@@ -254,3 +254,15 @@ activation 不会卸载既有 `lark` receipt 或删除 `LarkSuite.app`。三份�
 4. 再由维护者单独启动 Feishu，验证中国区账号、工作区、聊天、文件和同步，并判断是否
    需要迁移旧 `LarkShell` 数据；
 5. 验收完成前不卸载或删除任何一份应用、receipt、Trash 原件或私有备份。
+
+## 12. Issue #67：Claude Code 迁移到 Nix
+
+Issue #67 将 `claude-code` 从 Homebrew cask 声明移除，并由 macbook 的
+`ai-assisted-operations` Home Manager capability 提供锁定版本。当前 Homebrew 目标因此
+从 #81 完成后的 29 个 cask 回到 28 个；`cleanup = "none"` 保持不变，所以声明变化不会
+在 activation 中自动卸载真实机器已有的 Claude cask。
+
+只有在新的 Nix `claude` 完成 activation、PATH 与版本验收，并取得单独人工批准后，才可
+定向卸载该旧 cask。Claude 的账号、凭据、会话和其他可变状态仍不由 Homebrew 或 Nix
+接管；完整四 CLI 所有权与清理关卡见
+[`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)。

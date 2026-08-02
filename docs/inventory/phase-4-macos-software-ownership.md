@@ -3,7 +3,7 @@
 - **机器：** `macbook`
 - **收口日期：** 2026-07-28
 - **维护修订：** 2026-08-03，Issue #74 恢复 Lark 数据，#81 将当前渠道更正为中国区
-  Feishu，#67 增加 agent Python 基线
+  Feishu，#67 增加 agent Python 基线并收口四个 AI CLI 所有权
 - **决策来源：** Issue #6、#36 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -24,7 +24,7 @@
 | 来源 | 最终职责 | 声明/恢复入口 |
 | --- | --- | --- |
 | Nix / Home Manager | 通用 CLI、Shell、终端、编辑器及可靠 GUI | 顶层 Flake 与 `modules/home/` |
-| nix-darwin Homebrew | 29 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
+| nix-darwin Homebrew | 28 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
 | Mac App Store | 9 个可独立恢复的 Apple/第三方应用 | `homebrew.masApps` |
 | Setapp | 14 个订阅应用与 Setapp 客户端 | Setapp 官方客户端、人工登录 |
 | macOS / Apple | 核心系统应用、Command Line Tools | 系统更新或 Apple 官方安装流程 |
@@ -47,6 +47,11 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
 
 - mise 固定 Node、Bun、pnpm、Erlang 29.0.3 与 Elixir 1.20.2-otp-29；
 - Nix 为 macbook AI 辅助运维提供一个裸 Python 3.14 agent 基线，不加入全局第三方包；
+- `ai-assisted-operations` capability 由 Nix/Home Manager 唯一提供 `codex` 0.146.0、
+  `claude` 2.1.187、`agy` 1.1.9 和 `omp` 17.2.4；Oh My Pi 使用固定官方
+  `darwin-arm64` 发布物，四个可执行文件的更新由 Nix 控制，`~/.omp` 状态与凭据保持
+  可写且不进入 Store。完整版本、重复副本和人工关卡见
+  [`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)；
 - uv 负责项目 Python 选择，`.venv`、依赖与 lock file 属于项目；
 - nginx、pkgconf 等项目依赖进入项目 dev shell，不进入全局用户 profile；
 - PostgreSQL 16 数据服务不与普通 CLI 混合迁移，延期到 Issue #60。
@@ -82,13 +87,13 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 ### 4.1 nix-darwin 声明
 
 唯一允许的第三方 tap 是 `erictli/tap`，只为 Markdown 应用 Scratch 提供
-`erictli/tap/scratch`。声明的 29 个 cask 为：
+`erictli/tap/scratch`。声明的 28 个 cask 为：
 
 | 分类 | cask |
 | --- | --- |
 | 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`feishu`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
 | 创作与媒体 | `balenaetcher`、`figma`、`neteasemusic`、`homebrew/cask/obs` |
-| 开发与 AI | `chatgpt`、`claude-code`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
+| 开发与 AI | `chatgpt`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
 | 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`steam`、`topnotch`、`vorssaint` |
 
 `autoUpdate = false`、`upgrade = false`、`cleanup = "none"`。普通 activation 只校验/恢复
@@ -98,6 +103,9 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 
 - `chatgpt` 对应 `com.openai.codex`（现 `ChatGPT.app`）；`ChatGPT Classic.app`
   是单独的 `com.openai.chat`，保持外部所有；
+- `claude-code` 不再是声明的 Homebrew cask；迁移前 `/opt/homebrew` 中的 Claude
+  2.1.153 只作为待人工批准的精确清理目标保留。ChatGPT.app 的 embedded Codex 是
+  app-private helper，不是 `codex` PATH 来源或清理目标；
 - `erictli/tap/scratch` 对应 Markdown 应用 `com.scratch.app`。Issue #64 已把 Homebrew
   receipt 与实际 bundle 定向对齐到 1.0.0；裸 `scratch` 会解析到同名 MIT 应用，安装、
   升级和 outdated 验证必须使用完整 token；
@@ -204,13 +212,13 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 | --- | --- |
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
 | VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
-| GUI 来源散落且缺少统一恢复说明 | 29 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner |
+| GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner；四个 AI CLI 另由 Nix/Home Manager 唯一提供 |
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时，旧 Docker Desktop helper 已清理 |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
 | 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置源；旧仓库冻结归档 |
 
-已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、Google Antigravity、
+已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、旧 Google Antigravity GUI、
 Itsycal、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Preview、
 Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明确批准完成；Trash
 或私有备份是否最终清空不属于配置仓库职责。

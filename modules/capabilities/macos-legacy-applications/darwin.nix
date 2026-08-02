@@ -13,7 +13,6 @@
       "baidunetdisk"
       "balenaetcher"
       "chatgpt"
-      "claude-code"
       "easyfind"
       "erictli/tap/scratch"
       "figma"

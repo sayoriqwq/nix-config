@@ -22,6 +22,8 @@
     pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
+      "claude-code"
+      "antigravity-cli"
       "mos"
       "obsidian"
       "vscode"
