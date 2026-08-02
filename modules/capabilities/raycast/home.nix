@@ -56,8 +56,8 @@ in
       message = "Raycast capability expects exactly seven active Script Command entrypoints.";
     }
     {
-      assertion = builtins.length managedPaths == 16 && builtins.length (lib.unique managedPaths) == 16;
-      message = "Raycast managed Script Command tree must contain exactly 16 unique source files.";
+      assertion = builtins.length managedPaths == 24 && builtins.length (lib.unique managedPaths) == 24;
+      message = "Raycast managed Script Command tree must contain exactly 24 unique source files.";
     }
     {
       assertion = lib.all (path: isSafeRelativePath path && lib.hasPrefix "scripts/" path) managedPaths;

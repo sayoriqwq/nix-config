@@ -2,7 +2,8 @@
 
 - **盘点日期：** 2026-08-03
 - **目标应用：** Raycast `1.104.24`
-- **自研源码：** [`sayoriqwq/raycast`](https://github.com/sayoriqwq/raycast/tree/fb8e901fde16417c6a08bdd7c36beb2991e5895b)，当前 `main` 干净，revision 为 `fb8e901fde16417c6a08bdd7c36beb2991e5895b`
+- **自研源码：** [`sayoriqwq/raycast`](https://github.com/sayoriqwq/raycast/tree/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee)，当前 `main` 干净，revision 为 `48f7a10551f7ae2cada8f7bbe4243ce36ed656ee`
+- **部署状态：** 维护者已激活 Raycast capability，并通过官方 UI 选择 Home Manager 管理的 Script Directory；本仓库仍是开发源码 checkout
 - **性质：** 只读、脱敏的现状证据；不是可直接 apply 的声明
 - **维护者决策：** 当前配置视为稳定基线，不建立持续维护流程；Show only customized 是
   Raycast Settings 中所有已修改内容的权威边界；DB Tunnel 与 `autossh` 已废弃，Yume command
@@ -15,7 +16,7 @@
 
 1. `⌘ Space` 启动、Compact 窗口、Caps Lock Hyper Key 等全局交互偏好；
 2. 15 个已观察到的 Hyper 应用启动键，以及 6 个窗口管理快捷键；
-3. `~/Desktop/raycast/scripts` 中 7 个仍在使用的 Script Commands；
+3. `~/.local/share/raycast/script-commands` 中 7 个由 Home Manager 部署的 Script Commands；
 4. 3 个本地 extension 和 6 个 Store extension；
 5. Quicklinks、Apple Shortcuts、aliases 和 extension preferences 等 Raycast 数据库状态。
 
@@ -165,8 +166,11 @@ Raycast 是当前窗口管理主路径，配置形成一组 Vim 方位风格快�
 Raycast 当前登记且实时监视的目录是：
 
 ```text
-~/Desktop/raycast/scripts
+~/.local/share/raycast/script-commands
 ```
+
+该目录由 Home Manager 从固定 Raycast source revision 生成；`~/Desktop/raycast` 继续作为 Git
+源码与开发 checkout，不应删除或直接作为第二个 Script Directory 同时登记。
 
 目录中有 7 个仍在使用的 Script Commands：
 
@@ -177,18 +181,23 @@ Raycast 当前登记且实时监视的目录是：
 | Claude (Switch or Open) | silent | `cc` | 无 |
 | Gemini (Switch or Open) | silent | `gm` | 无 |
 | GitHub (Switch or Open) | silent | `gh` | 无 |
-| NotebookLM (Switch or Open) | silent | `llm` | 无 |
+| Gemini Notebook (Switch or Open) | silent | `llm` | 无 |
 | YouTube (Switch or Open) | silent | `yt` | 无 |
 
 这 7 个导航命令是薄 wrapper，全部调用同一个
-[`chrome-switch.sh`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/chrome-switch.sh)
+[`chrome-switch.sh`](https://github.com/sayoriqwq/raycast/blob/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee/scripts/chrome-switch.sh)
 和 JXA
-[`chrome-switch.js`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/lib/chrome-switch.js)：
+[`chrome-switch.js`](https://github.com/sayoriqwq/raycast/blob/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee/scripts/lib/chrome-switch.js)：
 
 - 配置只包含 `defaultURL` 与 `targetList`；
 - 匹配目标 host 或其子域名；
 - 跳过 DevTools、Chrome 内部页、空白页、data URL 和本地开发地址；
 - 已有目标 tab 时聚焦，否则在正常 Chrome 窗口创建 tab；没有窗口时用 `open -a`。
+
+7 个命令均使用 source revision 内固定的本地品牌图标，不依赖运行时联网加载。Gemini Notebook
+使用 light/dark 两套图标，默认打开 `https://notebook.google.com/`，并继续匹配旧域名
+`notebooklm.google.com` 以兼容尚未重定向的既有标签页。入口路径仍是 `notebook-switch.sh`，
+因此不主动改变应用内 alias `llm` 的命令身份。
 
 这些导航脚本依赖系统 `/bin/bash`、`/usr/bin/osascript` 和 Google Chrome，不再要求
 Raycast GUI 环境能找到 Node。
@@ -210,7 +219,7 @@ DB tunnel 曾包含的生产连接事实不在本文记录，未来不得恢复�
 
 两个仍在源码树中的 extension 都固定 `@raycast/api = 1.104.23`，通过 `pnpm exec ray`
 提供开发 CLI；`dev` 使用 `ray develop`，`lint` 使用 `ray lint`，构建使用
-[`build-extension.mjs`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/scripts/build-extension.mjs)
+[`build-extension.mjs`](https://github.com/sayoriqwq/raycast/blob/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee/scripts/build-extension.mjs)
 在临时目录运行 `ray build`，再复制当前 manifest 声明的 JS 输出。
 
 ### 6.2 Terminal Finder
@@ -232,7 +241,7 @@ Settings 数据库仍额外登记：
 不是理论风险。
 
 另外，
-[`ghostty.ts`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/extensions/terminal-finder/src/ghostty.ts#L4-L5)
+[`ghostty.ts`](https://github.com/sayoriqwq/raycast/blob/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee/extensions/terminal-finder/src/ghostty.ts#L4-L5)
 仍硬编码 `/Applications/Ghostty.app`，但本机只有
 `~/Applications/Home Manager Apps/Ghostty.app`。打开路径函数还会尝试应用名和 bundle ID，
 但 Ghostty → Finder 的 AppleScript 路径直接依赖该硬编码 bundle，因此存在明确的 Nix 安装
@@ -251,7 +260,7 @@ WezTerm 路径则通过登录 shell执行 `command -v wezterm`，当前解析为
 
 它通过 Raycast `getApplications()` 按 bundle ID 查找应用，再使用返回的实际 `app.path`，
 因此可兼容 Home Manager Apps 路径。证据见
-[`src/lib.ts`](https://github.com/sayoriqwq/raycast/blob/fb8e901fde16417c6a08bdd7c36beb2991e5895b/extensions/open-in-editor/src/lib.ts#L37-L45)。
+[`src/lib.ts`](https://github.com/sayoriqwq/raycast/blob/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee/extensions/open-in-editor/src/lib.ts#L37-L45)。
 
 live bundle 仍额外包含 AionUI、Antigravity、Kiro、OpenCode 四个命令。它们在提交
 [`f5fbf38`](https://github.com/sayoriqwq/raycast/commit/f5fbf38) 中已从源码删除，当前没有
