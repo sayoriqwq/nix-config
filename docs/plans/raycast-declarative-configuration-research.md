@@ -4,9 +4,10 @@
 - **目标机器：** `macbook`
 - **范围：** Raycast 应用、稳定偏好、Script Commands、Store Extensions、本地扩展、
   Snippets、Quicklinks、快捷键与可变状态边界
-- **性质：** 研究与未来参考；当前配置已被维护者确认为稳定基线，暂不创建实现或维护
-  Issue。本文不授权修改配置、导入数据、安装/卸载应用、activation、TCC 变更或清理
-  Raycast 状态
+- **性质：** 研究、现状边界与分阶段实施依据；当前配置仍是稳定基线，不建立持续维护
+  流程。维护者随后明确启动“文档落库 → Raycast 源码仓库整理 → nix-config 固定输入与
+  capability adapter”的窄范围实施；每一步仍由独立 Issue 约束。本文本身不授权修改
+  Raycast 运行配置、导入数据、activation、TCC 变更或清理状态
 
 ## 1. 结论
 
@@ -15,7 +16,9 @@
 - Raycast Settings 的 **Show only customized** 视图可以直接作为其中“所有已修改内容”的权威
   边界，包括其中显示的 command、alias 和 hotkey；不需要用完整 `.rayconfig` 再确认范围；
 - `Toggle DB Tunnel` 及其 `autossh` 依赖已经废弃，不迁移、不补依赖、不进入 capability；
-- 当前 Raycast 配置相对稳定，以下架构与 Issue 拆分只保留为未来触发条件，不立即实施。
+- 当前 Raycast 配置相对稳定，不需要先建立持续维护或配置回流机制；
+- 在完成盘点后，维护者明确要求按“文档落库 → Raycast 源码仓库整理 → nix-config 固定输入
+  与 capability adapter”的顺序启动实施，同时继续排除数据库、导入和 activation。
 
 Raycast 可以成为本仓库的一项纵向 capability，但不能把整个 Raycast 运行目录当作普通
 dotfiles 接管。推荐目标是：
@@ -197,11 +200,15 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
 - **rollback：** Nix generation 只撤销声明。Raycast import 是 additive，不能假设 generation
   rollback 会删除已导入项目；应用迁移还需单独恢复原安装渠道。
 
-## 6. 未来实施顺序（当前暂停）
+## 6. 分阶段实施顺序（已重新启动）
 
-维护者当前不要求实施或维护 Raycast capability。只有出现新机器恢复、当前配置明显漂移、
-Raycast 上游提供稳定配置接口，或维护者重新提出声明需求时，才从以下窄 Issue 中选择一项
-启动；不得把它们自动转为当前 backlog。
+维护者最初把当前配置视为稳定基线，决定不建立持续维护 backlog；完成架构讨论后，又明确
+要求启动一次性的声明归属实施。执行顺序是：先合入本文与当前盘点，再在独立 Raycast 仓库
+整理源码侧配置，最后由 nix-config 通过固定 Git revision 和窄 capability adapter 消费。
+
+以下 Issue A–D 仍是边界参考，不表示一次性全部实施。当前只应由实际创建并标记为可执行的
+独立 Issue 选择其中最小范围；数据库、全量 export、自动 import、运行态清理和 activation
+继续禁止。
 
 ### Issue A — Raycast capability contract 与安全基线
 
@@ -275,9 +282,12 @@ extension Issue 还需对每个 manifest 验证：
 
 ## 8. 已记录的维护者决策
 
-1. 当前配置是稳定基线，暂不实施 Issue A–D，也不创建 Raycast 维护 backlog；
+1. 当前配置是稳定基线，不创建 Raycast 持续维护或自动配置回流 backlog；
 2. Show only customized 是自定义内容的权威盘点视图；
 3. `Toggle DB Tunnel` 与 `autossh` 已废弃，未来声明、构建和恢复流程均排除；
 4. `counter`、本地 extension 分发方式、Snippets/Quicklinks 回流和 app package owner 等问题
    暂不决策；只有出现实际需求时才重新打开对应窄 Issue；
-5. 现有运行态不因本研究自动清理、重建或迁移。
+5. 现有运行态不因本研究自动清理、重建或迁移；
+6. 维护者随后明确启动“文档落库 → Raycast 源码仓库整理 → nix-config 固定输入与
+   capability adapter”的窄范围实施。该决定只重新打开声明归属工作，不授权数据库读取、
+   自动导入、TCC、应用安装渠道迁移、activation 或废弃 tunnel 清理。
