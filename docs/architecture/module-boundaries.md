@@ -124,8 +124,10 @@ Node 与 Bun 的版本切换是 mise 的核心职责：
 
 Python 使用不同模型：
 
-- Nix/Home Manager 只提供 `uv` 可执行文件，不全局安装 Python interpreter；
-- uv 根据项目事实获取 Python，项目 `.venv`、依赖与 lock file 不进入全局 profile；
+- macbook 的 AI 辅助运维能力通过 Nix/Home Manager 提供一个裸 Python interpreter，
+  作为 Codex 等 agent 不进入项目环境时的稳定基线；当前明确选择 `python314`；
+- Home Manager profile 最多包含一个 Python interpreter，且不为它加入全局第三方包；
+- uv 根据项目事实选择 Python，项目 `.venv`、依赖与 lock file 不进入全局 profile；
 - mise 不声明 Python 或 uv；
 - `~/.local/bin` 是用户可变工具的低优先级兼容路径，Nix 不扫描、同步或清理其内容。
 
