@@ -26,25 +26,23 @@ key/history、浏览器 profile、编辑器登录态与 workspace、数据库、
 3. 记录现有 `/Applications`、Homebrew/MAS receipts、当前 Nix generation 和外部应用身份。
 4. 不运行 `brew cleanup`、`brew autoremove`、`brew uninstall --zap` 或批量删除应用。
 
-### 2.2 当前机器的 Feishu 渠道更正与数据关卡
+### 2.2 Feishu 渠道与数据边界
 
-Issue #74 已从 Trash 恢复并人工验收旧 `Lark.app` 与核心数据，Trash 原件和仓库外私有
-备份仍保留；此前全球版 `lark` cask 还安装了 `LarkSuite.app`。Issue #81 已明确当前目标
-是中国区 `feishu` cask 与 `/Applications/Feishu.app`。在当前机器恢复时：
+Issue #74 曾从 Trash 恢复并人工验收旧 `Lark.app` 与核心数据，#81 随后明确当前目标
+是中国区 `feishu` cask 与 `/Applications/Feishu.app`。#93 核验当前 Feishu 的 receipt、
+bundle 与签名并取得维护者明确清理批准后，定向删除旧 `Lark.app`、全球版 `lark`
+receipt/`LarkSuite.app` 和两个已批准的 Trash rollback 目录。当前恢复时：
 
-1. 保留 `Lark.app`、`LarkSuite.app`、Trash 原件和私有备份，不运行 cleanup、zap 或
-   定向卸载；
-2. 确认 Lark、LarkSuite 与 Feishu 进程全部退出，再执行绑定精确 commit 的
-   nix-darwin activation；
-3. `cleanup = "none"` 意味着 activation 只安装 `Feishu.app`，不会自动删除既有两份
-   应用或 Homebrew `lark` receipt；
-4. 安装后先核验 Feishu 的 Homebrew receipt、bundle、Team ID 与签名，不启动应用；
-5. 再由维护者单独启动 Feishu，验证中国区账号、工作区、聊天、本地文件和同步，并决定
-   是否需要迁移旧数据；三份应用不得同时运行；
-6. Feishu 验收通过后，旧应用、receipt 与备份的最终处置仍需独立 Issue 和明确批准。
+1. 只从当前声明恢复 `feishu`，不要重新安装全球版 `lark` 作为并行来源；
+2. `cleanup = "none"` 意味着 activation 不会替用户判断或删除现场已有应用；若目标路径
+   冲突，先停止并盘点；
+3. 安装后核验 Feishu 的 Homebrew receipt、bundle、Team ID 与签名，再由维护者验证
+   中国区账号、工作区、聊天、本地文件和同步；
+4. live `~/Library` 数据和仓库外私有备份属于用户数据恢复范围，不由 Nix generation
+   创建、覆盖或删除。
 
-Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark/Feishu 可变数据逻辑完整。若
-任何目标路径已存在，停止并先建立私有备份/比较，不覆盖。
+Nix build 只能证明声明可构建，不能证明 Lark/Feishu 可变数据逻辑完整。若任何目标路径
+已存在，停止并先建立私有备份/比较，不覆盖。
 
 ### 2.3 安装 Nix 系统层
 
@@ -64,7 +62,7 @@ Issue #67 的四个命令只属于 macbook 的 `ai-assisted-operations` capabili
 `codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4。它们由
 Nix/Home Manager 提供唯一的声明式 PATH 来源；Oh My Pi 使用固定官方 `darwin-arm64`
 发布物，`claude-code` 不再是 Homebrew cask。
-构建通过不代表已安装或已激活，且 activation 不清理旧副本。
+构建通过不代表已安装或已激活，且 activation 不清理现场未知副本。
 
 维护者在审阅精确 commit 后按以下顺序操作：
 
@@ -84,11 +82,9 @@ agy --version
 omp --version
 ```
 
-四个 `command -s` 必须命中 Home Manager profile，版本分别符合上述锁定值。旧的
-Homebrew Claude 2.1.153（`/opt/homebrew`）、`~/.local/bin/agy` 1.0.8 和停用 mise
-Node 25.8.1 中的 `@openai/codex@0.144.4` 只在验收后作为精确清理目标；当前恢复
-步骤不安装、卸载或删除它们。停用 mise Node 树中的 `oh-my-codex@0.14.2` 不属于本轮
-清理目标；`ChatGPT.app` 及其 embedded Codex helper 继续保留。
+四个 `command -s` 必须命中 Home Manager profile，版本分别符合上述锁定值。#93 已
+删除旧 Homebrew Claude、手工 `agy` 和停用 mise Node 25 树；恢复流程不应重新创建这些
+兼容副本。`ChatGPT.app` 及其 embedded Codex helper 继续保留为应用私有组成。
 
 凭据、登录态、token、session、history、skills/hooks、cache、数据库以及 `~/.omp` 和
 项目 Oh My Pi 状态继续保持可写且不进入 Nix Store；路径边界详见
@@ -122,8 +118,8 @@ Codex 进程继承的 PATH 代替。
 3. **Swift 工具链：** 按项目需要安装 Xcode Beta、Command Line Tools、SDK/Simulator，
    再验证外部 XcodeGen；仓库不替你接受许可证。
 4. **厂商/手工应用：** 只从 inventory 中的官方入口恢复，并核对 bundle ID/Team ID。
-5. **外部 formula：** PostgreSQL 16 按 Issue #60 的数据迁移流程处理；现有 Python 兼容
-   venv 和 XcodeGen 在消费者验证完成前不得删除。
+5. **外部 formula：** PostgreSQL 16 按 Issue #60 的数据迁移流程处理；XcodeGen 随外部
+   Swift 工具链恢复。项目 Python 由 uv 按项目声明重建，不恢复 Homebrew Python 兼容层。
 6. **数据：** 最后按各应用自己的恢复流程恢复数据库、容器、vault、profile、账号和历史。
 
 ## 3. 所有权验收
@@ -133,10 +129,12 @@ Codex 进程继承的 PATH 代替。
 - Nix 应用只来自 Home Manager Apps，不存在旧 VS Code、Zed Preview 或 #61 所列七个
   `/Applications` rollback bundle；
 - Homebrew Bundle 恰好声明 1 个 tap、28 个 cask、9 个 MAS app、0 个 formula；不再声明
-  `claude-code`，但旧 `/opt/homebrew` Claude 只有在单独批准后才清理；
+  `claude-code`，正常环境也不存在旧 `/opt/homebrew` Claude；
 - 干净 Fish 中 `codex`、`claude`、`agy`、`omp` 的首个 PATH 来源均为 Home Manager
   profile，版本分别为 0.146.0、2.1.187、1.1.9、17.2.4；
 - 通信应用声明为中国区 `feishu`，不再声明全球版 `lark`；
+- 不存在旧 `Lark.app`、`LarkSuite.app`、`lark` receipt 或 #57/#61 的 Trash rollback
+  目录；live 应用数据仍按外部数据验收；
 - `homebrew.onActivation.cleanup = "none"`；
 - `ChatGPT.app` 是 `com.openai.codex`，`ChatGPT Classic.app` 是 `com.openai.chat`；
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；

@@ -2,6 +2,10 @@
 
 本文记录 Issue [#28](https://github.com/sayoriqwq/nix-config/issues/28) 的故障证据、所有权决策、离线验证、人工 activation 清单与回滚步骤。本文不授权 activation、Homebrew cleanup、删除可变数据或合并 Pull Request。
 
+> 本文保留 #28 首次修复的历史证据。#93 已删除空的可变全局
+> `~/.config/mise/config.toml`、停用 runtime 和 Bun global 残留；当前终态以
+> [`mise-runtime-ownership.md`](mise-runtime-ownership.md) 为准。
+
 ## 1. 故障与根因证据
 
 - 采集日期：2026-07-23。
@@ -23,14 +27,16 @@ mise 的核心职责是按全局、目录和项目切换语言运行时版本，
 | mise 程序 | Home Manager `programs.mise` | Nix 安装并固定版本 |
 | Fish activation | Home Manager `programs.mise.enableFishIntegration` | 使用 Nix Store 中的 mise 绝对路径 |
 | 稳定默认工具 | nix-config 的 `mise/conf.d/10-nix-defaults.toml` | 默认 Node/Bun 为 `latest` |
-| 全局个人选择 | 可写 `~/.config/mise/config.toml` | 保留 `mise use -g` |
+| 全局默认选择 | Home Manager `mise/conf.d/10-nix-defaults.toml` | macbook 不再用 `mise use -g` 创建第二份可变全局默认 |
 | 项目工具版本 | 各项目的 `mise.toml` | 应随项目提交 |
 | 项目个人覆盖 | 各项目的 `mise.local.toml` | 不提交 |
 | 已安装运行时、cache、state | mise 可变数据目录 | 不进入 Git/Nix Store |
 | Oh My Pi 程序 | Nix package | 使用官方独立二进制，不依赖 mise/Bun |
 | `~/.omp` 配置、会话与登录态 | 本机可变数据 | 本 issue 不接管 |
 
-Home Manager 不使用 `programs.mise.globalConfig` 占用 `~/.config/mise/config.toml`，因为只读 Store 链接会阻止 `mise use -g`。稳定默认值改放在 mise 原生支持的 `conf.d` 片段中，用户全局配置可以覆盖它。
+Home Manager 不使用 `programs.mise.globalConfig` 占用 `~/.config/mise/config.toml`。稳定
+默认值放在 mise 原生支持的 `conf.d` 片段中；macbook 的全局默认以该生成声明为唯一
+真源，项目差异使用提交的 `mise.toml` 或不提交的 `mise.local.toml`。
 
 direnv/nix-direnv 继续负责 Nix dev shell 与项目环境变量，mise 负责需要快速切换的语言运行时。同一项目不得让两者重复管理同一个 Node/Bun。
 
@@ -140,4 +146,6 @@ sudo -H /run/current-system/sw/bin/darwin-rebuild switch \
 
 `mise doctor` 仍提示当前锁定的 mise 不是上游最新版，以及 mise tool paths 排在 Nix profile 与 `~/.local/bin` 之后。当前声明禁止 Nix 与 mise 重复管理 Node/Bun，实机切换也已通过，因此保留上游默认 `activate_aggressive = false`，不为消除非阻塞 warning 改变 PATH 语义。
 
-Homebrew mise、Bun global OMP 和 mise 下载的运行时仍保留。它们的清理需要单独批准，不属于本次 activation。
+Homebrew mise、Bun global OMP 和 mise 下载的旧 runtime 在本次 activation 后仍作为
+回滚入口保留；这是 #28 的历史时点。Homebrew mise/Bun global 后由 #30 清理，停用
+runtime、空 `config.toml` 与孤立 Bun global 包树再由 #93 清理。

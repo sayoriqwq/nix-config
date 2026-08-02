@@ -1,5 +1,9 @@
 # VS Code 与 Zed Nightly 迁移手册
 
+> 本文保留首次迁移与双安装回滚窗口的历史步骤。旧 Homebrew VS Code、Zed Preview 及
+> 相应 rollback bundle 已由 #56/#57/#61 清理；当前机器恢复请使用
+> [`restore-macos-environment.md`](restore-macos-environment.md)，不要重新创建双安装状态。
+
 本手册只描述人工关卡。Agent 的离线 build、ADR 接受或 Draft PR 都不等同于真实
 机器 activation、默认编辑器切换或旧应用卸载授权。
 
