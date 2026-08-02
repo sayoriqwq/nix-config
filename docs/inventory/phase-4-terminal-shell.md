@@ -44,7 +44,8 @@ Ghostty + Zsh 与 WezTerm + Fish 不属于验收矩阵。VS Code/Zed launcher �
 - `~/.local/share/atuin`、Atuin key/config/daemon state；
 - Fish history 与 universal variables；
 - `~/.zhistory`；
-- `~/.local/share/mise`、`~/.config/mise/config.toml` 与项目 `mise.toml`；
+- `~/.local/share/mise` 与项目 `mise.toml`/`mise.local.toml`；全局默认来自 Home Manager
+  `mise/conf.d`，不再依赖可变 `~/.config/mise/config.toml`；
 - `~/.config/gh/config.yml` 与 `~/.config/gh/hosts.yml`；
 - Ghostty/WezTerm session、window、mux 与登录态；
 - `~/.orbstack` 及 OrbStack container/VM/volume；

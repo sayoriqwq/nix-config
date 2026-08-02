@@ -39,6 +39,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | 退役应用与数据 | #57 | 无仓库实现 PR | Battery Buddy、Lark、Zed Preview 移入可恢复 Trash，保留共享 Zed 数据；Lark 后由 #74 恢复，并由 #81 更正为中国区 Feishu 渠道 |
 | Chezmoi/dotfiles handoff | #58 | 无仓库实现 PR | Chezmoi 已卸载；旧仓库冻结，Nix 配置链接验证 |
 | 旧 Nix GUI rollback bundle | #61 | 无仓库实现 PR | 七个旧 `/Applications` bundle 移入可恢复 Trash；Nix 应用与共享数据验证通过 |
+| 迁移残留最终收口 | #93 | 本维护 PR | 旧 CLI/runtime/app/formula、六个 root-owned 悬空链接与两个 Trash rollback 目录定向清理；声明源与 live 数据边界复核 |
 
 所有真实 `darwin-rebuild switch` 均由维护者执行。部分工作流经历了安全中止、修订 commit
 和重新 activation；最终通过状态以对应 Issue/PR 的最新验收评论为准，不能只看首次命令。
@@ -83,6 +84,8 @@ Phase 1 的旧 ThinkPad 快照不能直接部署，其中的 `trusted-public-key
 ## 6. Phase 4 后续维护修正
 
 Issue #74 在 Phase 4 已完成后纠正了 Lark 的退役决定，并完成旧应用与数据的保全和人工
-验收；Issue #81 随后把当前声明从全球版 `lark` 更正为中国区 `feishu`。既有
-`Lark.app`、`LarkSuite.app`、Trash 原件和私有备份继续作为迁移回滚入口保留。两项维护
-都不重开 Phase 4、不改变 #57 当时执行过的历史事实，也不与 Server Phase 7/8 实现混合。
+验收；Issue #81 随后把当前声明从全球版 `lark` 更正为中国区 `feishu`。#93 核验当前
+Feishu 的 receipt、bundle 与签名并取得维护者批准后，删除旧 `Lark.app`、
+`LarkSuite.app`/`lark` receipt，以及 #57/#61 的两个精确 Trash rollback 目录；当前只
+保留声明的 Feishu 应用，live 数据与仓库外私有备份不在清理范围。以上维护不重开
+Phase 4、不改变当时执行过的历史事实，也不与 Server Phase 7/8 实现混合。
