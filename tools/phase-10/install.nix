@@ -205,7 +205,7 @@ let
         --kexec "$kexec_tarball" \
         --phases kexec,disko,install,reboot \
         --ssh-port 22
-      printf '%s ' '-i "$phase10_private_identity"'
+      printf '%s ' "-i \"\$phase10_private_identity\""
       for option in \
         BatchMode=yes \
         CheckHostIP=yes \
@@ -230,7 +230,7 @@ let
       do
         printf '%q ' --ssh-option "$option"
       done
-      printf '%s ' '--ssh-option "UserKnownHostsFile=$phase10_private_known_hosts"'
+      printf '%s ' "--ssh-option \"UserKnownHostsFile=\$phase10_private_known_hosts\""
       printf '%q\n' --target-host "root@$expected_host"
     }
 
@@ -332,7 +332,7 @@ let
         --no-use-machine-substituters
         --copy-host-keys
         --kexec "$kexec_tarball"
-        --phases kexec,disko,install,reboot
+        --phases "kexec,disko,install,reboot"
         --ssh-port 22
         -i "$identity_file"
       )
