@@ -113,11 +113,35 @@ Rescue 演练是 install 前的独立 provider 关卡，不得与 destructive in
 
 ### B. 安装
 
-1. macbook 保持 VNC 与独立 SSH 观察，不作为构建来源；
-2. nixbox 运行已通过 VM 的短 `install` 入口；
-3. helper 必须固定 local build/push、destination 不 substitute、strict host pin、专用 deploy identity、精确 flake output 与保留现有 SSH host keys；
-4. 从 kexec 开始到最终 NixOS SSH 验收完成，不恢复业务、不开放额外端口、不现场顺带加固；
-5. 任一 preflight 复核失败都在破坏动作前退出。
+安装窗口前，先在 nixbox 的最终 clean checkout 运行非 production 计划入口：
+
+~~~text
+nix run .#phase10-install-plan
+~~~
+
+该入口不接受参数、不连接 production。它验证当前 HEAD 与 helper 内嵌 commit 一致，在 nixbox 本地实现精确 server closure、disko script 和 pinned kexec tarball，验证 dedicated identity/known-hosts 但不输出 private path，并打印行动卡所需的脱敏完整底层命令。若 plan 失败、输出 target/disk/closure/phase 漂移或没有明确报告 production-contact=no，则停止，不申请执行批准。
+
+Issue #13 的本次行动卡必须绑定 plan 输出的精确 commit，并记录 target、stable disk、server derivation/output、kexec、phases、维护窗口、VNC/SSH 观察人、停止条件、数据全丢 waiver 和恢复阶梯。旧批准、实现批准、Rescue 批准或只读 preflight 批准都不能代替本次 destructive install 批准。
+
+取得该行动卡的当前明确批准后，维护者只在 nixbox 的同一 clean checkout 运行：
+
+~~~text
+nix run .#phase10-install
+~~~
+
+现场顺序固定为：
+
+1. macbook 保持已连接 VNC 和独立 SSH 观察，不作为构建来源；
+2. install 入口重新执行与 plan 相同的本地冻结检查并再次打印 plan；
+3. 维护者逐项核对 commit、target、disk、closure 与 phases 后，在真实交互式 TTY 手动输入短确认词 INSTALL；不得用参数、管道、后台或无人值守方式代替；
+4. helper 先以 nixbox 专用 deploy identity、dedicated known-hosts、public-key only 和 strict host checking 对当前 Ubuntu 重跑完整只读 production preflight；
+5. 任一 local 或 remote preflight 失败都在 kexec/disko 前退出；不要当场放宽 SSH、改 disk/network 或换用 Reinstall；
+6. 只有 preflight PASS 后，helper 才调用本阶段专用的 pinned nixos-anywhere：local build、空 builders、destination 不 substitute、不使用 machine substituters、本地 kexec tarball、copy 现有 host keys，phases 精确为 kexec,disko,install,reboot；
+7. 从 kexec 开始到首次 NixOS SSH 验收完成，不恢复业务、不开放额外端口、不现场顺带加固。
+
+Phase 10 派生的 nixos-anywhere 只移除 upstream 1.13.0 内置的 UserKnownHostsFile=/dev/null 与 StrictHostKeyChecking=no；其余行为继续使用锁定版本。helper 再显式传入专用 host pin，并禁用 SSH agent、password、keyboard-interactive、proxy/jump、connection sharing、forwarding 与 host-key 自动更新。原始 Phase 9 package 不变，策略检查会在 upstream 参数形状漂移时构建失败。
+
+install 的 phases 已包含安装后的第一次 reboot。不要在 nixos-anywhere 返回后立即再 reboot；首次启动必须先完成下一节验收，第二次 reboot 仍按 D 节提交独立行动卡并取得新的明确批准。
 
 ### C. 首次启动验收
 

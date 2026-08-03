@@ -163,7 +163,57 @@ VNC 自动键盘输入受远端 Caps Lock 状态影响，最初长探针只产�
 
 运行结束后，macbook 与 nixbox 两端的 `phase10-final-build.*` 临时目录均为空；临时 bundle、detached checkout 与本地派发 helper 已清理。此结果关闭最终 Phase 9 回归和 server closure 预构建关卡，但不授权生成中的 install helper 联系 production，也不授权 kexec、disko、nixos-anywhere、安装或 reboot。
 
-## 7. 后续顺序
+## 7. Install helper 的冻结合同与隔离验证
+
+Phase 10 只新增两个不接受参数的 nixbox 入口：
+
+~~~text
+nix run .#phase10-install-plan
+nix run .#phase10-install
+~~~
+
+phase10-install-plan 是非 production 的冻结检查。它必须在 x86_64-linux nixbox、声明式 sayori 用户和 clean checkout 中运行，并拒绝未提交的 path flake、当前 HEAD 与 helper 内嵌 self.rev 不一致或任何额外参数。入口从该精确 commit 重新求值 server output，在 nixbox 本地构建 server closure 与 disko script，确认 pinned kexec tarball 已落入本地 Nix store，然后打印 commit、target、stable disk、derivation、closure、disko、kexec、phase 与完整脱敏底层命令。它不执行 SSH，成功结尾固定包含 production-contact=no 和“没有尝试 SSH 或 production 修改”。
+
+phase10-install 复用完全相同的本地冻结检查，但还要求真实交互式 TTY。维护者必须先核对重新打印的 plan，再手动输入短确认词 INSTALL；参数、管道、后台或无人值守调用不能跳过该关卡。确认后它先以专用 nixbox identity 和专用 known-hosts 对当前 Ubuntu 运行最后一次完整只读 preflight。只有 preflight 全部通过，才调用本阶段专用的 nixos-anywhere 进入 kexec,disko,install,reboot。
+
+两个入口都不接收 private path。运行时只在 nixbox 用户的 mode 0700、非 symlink ~/.ssh 下查找：
+
+- 恰好一把 public half 与仓库已审阅 deploy public key payload 相同、private half 为当前用户所有且 mode 0600、可在不提示 passphrase 时读出相同 public payload 的 identity；
+- 恰好一份当前用户所有、mode 0600、非 symlink，且只包含已审阅 production host 的 dedicated known-hosts。
+
+重复 identity、混入其他 host、unsafe mode、owner、symlink、加密或无法匹配都会在 production 连接前失败。private path 只保存在运行时 shell 变量中，不写入 Git、Nix store、plan 输出或底层命令文本。
+
+### 7.1 为什么只对 Phase 10 派生 nixos-anywhere
+
+锁定的 nixos-anywhere 1.13.0 会在内部 SSH 参数最前面写入 UserKnownHostsFile=/dev/null 和 StrictHostKeyChecking=no。OpenSSH 对这类单值选项采用先取得的值；仅在命令末尾追加 --ssh-option 不能可靠覆盖前面的不安全值。因此本阶段从同一 pinned package 派生一个最小变体，只删除这两个 upstream 默认项，再由 helper 显式提供 dedicated known-hosts 与 StrictHostKeyChecking=yes。Phase 9 使用的原始 pinned package 没有改变。
+
+策略检查会同时确认：upstream 参数形状仍与补丁前提一致、派生脚本已不存在两个不安全默认项、install 固定包含 local build、destination 不 substitute、host-key copy、完整 phases 和 strict host pin。若 upstream 形状漂移，--replace-fail 会在构建期停止，而不是静默生成不同工具。
+
+实际 nixos-anywhere 合同固定为：
+
+- --build-on local 与空 builders：server closure 只在 nixbox 构建；
+- --no-substitute-on-destination、--no-use-machine-substituters：临时 installer 不依赖 destination cache、GitHub 或 DNS；
+- 使用 pinned nixos-images 的本地 noninteractive kexec tarball；
+- --copy-host-keys：把当前已验证 production SSH host identity 带入新系统；
+- phases 精确为 kexec,disko,install,reboot，因此第一次进入新 NixOS 的 reboot 属于本次安装动作；首次验收后的第二次 reboot 不在其中，仍需另行批准；
+- public-key only、strict known-host pin、禁用 agent、password、keyboard-interactive、proxy/jump、connection sharing、forwarding 与 host-key 自动更新。
+
+### 7.2 2026-08-03 x86 隔离结果
+
+在 nixbox 的 detached clean checkout 对实现 commit 79f0d38a5d14e3bff73f0c1c3d685febcabe2dfc 完成：
+
+- checks.x86_64-linux.phase10-install-policy 构建 PASS；
+- packages.x86_64-linux.phase10-install-plan 与 phase10-install 的生成脚本 ShellCheck/build PASS；
+- runtime input 的成功、duplicate identity、unsafe known-hosts mode 与混入其他 host 失败注入 PASS；
+- 无参数 plan 实际运行 PASS，local private inputs 仅输出脱敏结论；
+- server derivation 与 output 仍分别为 /nix/store/wzag8v8iv686cz62qcy6zaxas97c5nhv-nixos-system-server-26.05.20260719.fd14620.drv 和 /nix/store/8zy753v5xl4vfrq0ndwvzj3mw0mggyjg-nixos-system-server-26.05.20260719.fd14620，stable disk 仍为 /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0；
+- disko script 与 pinned local kexec tarball 均已实现，plan 明确报告 phases=kexec,disko,install,reboot 和 production-contact=no。
+
+首次 plan 准备本地 kexec image 时产生较重的一次性构建；客户端中断后没有留下第二份构建，nixbox 恢复到正常低负载，并从已实现的 store 结果继续。整个 x86 验证只操作临时 checkout 和 Nix store，没有运行 phase10-install、没有 SSH production，也没有执行 kexec、disko、reboot 或磁盘写入。
+
+这关闭 install helper 的实现与隔离验证关卡，但不构成 destructive install 批准。文档完成后的最终 PR HEAD 仍须在 nixbox 重跑 plan，并把精确 commit、输出、维护窗口、停止条件和脱敏完整底层命令写入 Issue #13 行动卡；只有维护者对该行动卡再次明确批准后，才能运行 phase10-install。
+
+## 8. 后续顺序
 
 1. 合并前保持 Draft PR，先审阅 helper 的 target、拒绝条件与输出边界；
 2. **已完成：** 对精确 clean commit 单独批准并运行 macbook `phase10-preflight`；
@@ -171,5 +221,6 @@ VNC 自动键盘输入受远端 Caps Lock 状态影响，最初长探针只产�
 4. **已完成：** 对最终精确 commit 批准并执行 bootstrap，随后从 macbook 与 nixbox 以各自 identity 和 strict host pin 只读验证当前 Ubuntu；两端均 PASS，未触发 rollback；
 5. **已完成：** 用独立行动卡启动 Rescue，实际登录并确认目标磁盘；再经第二次批准回到 Ubuntu，VNC、macbook、nixbox 与完整 preflight 均 PASS；
 6. **已完成：** 在 nixbox 对 Rescue 证据 commit 重跑 Phase 9、强制重建隔离测试并预构建 server closure；全套 PASS，临时文件已清理；
-7. 实现并隔离验证不接受参数的 install helper，再冻结精确 commit、disk、closure、完整底层命令、窗口与停止条件；
-8. 维护者对该次 destructive install 重新明确批准后，才进入 kexec/disko/安装。
+7. **已完成：** 实现不接受参数的 plan/install helper，并在 nixbox 隔离验证 strict host pin、runtime input 失败关闭、生成脚本与脱敏 plan；
+8. 对最终 PR HEAD 重跑 plan，在 Issue #13 冻结精确 commit、disk、closure、完整脱敏底层命令、窗口与停止条件；
+9. 维护者对该次 destructive install 行动卡重新明确批准后，才运行 phase10-install 并进入 kexec/disko/安装。
