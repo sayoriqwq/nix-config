@@ -22,7 +22,7 @@ Git 中允许存在：public routing facts、stable disk alias、public keys、�
 
 Git、Issue、PR、聊天与 Nix Store 中禁止存在：private key、passphrase、SSH host private key、未公开 fingerprint、Contabo/VNC/Rescue credential、account/endpoint 标识或 production secret。它们只在 mode `0600` 的本地私密记录、客户端受限文件和现场 UI 中处理。
 
-不要要求维护者手抄 hash、store path、public key、fingerprint 或长参数。Phase 9 应生成并验证一个窄作用域 helper；Phase 10 只暴露 `preflight` 与 `install` 两个短入口。helper 固定目标和参数、默认拒绝漂移，现场结束后删除临时副本。
+不要要求维护者手抄 hash、store path、public key、fingerprint 或长参数。Phase 9 应生成并验证一个窄作用域 helper；Phase 10 按 preflight、bootstrap/rollback、plan/install 与中断恢复阶段分别暴露不接受 target 参数的窄入口。helper 固定目标和参数、默认拒绝漂移；临时副本在对应现场结束后删除。
 
 ## 3. Phase 8：只构建，不执行
 

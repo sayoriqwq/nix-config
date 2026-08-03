@@ -2,14 +2,16 @@
 
 > 范围：Issue #13。本文记录 production 替换前的实时证据、只读 preflight 合同、正式安装与中断恢复，以及两轮启动验收的脱敏结果。任何记录或 helper 都不自动授权新的 Rescue、SSH access 修改、kexec、disko、安装、重启或 Reinstall。
 
-## 1. 当前批准与实时证据
+当前状态：2026-08-03 已运行冻结版本的最小 NixOS，首次启动与独立第二次 reboot 验收均 PASS；旧 Ubuntu、业务、数据与 production secret 均未恢复。
 
-- 维护者继续接受当前 Ubuntu、服务、容器、数据库和数据全部丢失，不要求 source backup、dump 或 restore test；失败恢复目标仍是重新建立可从 macbook SSH 管理的最小 NixOS。
-- 2026-07-31 已在维护者登录的 Contabo Customer Control Panel 中只读复核唯一目标 VPS：Ubuntu 24.04、Running，VNC 已启用，Rescue 与 Reinstall 入口均存在。
+## 1. 替换前批准与实时证据（历史）
+
+- 维护者在执行前接受当时 Ubuntu、服务、容器、数据库和数据全部丢失，不要求 source backup、dump 或 restore test；失败恢复目标是重新建立可从 macbook SSH 管理的最小 NixOS。
+- 2026-07-31 在维护者登录的 Contabo Customer Control Panel 中只读复核唯一目标 VPS：当时为 Ubuntu 24.04、Running，VNC 已启用，Rescue 与 Reinstall 入口均存在。
 - 维护者单独批准一次实际 VNC 连接。Contabo 不显示现有 VNC 密码，只提供密码修改表单；维护者亲自设置临时密码，Agent 未读取、保存或记录凭据。
-- macOS 内置“屏幕共享”已实际连接到目标控制台，窗口身份与当前实例一致；“记住密码”未启用。Agent 没有向 guest 发送鼠标、按键或命令，观察完成后主动断开。
-- VNC 画面停留在旧的 Linux `soft lockup` / RCU stall 警告。维护者随后单独批准严格 host-key 的 SSH 只读健康诊断：当前负载很低，最近 6 小时没有同类 kernel warning；VNC 中的 kernel monotonic timestamp 比当前 uptime 早约 73 天，因此判定为旧控制台日志，不是当前持续 lockup。
-- `systemctl is-system-running` 仍为 `degraded`；失败项仍是 Phase 7 已知的 cloud-init、nginx 与 networkd-wait-online，没有发现新增失败单元。本阶段不修复这些将被清除的 Ubuntu 服务。
+- macOS 内置“屏幕共享”实际连接到目标控制台，窗口身份与当时实例一致；“记住密码”未启用。Agent 没有向 guest 发送鼠标、按键或命令，观察完成后主动断开。
+- VNC 画面停留在旧的 Linux `soft lockup` / RCU stall 警告。维护者随后单独批准严格 host-key 的 SSH 只读健康诊断：当时负载很低，最近 6 小时没有同类 kernel warning；VNC 中的 kernel monotonic timestamp 比当时 uptime 早约 73 天，因此判定为旧控制台日志，不是持续 lockup。
+- 当时 `systemctl is-system-running` 为 `degraded`；失败项是 Phase 7 已知的 cloud-init、nginx 与 networkd-wait-online，没有发现新增失败单元。本阶段没有修复这些随后被清除的 Ubuntu 服务。
 - 上述控制面与健康诊断在当时没有执行 restart、stop、Rescue、Reinstall、guest package/service/network/SSH 修改或 reboot；后续经两张独立行动卡完成的 Rescue 与回盘演练见第 5 节。
 - 2026-07-31 Rescue 演练已完成：实际登录临时 Rescue、确认稳定目标盘后，经单独批准回到原 Ubuntu；VNC、macbook strict SSH、nixbox strict SSH 与完整 production preflight 均再次通过。敏感 endpoint、实例标识、credential、fingerprint 与 private-key path 只留在仓库外私有记录。
 
