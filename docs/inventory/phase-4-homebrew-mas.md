@@ -1,8 +1,9 @@
 # Phase 4 Homebrew cask 与 Mac App Store 声明记录
 
 本文记录 Issue [#46](https://github.com/sayoriqwq/nix-config/issues/46) 的所有权、
-离线验证、真实机器 activation 关卡和回滚边界。本文不授权 activation、应用升级、
-应用卸载、Homebrew cleanup、App Store 账号变更或 Pull Request 合并。
+离线验证、真实机器 activation 关卡和回滚边界，并在第 10–13 节保留后续维护事实。
+本文不授权新的 activation、应用升级、Homebrew cleanup、App Store 账号变更或 Pull
+Request 合并。
 
 ## 1. 声明范围
 
@@ -16,9 +17,10 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 - `homebrew.onActivation.upgrade = false`；
 - `homebrew.onActivation.cleanup = "none"`。
 
-以上 28 个 cask 是 Issue #46 的原始实施与验收基线。Issue #74 在 2026-07-31 恢复
-Lark 声明后，当前目标为 29 个 cask；原始 build/activation 记录仍按当时 28 个条目
-解释，后续修订见第 10 节。
+以上 28 个 cask 是 Issue #46 的原始实施与验收基线。Issue #74 在 2026-07-31 曾恢复
+全球版 `lark` 声明，Issue #81 随后把当前渠道更正为中国区 `feishu`；Issue #67 又把
+`claude-code` 从 Homebrew 迁移到 Nix/Home Manager，因此当前目标为 28 个 cask。
+原始 build/activation 记录继续按当时 28 个条目解释，后续修订见第 10–12 节。
 
 应用账号、许可证、登录态、偏好、缓存、数据库、容器、虚拟机、项目和其他可变状态
 不由 Homebrew Bundle 或 Nix 接管。
@@ -80,8 +82,8 @@ artifact 与既有应用匹配时接管登记，不会因为同名目标冲突�
 
 `cleanup = "none"` 保证未列入本次声明的旧 cask 和应用不会被批量移除。
 Issue #46 当时依据维护者决定未声明 `lark`，随后 #57 将旧 `Lark.app` 与专属数据移入
-可恢复 Trash。该历史决定已由 #74 修正；当前声明加入 `lark`，但原始 #46 activation
-仍只包含 28 个 cask。
+可恢复 Trash。该历史决定先由 #74 修正为声明全球版 `lark`，再由 #81 更正为声明中国区
+`feishu`；原始 #46 activation 仍只包含 28 个 cask。
 
 ## 4. Mac App Store 边界
 
@@ -196,7 +198,7 @@ Homebrew 元数据更新和 `brew upgrade --cask erictli/tap/scratch`。升级�
 `38H4DN8A25`，深度签名验证和启动探针均通过。裸 `brew outdated scratch` 会误解析到
 MIT Scratch 3.32.0，因此后续安装、升级和 outdated 验证都必须使用完整 token。
 
-## 10. Issue #74：恢复 Lark 声明与数据边界
+## 10. Issue #74：恢复 Lark 声明与数据边界（历史）
 
 2026-07-31 的只读检查确认：
 
@@ -206,17 +208,18 @@ MIT Scratch 3.32.0，因此后续安装、升级和 outdated 验证都必须使�
 - bundle-specific preferences、HTTPStorage、cache 与字体 workaround 仍在隔离目录；
 - 未打开聊天、账号、数据库或其他用户内容。
 
-当前官方 Homebrew token 为 `lark`。对 Homebrew API 所列 DMG 做 SHA-256 校验和只读
-挂载后，确认 artifact 为 `LarkSuite.app`，bundle ID 为 `com.larksuite.larkApp`，
+Issue #74 实施时选择的官方 Homebrew token 为 `lark`。对 Homebrew API 所列 DMG 做
+SHA-256 校验和只读挂载后，确认 artifact 为 `LarkSuite.app`，bundle ID 为
+`com.larksuite.larkApp`，
 Team ID 为 `JBRN9C6V7T`。Trash 中旧 `Lark.app` 的 bundle ID 为
 `com.electron.lark`，Team ID 为 `XY6NLV7YTS`。两者的
 `CFBundleShortVersionString` 均为 `131.0.6778.268`，二进制均引用 `LarkShell` 和旧新
 bundle identity，但 Keychain access group 随 Team/bundle 改变；因此文件数据具有迁移
 路径，登录凭据不能假定可直接继承。
 
-Homebrew 还提供 `feishu` cask，但它面向 `feishu.cn` 并安装 `Feishu.app`，不是本次维护者
-明确要求的 Lark 全球产品渠道，故不声明。配置只恢复 `LarkSuite.app` presence，不安装
-固定版本，也不接管应用自更新或可变状态。
+Homebrew 还提供 `feishu` cask，它面向 `feishu.cn` 并安装 `Feishu.app`。Issue #74 当时
+选择全球版 `lark`；该产品渠道判断已由维护者在 Issue #81 明确推翻。以下步骤保留为
+#74 的历史恢复证据，不再描述当前目标声明。
 
 人工恢复必须遵循：
 
@@ -231,3 +234,55 @@ Homebrew 还提供 `feishu` cask，但它面向 `feishu.cn` 并安装 `Feishu.ap
    `Lark.app` 的处置；两份应用不得同时运行，验收前继续保留私有回滚副本。
 
 Agent 在 #74 中只修改声明、文档并 build，不执行恢复、activation、安装或应用启动。
+
+## 11. Issue #81：更正为中国区 Feishu（历史）
+
+维护者已明确当前产品要求是中国区 Feishu。Homebrew 官方 `feishu` cask 的 homepage 为
+`https://www.feishu.cn/`，当前元数据版本为 `7.72.8,715e64ed`，并把 DMG 内的
+`Lark.app` 安装为 `/Applications/Feishu.app`。当前声明只包含 `feishu`，不再包含
+`lark`；Homebrew 继续只拥有应用 presence，不拥有账号、聊天、数据库或其他可变状态。
+
+Issue #81 开始时，真实机器已同时保留恢复后的 `/Applications/Lark.app` 和已由
+Homebrew 安装的 `/Applications/LarkSuite.app`。由于 `cleanup = "none"`，后续 Feishu
+activation 不会卸载既有 `lark` receipt 或删除 `LarkSuite.app`。三份应用的并存是迁移
+回滚窗口；它们不得同时运行，任何卸载、zap、数据选择或迁移都必须另行批准。
+
+当时的人工顺序为：
+
+1. 保留旧 App、`LarkSuite.app`、Trash 原件与私有备份，并确认相关进程全部退出；
+2. 对包含 `feishu` 的精确 merge commit 单独批准并执行 nix-darwin activation；
+3. 核验 `/Applications/Feishu.app`、Homebrew receipt、bundle 与签名身份，不启动应用；
+4. 再由维护者单独启动 Feishu，验证中国区账号、工作区、聊天、文件和同步，并判断是否
+   需要迁移旧 `LarkShell` 数据；
+5. 验收完成前不卸载或删除任何一份应用、receipt、Trash 原件或私有备份。
+
+## 12. Issue #67：Claude Code 迁移到 Nix
+
+Issue #67 将 `claude-code` 从 Homebrew cask 声明移除，并由 macbook 的
+`ai-assisted-operations` Home Manager capability 提供锁定版本。当前 Homebrew 目标因此
+从 #81 完成后的 29 个 cask 回到 28 个；`cleanup = "none"` 保持不变，所以声明变化不会
+在 activation 中自动卸载真实机器已有的 Claude cask。
+
+新的 Nix `claude` 已完成 activation、PATH 与版本验收；维护者在 #93 另行批准后定向
+卸载旧 cask，未运行 cleanup 或 zap。Claude 的账号、凭据、会话和其他可变状态仍不由
+Homebrew 或 Nix 接管；完整四 CLI 所有权与清理记录见
+[`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)。
+
+## 13. Issue #93：迁移残留最终收口
+
+2026-08-03，维护者批准在不执行新 activation、不运行全局 cleanup/zap 的前提下清理
+已完成替代验收的旧来源。Homebrew 侧完成：
+
+- 定向卸载全球版 `lark` cask 和旧 Claude Code cask，并删除手工旧 `Lark.app`；
+- 保留中国区 `feishu` cask、`/Applications/Feishu.app` 及全部 live `~/Library` 数据；
+- 在项目 venv 切换到 uv-managed CPython 并通过测试后，定向卸载 `python@3.12`；
+- 删除无消费者的 `freetype`，保留 PostgreSQL 16、XcodeGen 及其依赖；
+- 保持 `HOMEBREW_NO_AUTOREMOVE=1`，没有触碰 PostgreSQL service/data 或其他 cask。
+- 精确删除六个指向已退役 Docker、WARP 与 Zed Preview 应用的 root-owned
+  `/usr/local/bin` 悬空链接；OrbStack 和 Nix Zed 的现行入口复验通过。
+
+当前声明仍为 1 tap、28 cask、9 MAS app、0 formula；真实 Homebrew formula 外部状态为
+14 个。`feishu 7.72.8,715e64ed` 的 receipt 与 `/Applications/Feishu.app` 存在；实际
+bundle ID 为 `com.electron.lark`、Team ID 为 `XY6NLV7YTS`，深度签名和 Gatekeeper
+notarization 验证均通过。#74/#81 的 Lark 恢复步骤继续作为历史证据，不再描述当前
+机器的应用集合；账号、聊天与本地数据未在本维护中读取或验收。

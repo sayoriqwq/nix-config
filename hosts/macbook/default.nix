@@ -10,6 +10,7 @@
     ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
     ../../modules/darwin/shell.nix
+    ../../modules/capabilities/raycast/darwin.nix
     ../../modules/capabilities/macos-legacy-applications/darwin.nix
     ../../modules/capabilities/google-chrome/darwin.nix
     ../../modules/capabilities/clash-verge-rev/darwin.nix
@@ -22,6 +23,8 @@
     pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
+      "claude-code"
+      "antigravity-cli"
       "mos"
       "obsidian"
       "vscode"
@@ -55,6 +58,7 @@
       imports = [
         ../../modules/home/capabilities/portable-shell.nix
         ../../modules/home/capabilities/terminal-toolkit.nix
+        ../../modules/home/capabilities/herdr.nix
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/workstation-history-sync.nix
         ../../modules/home/capabilities/macos-atuin-desktop.nix

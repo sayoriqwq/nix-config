@@ -117,15 +117,19 @@ Mac 上遵循：
 
 Node 与 Bun 的版本切换是 mise 的核心职责：
 
-- Nix/Home Manager 只安装 mise 本体、管理稳定默认值和 shell integration；
-- Node、Bun 与 pnpm 的安装、全局默认和项目版本切换由 mise 管理；
+- Nix/Home Manager 安装 mise 本体，并通过生成的 `mise/conf.d` 声明稳定全局默认与
+  shell integration；macbook 不再维护第二份可变全局默认文件；
+- mise 按上述声明安装、解析和切换 Node、Bun 与 pnpm；项目版本继续由项目
+  `mise.toml` 或不提交的 `mise.local.toml` 选择；
 - `home.packages` 不得直接包含 `nodejs`、`nodejs-slim` 或 `bun`；
 - mise runtime、cache、state 与已安装版本属于可变数据。
 
 Python 使用不同模型：
 
-- Nix/Home Manager 只提供 `uv` 可执行文件，不全局安装 Python interpreter；
-- uv 根据项目事实获取 Python，项目 `.venv`、依赖与 lock file 不进入全局 profile；
+- macbook 的 AI 辅助运维能力通过 Nix/Home Manager 提供一个裸 Python interpreter，
+  作为 Codex 等 agent 不进入项目环境时的稳定基线；当前明确选择 `python314`；
+- Home Manager profile 最多包含一个 Python interpreter，且不为它加入全局第三方包；
+- uv 根据项目事实选择 Python，项目 `.venv`、依赖与 lock file 不进入全局 profile；
 - mise 不声明 Python 或 uv；
 - `~/.local/bin` 是用户可变工具的低优先级兼容路径，Nix 不扫描、同步或清理其内容。
 

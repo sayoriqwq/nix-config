@@ -2,7 +2,9 @@
 
 - **机器：** `macbook`
 - **收口日期：** 2026-07-28
-- **维护修订：** 2026-07-31，Issue #74 恢复 Lark 的声明与可变数据边界
+- **维护修订：** 2026-08-03，Issue #74 恢复 Lark 数据，#81 将当前渠道更正为中国区
+  Feishu，#67 增加 agent Python 基线并收口四个 AI CLI 所有权，#93 清理已验收替代的
+  迁移残留
 - **决策来源：** Issue #6、#36 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -23,12 +25,12 @@
 | 来源 | 最终职责 | 声明/恢复入口 |
 | --- | --- | --- |
 | Nix / Home Manager | 通用 CLI、Shell、终端、编辑器及可靠 GUI | 顶层 Flake 与 `modules/home/` |
-| nix-darwin Homebrew | 29 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
+| nix-darwin Homebrew | 28 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
 | Mac App Store | 9 个可独立恢复的 Apple/第三方应用 | `homebrew.masApps` |
 | Setapp | 14 个订阅应用与 Setapp 客户端 | Setapp 官方客户端、人工登录 |
 | macOS / Apple | 核心系统应用、Command Line Tools | 系统更新或 Apple 官方安装流程 |
 | 厂商/手工 | 不能可靠声明或有意试用的应用 | 本文的官方入口与签名身份 |
-| Homebrew 外部 formula | PostgreSQL、Python 兼容环境、XcodeGen、Freetype | 当前本机状态；不属于声明式基线 |
+| Homebrew 外部 formula | PostgreSQL、XcodeGen 及其依赖 | 当前本机状态；不属于声明式基线 |
 
 这个概览描述安装来源，不表示 Nix 能恢复应用数据。完整恢复顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
@@ -38,14 +40,20 @@
 ### 3.1 通用 CLI 与运行时入口
 
 Home Manager 声明 Atuin、Bat、Btop、Delta、Eza、fd、fastfetch、Fish、fzf、GitHub CLI、
-Gitleaks、Graphviz、Helix、jq、Lazygit、mise、nh、pay-respects、Poppler、rclone、ripgrep、
-rtk、Starship、tmux、tree、uv、yazi 和 zoxide 等用户工具。Zsh 的 autosuggestions 与
-syntax highlighting 也来自 Nix，而不是 Homebrew formula。
+Gitleaks、Graphviz、Helix、jq、Lazygit、mise、nh、pay-respects、Poppler、Python 3.14、
+rclone、ripgrep、rtk、Starship、tmux、tree、uv、yazi 和 zoxide 等用户工具。Zsh 的
+autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formula。
 
 运行时分工如下：
 
 - mise 固定 Node、Bun、pnpm、Erlang 29.0.3 与 Elixir 1.20.2-otp-29；
-- Nix 只提供 uv 可执行文件，Python 版本、`.venv`、依赖与 lock file 属于项目；
+- Nix 为 macbook AI 辅助运维提供一个裸 Python 3.14 agent 基线，不加入全局第三方包；
+- `ai-assisted-operations` capability 由 Nix/Home Manager 唯一提供 `codex` 0.146.0、
+  `claude` 2.1.187、`agy` 1.1.9 和 `omp` 17.2.4；Oh My Pi 使用固定官方
+  `darwin-arm64` 发布物，四个可执行文件的更新由 Nix 控制，`~/.omp` 状态与凭据保持
+  可写且不进入 Store。完整版本、重复副本和人工关卡见
+  [`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)；
+- uv 负责项目 Python 选择，`.venv`、依赖与 lock file 属于项目；
 - nginx、pkgconf 等项目依赖进入项目 dev shell，不进入全局用户 profile；
 - PostgreSQL 16 数据服务不与普通 CLI 混合迁移，延期到 Issue #60。
 
@@ -74,19 +82,21 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 一份 activation 前保留的 `/Applications` rollback bundle。Issue #61 已在不删除共享
 配置、账号、vault、history 或缓存的前提下把七个旧 bundle 移入可恢复 Trash；对应 Nix
 应用与数据路径均通过验证。LocalSend 与 xbar 的旧 Homebrew 副本此前已由 #56 清理。
+#93 在这些 Nix 应用继续通过 presence 验收后永久删除了 #61 的精确 Trash rollback
+目录；应用配置、账号、vault、history 和缓存仍保持外部。
 
 ## 4. Homebrew 所有权
 
 ### 4.1 nix-darwin 声明
 
 唯一允许的第三方 tap 是 `erictli/tap`，只为 Markdown 应用 Scratch 提供
-`erictli/tap/scratch`。声明的 29 个 cask 为：
+`erictli/tap/scratch`。声明的 28 个 cask 为：
 
 | 分类 | cask |
 | --- | --- |
-| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`lark`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
+| 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`feishu`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
 | 创作与媒体 | `balenaetcher`、`figma`、`neteasemusic`、`homebrew/cask/obs` |
-| 开发与 AI | `chatgpt`、`claude-code`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
+| 开发与 AI | `chatgpt`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
 | 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`steam`、`topnotch`、`vorssaint` |
 
 `autoUpdate = false`、`upgrade = false`、`cleanup = "none"`。普通 activation 只校验/恢复
@@ -96,30 +106,31 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 
 - `chatgpt` 对应 `com.openai.codex`（现 `ChatGPT.app`）；`ChatGPT Classic.app`
   是单独的 `com.openai.chat`，保持外部所有；
+- `claude-code` 不再是声明的 Homebrew cask；迁移前 `/opt/homebrew` 中的 Claude
+  2.1.153 已在 Nix 版本验收和 #93 批准后定向卸载。ChatGPT.app 的 embedded Codex
+  是 app-private helper，不是 `codex` PATH 来源或清理目标；
 - `erictli/tap/scratch` 对应 Markdown 应用 `com.scratch.app`。Issue #64 已把 Homebrew
   receipt 与实际 bundle 定向对齐到 1.0.0；裸 `scratch` 会解析到同名 MIT 应用，安装、
   升级和 outdated 验证必须使用完整 token；
 - `homebrew/cask/obs` 强制选择官方 OBS Studio，避免旧第三方 tap 的同名迁移；
-- `lark` 当前安装 `LarkSuite.app`（`com.larksuite.larkApp`，Team ID
-  `JBRN9C6V7T`）。Trash 中的旧 `Lark.app` 是另一签名身份
-  （`com.electron.lark`，Team ID `XY6NLV7YTS`）；两者均引用
-  `~/Library/Application Support/LarkShell`，但 Keychain access group 不同，不能假设
-  登录态可直接迁移。Homebrew 只拥有新应用 presence；数据与迁移验收按 #74 的人工关卡
-  处理；
+- `feishu` 是当前声明的中国区渠道，官方 cask 把 DMG 内 `Lark.app` 安装为
+  `/Applications/Feishu.app`。Homebrew 只拥有应用 presence。#93 在核验 Feishu
+  receipt、bundle 与签名并确认三种应用进程均未运行后，按维护者明确批准定向卸载全球
+  版 `lark` cask 并删除手工旧 `Lark.app`；当前只保留 `/Applications/Feishu.app` 和
+  `feishu` receipt。
+  Lark/Feishu 的账号、聊天、数据库与 `~/Library` 可变数据未被清理；
 - OrbStack 是唯一容器运行时。Nix/Homebrew 只声明应用 presence，VM、镜像、容器、
   volume、网络、context 与凭据不由仓库接管。
 
 ### 4.2 当前外部 formula
 
-nix-darwin 不声明任何 Homebrew formula。当前实机的 16 个 formula 均属 Homebrew
+nix-darwin 不声明任何 Homebrew formula。#93 收口后，当前实机的 14 个 formula 均属 Homebrew
 外部状态：
 
 | 类型 | formula | disposition |
 | --- | --- | --- |
 | 数据服务 | `postgresql@16` | 保留现有服务与数据；Issue #60 单独迁移，不阻塞 Phase 4 |
-| 项目兼容 | `python@3.12` | 现有项目 venv 仍引用该解释器；重建 venv 前保留 |
 | Swift 工具链 | `xcodegen` | 当前 Swift 项目依赖；与 Xcode Beta 一起保持 macbook 外部所有 |
-| 兼容 leaf | `freetype` | 当前无已安装 formula consumer；不属于可复现基线，未来只可经窄维护项清理 |
 | 传递依赖 | `ca-certificates`、`gettext`、`icu4c@78`、`krb5`、`libunistring`、`lz4`、`mpdecimal`、`openssl@3`、`readline`、`sqlite`、`xz`、`zstd` | 由上述外部 formula 的 Homebrew 依赖图拥有，不逐项声明 |
 
 Phase 4 已定向删除 35 个旧 formula，并接受 Homebrew 对无消费者依赖的自动回收结果。
@@ -201,22 +212,24 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 | --- | --- |
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
 | VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
-| GUI 来源散落且缺少统一恢复说明 | 29 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner |
+| GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner；四个 AI CLI 另由 Nix/Home Manager 唯一提供 |
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时，旧 Docker Desktop helper 已清理 |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
 | 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置源；旧仓库冻结归档 |
 
-已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、Google Antigravity、
+已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、旧 Google Antigravity GUI、
 Itsycal、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Preview、
-Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明确批准完成；Trash
-或私有备份是否最终清空不属于配置仓库职责。
+Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明确批准完成。#93
+又在核对精确路径后永久删除 #57/#61 的两个 Trash rollback 目录；仓库外私有备份及
+应用 live 数据不在清理范围内。
 
 Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移动到可恢复 Trash。#74
-已纠正该决定：当前声明恢复 `lark` cask，但在 activation 前应先恢复并人工验收旧
-`Lark.app` 与可变数据，再把 `LarkSuite.app` 作为独立新身份迁移验证。两者可以并存，
-但不得同时运行或在无备份时共享写入 `LarkShell`。这项修正不把聊天、登录态或数据库
-交给 Nix，也不把 build 结果当作数据恢复成功。
+恢复并人工验收了旧应用与数据，随后全球版 `lark` cask 安装了 `LarkSuite.app`。维护者
+在 #81 明确把当前产品要求更正为中国区 Feishu，因此声明改为 `feishu`。#93 核验当前
+Feishu 的 receipt、bundle 与签名并取得明确清理批准后，删除两份旧 Lark 应用、`lark`
+receipt 和两个已批准的 Trash rollback 目录；当前只保留声明的 Feishu 应用。聊天、
+登录态、数据库及其他 live 数据仍不交给 Nix，也未随应用清理删除。
 
 ## 10. 已知延期与回滚边界
 
@@ -226,3 +239,6 @@ Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移�
 - Nix generation 回滚只恢复声明和 Nix-owned package 链接；不能回滚 Homebrew adoption、
   MAS receipt、Setapp 登录、厂商应用数据、数据库或容器。
 - Homebrew/MAS/Setapp/厂商应用的具体恢复和故障顺序见 Mac 总体 runbook。
+- #93 还发现并精确删除六个指向已删除 Docker、WARP 与 Zed Preview 应用的 root-owned
+  `/usr/local/bin` 悬空链接。删除后 `docker`/`kubectl` 继续由 OrbStack 提供，`zed` 只
+  命中 Nix profile，WARP 与 `cagent` 不再有命令入口。

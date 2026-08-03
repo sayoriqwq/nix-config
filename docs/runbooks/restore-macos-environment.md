@@ -26,21 +26,23 @@ key/history、浏览器 profile、编辑器登录态与 workspace、数据库、
 3. 记录现有 `/Applications`、Homebrew/MAS receipts、当前 Nix generation 和外部应用身份。
 4. 不运行 `brew cleanup`、`brew autoremove`、`brew uninstall --zap` 或批量删除应用。
 
-### 2.2 当前机器的 Lark 恢复关卡
+### 2.2 Feishu 渠道与数据边界
 
-Issue #74 确认旧 `Lark.app` 与专属数据仍在
-`~/.Trash/nix-config-phase4-retired-apps.sTa1Cr`。在当前机器恢复时：
+Issue #74 曾从 Trash 恢复并人工验收旧 `Lark.app` 与核心数据，#81 随后明确当前目标
+是中国区 `feishu` cask 与 `/Applications/Feishu.app`。#93 核验当前 Feishu 的 receipt、
+bundle 与签名并取得维护者明确清理批准后，定向删除旧 `Lark.app`、全球版 `lark`
+receipt/`LarkSuite.app` 和两个已批准的 Trash rollback 目录。当前恢复时：
 
-1. 不清空 Trash，也不先启动或安装新的 Lark；
-2. 先在仓库外建立隔离目录的私有副本，再把旧 `Lark.app`、`LarkShell`、字体
-   workaround、preferences 与 HTTPStorage 恢复到原位置；cache 可选，不恢复过期 socket；
-3. 由维护者先启动旧 `Lark.app`，验证账号、聊天和本地文件，完成必要同步或导出后退出；
-4. 再执行绑定精确 commit 的 nix-darwin activation，安装当前 `LarkSuite.app`；
-5. 新旧应用 bundle/Team/Keychain identity 不同；维护者首次启动新应用、完成可能需要的
-   重新登录并验证迁移。两份应用不得同时运行，验收前不删除旧应用或私有回滚副本。
+1. 只从当前声明恢复 `feishu`，不要重新安装全球版 `lark` 作为并行来源；
+2. `cleanup = "none"` 意味着 activation 不会替用户判断或删除现场已有应用；若目标路径
+   冲突，先停止并盘点；
+3. 安装后核验 Feishu 的 Homebrew receipt、bundle、Team ID 与签名，再由维护者验证
+   中国区账号、工作区、聊天、本地文件和同步；
+4. live `~/Library` 数据和仓库外私有备份属于用户数据恢复范围，不由 Nix generation
+   创建、覆盖或删除。
 
-Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark 可变数据逻辑完整。若任何目标
-路径已存在，停止恢复并先建立私有备份/比较，不覆盖。
+Nix build 只能证明声明可构建，不能证明 Lark/Feishu 可变数据逻辑完整。若任何目标路径
+已存在，停止并先建立私有备份/比较，不覆盖。
 
 ### 2.3 安装 Nix 系统层
 
@@ -54,7 +56,42 @@ Nix build 只能证明声明可构建，不能证明 4.7 GB 的 Lark 可变数�
 首次 activation 将同时恢复 Nix/Home Manager 应用、CLI、静态配置、Homebrew cask、
 MAS 声明和 defaults。它不会自动恢复外部数据。
 
-### 2.4 验证声明式层
+### 2.4 AI CLI 激活顺序与验收
+
+Issue #67 的四个命令只属于 macbook 的 `ai-assisted-operations` capability：
+`codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4。它们由
+Nix/Home Manager 提供唯一的声明式 PATH 来源；Oh My Pi 使用固定官方 `darwin-arm64`
+发布物，`claude-code` 不再是 Homebrew cask。
+构建通过不代表已安装或已激活，且 activation 不清理现场未知副本。
+
+维护者在审阅精确 commit 后按以下顺序操作：
+
+1. 先完成本节 2.3 的 Nix build，确认版本和 lock file；
+2. 另行批准并执行 nix-darwin/Home Manager activation；
+3. 完全退出并重新打开 Fish，在不继承 Codex 进程 PATH 的干净会话中执行：
+
+```fish
+type -a codex claude agy omp
+command -s codex
+command -s claude
+command -s agy
+command -s omp
+codex --version
+claude --version
+agy --version
+omp --version
+```
+
+四个 `command -s` 必须命中 Home Manager profile，版本分别符合上述锁定值。#93 已
+删除旧 Homebrew Claude、手工 `agy` 和停用 mise Node 25 树；恢复流程不应重新创建这些
+兼容副本。`ChatGPT.app` 及其 embedded Codex helper 继续保留为应用私有组成。
+
+凭据、登录态、token、session、history、skills/hooks、cache、数据库以及 `~/.omp` 和
+项目 Oh My Pi 状态继续保持可写且不进入 Nix Store；路径边界详见
+[`macOS AI CLI 所有权`](../inventory/macos-ai-cli-ownership.md)。
+本节只适用于 macbook；nixbox/server 不安装这些客户端，也不改变其迁移与恢复流程。
+
+### 2.5 验证声明式层
 
 在全新登录 shell 中检查：
 
@@ -72,7 +109,7 @@ echo $VISUAL
 Quick Note、菜单栏时钟和电池。应用设置与 Shell PATH 必须在真实终端会话验证，不能用
 Codex 进程继承的 PATH 代替。
 
-### 2.5 恢复外部软件
+### 2.6 恢复外部软件
 
 按所有权逐层恢复，避免同一路径出现两个写入者：
 
@@ -81,8 +118,8 @@ Codex 进程继承的 PATH 代替。
 3. **Swift 工具链：** 按项目需要安装 Xcode Beta、Command Line Tools、SDK/Simulator，
    再验证外部 XcodeGen；仓库不替你接受许可证。
 4. **厂商/手工应用：** 只从 inventory 中的官方入口恢复，并核对 bundle ID/Team ID。
-5. **外部 formula：** PostgreSQL 16 按 Issue #60 的数据迁移流程处理；现有 Python 兼容
-   venv 和 XcodeGen 在消费者验证完成前不得删除。
+5. **外部 formula：** PostgreSQL 16 按 Issue #60 的数据迁移流程处理；XcodeGen 随外部
+   Swift 工具链恢复。项目 Python 由 uv 按项目声明重建，不恢复 Homebrew Python 兼容层。
 6. **数据：** 最后按各应用自己的恢复流程恢复数据库、容器、vault、profile、账号和历史。
 
 ## 3. 所有权验收
@@ -91,13 +128,20 @@ Codex 进程继承的 PATH 代替。
 
 - Nix 应用只来自 Home Manager Apps，不存在旧 VS Code、Zed Preview 或 #61 所列七个
   `/Applications` rollback bundle；
-- Homebrew Bundle 恰好声明 1 个 tap、29 个 cask、9 个 MAS app、0 个 formula；
+- Homebrew Bundle 恰好声明 1 个 tap、28 个 cask、9 个 MAS app、0 个 formula；不再声明
+  `claude-code`，正常环境也不存在旧 `/opt/homebrew` Claude；
+- 干净 Fish 中 `codex`、`claude`、`agy`、`omp` 的首个 PATH 来源均为 Home Manager
+  profile，版本分别为 0.146.0、2.1.187、1.1.9、17.2.4；
+- 通信应用声明为中国区 `feishu`，不再声明全球版 `lark`；
+- 不存在旧 `Lark.app`、`LarkSuite.app`、`lark` receipt 或 #57/#61 的 Trash rollback
+  目录；live 应用数据仍按外部数据验收；
 - `homebrew.onActivation.cleanup = "none"`；
 - `ChatGPT.app` 是 `com.openai.codex`，`ChatGPT Classic.app` 是 `com.openai.chat`；
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；
 - Atuin 配置和 `.hushlogin` 来自 Nix Store，但 key/history 保持本机可写状态；
 - `~/.local/share/chezmoi` 不再 apply，旧 dotfiles 不再参与配置生成；
-- PostgreSQL、OrbStack、编辑器、浏览器和 Setapp 数据没有被 activation 覆盖。
+- PostgreSQL、OrbStack、编辑器、浏览器、Setapp 数据以及 AI CLI 的状态/凭据没有被
+  activation 覆盖。
 
 ## 4. 回滚顺序
 
@@ -109,8 +153,8 @@ Codex 进程继承的 PATH 代替。
 sudo darwin-rebuild --rollback switch
 ```
 
-该命令恢复 Nix 声明，不撤销 Homebrew 已完成的 adoption/MAS 安装，也不回滚数据。macOS
-defaults 的逐键试用前值和定向回滚命令见
+该命令恢复 Nix 声明，不撤销 Homebrew 已完成的 adoption/MAS 安装，也不回滚数据或 AI
+CLI 的状态。macOS defaults 的逐键试用前值和定向回滚命令见
 [`phase-4-macos-defaults.md`](../inventory/phase-4-macos-defaults.md)。
 
 ### 4.2 Homebrew 与 MAS

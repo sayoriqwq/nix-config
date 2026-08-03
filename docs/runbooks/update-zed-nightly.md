@@ -18,14 +18,28 @@ Draft PR，不自动批准、合并或激活机器。
 Nix installer 只配置 ADR-0006 接受的 Zed Cachix URL 和公钥，并明确拒绝自动
 接受其他 Flake 的 `nixConfig`。
 
+固定分支模型依赖仓库启用“合并后自动删除 head branch”，即
+`delete_branch_on_merge = true`。更新 PR 合并后，GitHub 删除
+`automation/zed-nightly`；下一次定时运行再从当时的 `main` 创建同名分支。
+该设置作用于仓库内所有已合并 PR 的 head branch，但不会删除关闭且未合并的
+PR 分支。可用以下只读命令检查设置是否漂移：
+
+```bash
+gh api repos/sayoriqwq/nix-config --jq .delete_branch_on_merge
+```
+
 ## 失败与暂停
 
 - fetch、求值或 build 失败会让 GitHub Actions 保持失败状态；当前 lock 不变；
 - 已有开放更新 PR 时不会继续叠加新的 Nightly；
 - 临时暂停时在 GitHub Actions 中禁用该 workflow，或删除/注释 `schedule` 后
   通过普通 Draft PR 审阅；
-- 若 `automation/zed-nightly` 分支因为未合并关闭的 PR 而无法快进，保留失败，
-  由维护者审阅后删除或重建该自动化分支，不允许 workflow force-push。
+- 若已合并的更新 PR 仍留下 `automation/zed-nightly`，先检查
+  `delete_branch_on_merge` 是否被关闭；恢复设置并确认该 PR 的锁文件变化已进入
+  `main` 后，删除遗留分支，再通过 `workflow_dispatch` 创建一次新运行；
+- 若更新 PR 关闭但未合并，GitHub 会保留分支。后续 non-fast-forward 失败应保持
+  可见，由维护者审阅关闭原因、分支 diff 与当前 `main` 后，决定删除或重建该
+  自动化分支；workflow 不允许 force-push。
 
 ## 回滚
 

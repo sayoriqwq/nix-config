@@ -54,6 +54,26 @@
         "type": "github"
       }
     },
+    "herdr": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1784657072,
+        "narHash": "sha256-3BA8eredGku+vsL2Af7sUf43QiArR5XTHNrI+X11vFM=",
+        "owner": "herdrdev",
+        "repo": "herdr",
+        "rev": "ef4c23f5775bb8cfec05f05d0844226ff959a07a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "herdrdev",
+        "ref": "v0.7.5",
+        "repo": "herdr",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -174,16 +194,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1784432872,
-        "narHash": "sha256-n3gKTBIV4ZA5VQpUakffBe3KGu4+mhPoA34rrqS0GkA=",
+        "lastModified": 1779357205,
+        "narHash": "sha256-cCO8aTqss5x9Ky8GWkpY0Hy5fyTZEbtifSUV8QjSzic=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "fd1462031fdee08f65fd0b4c6b64e22239a77870",
+        "rev": "f83fc3c307e74bc5fd5adb7eb6b8b13ffd2a36e1",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-26.05",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -221,6 +241,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1784432872,
+        "narHash": "sha256-n3gKTBIV4ZA5VQpUakffBe3KGu4+mhPoA34rrqS0GkA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "fd1462031fdee08f65fd0b4c6b64e22239a77870",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1769789167,
         "narHash": "sha256-kKB3bqYJU5nzYeIROI82Ef9VtTbu4uA3YydSk/Bioa8=",
         "owner": "NixOS",
@@ -235,18 +271,58 @@
         "type": "github"
       }
     },
+    "raycast-source": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785707312,
+        "narHash": "sha256-+axEw9BmyeGIqSVnXJuRQe9ol4AW3sBpOkCI/3PM6e0=",
+        "owner": "sayoriqwq",
+        "repo": "raycast",
+        "rev": "fb8e901fde16417c6a08bdd7c36beb2991e5895b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sayoriqwq",
+        "repo": "raycast",
+        "rev": "fb8e901fde16417c6a08bdd7c36beb2991e5895b",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "disko": "disko",
+        "herdr": "herdr",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixos-anywhere": "nixos-anywhere",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-darwin": "nixpkgs-darwin",
+        "raycast-source": "raycast-source",
         "zed": "zed"
       }
     },
     "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "herdr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783577481,
+        "narHash": "sha256-EWMxOWrJ031f8f/lrcEmhTRs4npw1/5N3Hcjin846c8=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "4cdea398dc491b082dccdce0fad1ed0b75fa3394",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
           "zed",
@@ -292,15 +368,15 @@
       "inputs": {
         "crane": "crane",
         "flake-parts": "flake-parts",
-        "nixpkgs": "nixpkgs_2",
-        "rust-overlay": "rust-overlay"
+        "nixpkgs": "nixpkgs_3",
+        "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1785100419,
-        "narHash": "sha256-CszQigypJwVuq6RJK8HF6WwcqTW84JvMZ+p9pczt0w8=",
+        "lastModified": 1785674744,
+        "narHash": "sha256-HpQm9uTIofI2XTFPe/GG/W3V0ppOlwSXzQHfIdgDxN4=",
         "owner": "zed-industries",
         "repo": "zed",
-        "rev": "30730a305ae235f3be44643d5895e142048ef701",
+        "rev": "66ed3027b8ca7fed0feeee91d1ce6346ccd4ac39",
         "type": "github"
       },
       "original": {

@@ -26,7 +26,7 @@ let
   conflictingRuntimePackages = lib.filter (
     name: builtins.elem name forbiddenRuntimePackages
   ) profilePackageNames;
-  conflictingPythonInterpreters = lib.filter (
+  profilePythonInterpreters = lib.filter (
     name: builtins.match "^python([0-9.]*)$" name != null
   ) profilePackageNames;
   conflictingMiseTools = lib.intersectLists forbiddenMiseToolNames (builtins.attrNames miseTools);
@@ -45,11 +45,12 @@ in
       '';
     }
     {
-      assertion = conflictingPythonInterpreters == [ ];
+      assertion = builtins.length profilePythonInterpreters <= 1;
       message = ''
-        Python versions are owned by uv at project scope. Remove these Python
-        interpreters from Home Manager home.packages:
-        ${lib.concatStringsSep ", " conflictingPythonInterpreters}
+        Home Manager may expose at most one Nix-owned baseline Python
+        interpreter. Project Python versions remain owned by uv. Remove
+        duplicate interpreters from home.packages:
+        ${lib.concatStringsSep ", " profilePythonInterpreters}
       '';
     }
     {
