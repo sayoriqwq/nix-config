@@ -20,7 +20,6 @@ let
   expectedIPv4Gateway = "38.242.128.1";
   expectedIPv6Address = "2a02:c207:2301:9930::1/64";
   expectedIPv6Gateway = "fe80::1";
-  expectedDnsCsv = "213.136.95.10,213.136.95.11,2a02:c207::1:53";
   deployKeyPayload = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7pbS2HOp0EvAUj35QLEYNpDPmBtS79qJmyU1KLwqpz";
   nixosAnywhereBinary = "${nixosAnywhere}/bin/nixos-anywhere";
   remotePreflight = pkgs.writeText "phase10-install-resume-remote-preflight.sh" (
@@ -290,7 +289,6 @@ let
         ${lib.escapeShellArg expectedIPv4Gateway} \
         ${lib.escapeShellArg expectedIPv6Address} \
         ${lib.escapeShellArg expectedIPv6Gateway} \
-        ${lib.escapeShellArg expectedDnsCsv} \
         x86_64 \
         virtio_net \
         < ${remotePreflight}

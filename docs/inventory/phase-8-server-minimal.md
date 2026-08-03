@@ -72,7 +72,7 @@ VM test 还必须断言：`stateVersion = 26.05`、Atuin 没有 sync 设置、�
 正式窗口前必须由 Phase 9 交付并由维护者逐项审阅：
 
 1. 已通过 VM 首启与二次重启的精确 Git commit、flake lock 与 `nixosConfigurations.server` closure；
-2. 只读 preflight helper 的结果，确认 architecture、BIOS、唯一可写 disk、stable alias → device、容量、唯一 `virtio_net` NIC、address/prefix、双栈 gateway、DNS、RAM、kexec 与当前 SSH host identity 全部未漂移；
+2. 只读 preflight helper 的结果，确认 architecture、BIOS、唯一可写 disk、stable alias → device、容量、唯一 `virtio_net` NIC、address/prefix、双栈 gateway、DNS、RAM、kexec 与当前 SSH host identity 全部未漂移；若已进入 temporary installer 后执行定向恢复，则 installer DNS 只要求实际解析成功，最终 NixOS 的 static link DNS 声明保持不变并留待首启验收；
 3. macbook 与 nixbox 的 strict host pin、两条普通用户 key 路径、macbook root break-glass 与 `sudo -n` 验收步骤；
 4. 已实际连接的 Contabo VNC，以及可在需要时启动的 Rescue/Reinstall 入口；credential 只在本地私密记录和现场 UI 中处理；
 5. 由 helper 封装的短安装 entry command，其底层冻结 local build/push、destination 不 substitute、保留 host keys、精确 output 与严格 SSH options；

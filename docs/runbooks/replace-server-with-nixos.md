@@ -103,6 +103,7 @@ Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 
 
 - VNC 仍停在预期的 temporary NixOS installer，SSH recovery path 可用；
 - firmware、虚拟化、唯一 stable disk、容量、NIC 与冻结的 network facts 均未漂移；
+- temporary installer 的 DNS 解析实际可用；installer 可使用 systemd-resolved global fallback，不要求其临时 link-scoped resolver 与最终 NixOS 的 static provider DNS 相同；
 - 目标 ext4 已按审阅布局挂载到 `/mnt`，且没有意外的额外挂载或目标 SSH host-key partial state；
 - 待安装 system 仍是原安装行动卡冻结的 `0ba710e…` 输出，而不是恢复 helper 所在分支的较新 server output；
 - 现场证据仍能证明失败只发生在 closure copy，未进入 host-key copy、`nixos-install` 或 reboot。
@@ -117,6 +118,8 @@ Phase 9 的 ephemeral key、host key、disk image、network namespace 与临时 
 6. reboot 后回到本 runbook 的“首次启动验收”；任何失败都停止并重新形成证据与行动卡。
 
 恢复 helper 必须继续使用 local build/push、destination 不 substitute、strict host pin、专用 identity 与 fail-closed 参数检查。严禁重跑 `kexec` 或 `disko`，严禁手工清理 partial Nix store，严禁自动重试循环，也不得在 VS Code terminal、`tmux`、后台任务或无人值守会话中运行。若 Ghostty、VNC、SSH 或维护者现场监督中断，保持 installer 现场并停止；Rescue、Reinstall、额外 reboot、网络或 SSH 改写仍分别需要新的行动卡与批准。
+
+恢复阶段放宽的是 temporary installer 的 DNS scope 判定，不是最终 server 配置：冻结的 NixOS 仍声明 provider static DNS，首启与二次启动都必须验证解析结果。由于恢复入口固定 local build/push 并禁止 destination substitute，installer DNS 不参与 closure 下载。
 
 ## 6. 失联恢复阶梯
 

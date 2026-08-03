@@ -45,7 +45,7 @@
 | IPv6 default gateway | `fe80::1` | link-local gateway；route 必须保留 `GatewayOnLink=yes` |
 | DNS | `213.136.95.10`、`213.136.95.11`、`2a02:c207::1:53` | 已验证的 current link DNS；不与 provider 通用 forwarding nameserver 混用 |
 
-Phase 10 preflight 必须重新读取并逐项比较这些值；若 provider 在安装窗口前改变任一 address、prefix、gateway、NIC 数量或 driver，停止执行并回到 Phase 8/9 修订与测试。
+Phase 10 在进入 kexec 前必须重新读取并逐项比较这些值；若 provider 在安装窗口前改变任一 address、prefix、gateway、NIC 数量或 driver，停止执行并回到 Phase 8/9 修订与测试。进入 temporary installer 后的定向恢复不再把 installer 的 resolver scope 当成最终 NixOS 声明：installer 可使用 systemd-resolved global fallback，恢复 preflight 只验证解析功能；最终 NixOS 仍使用上表的 static link DNS，并在首次启动后重新验收。
 
 ## 3. 管理与部署链路
 

@@ -102,6 +102,38 @@ let
       fi
     done
   '';
+
+  dnsPreflightSimulation = pkgs.writeShellScript "phase10-install-resume-dns-preflight-simulation" ''
+    set -euo pipefail
+
+    preflight=${data.remotePreflight}
+    dns_function="$TMPDIR/phase10-check-dns.sh"
+    awk '
+      /^phase10_check_dns\(\) \{$/ { capture = 1 }
+      capture { print }
+      capture && /^}$/ { exit }
+    ' "$preflight" > "$dns_function"
+
+    # shellcheck disable=SC1090
+    source "$dns_function"
+    declare -F phase10_check_dns >/dev/null
+
+    fail() {
+      return 1
+    }
+    getent() {
+      [[ "$*" == "ahostsv4 cache.nixos.org" ]] && (( getent_status == 0 ))
+    }
+
+    getent_status=0
+    phase10_check_dns
+
+    getent_status=1
+    if phase10_check_dns; then
+      echo "phase10-install-resume-policy: unavailable DNS resolution was accepted" >&2
+      exit 1
+    fi
+  '';
 in
 pkgs.runCommand "phase10-install-resume-policy"
   {
@@ -186,7 +218,7 @@ pkgs.runCommand "phase10-install-resume-policy"
     fi
     grep -F 'requires a live interactive nixbox terminal' install-tty.log
 
-    shellcheck "$preflight" ${runtimeInputTest} ${preflightSimulation}
+    shellcheck "$preflight" ${runtimeInputTest} ${preflightSimulation} ${dnsPreflightSimulation}
     grep -F '(( EUID != 0 ))' "$preflight"
     grep -F '"''${ID:-}" != "nixos" || "''${VARIANT_ID:-}" != "installer"' "$preflight"
     grep -F '[[ "$disk_size_bytes" == "$expected_disk_size" ]]' "$preflight"
@@ -202,10 +234,17 @@ pkgs.runCommand "phase10-install-resume-policy"
     grep -F -- "-name 'ssh_host_*_key' -size +0c" "$preflight"
     grep -F '(( source_host_key_count > 0 ))' "$preflight"
     grep -F 'source-host-private-keys=%s' "$preflight"
-    grep -F '[[ "$actual_dns_csv" == "$expected_dns_csv" ]]' "$preflight"
+    if grep -F 'resolvectl dns "$nic_name"' "$preflight" || grep -F 'expected_dns_csv' "$preflight"; then
+      echo "phase10-install-resume-policy: installer DNS is still coupled to link-scoped provider resolvers" >&2
+      exit 1
+    fi
+    grep -F 'getent ahostsv4 cache.nixos.org' "$preflight"
+    grep -F 'DNS resolution is unavailable' "$preflight"
+    grep -F 'dns-resolution=pass' "$preflight"
 
     ${runtimeInputTest}
     ${preflightSimulation}
+    ${dnsPreflightSimulation}
 
     touch "$out"
   ''

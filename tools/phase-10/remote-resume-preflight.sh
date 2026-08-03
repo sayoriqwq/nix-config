@@ -7,7 +7,12 @@ fail() {
   exit 1
 }
 
-if (( $# != 11 )); then
+phase10_check_dns() {
+  getent ahostsv4 cache.nixos.org >/dev/null 2>&1 ||
+    fail "DNS resolution is unavailable"
+}
+
+if (( $# != 10 )); then
   fail "internal argument contract mismatch"
 fi
 
@@ -19,9 +24,8 @@ expected_ipv4_address="$5"
 expected_ipv4_gateway="$6"
 expected_ipv6_address="$7"
 expected_ipv6_gateway="$8"
-expected_dns_csv="$9"
-expected_arch="${10}"
-expected_nic_driver="${11}"
+expected_arch="$9"
+expected_nic_driver="${10}"
 
 if (( EUID != 0 )); then
   fail "the installer resume preflight must run as root"
@@ -187,13 +191,7 @@ actual_ipv6_gateway="$(
 [[ " ${ipv6_default_routes[0]} " =~ [[:space:]]onlink[[:space:]] ]] ||
   fail "IPv6 default route lost its on-link requirement"
 
-actual_dns_csv="$(
-  resolvectl dns "$nic_name" |
-    awk -F': ' 'NR == 1 { print $2 }' |
-    xargs |
-    tr ' ' ','
-)"
-[[ "$actual_dns_csv" == "$expected_dns_csv" ]] || fail "DNS drift on the provider NIC"
+phase10_check_dns
 
 printf 'phase10-resume-preflight: installer=nixos variant=installer arch=%s virt=%s boot=bios\n' \
   "$actual_arch" "$virtualization"
@@ -201,6 +199,6 @@ printf 'phase10-resume-preflight: disk alias=%s device=%s size-bytes=%s writable
   "$expected_disk" "$resolved_disk" "$disk_size_bytes"
 printf 'phase10-resume-preflight: layout=gpt bios-boot=%s root=%s partitions=2 mount=/mnt fs=ext4 rw=yes boot-mount=absent partial-store=present install-artifacts=absent target-host-private-keys=0 source-host-private-keys=%s\n' \
   "$expected_boot_partition" "$expected_root_partition" "$source_host_key_count"
-printf 'phase10-resume-preflight: network nic=%s driver=%s count=1 ipv4=%s ipv4-gateway=%s ipv6=%s ipv6-gateway=%s dns=%s\n' \
+printf 'phase10-resume-preflight: network nic=%s driver=%s count=1 ipv4=%s ipv4-gateway=%s ipv6=%s ipv6-gateway=%s dns-resolution=pass\n' \
   "$nic_name" "$expected_nic_driver" "$expected_ipv4_address" "$expected_ipv4_gateway" \
-  "$expected_ipv6_address" "$expected_ipv6_gateway" "$expected_dns_csv"
+  "$expected_ipv6_address" "$expected_ipv6_gateway"
