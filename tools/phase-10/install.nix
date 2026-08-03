@@ -231,7 +231,7 @@ let
         printf '%q ' --ssh-option "$option"
       done
       printf '%s ' "--ssh-option \"UserKnownHostsFile=\$phase10_private_known_hosts\""
-      printf '%q\n' --target-host "root@$expected_host"
+      printf '%q %q\n' --target-host "root@$expected_host"
     }
 
     ${runtimeInputFunctions}

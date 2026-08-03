@@ -84,6 +84,7 @@ pkgs.runCommand "phase10-install-policy"
     grep -R -F -- 'StrictHostKeyChecking=yes' ${phase10Install.install}
     grep -R -F -- 'UserKnownHostsFile=$known_hosts_file' ${phase10Install.install}
     grep -R -F -- '--phases kexec,disko,install,reboot' ${phase10Install.install}
+    grep -R -F "printf '%q %q\\n' --target-host" ${phase10Install.plan}
 
     if ${phase10Install.plan}/bin/phase10-install-plan unexpected >plan.log 2>&1; then
       echo "phase10-install-policy: plan accepted an extra argument" >&2
