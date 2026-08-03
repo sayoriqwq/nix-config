@@ -14,8 +14,8 @@ let
   expectedHost = "38.242.129.34";
   expectedDisk = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0";
   expectedDiskSize = "80530636800";
-  expectedBootPartition = "/dev/disk/by-partlabel/gpt-main-boot";
-  expectedRootPartition = "/dev/disk/by-partlabel/gpt-main-root";
+  expectedBootPartition = "/dev/disk/by-partlabel/disk-main-boot";
+  expectedRootPartition = "/dev/disk/by-partlabel/disk-main-root";
   expectedIPv4Address = "38.242.129.34/21";
   expectedIPv4Gateway = "38.242.128.1";
   expectedIPv6Address = "2a02:c207:2301:9930::1/64";
@@ -189,6 +189,8 @@ let
         "phase10-install-resume-plan: recovery-commit=$recovery_commit" \
         "phase10-install-resume-plan: target=root@$expected_host port=22" \
         "phase10-install-resume-plan: stable-disk=$expected_disk" \
+        "phase10-install-resume-plan: bios-boot-partition=${expectedBootPartition}" \
+        "phase10-install-resume-plan: root-partition=${expectedRootPartition}" \
         "phase10-install-resume-plan: flake=$recovery_flake_ref" \
         "phase10-install-resume-plan: server-drv=$drv_path" \
         "phase10-install-resume-plan: server-system=$system_path" \

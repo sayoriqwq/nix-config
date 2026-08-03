@@ -152,10 +152,10 @@ pkgs.runCommand "phase10-install-resume-policy"
     grep -F ${data.recoveryRevision} "$install"
     grep -F ${data.expectedDrv} "$install"
     grep -F ${data.expectedSystem} "$install"
-    test ${data.expectedBootPartition} = /dev/disk/by-partlabel/gpt-main-boot
-    test ${data.expectedRootPartition} = /dev/disk/by-partlabel/gpt-main-root
-    grep -F /dev/disk/by-partlabel/gpt-main-boot "$install"
-    grep -F /dev/disk/by-partlabel/gpt-main-root "$install"
+    test ${data.expectedBootPartition} = /dev/disk/by-partlabel/disk-main-boot
+    test ${data.expectedRootPartition} = /dev/disk/by-partlabel/disk-main-root
+    grep -F /dev/disk/by-partlabel/disk-main-boot "$install"
+    grep -F /dev/disk/by-partlabel/disk-main-root "$install"
     grep -F 'type RESUME' "$install"
     grep -F "printf '%q %q\\n' --target-host" "$plan"
 
