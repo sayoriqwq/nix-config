@@ -157,6 +157,7 @@ pkgs.runCommand "phase10-install-resume-policy"
     grep -F /dev/disk/by-partlabel/gpt-main-boot "$install"
     grep -F /dev/disk/by-partlabel/gpt-main-root "$install"
     grep -F 'type RESUME' "$install"
+    grep -F "printf '%q %q\\n' --target-host" "$plan"
 
     if grep -F -- '--kexec' "$install" || grep -F 'kexec,disko' "$install"; then
       echo "phase10-install-resume-policy: forbidden destructive phase leaked into resume helper" >&2
