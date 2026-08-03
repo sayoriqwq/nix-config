@@ -78,7 +78,7 @@ VM test 还必须断言：`stateVersion = 26.05`、Atuin 没有 sync 设置、�
 5. 由 helper 封装的短安装 entry command，其底层冻结 local build/push、destination 不 substitute、保留 host keys、精确 output 与严格 SSH options；
 6. 精确 host、stable disk alias、commit、命令、窗口、现场观察人与数据全量丢失 waiver 的当次明确批准。
 
-任何 disk、boot、NIC、route、DNS、host identity 或 provider recovery 差异都会停止窗口并回到 Phase 8/9；不得现场猜值或先运行 destructive command 再修。
+任何 disk、boot、NIC、route、host identity 或 provider recovery 差异，以及进入 kexec 前或最终 NixOS 验收时的 static DNS 差异，都会停止窗口并回到 Phase 8/9；temporary installer 定向恢复仅适用上一条的 functional DNS 例外。不得现场猜值或先运行 destructive command 再修。
 
 ## 6. Phase 8 验证记录
 
