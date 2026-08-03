@@ -91,6 +91,17 @@
         pkgs = phase9Pkgs;
       };
       nixosAnywherePackage = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
+      phase10NixosAnywhere = nixosAnywherePackage.overrideAttrs (oldAttrs: {
+        pname = "nixos-anywhere-phase10-strict-host-key";
+        postPatch = (oldAttrs.postPatch or "") + ''
+          substituteInPlace src/nixos-anywhere.sh \
+            --replace-fail \
+              'declare -a sshArgs=("-o" "IdentitiesOnly=yes" "-i" "$tempDir/nixos-anywhere" "-o" "UserKnownHostsFile=/dev/null" "-o" "StrictHostKeyChecking=no")' \
+              'declare -a sshArgs=("-o" "IdentitiesOnly=yes" "-i" "$tempDir/nixos-anywhere")'
+        '';
+      });
+      phase10KexecInstaller =
+        nixos-anywhere.inputs.nixos-images.packages.x86_64-linux.kexec-installer-nixos-stable-noninteractive;
       phase9TestRunner = import ./tests/phase-9/runner.nix {
         inherit nixosAnywherePackage;
         pkgs = phase9Pkgs;
@@ -104,6 +115,19 @@
         inherit phase10Preflight username;
         pkgs = phase10Pkgs;
         serverConfiguration = self.nixosConfigurations.server;
+      };
+      phase10Install = import ./tools/phase-10/install.nix {
+        inherit username;
+        kexecInstaller = phase10KexecInstaller;
+        nixosAnywhere = phase10NixosAnywhere;
+        pkgs = phase9Pkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+        sourceRevision = self.rev or null;
+      };
+      phase10InstallPolicy = import ./tests/phase-10/install-policy.nix {
+        inherit phase10Install;
+        nixosAnywhere = phase10NixosAnywhere;
+        pkgs = phase9Pkgs;
       };
       phase10RemotePreflightCheck =
         phase10Pkgs.runCommand "phase10-remote-preflight-shellcheck"
@@ -168,6 +192,8 @@
           inherit phase9Preflight;
           nixos-anywhere = nixosAnywherePackage;
           phase9-test = phase9TestRunner;
+          phase10-install = phase10Install.install;
+          phase10-install-plan = phase10Install.plan;
           zed-nightly = inputs.zed.packages.x86_64-linux.default;
         };
       };
@@ -195,6 +221,14 @@
         phase9-test = {
           type = "app";
           program = "${phase9TestRunner}/bin/phase9-test";
+        };
+        phase10-install = {
+          type = "app";
+          program = "${phase10Install.install}/bin/phase10-install";
+        };
+        phase10-install-plan = {
+          type = "app";
+          program = "${phase10Install.plan}/bin/phase10-install-plan";
         };
       };
 
@@ -231,6 +265,7 @@
         x86_64-linux = {
           phase9-network = phase9NetworkTest;
           phase9-policy = phase9PolicyCheck;
+          phase10-install-policy = phase10InstallPolicy;
           phase10-nixbox-bootstrap = phase10NixboxBootstrapTest;
         };
       };
