@@ -3,6 +3,7 @@
 {
   imports = [
     ../common/cli/agent-python.nix
+    ../common/cli/codex-agent-policy.nix
     ../common/state-paths.nix
   ];
 
@@ -23,7 +24,7 @@
       path = "${config.home.homeDirectory}/.codex";
       owner = "Codex CLI";
       backup = "separate-policy";
-      description = "Codex CLI authentication, configuration, session, history, plugins, hooks, and cache contents remain writable and external and are never linked into the Nix Store.";
+      description = "Codex CLI authentication, session, history, plugins, hooks, cache, databases, and mutable configuration remain writable and external. Only the stable global AGENTS.md policy is managed by Home Manager and linked into the Nix Store.";
     }
     {
       path = "${config.home.homeDirectory}/.claude";
