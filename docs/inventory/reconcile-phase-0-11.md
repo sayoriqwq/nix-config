@@ -58,4 +58,4 @@
 - `nix build --no-link --print-out-paths path:.#darwinConfigurations.macbook.system`：PASS，输出为 `/nix/store/iwky2v6s9wp2543hc65nf2pxzspsrdlp-darwin-system-26.05.c3e90c8`；
 - `git diff --check`：PASS。
 
-x86_64-linux 的 server/nixbox closure 与长期恢复 tests 必须在同架构 builder 完成最终 build。nixbox 当前不可达，因此不能把全系统求值误报为同架构构建通过；本 Issue 不为关闭验证而扩大 builder 或网络边界。
+曾从 server 针对不可变 GitHub commit 发起 x86_64-linux 的 server/nixbox closure 与长期恢复 tests 联合构建。求值显示 nixbox 桌面与 Zed 的冷缓存依赖会扩张为 3753 个 derivations，已主动中止这项超出本次清理所需的全量构建；没有 activation，也没有运行 GC。nixbox 当前不可达，因此不能把全系统求值或部分缓存下载误报为同架构构建通过；本 Issue 不为关闭验证而扩大 builder、网络或垃圾回收边界。
