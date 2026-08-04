@@ -109,13 +109,15 @@ flake.nix + flake.lock
 
 ### 3.6 机密层
 
-计划使用 sops-nix + age：
+Phase 11 使用 SOPS + sops-nix + age：
 
 - Git 只保存加密文件；
 - 解密在 activation 时发生；
 - 服务通过文件路径读取机密；
 - 明文不得作为普通 Nix 字符串进入 Store；
-- 每台机器的解密身份按最小权限配置。
+- 每台机器使用现有 Ed25519 SSH host identity 派生的独立 age recipient；
+- 每个 host 文件只授予管理员恢复 recipient 和该 host recipient；
+- 管理员 identity 和编辑工具只留在 macbook，另有加密离线备份；nixbox 与 server 不获得编辑能力。
 
 机密方案在专门阶段启用，不和第一次系统接入混在一起。
 

@@ -164,6 +164,14 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 密码、token、私钥、恢复码、私有环境变量等敏感材料。加密后的机密文件可以按策略提交；明文机密不得进入 Git 或 Nix Store。
 
+### 机密部署能力（Secret deployment capability）
+
+由 sops-nix 在 activation/boot 阶段使用当前主机自己的 age 解密身份，把已加密声明转换成受 owner、group、mode 控制的运行时文件。它不授予主机编辑其他主机机密的权限，也不把管理员恢复 identity 或 GitHub 凭据下发到目标机。
+
+### 机密管理能力（Secret administration capability）
+
+只由 macbook 选择的 SOPS、age 与 SSH-to-age 编辑/recipient 管理工具。管理员 identity 保存在仓库外并建立独立加密离线备份；nixbox 与 server 都不组合该能力，也不持有管理员 identity。
+
 ### 激活（Activation）
 
 把已构建配置应用到真实机器，例如 `darwin-rebuild switch`、`nixos-rebuild switch` 或 Home Manager switch。构建成功不代表 Agent 获得激活权限。

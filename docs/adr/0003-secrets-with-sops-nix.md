@@ -45,6 +45,15 @@
 - 服务器成功启动并确认 SSH host identity 后，再把服务器 recipient 加入 `.sops.yaml`，重新加密并部署业务 secret；
 - bootstrap 私钥、恢复密钥和明文迁移文件不得提交。
 
+## Phase 11 身份与文件模型
+
+- 管理员使用独立 X25519 age identity，只负责编辑、recipient 变更与灾难恢复；本机文件位于 SOPS 的 macOS 默认目录，另有一份加密离线备份；
+- `macbook`、`nixbox` 与 `server` 各自复用已经存在的 Ed25519 SSH host identity，仓库只记录由 public host key 派生的 age recipient；
+- 每个 host 拥有独立的加密文件，creation rule 只包含管理员 recipient 与该 host recipient；主机不能横向解密其他主机文件；
+- sops-nix 系统 adapter 只读取 `/etc/ssh/ssh_host_ed25519_key`，不生成第二份机器私钥，也不把管理员 identity 下发给主机；
+- SOPS、age 与 SSH-to-age 编辑工具只组合到 macbook；nixbox 与 server 只运行 sops-nix 的本机解密路径，不获得 secret 编辑工具，server 也不获得 GitHub 协作凭据；
+- Phase 11 的非生产示例固定为 `/run/secrets/phase11-demo`、owner 为 `sayori`、mode 为 `0400`。未来真实服务必须在 Phase 12 或独立 Issue 重新确认 owner、path、mode、recipient 与服务 reload/restart 合同。
+
 ## 被否决的替代方案
 
 ### 明文 `.env` 提交到私有仓库

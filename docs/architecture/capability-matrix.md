@@ -38,6 +38,8 @@
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
 | AI 辅助运维 | 是 | 否 | 否 | macbook 的 `rtk`、Graphviz、Poppler、裸 Python 3.14 agent 基线、由 Home Manager 管理的简洁全局 Shell/Python 入口策略，以及由 Nix/Home Manager 唯一提供 PATH 来源的 `codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4；RTK 规则、AI 客户端状态与凭据保持外部，详见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
+| 机密部署 | 是 | 是 | 是 | sops-nix 使用每机独立 SSH host identity 解密本机文件；运行时路径和 mode 受声明控制，不分发管理员 identity。 |
+| 机密管理 | 是 | 否 | 否 | 只有 macbook 提供 SOPS、age 与 SSH-to-age；管理员 identity 与离线备份保持仓库外，nixbox/server 不获得编辑或恢复能力。 |
 
 ## 明确排除或延后
 
@@ -46,6 +48,7 @@
 - nixbox 当前明确排除 Discord、Upscayl、OBS、Telegram、QQ、WeChat、腾讯会议、Transmission、balenaEtcher、网易云音乐、Scratch、原生 Figma/Linear/ChatGPT；Steam、MEGAsync 与百度网盘延后决定。
 - 桌面环境实验放在 NixOS 基线与核心迁移之后，不作为 nix-config 当前第一性目标。
 - server 不保存 GitHub 协作凭据，不使用工作站可变运行时管理 production workload；运行时来自 Nix closure、容器或服务声明。
+- server 只持有自己的既有 SSH host identity，并只能解密明确授予 server recipient 的文件；管理员恢复 identity 和其他主机 identity 都不进入 server。
 
 ## 当前 Phase 5.5 状态
 

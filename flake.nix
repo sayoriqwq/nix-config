@@ -15,6 +15,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Issue #76: consume Herdr's stable Nix package through Home Manager.
     herdr.url = "github:herdrdev/herdr/v0.7.5";
 
@@ -182,6 +187,27 @@
             shellcheck ${./tools/phase-10/remote-nixbox-bootstrap.sh}
             touch "$out"
           '';
+      phase11AdminKeyInit = import ./tools/phase-11/init-admin-key.nix {
+        pkgs = phase10Pkgs;
+        inherit username;
+      };
+      phase11AdminKeyPolicy = import ./tests/phase-11/admin-key-policy.nix {
+        adminKeyInit = phase11AdminKeyInit;
+        pkgs = phase10Pkgs;
+      };
+      phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
+        adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
+        hostRecipients = {
+          macbook = "age1a49p4p9k0xwkwkh9e0t3zw88hwsuafs4t37nvfw3vtcq3kux0f0qavyd8r";
+          nixbox = "age1xnjsz6n9uzsmj3w5umdwv9scltt035rc8wne0u2hsh2zuafcdu2qhu5knn";
+          server = "age1zsv4uz44lkr0emz6u49jtwgg3svevm02e5xwgcp9fqwtw56vfv8qf60g8c";
+        };
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = phase10Pkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+        source = ./.;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -218,6 +244,7 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
+          phase11-init-admin-key = phase11AdminKeyInit;
           phase10-bootstrap-nixbox = phase10NixboxBootstrap.add;
           phase10-preflight = phase10Preflight;
           phase10-rollback-nixbox-bootstrap = phase10NixboxBootstrap.remove;
@@ -236,6 +263,10 @@
       };
 
       apps.aarch64-darwin = {
+        phase11-init-admin-key = {
+          type = "app";
+          program = "${phase11AdminKeyInit}/bin/phase11-init-admin-key";
+        };
         phase10-bootstrap-nixbox = {
           type = "app";
           program = "${phase10NixboxBootstrap.add}/bin/phase10-bootstrap-nixbox";
@@ -279,6 +310,8 @@
 
       checks = {
         aarch64-darwin = {
+          phase11-admin-key-policy = phase11AdminKeyPolicy;
+          phase11-sops-policy = phase11SopsPolicy;
           macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
