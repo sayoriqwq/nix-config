@@ -170,7 +170,7 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 ### 机密管理能力（Secret administration capability）
 
-只由 macbook 选择的 SOPS、age 与 SSH-to-age 编辑/recipient 管理工具。管理员 identity 保存在仓库外并建立独立加密离线备份；nixbox 与 server 都不组合该能力，也不持有管理员 identity。
+只由 macbook 选择的 SOPS、age 与 SSH-to-age 编辑/recipient 管理工具。管理员 identity 与恢复副本都由维护者在仓库外自行管理，Agent 不读取或验证其内容；nixbox 与 server 都不组合该能力，也不持有管理员 identity。
 
 ### 激活（Activation）
 

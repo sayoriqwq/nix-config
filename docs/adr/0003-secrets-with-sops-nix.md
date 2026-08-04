@@ -13,7 +13,7 @@
 采用 sops-nix + age：
 
 - 仓库只提交 SOPS 加密后的文件和公开 age recipient；
-- 管理员 age 私钥保存在仓库外，并建立离线备份；
+- 管理员 age 私钥与恢复副本保存在仓库外，其介质、位置和保护方式由维护者自行管理；
 - 每台目标机器使用独立、可轮换的解密身份；
 - Nix 声明 secret 的目标路径、owner、group、mode 与服务依赖；
 - 服务优先通过运行时文件读取 secret，不把明文插值为普通 Nix 字符串；
@@ -39,7 +39,7 @@
 
 ## Bootstrap 策略
 
-- Mac 上建立管理员 age identity，并离线备份；
+- Mac 上建立管理员 age identity，并由维护者自行管理仓库外恢复副本；
 - 本地 NixOS 工作站可使用独立 recipient；
 - 服务器最小安装阶段不依赖业务 secret；
 - 服务器成功启动并确认 SSH host identity 后，再把服务器 recipient 加入 `.sops.yaml`，重新加密并部署业务 secret；
@@ -47,7 +47,7 @@
 
 ## Phase 11 身份与文件模型
 
-- 管理员使用独立 X25519 age identity，只负责编辑、recipient 变更与灾难恢复；本机文件位于 SOPS 的 macOS 默认目录，另有一份加密离线备份；
+- 管理员使用独立 X25519 age identity，只负责编辑、recipient 变更与灾难恢复；本机文件位于 SOPS 的 macOS 默认目录，恢复副本的介质、位置和保护方式由维护者在仓库外自行决定，Phase 11 不把 Agent 验证备份设为 activation 前置条件；
 - `macbook`、`nixbox` 与 `server` 各自复用已经存在的 Ed25519 SSH host identity，仓库只记录由 public host key 派生的 age recipient；
 - 每个 host 拥有独立的加密文件，creation rule 只包含管理员 recipient 与该 host recipient；主机不能横向解密其他主机文件；
 - sops-nix 系统 adapter 只读取 `/etc/ssh/ssh_host_ed25519_key`，不生成第二份机器私钥，也不把管理员 identity 下发给主机；

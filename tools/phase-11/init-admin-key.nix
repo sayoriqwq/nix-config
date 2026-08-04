@@ -63,6 +63,6 @@ pkgs.writeShellApplication {
 
     public_recipient="$(age-keygen -y "$key_file")"
     printf 'phase11-init-admin-key: public-recipient=%s\n' "$public_recipient"
-    printf 'phase11-init-admin-key: NEXT: create and verify one encrypted offline backup before activation\n'
+    printf 'phase11-init-admin-key: NEXT: manage any recovery copy outside the repository; never commit or share the identity\n'
   '';
 }

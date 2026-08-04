@@ -12,14 +12,14 @@
 
 | 角色 | public age recipient | 私钥所有权 |
 | --- | --- | --- |
-| 管理员恢复 | `age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn` | macbook SOPS 默认目录 + 加密离线备份；仓库外 |
+| 管理员恢复 | `age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn` | macbook SOPS 默认目录；恢复副本由维护者在仓库外自行管理 |
 | macbook | `age1a49p4p9k0xwkwkh9e0t3zw88hwsuafs4t37nvfw3vtcq3kux0f0qavyd8r` | 既有 `/etc/ssh/ssh_host_ed25519_key`；仓库外 |
 | nixbox | `age1xnjsz6n9uzsmj3w5umdwv9scltt035rc8wne0u2hsh2zuafcdu2qhu5knn` | 既有 `/etc/ssh/ssh_host_ed25519_key`；仓库外 |
 | server | `age1zsv4uz44lkr0emz6u49jtwgg3svevm02e5xwgcp9fqwtw56vfv8qf60g8c` | Phase 10 保留的 `/etc/ssh/ssh_host_ed25519_key`；仓库外 |
 
 公开 recipient 由维护者现有 strict host-key 路径取得 public key 后本地转换；输出中没有 private key、private path、host fingerprint、credential 或真实 secret。
 
-管理员于 2026-08-04 运行仓库提供的无参数 helper。只读 metadata 验证 identity 为 `sayori:staff`、mode `0600`、普通文件；Agent 未读取内容。加密离线备份仍是首次 activation 前未关闭的人工关卡。
+管理员于 2026-08-04 运行仓库提供的无参数 helper。只读 metadata 验证 identity 为 `sayori:staff`、mode `0600`、普通文件；Agent 未读取内容。维护者同日决定自行管理仓库外恢复副本，并明确接受不由 Agent 验证其介质、位置、保护方式或可恢复性的风险；该事项不再阻断 Phase 11 activation。
 
 锁定实现版本：sops-nix `f1406619a3884cd5c47992a70b8b35c9c0fcb4c9`，Nixpkgs 提供 age `1.3.1`、SOPS `3.13.2` 与 SSH-to-age `1.2.0`。
 
@@ -63,7 +63,6 @@ nixbox 首次构建曾因其到 `proxy.golang.org` 超时而无法取得 sops-ni
 以下动作尚未因代码或 build 自动获批：
 
 1. 维护者在 macbook 生成管理员 identity，只把 public recipient 交给实现；
-2. 在独立加密离线介质建立备份，并通过 public recipient 一致性验证恢复副本；
-3. 审阅 Draft PR 后分别批准 macbook、nixbox、server 的首次 activation；
-4. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
-5. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准。
+2. 审阅 Draft PR 后分别批准 macbook、nixbox、server 的首次 activation；
+3. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
+4. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。

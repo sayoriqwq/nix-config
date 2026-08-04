@@ -4,7 +4,7 @@
 
 ## 1. 身份职责
 
-- 管理员 identity：只在 macbook 编辑/恢复使用，保存在 `~/Library/Application Support/sops/age/keys.txt`，另有一份加密离线备份。
+- 管理员 identity：只在 macbook 编辑/恢复使用，保存在 `~/Library/Application Support/sops/age/keys.txt`；恢复副本由维护者在仓库外自行管理。
 - 主机 identity：复用每台机器已有的 `/etc/ssh/ssh_host_ed25519_key`；sops-nix 只在本机 activation/boot 时读取。
 - Git：只保存 `.sops.yaml` 的 public recipients 与 `secrets/` 中的 SOPS 密文。
 
@@ -22,13 +22,11 @@ rtk nix run .#phase11-init-admin-key
 
 helper 拒绝参数、`sudo`、symlink 和已有目标，绝不覆盖旧 identity。只记录 `public-recipient=age1...`；不要复制 identity 文件内容。
 
-## 3. 离线备份与恢复验证
+## 3. 维护者自管恢复副本
 
-首选一块与 macbook 分离、静置时加密的外部介质。维护者在本地把 identity 复制为单独文件，保持只对本人可读；介质标签不得包含 private key 或 secret 内容。备份完成后，在不打印文件内容的前提下分别执行 `age-keygen -y`，两个 public recipient 必须完全一致。
+恢复副本的介质、位置和保护方式由维护者自行决定，不纳入仓库或 Agent 管理。Agent 不读取、复制、上传或验证 identity 内容，也不要求维护者公开备份位置。无论采用何种方式，都不得把 identity 提交到 Git、Issue、PR、聊天或日志。
 
-若没有已挂载且确认加密的离线介质，停止在这里，不 activation。云同步目录、Git 仓库、普通 U 盘、Issue 附件和聊天都不是合格备份位置。
-
-恢复演练只在临时隔离目录进行：从离线介质复制恢复副本，确认 mode、owner 与 public recipient，随后删除临时副本并确认原工作副本未被覆盖。不得通过 `cat`、剪贴板或 shell trace 检查 identity。
+Phase 11 仅使用无价值的非生产示例，维护者已明确接受不由 Agent 验证恢复副本的风险，因此该事项不阻断首次 activation。若维护者自行执行恢复演练，应在不打印内容的前提下确认 mode、owner 与 public recipient，并避免覆盖原工作副本；第一项真实 production secret 仍须重新确认可恢复性、轮换代价和失败处置。
 
 ## 4. 编辑非生产示例
 
