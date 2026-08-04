@@ -72,13 +72,13 @@ VM test 还必须断言：`stateVersion = 26.05`、Atuin 没有 sync 设置、�
 正式窗口前必须由 Phase 9 交付并由维护者逐项审阅：
 
 1. 已通过 VM 首启与二次重启的精确 Git commit、flake lock 与 `nixosConfigurations.server` closure；
-2. 只读 preflight helper 的结果，确认 architecture、BIOS、唯一可写 disk、stable alias → device、容量、唯一 `virtio_net` NIC、address/prefix、双栈 gateway、DNS、RAM、kexec 与当前 SSH host identity 全部未漂移；
+2. 只读 preflight helper 的结果，确认 architecture、BIOS、唯一可写 disk、stable alias → device、容量、唯一 `virtio_net` NIC、address/prefix、双栈 gateway、DNS、RAM、kexec 与当前 SSH host identity 全部未漂移；若已进入 temporary installer 后执行定向恢复，则 installer DNS 只要求实际解析成功，最终 NixOS 的 static link DNS 声明保持不变并留待首启验收；
 3. macbook 与 nixbox 的 strict host pin、两条普通用户 key 路径、macbook root break-glass 与 `sudo -n` 验收步骤；
 4. 已实际连接的 Contabo VNC，以及可在需要时启动的 Rescue/Reinstall 入口；credential 只在本地私密记录和现场 UI 中处理；
 5. 由 helper 封装的短安装 entry command，其底层冻结 local build/push、destination 不 substitute、保留 host keys、精确 output 与严格 SSH options；
 6. 精确 host、stable disk alias、commit、命令、窗口、现场观察人与数据全量丢失 waiver 的当次明确批准。
 
-任何 disk、boot、NIC、route、DNS、host identity 或 provider recovery 差异都会停止窗口并回到 Phase 8/9；不得现场猜值或先运行 destructive command 再修。
+任何 disk、boot、NIC、route、host identity 或 provider recovery 差异，以及进入 kexec 前或最终 NixOS 验收时的 static DNS 差异，都会停止窗口并回到 Phase 8/9；temporary installer 定向恢复仅适用上一条的 functional DNS 例外。不得现场猜值或先运行 destructive command 再修。
 
 ## 6. Phase 8 验证记录
 

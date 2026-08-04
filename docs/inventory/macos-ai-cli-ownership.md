@@ -1,8 +1,9 @@
 # macbook AI CLI 软件所有权
 
-本文记录 Issue [#67](https://github.com/sayoriqwq/nix-config/issues/67) 收口后的
-macbook AI 命令行客户端边界。它是维护者审阅和激活前验收的清单，不表示本文提交
-已经在真实机器安装、卸载或激活任何软件。
+本文记录 Issue [#67](https://github.com/sayoriqwq/nix-config/issues/67) 建立、Issue
+[#93](https://github.com/sayoriqwq/nix-config/issues/93) 最终收口后的 macbook AI 命令行
+客户端边界。#67 的声明已由维护者激活并完成实机验收；#93 随后定向删除旧入口，未
+执行新的 nix-darwin activation。
 
 ## 1. 范围与决策
 
@@ -29,24 +30,23 @@ Homebrew cask 声明移除 `claude-code`；该声明变化不等于对真实机�
 ChatGPT.app 仍由既有 `chatgpt` cask 声明并保留 GUI。其 embedded Codex 是应用私有
 helper，不是上述 `codex` PATH 命令的安装来源，也不纳入 Nix 迁移或清理目标。
 
-## 2. 激活前仍存在的重复副本
+## 2. 迁移时的重复副本与清理结果
 
-以下是已知事实和未来的精确清理目标。它们在本 PR 和 activation 中均保留；只有目标
-commit 完成实机验收并获得新的人工批准后，维护者才可以逐项清理：
+以下副本曾作为 activation 回滚入口保留。维护者在新入口完成 PATH/版本验收后，于
+2026-08-03 在 #93 明确批准并完成定向清理：
 
-| 副本 | 当前事实 | 处置边界 |
+| 副本 | 迁移时事实 | #93 结果 |
 | --- | --- | --- |
-| Homebrew Claude | `/opt/homebrew` 中 `claude` `2.1.153` | 保留至新 `claude` 通过 PATH/行为验收；之后仅定向移除该 cask，不执行 cleanup/zap |
-| 手工 Antigravity | `~/.local/bin/agy` `1.0.8` | 保留至 Nix `agy` 验收；之后仅移除该精确文件 |
-| 停用 mise Node `25.8.1` 的 Codex npm global | `@openai/codex` `0.144.4` | 保留 mise runtime 和其余可变数据；仅在批准后从该 Node 树定向移除该 global package |
-| 停用 mise Node `25.8.1` 的 Oh My Codex npm global | `oh-my-codex` `0.14.2` | 本轮不清理、不迁移；保留现状，另行 Issue 决定 |
+| Homebrew Claude | `/opt/homebrew` 中 `claude` `2.1.153` | cask 已定向卸载；未运行 cleanup 或 zap |
+| 手工 Antigravity | `~/.local/bin/agy` `1.0.8` | 精确入口已删除 |
+| 停用 mise Node `25.8.1` 的 Codex npm global | `@openai/codex` `0.144.4` | 随已停用 Node 25 runtime 定向删除 |
+| 停用 mise Node `25.8.1` 的 Oh My Codex npm global | `oh-my-codex` `0.14.2` | 在 #67 中不属于首轮目标；#93 批准清理停用 runtime 后随 Node 25 一并删除 |
 | ChatGPT.app embedded Codex | app-private helper | 保留 GUI 和应用私有文件；不把它当作 PATH duplicate 或清理对象 |
 
 历史 Bun global `@oh-my-pi/pi-coding-agent@17.0.7` 已按 Issue #30 精确删除，不是
 当前存在的副本，也不是本轮清理目标。
 
-清理命令须在合并 commit 确定后由维护者按实际路径生成；本文件只规定目标，不提供可
-直接执行的卸载命令。不得把 `~/.codex`、`~/.claude`、`~/.claude.json`、
+清理前逐项核对了真实路径、版本和消费者。不得把 `~/.codex`、`~/.claude`、`~/.claude.json`、
 `~/.gemini`、`~/.omp` 或 `~/.local/share/mise` 作为递归删除目标。
 
 ## 3. 全局 Agent 策略
@@ -84,10 +84,9 @@ Nix Store：
 清理或接管内容。项目 Python、`.venv` 和依赖仍由 uv/项目管理；mise 不管理 Python
 或 uv。
 
-## 5. 激活顺序与干净 Fish 验收
+## 5. 激活顺序与干净 Fish 验收（已完成）
 
-以下是维护者在精确合并 commit 上执行的顺序；Agent 只做格式化、求值、构建和文档
-检查，不执行真实机器 activation：
+以下是 #67 使用的维护者执行顺序；真实机器 activation 和最终验收均由维护者完成：
 
 1. 审阅 diff、`flake.lock` 变更及本表版本，确认只组合 macbook 的
    `ai-assisted-operations` capability。
@@ -116,14 +115,12 @@ omp --version
 `~/.local/bin` 或 mise npm globals。验收同时确认 Codex/OMP 没有启动更新检查、AGY
 没有自动更新，且上述状态目录和凭据未被写入 Store。
 
-## 6. 清理关卡与回滚
+## 6. 清理记录与回滚
 
-验收通过后，维护者另行批准以下概念目标的精确动作：Homebrew `/opt/homebrew` 的
-Claude 2.1.153、`~/.local/bin/agy` 1.0.8，以及停用 mise Node 25.8.1 树中的
-`@openai/codex@0.144.4`。停用树中的 `oh-my-codex@0.14.2` 不属于本轮清理目标。
-动作必须逐项核对路径和版本，
-不得使用全局 `brew cleanup`、`brew uninstall --zap`、递归删除用户状态或删除
-mise runtime。若路径、版本或消费者与本表不符，停止并重新建立批准。
+维护者在 #93 批准了上述旧入口和全部停用 mise runtime 的精确清理。清理后，干净
+Fish 中四个命令的首个正常来源均为 Home Manager profile；ChatGPT.app 的 embedded
+Codex 继续作为应用私有 helper 保留。清理没有使用全局 `brew cleanup`、
+`brew uninstall --zap`，也没有删除任何 AI 客户端状态。
 
 若声明异常，优先回滚到上一代 nix-darwin/Home Manager generation；这只恢复 Nix
 声明、package 链接和 PATH，不恢复或删除客户端状态，也不自动重装已清理的旧副本。
@@ -135,5 +132,5 @@ mise runtime。若路径、版本或消费者与本表不符，停止并重新�
 - 不扩展到 nixbox 或 server，不改变 server 迁移、SSH、网络、firewall 或数据流程；
 - 不接管 AI 客户端登录、token、历史、skills/hooks、cache、数据库或项目状态；
 - 不改变 ChatGPT GUI、ChatGPT Classic 或其他 macOS 应用的所有权；
-- 不在本 PR 安装、卸载、激活、删除或迁移真实机器文件；
-- 旧 duplicate 的最终清理、行为兼容和数据迁移另建维护者批准的窄动作记录。
+- #93 的维护只删除已验证可替代的旧软件入口；不执行新的 activation；
+- 后续行为兼容或数据迁移仍需独立维护者批准的窄动作记录。

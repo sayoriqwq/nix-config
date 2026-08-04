@@ -1,8 +1,8 @@
 # uv、Python 与兼容 PATH 所有权
 
-本文记录 Issue #34 的 uv 终态边界，以及 Issue #67 批准的 macbook agent Python
-基线、验收关卡与回滚方式。Nix 提供可复现的 uv 入口和一个裸 Python 解释器；
-项目 Python 选择、虚拟环境和依赖仍由 uv 管理。
+本文记录 Issue #34 的 uv 终态边界、Issue #67 批准的 macbook agent Python 基线，
+以及 Issue #93 对旧 uv、Homebrew Python 和项目 venv 的最终收口。Nix 提供可复现的
+uv 入口和一个裸 Python 解释器；项目 Python 选择、虚拟环境和依赖仍由 uv 管理。
 
 ## 1. 回归原因
 
@@ -59,7 +59,7 @@ nix eval --json .#darwinConfigurations.macbook.config.home-manager.users.sayori.
 `/Users/sayori/.local/bin` 之前。本次 macbook 求值结果为 PostgreSQL、Home Manager
 profile、`~/.local/bin`，相对优先级符合约束。
 
-## 4. 激活后验收关卡
+## 4. 激活后验收关卡（历史）
 
 只有维护者审阅精确 commit 并另行批准后，才可激活 macbook。打开全新 Fish 后执行：
 
@@ -82,16 +82,23 @@ make check
 - uv 在项目上下文解析满足声明的 Python 3.12；
 - 项目检查通过，且项目的 `.python-version`、`pyproject.toml`、`uv.lock` 与 `.venv` 未被本仓库修改；
 - `~/.local/bin` 仍在 PATH，其中其他用户工具仍可发现；
-- 旧 `~/.local/bin/uv` 保留，未被覆盖或删除。
+- 旧 `~/.local/bin/uv` 在 #67 activation 验收时保留，未被覆盖或删除。
 
-## 5. 回滚与清理边界
+## 5. 回滚与清理记录
 
 激活异常时切回前一个 nix-darwin generation；这会同时撤回 agent Python 基线，
-但不删除 uv-managed Python、项目 `.venv` 或旧 `~/.local/bin/uv`。旧 uv 被完整保留，
-因此也可临时使用以下命令恢复入口：
+但不删除 uv-managed Python 或项目 `.venv`。#67 验收时旧 uv 被完整保留，因此当时
+可以临时使用以下命令恢复入口：
 
 ```fish
 env PATH="$HOME/.local/bin:$PATH" make dev
 ```
 
-本 Issue 不删除旧 uv。只有 Nix 版本完成实机验收并获得单独的当前批准后，维护者才能决定是否清理 `~/.local/bin/uv`；该决定不得扩大为扫描或清理 `~/.local/bin` 中的其他内容。
+2026-08-03，#93 在确认 Nix uv 为正常入口后，定向删除了 `~/.local/bin/uv`、`uvx`
+以及由系统 Python 用户级 pip 安装的第二份 uv；未扩大为清理整个 `~/.local/bin`。
+
+`yanhuang-agent-platform/backend/.venv` 原先把解释器和 Mach-O framework 硬绑定到
+Homebrew `python@3.12`。清理前使用 uv-managed CPython `3.12.13` 按 `uv.lock` 原子
+重建该 venv，并完成核心依赖 import 与 `tests/test_gateway_config.py`（5 passed）验证；
+项目已有的跟踪修改未被触碰。验证后才删除旧 venv 备份并定向卸载 Homebrew
+`python@3.12`。Nix agent Python `3.14` 与项目 Python `3.12` 的所有权边界保持不变。

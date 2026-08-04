@@ -117,8 +117,10 @@ Mac 上遵循：
 
 Node 与 Bun 的版本切换是 mise 的核心职责：
 
-- Nix/Home Manager 只安装 mise 本体、管理稳定默认值和 shell integration；
-- Node、Bun 与 pnpm 的安装、全局默认和项目版本切换由 mise 管理；
+- Nix/Home Manager 安装 mise 本体，并通过生成的 `mise/conf.d` 声明稳定全局默认与
+  shell integration；macbook 不再维护第二份可变全局默认文件；
+- mise 按上述声明安装、解析和切换 Node、Bun 与 pnpm；项目版本继续由项目
+  `mise.toml` 或不提交的 `mise.local.toml` 选择；
 - `home.packages` 不得直接包含 `nodejs`、`nodejs-slim` 或 `bun`；
 - mise runtime、cache、state 与已安装版本属于可变数据。
 

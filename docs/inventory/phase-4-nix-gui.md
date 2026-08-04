@@ -5,6 +5,10 @@
 - **安装层：** Home Manager desktop / Darwin 用户层
 - **当前状态：** 已声明、完成真实 Mac activation 和维护者基础验收
 
+> 本文保留 #45 首次迁移的双安装证据。旧应用随后由 #56/#61 定向清理，#93 在当前 Nix
+> 应用 presence 复核后永久删除 #61 的精确 Trash rollback 目录；以下“激活前/旧副本”
+> 描述均为历史记录，不是当前恢复指令。
+
 ## 1. 目标与边界
 
 本批次最初把九个可靠的 GUI package 分别放在
@@ -140,5 +144,5 @@ Discord、Mos、Obsidian、VS Code 返回 true，对反例 Spotify 返回 false�
 真实使用时处理。该决定不扩大配置所有权：旧应用和 `0700` 私有备份继续作为回退入口，
 后续发现单应用问题时按第 5 节处理。
 
-旧 Homebrew `obsidian-cli` 当前仍在 PATH 中优先于 Nix package 附带的官方 CLI；这不
-影响 Obsidian GUI 验收，也不在 #45 中清理，留给后续定向清理批次。
+旧 Homebrew `obsidian-cli` 在 #45 验收时仍位于 PATH 前部，未影响 Obsidian GUI；它已
+由后续定向清理批次删除，当前命令不再依赖该旧入口。

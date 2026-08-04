@@ -27,7 +27,6 @@
       "paseo"
       "pearcleaner"
       "qq"
-      "raycast"
       "steam"
       "telegram"
       "tencent-meeting"

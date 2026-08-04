@@ -1,8 +1,9 @@
 # Phase 4 Homebrew cask 与 Mac App Store 声明记录
 
 本文记录 Issue [#46](https://github.com/sayoriqwq/nix-config/issues/46) 的所有权、
-离线验证、真实机器 activation 关卡和回滚边界。本文不授权 activation、应用升级、
-应用卸载、Homebrew cleanup、App Store 账号变更或 Pull Request 合并。
+离线验证、真实机器 activation 关卡和回滚边界，并在第 10–13 节保留后续维护事实。
+本文不授权新的 activation、应用升级、Homebrew cleanup、App Store 账号变更或 Pull
+Request 合并。
 
 ## 1. 声明范围
 
@@ -234,7 +235,7 @@ Homebrew 还提供 `feishu` cask，它面向 `feishu.cn` 并安装 `Feishu.app`�
 
 Agent 在 #74 中只修改声明、文档并 build，不执行恢复、activation、安装或应用启动。
 
-## 11. Issue #81：更正为中国区 Feishu
+## 11. Issue #81：更正为中国区 Feishu（历史）
 
 维护者已明确当前产品要求是中国区 Feishu。Homebrew 官方 `feishu` cask 的 homepage 为
 `https://www.feishu.cn/`，当前元数据版本为 `7.72.8,715e64ed`，并把 DMG 内的
@@ -246,7 +247,7 @@ Homebrew 安装的 `/Applications/LarkSuite.app`。由于 `cleanup = "none"`，�
 activation 不会卸载既有 `lark` receipt 或删除 `LarkSuite.app`。三份应用的并存是迁移
 回滚窗口；它们不得同时运行，任何卸载、zap、数据选择或迁移都必须另行批准。
 
-当前人工顺序为：
+当时的人工顺序为：
 
 1. 保留旧 App、`LarkSuite.app`、Trash 原件与私有备份，并确认相关进程全部退出；
 2. 对包含 `feishu` 的精确 merge commit 单独批准并执行 nix-darwin activation；
@@ -262,7 +263,26 @@ Issue #67 将 `claude-code` 从 Homebrew cask 声明移除，并由 macbook 的
 从 #81 完成后的 29 个 cask 回到 28 个；`cleanup = "none"` 保持不变，所以声明变化不会
 在 activation 中自动卸载真实机器已有的 Claude cask。
 
-只有在新的 Nix `claude` 完成 activation、PATH 与版本验收，并取得单独人工批准后，才可
-定向卸载该旧 cask。Claude 的账号、凭据、会话和其他可变状态仍不由 Homebrew 或 Nix
-接管；完整四 CLI 所有权与清理关卡见
+新的 Nix `claude` 已完成 activation、PATH 与版本验收；维护者在 #93 另行批准后定向
+卸载旧 cask，未运行 cleanup 或 zap。Claude 的账号、凭据、会话和其他可变状态仍不由
+Homebrew 或 Nix 接管；完整四 CLI 所有权与清理记录见
 [`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)。
+
+## 13. Issue #93：迁移残留最终收口
+
+2026-08-03，维护者批准在不执行新 activation、不运行全局 cleanup/zap 的前提下清理
+已完成替代验收的旧来源。Homebrew 侧完成：
+
+- 定向卸载全球版 `lark` cask 和旧 Claude Code cask，并删除手工旧 `Lark.app`；
+- 保留中国区 `feishu` cask、`/Applications/Feishu.app` 及全部 live `~/Library` 数据；
+- 在项目 venv 切换到 uv-managed CPython 并通过测试后，定向卸载 `python@3.12`；
+- 删除无消费者的 `freetype`，保留 PostgreSQL 16、XcodeGen 及其依赖；
+- 保持 `HOMEBREW_NO_AUTOREMOVE=1`，没有触碰 PostgreSQL service/data 或其他 cask。
+- 精确删除六个指向已退役 Docker、WARP 与 Zed Preview 应用的 root-owned
+  `/usr/local/bin` 悬空链接；OrbStack 和 Nix Zed 的现行入口复验通过。
+
+当前声明仍为 1 tap、28 cask、9 MAS app、0 formula；真实 Homebrew formula 外部状态为
+14 个。`feishu 7.72.8,715e64ed` 的 receipt 与 `/Applications/Feishu.app` 存在；实际
+bundle ID 为 `com.electron.lark`、Team ID 为 `XY6NLV7YTS`，深度签名和 Gatekeeper
+notarization 验证均通过。#74/#81 的 Lark 恢复步骤继续作为历史证据，不再描述当前
+机器的应用集合；账号、聊天与本地数据未在本维护中读取或验收。
