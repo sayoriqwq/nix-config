@@ -19,7 +19,7 @@
 
 公开 recipient 由维护者现有 strict host-key 路径取得 public key 后本地转换；输出中没有 private key、private path、host fingerprint、credential 或真实 secret。
 
-管理员于 2026-08-04 运行仓库提供的无参数 helper。只读 metadata 验证 identity 为 `sayori:staff`、mode `0600`、普通文件；Agent 未读取内容。维护者同日决定自行管理仓库外恢复副本，并明确接受不由 Agent 验证其介质、位置、保护方式或可恢复性的风险；该事项不再阻断 Phase 11 activation。
+管理员于 2026-08-04 运行仓库提供的无参数 helper。只读 metadata 验证 identity 为 `sayori:staff`、mode `0600`、普通文件；Agent 未读取内容。维护者同日确认恢复副本已存放在其认可的安全位置，并自行承担介质、位置、保护方式与可恢复性管理；具体位置和内容不进入仓库或验收记录，该事项不再阻断 Phase 11 activation。
 
 锁定实现版本：sops-nix `f1406619a3884cd5c47992a70b8b35c9c0fcb4c9`，Nixpkgs 提供 age `1.3.1`、SOPS `3.13.2` 与 SSH-to-age `1.2.0`。
 
