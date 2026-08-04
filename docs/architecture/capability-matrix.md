@@ -28,7 +28,7 @@
 | 终端文件工作流 | 是 | 是 | 否 | Yazi；低使用频率不取消已确认的迁移方向。 |
 | Helix | 是 | 是 | 否 | 备用终端编辑器；server 的最小编辑需求在 server Phase 再确认。 |
 | Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish。 |
-| Zed | 是 | 是 | 否 | 两台工作站的主编辑器；live settings 保持可写。 |
+| Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` language server；live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |

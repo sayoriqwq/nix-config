@@ -113,6 +113,12 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
+      zedNixLspPolicy = import ./tests/zed-editor/nix-lsp-policy.nix {
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = darwinPkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -167,6 +173,7 @@
       checks = {
         aarch64-darwin = {
           sops-age-policy = phase11SopsPolicy;
+          zed-nix-lsp-policy = zedNixLspPolicy;
           macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;

@@ -13,7 +13,10 @@ in
 {
   # ADR-0006: this is Zed's official Nightly package, pinned by the root
   # flake.lock. The upstream Flake remains a leaf package provider.
-  home.packages = [ inputs.zed.packages.${system}.default ];
+  home.packages = [
+    inputs.zed.packages.${system}.default
+    pkgs.nil
+  ];
 
   # Zed is the sole owner of the default editor role. VS Code and Helix remain
   # available as explicit fallback editors.
