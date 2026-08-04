@@ -58,11 +58,22 @@
 
 nixbox 首次构建曾因其到 `proxy.golang.org` 超时而无法取得 sops-nix 的固定 Go 依赖；把 macbook 已构建的同一 Nix Store 固定输出复制到 nixbox 后重试通过。这是 builder 网络可达性问题，不是配置求值或构建失败。所有验证只产生 Nix Store 路径；没有读取管理员 identity、解密值或 host private key。
 
-## 6. 人工关卡
+## 6. 首次 activation 验证
+
+macbook 于 2026-08-04 在维护者明确批准后，从提交 `6d24b68` 执行首次 activation：
+
+- `darwin-rebuild switch --flake path:/Users/sayori/Desktop/nix-config#macbook`：PASS；
+- sops-nix 导入 `/etc/ssh/ssh_host_ed25519_key` 后报告的 public age fingerprint 与已记录 macbook recipient 完全一致；
+- `/run/secrets/phase11-demo`：普通文件，owner `sayori`、group `staff`、mode `0400`，PASS；
+- 非生产 demo 内容由维护者仅在 macbook 本机查看并记录 PASS，内容未进入命令日志、Issue、PR、聊天或本文。
+
+该批准不覆盖 nixbox、server、PR 合并或 production secret。
+
+## 7. 剩余人工关卡
 
 以下动作尚未因代码或 build 自动获批：
 
-1. 维护者在 macbook 生成管理员 identity，只把 public recipient 交给实现；
-2. 审阅 Draft PR 后分别批准 macbook、nixbox、server 的首次 activation；
-3. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
+1. 分别批准 nixbox 与 server 的首次 activation；
+2. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
+3. 所有本阶段验收完成后另行批准 PR 合并；
 4. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。
