@@ -1,0 +1,61 @@
+# Phase 0–11 Reconcile 记录
+
+> 范围：Issue #103，基线为 `main@4178a8ee3ad4e0c858aae85e136f2bbc7fb0887f`。本文记录 2026-08-04 的全仓、GitHub、主机只读状态与维护者批准的清理结果；不授权 activation、Nix GC、generation 删除、PostgreSQL 变更或其他生产修改。
+
+## 1. 当前阶段结论
+
+- Phase 0–11 均已完成；server 已运行最小 NixOS，Phase 11 的三机 SOPS/age 首次 activation 已验收。
+- Phase 12 / Issue #14 由维护者明确延后，不建立业务、生产 secret 或新框架占位。
+- 当前保留的独立后续为 #60、#67、#99，以及独立审阅的 Zed Nightly PR #95。
+
+## 2. 仓库收口
+
+- 删除 Phase 10 正式迁移专用的 preflight、bootstrap、install/resume helpers 与对应 tests；历史执行证据保留在 Phase 10 inventory。
+- 删除 Phase 11 管理员 identity 初始化 helper、验收 demo 声明和三份 SOPS 密文；Secret adapter 只保留 sops-nix 与 host SSH identity 基础。
+- Phase 9 的无 target 隔离演练改名为长期 `server-recovery-test`，继续拒绝参数、production target、dirty checkout、无 KVM 与低空间环境。
+- 删除已经失去可执行入口的 server 替换 runbook；Phase 8–10 的历史事实继续由 inventory 与 ADR 保存。
+- README、Context、架构、路线图、ADR、Secret runbook 与英文/中文 Agent 协议同步为当前事实。
+
+删除 secret 声明不会自行修改真实机器。三台主机上的历史 `/run/secrets/phase11-demo` 只有在各自主机未来取得单独批准并激活本变更后才会移除。
+
+## 3. GitHub 收口
+
+- 关闭并删除 PR #100 的生成分支：它错误识别仓库技术栈、引入第二份 Agent 规范并使用未锁定依赖，不符合仓库边界。
+- 删除已被 Phase 10 成功路径取代的本地与远端 `agent/phase-10-server-replacement` 分支。
+- 关闭已完成或被最终实现取代的 #74、#77、#81；保留 #14、#60、#67、#99 与 #103。
+- 更新 v1 跟踪 Issue #1：Phase 11 已完成，Phase 12 明确延后。
+
+## 4. 本地永久删除
+
+维护者明确批准永久删除旧 Codex、OpenClaw 与迁移备份。清理前逐路径复核 type 与 owner；不使用 glob，也不扩大到其他 Trash 项。
+
+已永久删除：
+
+- 13 个 Phase 3/4 一次性交接或 preflight 目录；
+- `~/.local/state/nix-config-backups/` 下两个已完成 Issue 的快照；
+- 10 个精确 Trash artifacts，包括旧 OpenClaw retirement 备份、Codex DMG/tickets/repo assets、Raycast 集成残留与其他 Phase 4 文档/目录。
+
+`~/.Trash/Codex_2026-06-30_18-49-28` 为 root 所有；普通用户删除因权限拒绝，非交互 sudo 又因需要维护者密码而失败关闭。该目录仍待维护者运行精确 sudo 删除命令，不能记为已完成。
+
+明确保留：
+
+- Phase 2 nix-darwin backup 与 Phase 5 nixbox preflight 证据；
+- `/etc/pam.d/sudo_local.before-nix-darwin` 与 `/etc/shells.before-nix-darwin`；
+- `/private/tmp/codex-browser-use`；
+- Nix system generations、Nix Store、PostgreSQL 16 数据与服务。
+
+## 5. 主机与临时服务
+
+- macbook 没有 Phase 10/11 LaunchAgent；PostgreSQL 16 正在运行且不属于本 Issue。
+- server 当前运行 Phase 11 已验收 closure；没有迁移 helper 或 `/tmp` 入口，只保留预期的 `run-secrets.d.mount`。
+- nixbox 在本次复核时 SSH banner timeout；不据此猜测远端状态，也不执行远端删除。其 Phase 11 成功验收证据仍保留，连接恢复后可另做只读复核。
+
+## 6. 验证
+
+- `nix fmt -- --check .`：PASS；
+- `nix flake check --no-build --all-systems path:.`：PASS；
+- `nix build --no-link path:.#checks.aarch64-darwin.sops-age-policy`：PASS；
+- `nix build --no-link --print-out-paths path:.#darwinConfigurations.macbook.system`：PASS，输出为 `/nix/store/iwky2v6s9wp2543hc65nf2pxzspsrdlp-darwin-system-26.05.c3e90c8`；
+- `git diff --check`：PASS。
+
+x86_64-linux 的 server/nixbox closure 与长期恢复 tests 必须在同架构 builder 完成最终 build。nixbox 当前不可达，因此不能把全系统求值误报为同架构构建通过；本 Issue 不为关闭验证而扩大 builder 或网络边界。

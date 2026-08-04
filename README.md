@@ -4,14 +4,12 @@
 
 - 一台 macOS 工作站；
 - 一台 NixOS 工作站；
-- 一台当前运行 Ubuntu、最终迁移到 NixOS 的服务器；
+- 一台已运行最小 NixOS、后续按需增加生产能力的服务器；
 - 三台机器按真实需求显式选择的能力模块。
 
 ## 当前状态
 
-仓库目前处于 **Phase 5.5：建立能力模块与主机组合新基线**。
-
-Phase 0–5 已完成治理、主机盘点、macbook 的 nix-darwin/Home Manager/应用接入，以及 nixbox 的原有 NixOS 系统基线。Phase 6 实施中发现 `common` / `desktop` / 平台 bundle 会让 nixbox 隐式继承 macbook 全量配置，因此先用 #66 把 macbook 重组为显式 capability imports，并保持 nixbox Phase 5 不变。
+Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。
 
 ## 目标模型
 
@@ -27,7 +25,7 @@ Phase 0–5 已完成治理、主机盘点、macbook 的 nix-darwin/Home Manager
           + Home Manager + Home Manager + Home Manager
 ```
 
-当前 server 仍运行 Ubuntu，但不建立 standalone Home Manager 过渡层：按只读盘点、最小 NixOS、隔离 VM 测试、人工批准直接替换、Secret、业务按需重建的顺序推进。维护者已明确放弃当前 Ubuntu 的业务与数据恢复。
+server 当前运行已经验收的最小 NixOS。旧 Ubuntu、业务与数据不恢复；新的服务、数据与 production secret 只在出现真实需求后，通过独立 Issue 建立各自的部署、备份、恢复和回滚合同。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 

@@ -13,8 +13,8 @@ in
       # network backend and exposes no virtualisation option for that machine.
       # The separate network test keeps the production-equivalent virtio_net
       # topology and fail-closed preflight.
-      _module.args.phase9ConfigureWithoutCarrier = true;
-      _module.args.phase9NetworkDriver = "e1000";
+      _module.args.serverRecoveryConfigureWithoutCarrier = true;
+      _module.args.serverRecoveryNetworkDriver = "e1000";
     };
     extraChecks = ''
       with subtest("BIOS, GPT, EF02, ext4 root and no swap"):

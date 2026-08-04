@@ -14,7 +14,7 @@
 | --- | --- | --- | --- |
 | `macbook` | Apple Silicon macOS 主工作站 | nix-darwin + Home Manager | 全量工作站能力、Darwin 系统能力、Mac 专属兼容能力 |
 | `nixbox` | `x86_64-linux` NixOS 次级工作站 | NixOS + Home Manager | 按需工作站能力、Linux 试验能力、Server 同平台预生产验证 |
-| `server` | 当前运行 `x86_64-linux` Ubuntu Server | 直接替换为 NixOS | Headless 生产能力、Server 主机事实与业务运行能力 |
+| `server` | `x86_64-linux` 最小 NixOS，Phase 10–11 已验收 | 按需增加 Headless 生产能力 | Server 主机事实、恢复能力与按需业务运行能力 |
 
 脱敏后的已确认事实与明确延后项记录在 `docs/inventory/phase-1-hosts.md`。真实主机名、地址和其他不影响 output 组合的敏感值不进入仓库。
 
@@ -195,7 +195,7 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
 4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. Server 从当前 Ubuntu 直接替换为最小可 SSH 的 NixOS，再建立 Secret 能力并按新需求从空白状态引入业务；不创建 Ubuntu standalone Home Manager 过渡配置，也不恢复当前 Ubuntu 的业务或数据。
+6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责

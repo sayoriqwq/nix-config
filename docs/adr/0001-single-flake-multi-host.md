@@ -17,7 +17,7 @@
 - 主机通过模块组合共享配置，不复制完整配置；
 - macOS 使用 `darwinConfigurations`；
 - NixOS 工作站与最终服务器使用 `nixosConfigurations`；
-- 当前 Ubuntu server 不建立过渡 output；完成盘点与验证后直接增加最终 `nixosConfigurations.server`；
+- server 已从 Ubuntu 直接替换并由最终 `nixosConfigurations.server` 管理；不恢复过渡 output；
 - `flake.nix` 只负责 inputs、outputs 和少量组合逻辑，具体配置进入模块。
 
 初期使用普通 Flake 代码，不立即引入 flake-parts、Blueprint 或自动主机发现框架。

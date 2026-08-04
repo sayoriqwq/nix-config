@@ -1,6 +1,6 @@
 # Phase 11：SOPS / age 机密能力事实
 
-> 范围：Issue #10。本文只记录公开 recipient、声明式运行时合同和人工关卡；不得记录 identity、私钥内容、真实 secret、解密输出或凭据。
+> 范围：Issue #10 / PR #102 的历史验收事实，以及后续 reconcile 状态。本文只记录公开 recipient、声明式运行时合同和人工关卡；不得记录 identity、私钥内容、真实 secret、解密输出或凭据。Phase 11 已完成并合并。
 
 ## 1. 前置状态
 
@@ -23,7 +23,7 @@
 
 锁定实现版本：sops-nix `f1406619a3884cd5c47992a70b8b35c9c0fcb4c9`，Nixpkgs 提供 age `1.3.1`、SOPS `3.13.2` 与 SSH-to-age `1.2.0`。
 
-## 3. 最小权限矩阵
+## 3. 验收时的最小权限矩阵（历史）
 
 | 加密文件 | 管理员 | macbook | nixbox | server |
 | --- | --- | --- | --- | --- |
@@ -33,7 +33,7 @@
 
 同一 host rule 中的两个 recipient 是独立解密入口，不使用 Shamir threshold。任何新增 recipient 都必须说明它为何需要读取该 host 的全部文件。
 
-## 4. 运行时合同
+## 4. 验收时的运行时合同（历史）
 
 三台机器的非生产示例都声明为：
 
@@ -50,7 +50,7 @@
 2026-08-04 在未执行任何 `switch`、activation 或远端 server 连接的前提下完成：
 
 - `nix fmt -- --check .`：PASS；
-- `nix flake check path:.`：PASS；当前 macOS system 与 Phase 11 两项策略检查均通过；
+- `nix flake check path:.`：PASS；当时的 macOS system 与 Phase 11 两项策略检查均通过；
 - `nix build --no-link path:.#checks.aarch64-darwin.phase11-admin-key-policy`：PASS；helper 的拒绝覆盖、owner/mode 与临时 identity 生命周期测试通过；
 - `nix build --no-link path:.#checks.aarch64-darwin.phase11-sops-policy`：PASS；三个文件均被 SOPS 识别为密文，每个文件恰有管理员加对应 host 两个 recipient，仓库 private-key marker 扫描通过；
 - `nix build --no-link --print-out-paths path:.#darwinConfigurations.macbook.system`：PASS，输出为 `/nix/store/8sxjrv29ga5sbi86b6hci2x4f1flbvhw-darwin-system-26.05.c3e90c8`；
@@ -94,10 +94,10 @@ server 于 2026-08-04 在维护者另行明确批准后，从提交 `dd3ab76` �
 
 该批准不覆盖 reboot、PR 合并、旧业务恢复或 production secret。
 
-## 7. 剩余人工关卡
+## 7. Reconcile 后的当前状态
 
-以下动作尚未因代码或 build 自动获批：
+Issue #10 已关闭，PR #102 已合并。后续维护 Issue #103 将验收用 demo 的三份声明和 SOPS 密文、管理员 identity 初始化 helper 及其测试从仓库删除；`modules/capabilities/secret-deployment/` 只保留 sops-nix 与每机 SSH-host-derived age identity 的部署基础，当前没有实际 secret 声明。
 
-1. 审阅 macbook、nixbox 与 server 的完整验收记录后，另行批准 PR 合并；
-2. 合并后关闭 Issue #10，并记录 Phase 11 completion summary；
-3. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。
+删除声明不会自行修改真实机器。macbook、nixbox 与 server 上既有 `/run/secrets/phase11-demo` 只有在各自主机未来获得单独批准并激活 reconcile 后的配置时才会移除；本次仓库清理不执行 activation，也不把运行时残留误报为已删除。
+
+任何真实 production secret 必须在独立 Issue 重新批准，并确认消费者、可恢复性、轮换代价、runtime metadata、服务 reload/restart 与失败回滚。Phase 12 已明确延后。
