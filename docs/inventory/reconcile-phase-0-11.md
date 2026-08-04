@@ -33,9 +33,9 @@
 
 - 13 个 Phase 3/4 一次性交接或 preflight 目录；
 - `~/.local/state/nix-config-backups/` 下两个已完成 Issue 的快照；
-- 10 个精确 Trash artifacts，包括旧 OpenClaw retirement 备份、Codex DMG/tickets/repo assets、Raycast 集成残留与其他 Phase 4 文档/目录。
+- 11 个精确 Trash artifacts，包括旧 OpenClaw retirement 备份、Codex DMG/tickets/repo assets、Raycast 集成残留与其他 Phase 4 文档/目录。
 
-`~/.Trash/Codex_2026-06-30_18-49-28` 为 root 所有；普通用户删除因权限拒绝，非交互 sudo 又因需要维护者密码而失败关闭。该目录仍待维护者运行精确 sudo 删除命令，不能记为已完成。
+`~/.Trash/Codex_2026-06-30_18-49-28` 原为 root 所有；维护者运行精确 sudo 删除命令后，已复核该路径不存在。批准范围内共 26 个本地 artifacts，现已全部永久删除。
 
 明确保留：
 
