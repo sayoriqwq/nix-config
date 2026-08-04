@@ -69,11 +69,23 @@ macbook 于 2026-08-04 在维护者明确批准后，从提交 `6d24b68` 执行�
 
 该批准不覆盖 nixbox、server、PR 合并或 production secret。
 
+nixbox 于 2026-08-04 在维护者另行明确批准后，从提交 `e61672b` 执行首次 activation：
+
+- 当前提交的不可变 Flake source 在 nixbox 原生构建 PASS，批准的 system closure 为 `/nix/store/j6kxka8p7w6fczid9yky76kzya88x2yr-nixos-system-nixos-26.05.20260719.fd14620`；
+- 经过 SHA-256、owner 和 mode 验证的无参数入口调用标准 `nixos-rebuild switch`，最终报告 `activation=pass`，`/run/current-system` 精确指向批准 closure；
+- sops-nix 导入 `/etc/ssh/ssh_host_ed25519_key` 后报告的 public age fingerprint 与已记录 nixbox recipient 完全一致；
+- `/run/secrets/phase11-demo`：普通文件，owner `sayori`、group `users`、mode `0400`，PASS；
+- system state 为 `running`、Home Manager result 为 `success`、failed unit 为 0；
+- 非生产 demo 内容由维护者仅在本机查看并记录 PASS；该值不是凭据。验收记录不包含任何真实 secret；
+- 前序派发尝试分别因预检 attribute 写错、`/tmp` 入口提前消失和 RTK 缓冲远端 sudo 提示而在 activation 前失败关闭；每次均确认原 system 未变、secret 不存在且 failed unit 为 0。最终成功后，稳定入口按已验证 SHA 删除，维护者既有 checkout 未被修改。
+
+该批准不覆盖 server、PR 合并、reboot 或 production secret。
+
 ## 7. 剩余人工关卡
 
 以下动作尚未因代码或 build 自动获批：
 
-1. 分别批准 nixbox 与 server 的首次 activation；
+1. 批准 server 的首次 activation；
 2. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
 3. 所有本阶段验收完成后另行批准 PR 合并；
 4. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。
