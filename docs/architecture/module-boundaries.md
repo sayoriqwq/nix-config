@@ -133,12 +133,12 @@ Python 使用不同模型：
 - mise 不声明 Python 或 uv；
 - `~/.local/bin` 是用户可变工具的低优先级兼容路径，Nix 不扫描、同步或清理其内容。
 
-macbook 的 AI 辅助运维能力还管理唯一的稳定全局 Agent 策略
-`~/.codex/AGENTS.md`。该文件是 Agent 理解 Nix、Python 与工具所有权的 interface，
-源码位于 `dotfiles/codex/AGENTS.md`；`~/.codex` 中的 auth、session、history、
-plugins、hooks、cache、数据库及其他可变配置继续外部可写，不进入 Nix Store。
-持久工具的同步必须回到相应 capability 和 Git 流程；项目依赖与一次性工具分别使用
-项目声明和临时执行入口，不能把它们都吸入全局 profile。
+macbook 的 AI 辅助运维能力还管理唯一的稳定全局 Agent 策略入口
+`~/.codex/AGENTS.md`。源码位于 `dotfiles/codex/AGENTS.md`，只固定 Nix 管理事实、
+Fish 登录入口、Python 入口和面向用户的命令格式。文件首行引用的
+`~/.codex/RTK.md` 仍是外部可写依赖，不由当前 Home Manager primitive 管理；后续
+AI 系列工作再单独收口其稳定基线。`~/.codex` 中的 auth、session、history、plugins、
+hooks、cache、数据库及其他可变配置继续外部可写，不进入 Nix Store。
 
 详细证据见 `docs/inventory/mise-runtime-ownership.md` 与 `docs/inventory/uv-python-ownership.md`。
 

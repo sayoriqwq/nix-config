@@ -38,9 +38,9 @@ dev shell 或 mise activation。`python314` 因此由 AI 辅助运维能力的�
 维护，而不是使用可变的 `latest`。
 
 Home Manager 管理的 `~/.codex/AGENTS.md` 向从 GUI 或非交互式进程启动的 Agent
-公开稳定入口 `/etc/profiles/per-user/sayori/bin/python`，并明确禁止向该基线引导
-`pip` 或写入全局第三方包。策略文件不写死 Nix Store derivation；项目 Python 与依赖
-继续按本表由 uv/项目拥有。
+公开稳定入口 `/etc/profiles/per-user/sayori/bin/python`。该简洁策略不再重复本表的
+完整 Python 所有权合同；无全局第三方包、项目 Python 与依赖继续由 uv/项目拥有等
+约束仍由 Home Manager 求值、本表与专项检查负责。
 
 ## 3. 未激活验证
 

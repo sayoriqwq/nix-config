@@ -53,14 +53,18 @@ helper，不是上述 `codex` PATH 命令的安装来源，也不纳入 Nix 迁�
 
 macbook 的 `ai-assisted-operations` capability 只把稳定策略
 `~/.codex/AGENTS.md` 纳入 Home Manager。其源码为
-`dotfiles/codex/AGENTS.md`，向所有 Codex 任务公开以下 interface：
+`dotfiles/codex/AGENTS.md`。2026-08-04 的 PR #92 合并后 reconcile 明确以当时正在
+使用的简洁版本为 authority，并回写 Nix 声明；该策略只公开以下 interface：
 
-- 本机由 `nix-darwin + Home Manager` 管理，声明源为 nix-config；
-- Agent 裸 Python 使用 Home Manager profile 的稳定 `python` 入口，不写死 Store path，
-  不引导全局 `pip`；项目 Python、`.venv` 与依赖继续由 uv/项目拥有；
-- 持久全局工具先进入对应 capability、ownership 文档与检查，再通过 Git/PR 同步；
-- 项目依赖进入项目声明，一次性工具只使用 `nix shell`、`nix run` 或 uv 临时入口；
-- Agent 不执行真实机器 activation，维护者继续拥有最后的人工关卡。
+- 本机由 `nix-darwin + Home Manager` 管理，命令通过 Nix-managed Fish 登录环境执行；
+- 项目环境外需要 Python 时使用 `/etc/profiles/per-user/sayori/bin/python`；
+- 展示给用户的命令默认使用 Fish 语法；
+- 每个需要用户执行的命令或命令块后附一行、恰好一个相关 emoji 的说明。
+
+文件首行继续引用外部 `~/.codex/RTK.md`。当前 capability 不管理该文件，也不把 RTK
+规则内联进策略；RTK 后续由专门的 AI 系列工作纳入稳定基线。旧长版中关于 Nix Store、
+uv/mise、全局安装和 activation 的扩展说明不再属于该全局策略正文；对应所有权和人工
+关卡仍由仓库规范、能力模块、inventory 与专项检查分别维护。
 
 Home Manager 对该精确文件设置 `force`，使激活后的入口不能被手工副本静默漂移。
 源文件不包含 token、session、账号或其他机密，可以安全进入 Nix Store。回滚上一代
