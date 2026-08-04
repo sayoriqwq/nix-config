@@ -1,7 +1,7 @@
 {
   lib,
-  phase9ConfigureWithoutCarrier,
-  phase9NetworkDriver,
+  serverRecoveryConfigureWithoutCarrier,
+  serverRecoveryNetworkDriver,
   pkgs,
   username,
   ...
@@ -12,7 +12,7 @@ let
 in
 {
   networking = {
-    hostName = lib.mkForce "server-phase9";
+    hostName = lib.mkForce "server-recovery";
     interfaces = lib.mkForce { };
     useDHCP = lib.mkForce false;
     useNetworkd = lib.mkForce true;
@@ -23,8 +23,8 @@ in
   systemd.network = {
     enable = lib.mkForce true;
     networks = lib.mkForce {
-      "10-phase9-uplink" = {
-        matchConfig.Driver = phase9NetworkDriver;
+      "10-server-recovery-uplink" = {
+        matchConfig.Driver = serverRecoveryNetworkDriver;
 
         addresses = [
           { Address = values.ipv4Address; }
@@ -40,7 +40,7 @@ in
         ];
 
         networkConfig = {
-          ConfigureWithoutCarrier = phase9ConfigureWithoutCarrier;
+          ConfigureWithoutCarrier = serverRecoveryConfigureWithoutCarrier;
           DHCP = "no";
           IPv6AcceptRA = false;
           LinkLocalAddressing = "ipv6";

@@ -50,9 +50,8 @@
 - server 不保存 GitHub 协作凭据，不使用工作站可变运行时管理 production workload；运行时来自 Nix closure、容器或服务声明。
 - server 只持有自己的既有 SSH host identity，并只能解密明确授予 server recipient 的文件；管理员恢复 identity 和其他主机 identity 都不进入 server。
 
-## 当前 Phase 5.5 状态
+## 当前状态
 
-- macbook 已通过显式 capability import 重组现有全量行为。
-- nixbox 保持 Phase 5 系统基线，本阶段不接入任何 Home Manager 用户能力。
-- server 不连接、不修改；Ubuntu 事实只在后续盘点阶段读取。
-- Phase 6 只按本矩阵为 nixbox 组合已经批准的子集。
+- macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
+- server 已运行最小 NixOS，只组合 headless 基线与明确需要的共享能力。
+- Phase 12 已延后；新增能力继续按本矩阵和独立 Issue 审批，不从其他主机继承 bundle。

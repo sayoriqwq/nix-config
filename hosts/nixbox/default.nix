@@ -14,9 +14,7 @@
     ../../modules/capabilities/clash-verge-rev/nixos.nix
     ../../modules/capabilities/termius/nixos.nix
     ../../modules/capabilities/localsend/nixos.nix
-    (import ../../modules/capabilities/secret-deployment/nixos.nix {
-      sopsFile = ../../secrets/nixbox/phase11-demo.yaml;
-    })
+    ../../modules/capabilities/secret-deployment/nixos.nix
   ];
 
   boot.loader = {

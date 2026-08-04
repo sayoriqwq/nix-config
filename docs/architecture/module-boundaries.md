@@ -65,7 +65,7 @@ Host 显式 import 一项能力即表示采用。不得再要求 host 同时设�
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
 | `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
-Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 共同声明 sops-nix、当前 host 的 SSH identity、运行时 owner/group/mode 与 activation 人工关卡；host 只传入自己的加密文件。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
+Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 只声明 sops-nix 和当前 host 的 SSH identity。具体 secret 的 source、运行时 owner/group/mode、服务依赖与 activation 人工关卡属于消费者的独立 Issue，不能用通用 demo 占位。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
 
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
@@ -146,10 +146,10 @@ hooks、cache、数据库及其他可变配置继续外部可写，不进入 Nix
 
 ## 8. 服务与容器边界
 
-Server 从 Ubuntu 直接替换为最小 NixOS，但系统替换与业务重构仍然分开：
+Server 已从 Ubuntu 直接替换为最小 NixOS，系统基线与业务能力仍然分开：
 
-- 首次替换只保证 boot、disk、network、SSH、sudo、基础 firewall 与救援能力；
-- 最小系统稳定后，只按届时的新需求从空白状态逐项引入业务；不恢复当前 Ubuntu 的 Compose、容器与数据；
+- 当前基线只保证 boot、disk、network、SSH、sudo、基础 firewall 与救援能力；
+- 后续只按届时的新需求从空白状态逐项引入业务；不恢复旧 Ubuntu 的 Compose、容器与数据；
 - 成熟 NixOS module 的采用另建 Issue，不顺带重写全部服务；
 - 容器 image tag、volume、环境变量、备份与健康检查必须显式记录；
 - production database upgrade 不作为 OS migration 的附带动作。

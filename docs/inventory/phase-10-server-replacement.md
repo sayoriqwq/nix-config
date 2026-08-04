@@ -271,4 +271,4 @@ phase10-install 复用完全相同的本地冻结检查，但还要求真实交�
 - server 不持有 GitHub 协作凭据，不依赖 mutable checkout 自行构建；
 - 旧 Ubuntu、容器、数据库、业务数据与 production secret 均未恢复，符合已记录的全量丢失 waiver；
 - key-only root break-glass 仍按设计保留。关闭 root SSH 必须另建窄 Issue、重新 build/验证，并在新的 production activation 行动卡后取得明确批准；不在 Phase 10 收尾中顺手修改；
-- Phase 10 完成后的下一主阶段是 Issue #10（Phase 11：sops-nix 与 age）。Phase 11 不自动授权 production secret 迁移或真实服务恢复。
+- Phase 11 已在 Issue #10 / PR #102 完成；它没有授权 production secret 迁移或真实服务恢复。Phase 12 已由维护者明确延后，后续业务只通过新的独立需求进入。

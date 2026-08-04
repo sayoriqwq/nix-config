@@ -121,13 +121,13 @@ Phase 12  业务按需重建、加固与 v1 收尾       #14
 
 在 nixbox 原生 build server closure；不修改 production server，不恢复业务，不引入 Secret。
 
-实现证据映射见 [`Phase 8 server 最小声明`](../inventory/phase-8-server-minimal.md)，后续 VM 与 production 人工关卡见 [`Server 替换 runbook`](../runbooks/replace-server-with-nixos.md)。
+实现证据映射见 [`Phase 8 server 最小声明`](../inventory/phase-8-server-minimal.md)，后续 VM 与 production 人工关卡的历史记录见 Phase 9 与 Phase 10 inventory。
 
 ### Phase 9 — nixos-anywhere VM 安装测试（#12）
 
 在 nixbox 的隔离 VM 中验证 Flake、disko、启动、用户与 SSH，形成正式迁移 runbook。此阶段不对 production server 运行安装，也不为构建扩大 OrbStack 或 macOS builder 边界。
 
-Phase 9 的测试结构、固定版本、资源/秘密边界与验证记录见 [`Server 隔离 VM 安装演练`](../inventory/phase-9-server-vm-test.md)。唯一维护者入口为不接受 target 参数的 `nix run .#phase9-test`；演练通过不构成 Phase 10 授权。
+Phase 9 的测试结构、固定版本、资源/秘密边界与验证记录见 [`Server 隔离 VM 安装演练`](../inventory/phase-9-server-vm-test.md)。迁移完成后，这套不接受 target 参数的演练以 `nix run .#server-recovery-test` 作为长期恢复验证入口；它不会连接 production server。
 
 ### Phase 10 — 经批准的 Ubuntu→NixOS 正式替换（#13）
 
@@ -139,11 +139,11 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 
 先用非 production secret 验证 recipient、解密、owner/mode、轮换与恢复，再接入真实服务。明文不得进入 Git、Issue、PR、log 或 Nix Store。
 
-当前实现采用管理员恢复 recipient 加每机独立 SSH-host-derived recipient；只有 macbook 提供编辑工具，nixbox 与 server 只有本机解密能力。管理员 identity 的仓库外恢复副本由维护者自行管理且不由 Agent 验证。macbook、nixbox 与 server 的首次 activation、public fingerprint、运行时 owner/group/mode、非生产内容、system health 与临时入口清理均已由维护者逐机验收；Phase 11 不引入 production secret，当前只剩 PR 合并与 Issue completion summary 关卡。
+当前实现采用管理员恢复 recipient 加每机独立 SSH-host-derived recipient；只有 macbook 提供编辑工具，nixbox 与 server 只有本机解密能力。管理员 identity 的仓库外恢复副本由维护者自行管理且不由 Agent 验证。macbook、nixbox 与 server 的首次 activation、public fingerprint、运行时 owner/group/mode、非生产内容、system health 与临时入口清理均已由维护者逐机验收；PR #102 已合并，Issue #10 已关闭。验收用 demo 在后续 reconcile 中退场，基础 adapter 不声明任何实际 secret。
 
 ### Phase 12 — 业务按需重建、加固与 v1 收尾（#14）
 
-不恢复当前 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。若没有业务需要，Phase 12 只完成系统加固、运维与 v1 收尾。
+不恢复旧 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。维护者于 2026-08-04 明确延后 Phase 12；延后期间不把业务占位、生产 secret 或额外框架提前塞入基线。
 
 ## 5. 控制链路与部署方向
 

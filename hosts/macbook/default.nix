@@ -16,9 +16,7 @@
     ../../modules/capabilities/clash-verge-rev/darwin.nix
     ../../modules/capabilities/termius/darwin.nix
     ../../modules/capabilities/localsend/darwin.nix
-    (import ../../modules/capabilities/secret-deployment/darwin.nix {
-      sopsFile = ../../secrets/macbook/phase11-demo.yaml;
-    })
+    ../../modules/capabilities/secret-deployment/darwin.nix
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";

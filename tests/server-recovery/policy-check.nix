@@ -1,23 +1,23 @@
 {
-  phase9Pkgs,
+  pkgs,
   serverConfiguration,
   username,
 }:
 
 let
-  lib = phase9Pkgs.lib;
+  inherit (pkgs) lib;
   values = import ./values.nix;
   testConfiguration = serverConfiguration.extendModules {
     modules = [
       {
-        _module.args.phase9ConfigureWithoutCarrier = false;
-        _module.args.phase9NetworkDriver = "virtio_net";
+        _module.args.serverRecoveryConfigureWithoutCarrier = false;
+        _module.args.serverRecoveryNetworkDriver = "virtio_net";
       }
       ./server-overlay.nix
     ];
   };
   config = testConfiguration.config;
-  network = config.systemd.network.networks."10-phase9-uplink";
+  network = config.systemd.network.networks."10-server-recovery-uplink";
   userKeys = config.users.users.${username}.openssh.authorizedKeys.keys;
   rootKeys = config.users.users.root.openssh.authorizedKeys.keys;
   homeConfig = config.home-manager.users.${username};
@@ -72,8 +72,8 @@ assert
     tcp = [ 22 ];
     udp = [ ];
   };
-assert evidence.hostName == "server-phase9";
-assert evidence.networkNames == [ "10-phase9-uplink" ];
+assert evidence.hostName == "server-recovery";
+assert evidence.networkNames == [ "10-server-recovery-uplink" ];
 assert
   evidence.routes == [
     {
@@ -105,4 +105,4 @@ assert !(homeConfig.programs.atuin.settings ? sync);
 assert lib.intersectLists forbiddenHomePackages homePackageNames == [ ];
 assert !config.services.xserver.enable;
 assert !config.virtualisation.docker.enable;
-phase9Pkgs.writeTextDir "phase9-policy.json" (builtins.toJSON evidence)
+pkgs.writeTextDir "server-recovery-policy.json" (builtins.toJSON evidence)

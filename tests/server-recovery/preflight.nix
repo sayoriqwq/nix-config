@@ -1,15 +1,15 @@
 { pkgs }:
 
 pkgs.writeShellApplication {
-  name = "phase9-vm-preflight";
+  name = "server-recovery-vm-preflight";
   runtimeInputs = [
     pkgs.coreutils
   ];
   text = ''
-    expected_boot_mode="''${PHASE9_EXPECTED_BOOT_MODE:-bios}"
-    expected_nic_driver="''${PHASE9_EXPECTED_NIC_DRIVER:-virtio_net}"
-    expected_nic_count="''${PHASE9_EXPECTED_NIC_COUNT:-1}"
-    expected_disk="''${PHASE9_EXPECTED_DISK:-}"
+    expected_boot_mode="''${SERVER_RECOVERY_EXPECTED_BOOT_MODE:-bios}"
+    expected_nic_driver="''${SERVER_RECOVERY_EXPECTED_NIC_DRIVER:-virtio_net}"
+    expected_nic_count="''${SERVER_RECOVERY_EXPECTED_NIC_COUNT:-1}"
+    expected_disk="''${SERVER_RECOVERY_EXPECTED_DISK:-}"
 
     case "$expected_boot_mode" in
       bios)

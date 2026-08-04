@@ -8,7 +8,7 @@ Build and maintain one auditable, reproducible Nix configuration repository for:
 
 - one primary macOS workstation managed by `nix-darwin` and Home Manager;
 - one secondary NixOS workstation and Linux experiment station;
-- one server that currently runs Ubuntu and will be replaced directly by NixOS;
+- one server that runs minimal NixOS and will gain production capabilities only from current requirements;
 - requirement-driven capability modules shared across those hosts.
 
 The repository manages **configuration**, not mutable application data or backups.
@@ -51,7 +51,7 @@ If no implementation issue exists, do not start implementation. Limit work to in
 - Use Home Manager for the portable user layer.
 - Use `nix-darwin` for macOS system configuration.
 - Use NixOS modules for NixOS system configuration.
-- Do not introduce a standalone Home Manager layer on the Ubuntu server; inventory it, validate a minimal NixOS replacement, and migrate through the approved server phases.
+- Do not restore the retired Ubuntu server layer. Keep the minimal NixOS server requirement-driven, and add each production capability through its own approved issue.
 - Keep host and hardware facts under `hosts/<host>/`.
 - Keep reusable macOS system modules under `modules/darwin/`.
 - Keep reusable NixOS system modules under `modules/nixos/`.

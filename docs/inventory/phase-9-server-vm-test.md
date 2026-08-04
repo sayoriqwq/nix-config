@@ -1,6 +1,6 @@
 # Phase 9：Server 隔离 VM 安装演练
 
-> 范围：Issue #12。本文记录在 nixbox 上运行的一次性 QEMU/NixOS 演练；不连接 production server，不读取或修改 Contabo 控制面，不使用 `sudo`，也不授权 Phase 10 的真实安装。
+> 范围：Issue #12。本文保留 2026-07-31 在 nixbox 上运行的一次性 QEMU/NixOS 演练证据；不连接 production server，不读取或修改 Contabo 控制面，不使用 `sudo`。Phase 10 完成后，同一安全边界已改名为长期 `server-recovery-test`，一次性迁移 helper 已删除。
 
 ## 1. 批准与安全边界
 
@@ -14,10 +14,16 @@
 
 下列动作仍然禁止：连接或指定 production server、运行 production kexec/install、修改 nixbox 的 host network/firewall/route/SSH、使用 `sudo`、接触真实 disk、操作 Contabo、记录 private key/credential，或把本阶段结果解释为 Phase 10 批准。
 
-短入口不接受 host、disk、SSH identity 或任何额外参数：
+Phase 9 当时的短入口不接受 host、disk、SSH identity 或任何额外参数：
 
 ```text
 nix run .#phase9-test
+```
+
+当前长期入口保持相同的参数拒绝与 production 隔离边界：
+
+```text
+nix run .#server-recovery-test
 ```
 
 入口在执行 VM 前会拒绝非 `x86_64`、不可访问 `/dev/kvm`、dirty checkout、低于 100 GiB 可用空间或任意额外参数。因而不能把它改造成 production target runner。
@@ -30,7 +36,7 @@ nix run .#phase9-test
 | disko | `ff8702b4de27f72b4c78573dfb89ec74e36abdf1` |
 | Nixpkgs | 仓库 `flake.lock` 中的 `nixos-26.05` revision |
 | production output | `nixosConfigurations.server` |
-| 测试入口 | `apps.x86_64-linux.phase9-test` |
+| 测试入口 | Phase 9 当时为 `apps.x86_64-linux.phase9-test`；当前为 `apps.x86_64-linux.server-recovery-test` |
 
 Phase 9 只给 `server` output 增加 `disko.tests` 定义；普通 production 配置没有启用测试覆盖层。修改前后
 `nixosConfigurations.server.config.system.build.toplevel.drvPath` 均为：
@@ -106,7 +112,7 @@ Nix build closure 仍按 nixbox 的正常 store/GC policy 管理；测试不会�
 
 ## 5. 声明边界检查
 
-`checks.x86_64-linux.phase9-policy` 从 production server 配置派生 test variant，并在纯求值时断言：
+当前 `checks.x86_64-linux.server-recovery-policy`（Phase 9 当时名为 `phase9-policy`）从 production server 配置派生 test variant，并在纯求值时断言：
 
 - dummy address、gateway、DNS 与 networkd network 唯一；
 - firewall 只开放 TCP 22；

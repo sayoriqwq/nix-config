@@ -7,6 +7,8 @@
 
 当前 server 运行 Ubuntu，但 Ubuntu 只是待替换的机器事实，不是长期架构角色。取消 standalone Home Manager 过渡配置，迁移顺序调整为：迁移前置盘点；最小 NixOS 与 disko 声明；隔离 VM 安装验证；经人工批准直接替换为只保证启动、网络、SSH、sudo 与救援能力的最小 NixOS；系统稳定后建立 sops-nix/age Secret 能力；最后按新需求从空白状态引入业务并建立相应运维能力，不恢复当前 Ubuntu 的业务与数据。
 
+实施状态：Phase 10 已于 2026-08-03 完成正式替换，Phase 11 已于 2026-08-04 完成 Secret 基础验收；上述“当前 Ubuntu”是本 ADR 作出时的历史前提，不是现状。Phase 12 已明确延后。
+
 nixbox 是与 server 同为 `x86_64-linux` 的预生产验证主机，负责构建和隔离验证可复用的 NixOS 能力，但不运行生产服务。配置一致性不能替代 server 的磁盘、启动、网络、SSH、Secret、生产服务和数据处置关卡。
 
 后续部署采用 closure 推送方向：nixbox 获取锁定输入、构建和验证 server closure，再将不可变 closure 推送给 server。macbook 保留到 server 的独立 SSH 管理与救援路径，使 nixbox 故障不会切断生产控制面；该路径不是另一套构建来源，也不绕过 nixbox 的主要验证职责。Server 不保存 GitHub 协作凭据，也不依赖 mutable checkout 自行拉取和构建；GitHub 不成为生产切换与回滚路径的运行时依赖。

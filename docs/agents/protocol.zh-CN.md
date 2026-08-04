@@ -8,7 +8,7 @@
 
 - 一台由 nix-darwin 与 Home Manager 管理的 macOS 主工作站；
 - 一台作为次级工作站与 Linux 试验站的 NixOS 主机；
-- 一台当前运行 Ubuntu、后续直接替换为 NixOS 的服务器；
+- 一台当前运行最小 NixOS、只按当前需求增加生产能力的服务器；
 - 一组由三台主机按真实需求组合的能力模块。
 
 本仓库管理配置声明，不负责保存可变应用数据或充当备份系统。
@@ -51,7 +51,7 @@ Agent 修改文件前必须依次阅读：
 - Home Manager 管理可移植用户层。
 - nix-darwin 管理 macOS 系统层。
 - NixOS Modules 管理 NixOS 系统层。
-- 不为当前 Ubuntu server 引入 standalone Home Manager 层；先盘点，再按已批准的服务器阶段验证并直接替换为最小 NixOS。
+- 不恢复已退役的 Ubuntu server 层；保持最小 NixOS server 按需求组合，每项生产能力通过独立批准的 Issue 引入。
 - `hosts/<host>/` 保存主机与硬件事实。
 - `modules/darwin/` 保存可复用的 macOS 系统模块。
 - `modules/nixos/` 保存可复用的 NixOS 系统模块。

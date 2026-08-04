@@ -9,9 +9,7 @@
     ./disko.nix
     ./networking.nix
     ../../modules/capabilities/portable-shell/nixos.nix
-    (import ../../modules/capabilities/secret-deployment/nixos.nix {
-      sopsFile = ../../secrets/server/phase11-demo.yaml;
-    })
+    ../../modules/capabilities/secret-deployment/nixos.nix
   ];
 
   boot.initrd.availableKernelModules = [

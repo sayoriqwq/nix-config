@@ -10,7 +10,7 @@ Phase 1 已确认的 output 与平台边界如下：
 | --- | --- | --- |
 | `macbook` | `aarch64-darwin` | 主工作站，组合完整工作站、Darwin 与兼容能力 |
 | `nixbox` | `x86_64-linux` | 次级工作站、Linux 试验站与 Server 预生产验证站 |
-| `server` | `x86_64-linux` | 当前运行 Ubuntu，后续直接替换为 Headless NixOS |
+| `server` | `x86_64-linux` | 已验收的最小 Headless NixOS，后续能力按需引入 |
 
 ```text
 flake.nix + flake.lock
@@ -36,7 +36,7 @@ flake.nix + flake.lock
     └── Home Manager: headless capability subset
 ```
 
-当前 Ubuntu server 不暴露 standalone Home Manager output。它先接受只读盘点，再通过最小 NixOS、隔离 VM 测试和人工批准的正式替换阶段进入上述终态。
+server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的正式替换进入上述基线；旧 Ubuntu 层不恢复。
 
 ## 2. 配置事实来源
 
@@ -109,9 +109,9 @@ flake.nix + flake.lock
 
 ### 3.6 机密层
 
-Phase 11 使用 SOPS + sops-nix + age：
+Phase 11 建立了 SOPS + sops-nix + age 基础：
 
-- Git 只保存加密文件；
+- Git 只保存按真实消费者批准的加密文件；当前没有 production secret；
 - 解密在 activation 时发生；
 - 服务通过文件路径读取机密；
 - 明文不得作为普通 Nix 字符串进入 Store；
@@ -119,7 +119,7 @@ Phase 11 使用 SOPS + sops-nix + age：
 - 每个 host 文件只授予管理员恢复 recipient 和该 host recipient；
 - 管理员 identity 和编辑工具只留在 macbook；恢复副本由维护者在仓库外自行管理，nixbox 与 server 不获得编辑能力。
 
-机密方案在专门阶段启用，不和第一次系统接入混在一起。
+机密部署 adapter 只声明身份与解密基础；具体 secret 的 source、path、owner、mode 与服务合同由后续独立 Issue 的消费者声明。
 
 ## 4. 工具选择与引入顺序
 
@@ -135,7 +135,7 @@ Phase 11 使用 SOPS + sops-nix + age：
 | `nh` | 友好的构建命令与 diff 展示 | 基础用户工具阶段 |
 | sops-nix + age | 机密部署 | 两台本地机器稳定后 |
 | disko | 服务器磁盘声明 | 服务器 NixOS 设计阶段 |
-| nixos-anywhere | 通过 SSH 安装服务器 | VM 测试与人工批准后 |
+| nixos-anywhere | 服务器恢复演练的内部安装测试依赖 | `server-recovery-test`，不暴露生产 target 参数 |
 
 ### 延后工具
 
@@ -201,7 +201,7 @@ v1 完成时应达到：
 - 三台机器的配置都来自同一个仓库；
 - 每台机器可以独立 build 自己的 output；
 - 三台主机通过需求驱动的能力模块复用配置，不从 macbook 继承整套 bundle；
-- 当前 Ubuntu server 已按人工关卡直接替换为可恢复的 NixOS output；
+- server 已按人工关卡从 Ubuntu 直接替换为可恢复的 NixOS output；
 - 机密不以明文进入 Git；
 - 服务器具备可验证的数据处置与失败恢复策略：stateful data 使用备份/恢复手册，或 source data 已有明确丢失 waiver；控制台与救援手册始终存在；
 - 新机器或重装流程有文档，但破坏性执行仍保留人工关卡。
