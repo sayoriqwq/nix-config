@@ -81,11 +81,23 @@ nixbox 于 2026-08-04 在维护者另行明确批准后，从提交 `e61672b` �
 
 该批准不覆盖 server、PR 合并、reboot 或 production secret。
 
+server 于 2026-08-04 在维护者另行明确批准后，从提交 `dd3ab76` 执行首次 activation：
+
+- 当前提交的不可变 Flake source 先在 nixbox 构建出 `/nix/store/ji49z8k49czg5sw28c92l6fv0nygfwc8-nixos-system-server-26.05.20260719.fd14620`，server 随后从同一 source 本机构建出完全相同的 closure；
+- 经过 SHA-256、owner、mode、Bash 语法、TTY 与参数拒绝验证的 root 稳定入口调用标准 `nixos-rebuild switch`，最终报告 `activation=pass`；`/run/current-system` 与 system profile 均精确指向批准 closure；
+- sops-nix 导入 `/etc/ssh/ssh_host_ed25519_key` 后报告的 public age fingerprint 与已记录 server recipient 完全一致；
+- `/run/secrets/phase11-demo`：普通文件，owner `sayori`、group `users`、mode `0400`，PASS；
+- system state 为 `running`、Home Manager result 为 `success`、failed unit 为 0；既有 root break-glass SSH 在 activation 后继续 PASS，未执行 reboot；
+- 非生产 demo 内容由维护者仅在本机查看并记录 PASS；该值不是凭据。验收记录不包含任何真实 secret；
+- 普通 `server` 名称未命中已验收入口、root 默认 Bash 与预检 Fish 语法不匹配时均在修改前失败关闭。nixbox 到 server 的 Nix Store 复制因 destination `require-sigs` 拒绝未签名本地构建而停止；一次性的 source trust 不能绕过 destination 策略，因此没有关闭或持久修改签名要求，改由 server 本地构建；
+- activation 后清理入口的首次 SSH 连接瞬时超时，复核确认 system 仍为 `running` 且 failed unit 为 0；重连后按已验证 SHA 删除稳定入口，临时目录已清理。
+
+该批准不覆盖 reboot、PR 合并、旧业务恢复或 production secret。
+
 ## 7. 剩余人工关卡
 
 以下动作尚未因代码或 build 自动获批：
 
-1. 批准 server 的首次 activation；
-2. activation 后只检查存在性、owner、group、mode 与非生产值是否匹配，不把内容复制到 Issue、PR、聊天或日志；
-3. 所有本阶段验收完成后另行批准 PR 合并；
-4. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。
+1. 审阅 macbook、nixbox 与 server 的完整验收记录后，另行批准 PR 合并；
+2. 合并后关闭 Issue #10，并记录 Phase 11 completion summary；
+3. 任何真实 production secret 在 Phase 12 或独立 Issue 再批准，并重新确认该 secret 的可恢复性与轮换代价。
