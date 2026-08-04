@@ -51,9 +51,10 @@
 ### AI 辅助运维能力（AI-assisted operations capability）
 
 为本地 coding agent 提供命令输出压缩、内容检查、文档解析、关系图生成、不依赖项目
-环境的基础 Python 解释器，以及声明本机 Nix/工具所有权与人工 activation 关卡的稳定
-全局 Agent 策略。具体 AI 客户端及其凭据是否存在，由各主机组合决定；项目语言版本、
-虚拟环境和依赖仍属于开发运行时能力。
+环境的基础 Python 解释器，以及由 Home Manager 管理的简洁全局 Shell 策略。该策略
+只固定 Nix 管理事实、Fish 登录入口、Python 入口和用户命令展示格式；RTK 规则继续由
+外部 `~/.codex/RTK.md` 提供。具体 AI 客户端及其凭据是否存在，由各主机组合决定；
+项目语言版本、虚拟环境和依赖仍属于开发运行时能力。
 
 ### Nix 运维能力（Nix operations capability）
 

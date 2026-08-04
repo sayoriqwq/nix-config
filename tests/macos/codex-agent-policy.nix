@@ -33,14 +33,17 @@ pkgs.runCommand "macbook-codex-agent-policy-check"
     policy=${policy.source}
 
     test -f "$policy"
-    grep -Fq '/Users/sayori/Desktop/nix-config' "$policy"
+    grep -Fq '@/Users/sayori/.codex/RTK.md' "$policy"
+    grep -Fq 'managed by Nix through nix-darwin and Home Manager' "$policy"
+    grep -Fq "/etc/profiles/per-user/sayori/bin/fish -lc '<command>'" "$policy"
     grep -Fq '/etc/profiles/per-user/sayori/bin/python' "$policy"
-    grep -Fq 'The baseline intentionally has no global `pip`' "$policy"
-    grep -Fq 'uv owns project Python selection' "$policy"
-    grep -Fq 'Persistent user-global CLI tools default to a declaration' "$policy"
-    grep -Fq 'Never run nix-darwin, Home Manager, or NixOS activation commands' "$policy"
-    grep -Fq "/etc/profiles/per-user/sayori/bin/fish -lc" "$policy"
-    grep -Fq 'rtk git status' "$policy"
+    grep -Fq 'Use Fish syntax by default for commands shown to the user' "$policy"
+    grep -Fq '<emoji> <brief description>' "$policy"
+
+    if grep -Eq '^# (Nix-managed workstation|Python|Tool ownership and synchronization)$' "$policy"; then
+      echo 'global Codex policy must not restore the superseded long-form policy' >&2
+      exit 1
+    fi
 
     if grep -Eq '/nix/store/[0-9a-z]{32}-' "$policy"; then
       echo 'global Codex policy must not hard-code a Nix Store derivation path' >&2
