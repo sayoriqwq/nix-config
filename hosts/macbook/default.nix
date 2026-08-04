@@ -16,6 +16,9 @@
     ../../modules/capabilities/clash-verge-rev/darwin.nix
     ../../modules/capabilities/termius/darwin.nix
     ../../modules/capabilities/localsend/darwin.nix
+    (import ../../modules/capabilities/secret-deployment/darwin.nix {
+      sopsFile = ../../secrets/macbook/phase11-demo.yaml;
+    })
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -81,6 +84,7 @@
         ../../modules/home/capabilities/ai-assisted-operations.nix
         ../../modules/home/capabilities/cloud-storage.nix
         ../../modules/home/capabilities/shortcut-reference.nix
+        ../../modules/home/capabilities/secret-administration.nix
       ];
 
       home = {

@@ -139,6 +139,8 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 
 先用非 production secret 验证 recipient、解密、owner/mode、轮换与恢复，再接入真实服务。明文不得进入 Git、Issue、PR、log 或 Nix Store。
 
+当前实现采用管理员恢复 recipient 加每机独立 SSH-host-derived recipient；只有 macbook 提供编辑工具，nixbox 与 server 只有本机解密能力。管理员 identity 的仓库外恢复副本由维护者自行管理且不由 Agent 验证。macbook、nixbox 与 server 的首次 activation、public fingerprint、运行时 owner/group/mode、非生产内容、system health 与临时入口清理均已由维护者逐机验收；Phase 11 不引入 production secret，当前只剩 PR 合并与 Issue completion summary 关卡。
+
 ### Phase 12 — 业务按需重建、加固与 v1 收尾（#14）
 
 不恢复当前 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。若没有业务需要，Phase 12 只完成系统加固、运维与 v1 收尾。
