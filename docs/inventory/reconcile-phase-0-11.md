@@ -48,7 +48,6 @@
 
 - macbook 没有 Phase 10/11 LaunchAgent；PostgreSQL 16 正在运行且不属于本 Issue。
 - server 当前运行 Phase 11 已验收 closure；没有迁移 helper 或 `/tmp` 入口，只保留预期的 `run-secrets.d.mount`。
-- nixbox 在本次复核时 SSH banner timeout；不据此猜测远端状态，也不执行远端删除。其 Phase 11 成功验收证据仍保留，连接恢复后可另做只读复核。
 
 ## 6. 验证
 
@@ -58,4 +57,4 @@
 - `nix build --no-link --print-out-paths path:.#darwinConfigurations.macbook.system`：PASS，输出为 `/nix/store/iwky2v6s9wp2543hc65nf2pxzspsrdlp-darwin-system-26.05.c3e90c8`；
 - `git diff --check`：PASS。
 
-曾从 server 针对不可变 GitHub commit 发起 x86_64-linux 的 server/nixbox closure 与长期恢复 tests 联合构建。求值显示 nixbox 桌面与 Zed 的冷缓存依赖会扩张为 3753 个 derivations，已主动中止这项超出本次清理所需的全量构建；没有 activation，也没有运行 GC。nixbox 当前不可达，因此不能把全系统求值或部分缓存下载误报为同架构构建通过；本 Issue 不为关闭验证而扩大 builder、网络或垃圾回收边界。
+曾从 server 针对不可变 GitHub commit 发起 x86_64-linux 的 server/nixbox closure 与长期恢复 tests 联合构建。求值显示 nixbox 桌面与 Zed 的冷缓存依赖会扩张为 3753 个 derivations，已主动中止这项超出本次清理所需的全量构建；没有 activation，也没有运行 GC，且不把全系统求值或部分缓存下载误报为同架构构建通过。本 Issue 不为关闭验证而扩大 builder、网络或垃圾回收边界。
