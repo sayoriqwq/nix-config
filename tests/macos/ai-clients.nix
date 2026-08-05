@@ -60,7 +60,7 @@ pkgs.runCommand "macbook-ai-clients-check"
       "$codexVersion" "$claudeVersion" "$antigravityVersion" "$ohMyPiVersion"
 
     printf '%s\n' "$codexVersion" | grep -Fq '0.146.0'
-    printf '%s\n' "$claudeVersion" | grep -Fq '2.1.187'
+    printf '%s\n' "$claudeVersion" | grep -Fq '2.1.220'
     printf '%s\n' "$antigravityVersion" | grep -Fq '1.1.9'
     printf '%s\n' "$ohMyPiVersion" | grep -Fq '17.2.4'
 

@@ -63,6 +63,11 @@ server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的
 
 不承担大量具体配置。避免把整套系统逻辑都塞进 `flake.nix`。
 
+平台 input 采用独立更新节奏：macbook 的 `nixpkgs-darwin` 跟随
+`nixpkgs-unstable`，nix-darwin 跟随 `master`；nixbox/server 的根 nixpkgs 继续跟随
+`nixos-26.05`，Home Manager 继续跟随 `release-26.05`。所有 input 仍由同一份
+`flake.lock` 固定精确 revision；详见 ADR-0009。
+
 ### 3.2 主机层
 
 `hosts/<host>/` 保存只属于该机器的事实：

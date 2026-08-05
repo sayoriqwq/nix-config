@@ -14,7 +14,7 @@
 | 命令 | 目标版本 | 来源与所有权 | 更新策略 |
 | --- | --- | --- | --- |
 | `codex` | OpenAI 官方发布 `0.146.0` | 官方 macOS 发布物；Nix package 负责固定下载、校验和 PATH | 关闭启动更新检查；可执行文件仅由 Nix 更新 |
-| `claude` | 锁定 nixpkgs `claude-code` `2.1.187` | nixpkgs recipe；Home Manager profile | recipe 禁止上游 installer/updater；版本随锁定 nixpkgs 变更 |
+| `claude` | 锁定 nixpkgs `claude-code` `2.1.220` | nixpkgs recipe；Home Manager profile | recipe 禁止上游 installer/updater；版本随锁定 nixpkgs 变更 |
 | `agy` | Google 官方 Antigravity CLI `1.1.9` | 官方 macOS 发布物；Nix package 负责固定下载、校验和 PATH | wrapper 关闭客户端自动更新；可执行文件仅由 Nix 更新 |
 | `omp` | Oh My Pi `17.2.4` | 官方 `darwin-arm64` 发布物；Nix package 固定版本、校验和 PATH | 只读配置 overlay 关闭启动更新检查；可执行文件仅由 Nix 更新 |
 
@@ -114,7 +114,7 @@ omp --version
 ```
 
 通过条件是四个 `command -s` 均指向 Home Manager profile（如
-`/etc/profiles/per-user/sayori/bin`），版本分别为 `0.146.0`、`2.1.187`、`1.1.9`、
+`/etc/profiles/per-user/sayori/bin`），版本分别为 `0.146.0`、`2.1.220`、`1.1.9`、
 `17.2.4`；`type -a` 可以显示历史副本，但 PATH 首个命中不得来自 Homebrew、
 `~/.local/bin` 或 mise npm globals。验收同时确认 Codex/OMP 没有启动更新检查、AGY
 没有自动更新，且上述状态目录和凭据未被写入 Store。

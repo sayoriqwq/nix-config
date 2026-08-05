@@ -3,10 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
@@ -119,6 +119,12 @@
         pkgs = darwinPkgs;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      macosRollingInputsPolicy = import ./tests/macos/rolling-inputs.nix {
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = darwinPkgs;
+        source = ./.;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -174,6 +180,7 @@
         aarch64-darwin = {
           sops-age-policy = phase11SopsPolicy;
           zed-nix-lsp-policy = zedNixLspPolicy;
+          macos-rolling-inputs = macosRollingInputsPolicy;
           macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
