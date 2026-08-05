@@ -59,7 +59,7 @@ MAS 声明和 defaults。它不会自动恢复外部数据。
 ### 2.4 AI CLI 激活顺序与验收
 
 Issue #67 的四个命令只属于 macbook 的 `ai-assisted-operations` capability：
-`codex` 0.146.0、`claude` 2.1.187、`agy` 1.1.9、`omp` 17.2.4。它们由
+`codex` 0.146.0、`claude` 2.1.220、`agy` 1.1.9、`omp` 17.2.4。它们由
 Nix/Home Manager 提供唯一的声明式 PATH 来源；Oh My Pi 使用固定官方 `darwin-arm64`
 发布物，`claude-code` 不再是 Homebrew cask。
 构建通过不代表已安装或已激活，且 activation 不清理现场未知副本。
@@ -131,7 +131,7 @@ Codex 进程继承的 PATH 代替。
 - Homebrew Bundle 恰好声明 1 个 tap、28 个 cask、9 个 MAS app、0 个 formula；不再声明
   `claude-code`，正常环境也不存在旧 `/opt/homebrew` Claude；
 - 干净 Fish 中 `codex`、`claude`、`agy`、`omp` 的首个 PATH 来源均为 Home Manager
-  profile，版本分别为 0.146.0、2.1.187、1.1.9、17.2.4；
+  profile，版本分别为 0.146.0、2.1.220、1.1.9、17.2.4；
 - 通信应用声明为中国区 `feishu`，不再声明全球版 `lark`；
 - 不存在旧 `Lark.app`、`LarkSuite.app`、`lark` receipt 或 #57/#61 的 Trash rollback
   目录；live 应用数据仍按外部数据验收；

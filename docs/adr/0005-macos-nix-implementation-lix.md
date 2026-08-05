@@ -33,7 +33,7 @@ nix.package = pkgs.lix;
 2. 原生 Darwin build 由维护者手动执行，且不激活；
 3. 第一次 `darwin-rebuild switch` 需要新的明确批准。
 
-截至 2026-07-20，维护者已在 `macbook` 使用 bootstrap 阶段的 Lix 2.95.2 完成 `nix flake check --all-systems` 和 `darwinConfigurations.macbook.system` 原生构建，两者退出状态均为 `0`。维护者随后在明确批准后手动完成第一次 nix-darwin 激活；当前 generation 使用锁定 nixpkgs 提供的 Lix 2.94.2。
+截至 2026-07-20，维护者已在 `macbook` 使用 bootstrap 阶段的 Lix 2.95.2 完成 `nix flake check --all-systems` 和 `darwinConfigurations.macbook.system` 原生构建，两者退出状态均为 `0`。维护者随后在明确批准后手动完成第一次 nix-darwin 激活；该 generation 使用当时锁定的 nixpkgs 26.05 所提供的 Lix 2.94.2。2026-08-05 起 Darwin package channel 改为独立 rolling inputs，但 `nix.package = pkgs.lix` 的实现所有权不变，见 ADR-0009。
 
 ## 选择依据
 
@@ -65,7 +65,7 @@ nix.package = pkgs.lix;
 - state directory：`/nix/var/nix`；
 - experimental features：`flakes nix-command`。
 
-第一次 nix-darwin 激活后，`nix.package = pkgs.lix` 接管运行时版本。锁定的 nixpkgs 26.05 当前提供 Lix 2.94.2，因此版本从安装器提供的 2.95.2 变为 2.94.2。这不是切换回上游 Nix，也不是隐式自升级；它是声明式配置和 `flake.lock` 决定的版本。激活后再次确认 `flakes nix-command`、`aarch64-darwin`、`/nix/store` 和 `/nix/var/nix` 均保持正常。
+第一次 nix-darwin 激活后，`nix.package = pkgs.lix` 接管运行时版本。当时锁定的 nixpkgs 26.05 提供 Lix 2.94.2，因此版本从安装器提供的 2.95.2 变为 2.94.2。这不是切换回上游 Nix，也不是隐式自升级；运行版本由声明式配置和 `flake.lock` 决定。Darwin 后续采用 rolling inputs 时可以随 lock diff 更新 Lix，但仍不改变实现所有权。激活后再次确认 `flakes nix-command`、`aarch64-darwin`、`/nix/store` 和 `/nix/var/nix` 均保持正常。
 
 ## 结果
 

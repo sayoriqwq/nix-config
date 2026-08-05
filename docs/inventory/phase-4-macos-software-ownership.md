@@ -49,7 +49,7 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
 - mise 固定 Node、Bun、pnpm、Erlang 29.0.3 与 Elixir 1.20.2-otp-29；
 - Nix 为 macbook AI 辅助运维提供一个裸 Python 3.14 agent 基线，不加入全局第三方包；
 - `ai-assisted-operations` capability 由 Nix/Home Manager 唯一提供 `codex` 0.146.0、
-  `claude` 2.1.187、`agy` 1.1.9 和 `omp` 17.2.4；Oh My Pi 使用固定官方
+  `claude` 2.1.220、`agy` 1.1.9 和 `omp` 17.2.4；Oh My Pi 使用固定官方
   `darwin-arm64` 发布物，四个可执行文件的更新由 Nix 控制，`~/.omp` 状态与凭据保持
   可写且不进入 Store。完整版本、重复副本和人工关卡见
   [`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)；
