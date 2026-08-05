@@ -287,14 +287,19 @@ Issue #99 把安装期临时 root SSH 恢复路径作为独立窄变更处理。
 - 既有 root key-only break-glass 仍 PASS，证明 production 尚未应用本 Issue 的声明；
 - 本地 evaluation 得到 `PermitRootLogin="no"` 与空 root authorized-key 列表，完整 Flake
   evaluation PASS；
-- macbook 是 `aarch64-darwin`，不能代替 `x86_64-linux` nixbox 构建禁止 substitute 的
-  policy、VM test 与 server closure；
-- nixbox 当前没有出现在与 macbook 相同的 LAN 管理面：目标没有邻居解析、ICMP 或 TCP 22
-  响应，整个本地 subnet 也没有发现另一个开放 SSH 的候选。该事实阻塞 x86 build、第二条
-  普通管理路径预检与 production 行动卡，不被记录为正常异地网络状态。
+- nixbox 的固定 LAN SSH alias 最初因 DHCP lease 变化而指向旧地址；以旧地址已有 host-key
+  pin 严格验证新地址后确认仍是同一 nixbox。没有接受新 host key，也没有把 LAN 地址写入仓库；
+- 在 nixbox 对 clean commit `338ff2f2a01df5cae3645fe1193cfadd030e6135`
+  完整运行 `server-recovery-test`：policy、production closure 非激活 build、BIOS/disko install、
+  两轮启动、双栈 DNS/SSH/firewall、两个普通用户 key、root 公钥拒绝与临时凭据清理全部 PASS；
+- server closure 为
+  `/nix/store/7prri05dpc2vdkqw05j84l16vva31rhk-nixos-system-server-26.05.20260719.fd14620`；
+- nixbox 使用既有专用 deploy identity 与 dedicated known-hosts 到 server 的 `sayori` key-only
+  登录、`sudo -n true` 与 system `running` PASS；macbook 与 nixbox 两条普通管理路径均已关闭；
+- bundle、checkout 与只读 preflight helper 只存在于精确临时目录，测试后必须删除；nixbox 既有
+  checkout 没有修改，production server 没有被 runner 联系。
 
-在 nixbox 恢复前不得请求或执行 production activation。恢复后必须先在同一 clean commit
-完成 policy、隔离 SSH 测试与 server closure build，并重新验证 macbook 与 nixbox 两条
-`sayori` + sudo 路径、VNC/Rescue 可用性，再提交包含精确 commit、closure、短入口、预期 SSH
-重载影响、只读验收与上一代 system rollback 的行动卡。该行动卡的批准只覆盖一次
-`nixos-rebuild switch`；不覆盖 reboot、network/firewall 变化、业务恢复、Secret 或数据操作。
+Production activation 前还必须由维护者确认当前 VNC/Rescue 可用，并审阅包含精确 commit、
+closure、短入口、预期 SSH 重载影响、只读验收与上一代 system rollback 的行动卡。该行动卡的
+批准只覆盖一次 `nixos-rebuild switch`；不覆盖 reboot、network/firewall 变化、业务恢复、
+Secret 或数据操作。
