@@ -5,6 +5,8 @@
 > 维护者已接受现有系统、服务与数据全部丢失，不要求备份、恢复测试、业务恢复或有限停机窗口。唯一强制的生产验收目标是：替换后仍能从 macbook 取得 SSH 控制权。该 waiver 不替代 boot、network、SSH、provider rescue 与精确 destructive target 的人工关卡。
 >
 > 维护者于 2026-07-30 批准本文推荐的 public routing facts、双管理 key、首次 key-only root break-glass、保留 SSH host identity 与 source-data waiver 方案。该批准是 Phase 8–10 的设计输入，不是 production 执行授权。
+>
+> **后续决策：** 本文关于“二次启动后关闭 root SSH”的建议已被维护者于 2026-08-05 的单管理员决策取代。当前长期模型是 macbook 的本地 Host alias `sayori` 直达 server `root`，仅允许维护者公钥；#99 / PR #109 已关闭且从未 activation。本文其余迁移期证据与风险控制原则继续作为历史记录。
 
 ## 1. 结论
 

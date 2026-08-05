@@ -1,6 +1,8 @@
 # Phase 8：Server 最小 NixOS 声明
 
 > 范围：Issue #11 的声明、非破坏性 evaluation/build 与后续关卡输入。本文不授权连接或修改 production Ubuntu server，也不授权运行 disko、nixos-anywhere、kexec、format、reboot、Rescue、Reinstall 或任何 Contabo 电源动作。
+>
+> **后续决策：** Phase 8 将 root SSH 标为首次替换 break-glass；维护者于 2026-08-05 在任何关闭配置 activation 前明确采用单管理员 root public-key-only 长期模型。当前声明保持本页已验证的 key-only root 路径，#99 / PR #109 不实施。
 
 ## 1. 证据到声明的映射
 

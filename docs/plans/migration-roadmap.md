@@ -145,16 +145,27 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 
 不恢复旧 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。维护者于 2026-08-04 明确延后 Phase 12；延后期间不把业务占位、生产 secret 或额外框架提前塞入基线。
 
+2026-08-05 的单管理员决策明确保留 macbook→server 的 root public-key-only 交互路径；Phase 12 不再把关闭该路径作为默认完成条件。只有管理员模型、自动化主体或审计需求发生变化时，才通过独立 Issue 复审。
+
+### 当前主流程判定（2026-08-05）
+
+- Phase 0–11 全部完成并合并，三台机器均已完成对应实机验收；
+- #110 只同步当前管理模型与任务视图，不修改配置或运行态，不构成新 Phase；
+- Phase 12 / #14 继续保持主动延后，不是 blocker，也不是自动下一步；
+- 因此主流程停在“Phase 11 后稳定基线”，直到维护者提出真实业务需求或主动启动 v1 最小收尾。
+
 ## 5. 控制链路与部署方向
 
 ```text
-macbook ──SSH 管理/救援──▶ server
+维护者 ──macbook: `ssh sayori`→root 管理/救援──▶ server
    │
    └──remote development──▶ nixbox ──build/test/push closure──▶ server
+                                      独立 deploy identity
 ```
 
 - nixbox 是 server closure 的主要构建与验证节点；
-- macbook→server 直连保证 nixbox 故障时仍有 production 控制面；
+- 维护者在 nixbox 上使用实际 Unix 用户 `sayori`，但 nixbox 的 deploy identity 是独立机器身份，不等于维护者交互身份；
+- macbook 的 `ssh sayori` 是本地 Host alias，远端用户为 `root`；该直连保证 nixbox 故障时仍有 production 控制面；
 - server 不保存 GitHub 协作凭据，不依赖 mutable checkout 自行构建；
 - 配置一致性提高复用与测试置信度，但不取消 host-specific 的 disk、boot、network、SSH、Secret、service 与 data 验证。
 

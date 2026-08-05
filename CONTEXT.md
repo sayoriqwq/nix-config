@@ -12,9 +12,9 @@
 
 | 逻辑角色 | 当前状态 | 目标状态 | 主要管理层 |
 | --- | --- | --- | --- |
-| `macbook` | Apple Silicon macOS 主工作站 | nix-darwin + Home Manager | 全量工作站能力、Darwin 系统能力、Mac 专属兼容能力 |
-| `nixbox` | `x86_64-linux` NixOS 次级工作站 | NixOS + Home Manager | 按需工作站能力、Linux 试验能力、Server 同平台预生产验证 |
-| `server` | `x86_64-linux` 最小 NixOS，Phase 10–11 已验收 | 按需增加 Headless 生产能力 | Server 主机事实、恢复能力与按需业务运行能力 |
+| `macbook` | Apple Silicon macOS 主工作站 | nix-darwin + Home Manager | 全量工作站能力、维护者交互控制面、Darwin 系统能力、Mac 专属兼容能力 |
+| `nixbox` | `x86_64-linux` NixOS 次级工作站 | NixOS + Home Manager | 维护者的第二工作站、Linux 试验能力、Server 同平台预生产 build/test/deploy 节点 |
+| `server` | `x86_64-linux` 最小 NixOS，Phase 10–11 已验收 | 按需增加 Headless 生产能力 | 单管理员 root key-only 交互管理、恢复能力与按需业务运行能力 |
 
 脱敏后的已确认事实与明确延后项记录在 `docs/inventory/phase-1-hosts.md`。真实主机名、地址和其他不影响 output 组合的敏感值不进入仓库。
 
@@ -92,9 +92,17 @@
 
 nixbox 拉取锁定输入、构建并验证 server closure，再把不可变 closure 推送给 server。Server 是运行者，不依赖带 GitHub 写权限的工作树或自行拉取构建。
 
+### 维护者交互管理身份（Maintainer interactive administration identity）
+
+维护者本人从 macbook 执行 `ssh sayori` 管理 server；其中 `sayori` 是 macbook 本地 SSH Host 别名，远端用户固定为 `root`，不是 server 上的普通用户登录名。当前 server 是维护者个人使用的单管理员主机，因此交互管理不增加普通用户登录后再 `sudo` 的额外一层。该决定只保留 public-key root SSH；password 与 keyboard-interactive 继续关闭，Contabo VNC 作为已实连验证的带外恢复路径。
+
+### Nixbox 机器部署身份（Nixbox machine deployment identity）
+
+nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另以独立 deploy identity 构建、验证并在获批后部署 server closure；该 identity 是机器到机器的部署边界，不代表维护者本人，也不获得 macbook maintenance private key。nixbox 不是 server 的必经 bastion，故障时不影响 macbook 直达 server 的管理链路。
+
 ### Server 直接管理链路（Direct server management path）
 
-macbook 到 server 的独立 SSH 管理与救援路径，用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
+macbook 到 server 的独立 root public-key SSH 管理与救援路径，用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
 
 ### Git 基础能力（Git foundation capability）
 
@@ -195,7 +203,7 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
 4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
+6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；维护者本人从 macbook 以 root public-key-only 直连，nixbox 使用独立机器部署身份；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责

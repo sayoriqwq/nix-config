@@ -1,6 +1,6 @@
 # Phase 7 Server 迁移前置盘点
 
-本文记录 Issue #9 的脱敏证据、维护者决策、未知事实与 Phase 8 阻塞项。Phase 8–10 的低风险设计结论另见 [`docs/plans/phase-7-server-migration-practice-research.md`](../plans/phase-7-server-migration-practice-research.md)。当前阶段只盘点 Ubuntu source state，不建立 `nixosConfigurations.server`、standalone Home Manager、`disko` 或生产服务声明，也不修改 server。
+本文记录 Issue #9 的脱敏证据、维护者决策、未知事实与 Phase 8 阻塞项。Phase 8–10 的低风险设计结论另见 [`docs/plans/phase-7-server-migration-practice-research.md`](../plans/phase-7-server-migration-practice-research.md)。当前阶段只盘点 Ubuntu source state，不建立 `nixosConfigurations.server`、standalone Home Manager、`disko` 或生产服务声明，也不修改 server。文中的“首次 root break-glass”是迁移期术语；维护者于 2026-08-05 已明确将 macbook→server root public-key-only 直连保留为当前单管理员长期模型。
 
 ## 1. 证据与批准边界
 
