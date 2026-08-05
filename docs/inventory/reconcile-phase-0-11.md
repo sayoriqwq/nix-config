@@ -6,7 +6,7 @@
 
 - Phase 0–11 均已完成；server 已运行最小 NixOS，Phase 11 的三机 SOPS/age 首次 activation 已验收。
 - Phase 12 / Issue #14 由维护者明确延后，不建立业务、生产 secret 或新框架占位。
-- 当前保留的独立后续为 #60、#67、#99，以及独立审阅的 Zed Nightly PR #95。
+- 当前保留的独立后续为 #60、#67，以及独立审阅的 Zed Nightly PR #95。#99 后续已在 2026-08-05 被维护者明确否决，见第 7 节。
 
 ## 2. 仓库收口
 
@@ -58,3 +58,12 @@
 - `git diff --check`：PASS。
 
 曾从 server 针对不可变 GitHub commit 发起 x86_64-linux 的 server/nixbox closure 与长期恢复 tests 联合构建。求值显示 nixbox 桌面与 Zed 的冷缓存依赖会扩张为 3753 个 derivations，已主动中止这项超出本次清理所需的全量构建；没有 activation，也没有运行 GC，且不把全系统求值或部分缓存下载误报为同架构构建通过。本 Issue 不为关闭验证而扩大 builder、网络或垃圾回收边界。
+
+## 7. 2026-08-05 后续状态同步
+
+- 维护者明确当前 server 为个人使用的单管理员主机：macbook 上的 `ssh sayori` 是本地 Host alias，远端用户为 `root`；root SSH 保持 public-key-only；
+- Contabo VNC 已由维护者完成当前 endpoint 的真实端到端连接验证；
+- #99 与未合并 Draft PR #109 已以未计划实施关闭；关闭 root SSH 的配置从未 activation；
+- #110 承接纯文档同步，不修改 Nix 配置或三台机器运行态；
+- nixbox 仍是维护者的次级 NixOS 工作站及 server 的 `x86_64-linux` build/test/deploy 节点；其独立 deploy identity 不等于维护者交互身份，也不是 macbook 直连 server 的必经跳板；
+- 当前开放主线跟踪为 #1；Phase 12 / #14 继续延后；独立候选为 #60（PostgreSQL 16 数据迁移）与 #67（broader AI/RTK 基线）；开放 PR #95 继续独立审阅；自动生成的 PR #108 误判仓库为 TypeScript 项目并引入第二套 Agent/ECC 配置，应由维护者单独裁决，推荐关闭而非并入当前基线。

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `macbook` | 主工作站 | 保留完整 GUI、CLI、迁移兼容与已确认试点能力；它是能力的全量组合，不再是其他主机的继承源。 |
 | `nixbox` | 次级工作站、Linux 试验站、Server 预生产验证站 | 只选择明确需要的 macbook 能力，并增加 NixOS/Linux 自身需求；不镜像 macbook。 |
-| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
+| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；维护者从 macbook 以 root public-key-only 直达，nixbox 以独立机器身份承担 build/test/deploy；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
 
 ## 已确认目标组合
 
@@ -54,4 +54,5 @@
 
 - macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
 - server 已运行最小 NixOS，只组合 headless 基线与明确需要的共享能力。
+- server 当前采用维护者明确批准的单管理员模型；macbook 的本地 Host alias `sayori` 直达远端 `root`，nixbox 不是交互身份或必经跳板。
 - Phase 12 已延后；新增能力继续按本矩阵和独立 Issue 审批，不从其他主机继承 bundle。

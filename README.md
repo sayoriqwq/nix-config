@@ -9,7 +9,7 @@
 
 ## 当前状态
 
-Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。
+Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。Server 的长期交互管理采用单管理员、root public-key-only 模型；关闭 root SSH 的 #99 / PR #109 已明确不实施。
 
 ## 目标模型
 
@@ -26,6 +26,17 @@ Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 U
 ```
 
 server 当前运行已经验收的最小 NixOS。旧 Ubuntu、业务与数据不恢复；新的服务、数据与 production secret 只在出现真实需求后，通过独立 Issue 建立各自的部署、备份、恢复和回滚合同。
+
+当前控制关系为：
+
+```text
+维护者 ──macbook 上的 `ssh sayori`──▶ server:root
+   │                                      ▲
+   └──实际 Unix 用户 `sayori`──▶ nixbox ──┘
+                              build/test/deploy identity
+```
+
+macbook 上的 `sayori` 是指向 server 的本地 SSH Host 别名，远端用户为 `root`，不是 server 上的普通用户登录名。nixbox 是维护者的次级 NixOS 工作站和 `x86_64-linux` 预生产节点；它以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，并只在获批部署中使用 `sudo -n`。这条机器链路不是维护者的交互身份，也不是 macbook 管理 server 的必经跳板。root SSH 继续关闭 password 与 keyboard-interactive，只接受维护者公钥；Contabo VNC 是已实连验证的带外恢复路径。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 

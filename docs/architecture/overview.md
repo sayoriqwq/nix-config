@@ -126,6 +126,25 @@ Phase 11 建立了 SOPS + sops-nix + age 基础：
 
 机密部署 adapter 只声明身份与解密基础；具体 secret 的 source、path、owner、mode 与服务合同由后续独立 Issue 的消费者声明。
 
+### 3.7 控制身份与机器关系
+
+维护者、macbook 与 nixbox 不能被折叠成同一个“管理员”身份：
+
+```text
+维护者 ──macbook 本地 Host alias `sayori`──▶ server:root
+   │                                           ▲
+   └──Unix 用户 `sayori`──▶ nixbox ────────────┘
+                           独立 deploy identity
+```
+
+- 维护者本人通过 macbook 直达 server 的 `root`，不经过 nixbox，也不先登录 server 普通用户再 `sudo`；
+- `ssh sayori` 中的 `sayori` 是 macbook 本地 Host alias，不能误写成 server 的 Unix username；
+- root SSH 只允许维护者公钥，password 与 keyboard-interactive 保持关闭；Contabo VNC 提供已实连验证的带外恢复；
+- 维护者在 nixbox 上使用实际 Unix 用户 `sayori`；nixbox 同时是 `x86_64-linux` build/test 节点，并以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，只在获批部署中使用 `sudo -n` 应用 closure；
+- nixbox 的机器身份不等于维护者本人，不获得 macbook maintenance private key，也不形成 macbook 管理 server 的必经 bastion。
+
+这一单管理员模型是维护者对当前个人 server 的明确取舍。若未来增加管理员、自动化主体或合规审计要求，应另建 Issue 重新评估 root 直连、sudo 边界和 deploy identity，不从当前单用户前提外推。
+
 ## 4. 工具选择与引入顺序
 
 ### 基础工具
