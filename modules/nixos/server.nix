@@ -9,6 +9,6 @@
 
   services.openssh = {
     openFirewall = false;
-    settings.PermitRootLogin = "prohibit-password";
+    settings.PermitRootLogin = "no";
   };
 }

@@ -89,8 +89,8 @@ assert
   evidence.ssh == {
     KbdInteractiveAuthentication = false;
     PasswordAuthentication = false;
-    PermitRootLogin = "prohibit-password";
-    rootKeys = [ values.maintenancePublicKey ];
+    PermitRootLogin = "no";
+    rootKeys = [ ];
     userKeys = [
       values.maintenancePublicKey
       values.deployPublicKey

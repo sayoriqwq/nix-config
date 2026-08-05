@@ -20,16 +20,10 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  users.users = {
-    ${username}.openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEH/1NOp9oK5riYtfFSK+tkGGCnwTE2z8LGo/+azwjFR sayori-ecs"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7pbS2HOp0EvAUj35QLEYNpDPmBtS79qJmyU1KLwqpz nixbox-server-deploy-2026-07-30"
-    ];
-
-    root.openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEH/1NOp9oK5riYtfFSK+tkGGCnwTE2z8LGo/+azwjFR sayori-ecs"
-    ];
-  };
+  users.users.${username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEH/1NOp9oK5riYtfFSK+tkGGCnwTE2z8LGo/+azwjFR sayori-ecs"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7pbS2HOp0EvAUj35QLEYNpDPmBtS79qJmyU1KLwqpz nixbox-server-deploy-2026-07-30"
+  ];
 
   home-manager = {
     extraSpecialArgs = { inherit inputs; };

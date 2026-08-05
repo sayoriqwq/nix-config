@@ -272,3 +272,29 @@ phase10-install 复用完全相同的本地冻结检查，但还要求真实交�
 - 旧 Ubuntu、容器、数据库、业务数据与 production secret 均未恢复，符合已记录的全量丢失 waiver；
 - key-only root break-glass 仍按设计保留。关闭 root SSH 必须另建窄 Issue、重新 build/验证，并在新的 production activation 行动卡后取得明确批准；不在 Phase 10 收尾中顺手修改；
 - Phase 11 已在 Issue #10 / PR #102 完成；它没有授权 production secret 迁移或真实服务恢复。Phase 12 已由维护者明确延后，后续业务只通过新的独立需求进入。
+
+## 12. Issue #99：关闭 root SSH break-glass
+
+Issue #99 把安装期临时 root SSH 恢复路径作为独立窄变更处理。声明目标是
+`PermitRootLogin=no`，并从 server composition 删除 root authorized key；macbook 与 nixbox
+的两个 `sayori` public-key slot、passwordless sudo、SSH host identity、TCP 22、network、DNS
+与 firewall 声明都不改变。隔离测试即使临时给 root 写入匹配 public key，也必须确认 SSH
+仍因 effective policy 拒绝 root，并在第二次启动后保持拒绝。
+
+2026-08-05 的 activation 前证据：
+
+- macbook 到 server 的 `sayori` key-only 登录、`sudo -n true` 与 system `running` PASS；
+- 既有 root key-only break-glass 仍 PASS，证明 production 尚未应用本 Issue 的声明；
+- 本地 evaluation 得到 `PermitRootLogin="no"` 与空 root authorized-key 列表，完整 Flake
+  evaluation PASS；
+- macbook 是 `aarch64-darwin`，不能代替 `x86_64-linux` nixbox 构建禁止 substitute 的
+  policy、VM test 与 server closure；
+- nixbox 当前没有出现在与 macbook 相同的 LAN 管理面：目标没有邻居解析、ICMP 或 TCP 22
+  响应，整个本地 subnet 也没有发现另一个开放 SSH 的候选。该事实阻塞 x86 build、第二条
+  普通管理路径预检与 production 行动卡，不被记录为正常异地网络状态。
+
+在 nixbox 恢复前不得请求或执行 production activation。恢复后必须先在同一 clean commit
+完成 policy、隔离 SSH 测试与 server closure build，并重新验证 macbook 与 nixbox 两条
+`sayori` + sudo 路径、VNC/Rescue 可用性，再提交包含精确 commit、closure、短入口、预期 SSH
+重载影响、只读验收与上一代 system rollback 的行动卡。该行动卡的批准只覆盖一次
+`nixos-rebuild switch`；不覆盖 reboot、network/firewall 变化、业务恢复、Secret 或数据操作。
