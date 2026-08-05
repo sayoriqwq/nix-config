@@ -164,7 +164,7 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 ```
 
 - nixbox 是 server closure 的主要构建与验证节点；
-- 维护者在 nixbox 上使用实际 Unix 用户 `sayori`，但 nixbox 的 deploy identity 是独立机器身份，不等于维护者交互身份；
+- 维护者在 nixbox 上使用实际 Unix 用户 `sayori`；nixbox 的 deploy identity 登录 server 的实际 Unix 用户 `sayori`，只在获批部署中使用 `sudo -n`，且该机器身份不等于维护者交互身份；
 - macbook 的 `ssh sayori` 是本地 Host alias，远端用户为 `root`；该直连保证 nixbox 故障时仍有 production 控制面；
 - server 不保存 GitHub 协作凭据，不依赖 mutable checkout 自行构建；
 - 配置一致性提高复用与测试置信度，但不取消 host-specific 的 disk、boot、network、SSH、Secret、service 与 data 验证。

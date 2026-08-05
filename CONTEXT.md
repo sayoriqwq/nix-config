@@ -98,7 +98,7 @@ nixbox 拉取锁定输入、构建并验证 server closure，再把不可变 clo
 
 ### Nixbox 机器部署身份（Nixbox machine deployment identity）
 
-nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另以独立 deploy identity 构建、验证并在获批后部署 server closure；该 identity 是机器到机器的部署边界，不代表维护者本人，也不获得 macbook maintenance private key。nixbox 不是 server 的必经 bastion，故障时不影响 macbook 直达 server 的管理链路。
+nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，构建、验证并仅在获批部署中使用 `sudo -n` 应用 server closure；该 identity 是机器到机器的部署边界，不代表维护者本人，也不获得 macbook maintenance private key。nixbox 不是 server 的必经 bastion，故障时不影响 macbook 直达 server 的管理链路。
 
 ### Server 直接管理链路（Direct server management path）
 

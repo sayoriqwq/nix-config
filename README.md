@@ -36,7 +36,7 @@ server 当前运行已经验收的最小 NixOS。旧 Ubuntu、业务与数据不
                               build/test/deploy identity
 ```
 
-macbook 上的 `sayori` 是指向 server 的本地 SSH Host 别名，远端用户为 `root`，不是 server 上的普通用户登录名。nixbox 是维护者的次级 NixOS 工作站和 `x86_64-linux` 预生产节点；它以独立 deploy identity 构建、验证并在获批后部署 server closure，不是维护者的交互身份，也不是 macbook 管理 server 的必经跳板。root SSH 继续关闭 password 与 keyboard-interactive，只接受维护者公钥；Contabo VNC 是已实连验证的带外恢复路径。
+macbook 上的 `sayori` 是指向 server 的本地 SSH Host 别名，远端用户为 `root`，不是 server 上的普通用户登录名。nixbox 是维护者的次级 NixOS 工作站和 `x86_64-linux` 预生产节点；它以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，并只在获批部署中使用 `sudo -n`。这条机器链路不是维护者的交互身份，也不是 macbook 管理 server 的必经跳板。root SSH 继续关闭 password 与 keyboard-interactive，只接受维护者公钥；Contabo VNC 是已实连验证的带外恢复路径。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 
