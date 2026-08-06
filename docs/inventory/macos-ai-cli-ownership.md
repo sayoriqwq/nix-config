@@ -30,6 +30,17 @@ Homebrew cask 声明移除 `claude-code`；该声明变化不等于对真实机�
 ChatGPT.app 仍由既有 `chatgpt` cask 声明并保留 GUI。其 embedded Codex 是应用私有
 helper，不是上述 `codex` PATH 命令的安装来源，也不纳入 Nix 迁移或清理目标。
 
+### 文档与关系图工具边界
+
+#67 的静态调用者审计没有发现 Graphviz `dot` 的实际需求，因此仓库不再把 Graphviz
+放入全局 Home Manager profile。未来项目若需要 DOT 渲染，应由项目 dev shell 声明；
+若出现稳定的跨项目需求，再通过独立能力重新引入。
+
+Codex 自带 runtime 已包含其 PDF 解析与渲染所需的 Poppler 工具。该 runtime 属于
+Codex 客户端，由客户端版本更新，不是 nix-config 的稳定 PATH 或版本合同；仓库因此
+也不再全局安装 `poppler-utils`。其他 Shell、项目或 AI 客户端不得依赖 Codex runtime
+的内部路径，需要 PDF CLI 时应在自己的 dev shell 或能力中声明依赖。
+
 ## 2. 迁移时的重复副本与清理结果
 
 以下副本曾作为 activation 回滚入口保留。维护者在新入口完成 PATH/版本验收后，于
