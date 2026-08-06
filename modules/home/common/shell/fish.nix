@@ -1,15 +1,8 @@
-{ lib, pkgs, ... }:
+{ ... }:
 
 {
   programs.fish = {
     enable = true;
-
-    # Home Manager 26.05 calls a helper removed by Fish 4.8 when generating
-    # man-page completions. Keep package-provided completions on Darwin while
-    # avoiding that incompatible generation step.
-    generateCompletions = lib.mkIf (
-      pkgs.stdenv.hostPlatform.isDarwin && lib.versionAtLeast pkgs.fish.version "4.8"
-    ) (lib.mkForce false);
 
     functions.fish_greeting = "";
 

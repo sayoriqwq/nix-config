@@ -4,7 +4,9 @@
 - **日期：** 2026-08-05
 - **决策范围：** `macbook` 的 nixpkgs、nix-darwin 与 Home Manager 兼容边界
 - **关联 Issue：** [#106](https://github.com/sayoriqwq/nix-config/issues/106)
-- **批准记录：** 维护者在真实 activation 后明确决定保留当前改动并正式收口
+- **后续修订：** [#115](https://github.com/sayoriqwq/nix-config/issues/115)
+- **批准记录：** 维护者在真实 activation 后明确决定保留 rolling inputs；2026-08-06
+  明确要求先升级 Home Manager 并验证，而不是关闭 release check
 
 ## 背景
 
@@ -26,19 +28,37 @@ Obsidian Darwin DMG 把 `Obsidian.app` 放在版本目录内；Fish 4.8 又与 H
 26.05 的 man-page completion 生成 helper 不兼容。维护者明确选择保留 rolling inputs
 及这两个窄修复，而不是回退到 Darwin release channel。
 
+2026-08-06 的后续 activation 再次证明该组合可工作，但明确报告 Home Manager
+26.05/26.11 release mismatch。初始修复方案准备保留旧 Home Manager 并关闭检查；维护者
+否决该顺序，要求先升级和验证。#115 因此为 macbook 新增独立的 Home Manager `master`
+input，使 macOS 的 package、system module 与 user module 共同 rolling；Linux 主机继续
+使用完整的 26.05 release 组合。同次诊断还确认 nix-darwin 的默认 channel 兼容层把不存
+在的 root channels 路径加入 `NIX_PATH`；仓库没有 mutable channel 需求。
+
 ## 决策
 
 ### 1. Darwin 与 Linux 使用不同更新节奏
 
 - `macbook` 使用 `nixpkgs-unstable` 和 nix-darwin `master`；
 - `nixbox` 与 `server` 继续使用 `nixos-26.05`；
-- Home Manager 继续使用 `release-26.05`；
+- `macbook` 使用独立的 `home-manager-darwin` `master` input，并让其 nixpkgs input
+  follows `nixpkgs-darwin`；
+- `nixbox` 与 `server` 继续使用 `home-manager` `release-26.05`，并让其 nixpkgs input
+  follows 根 `nixpkgs`；
 - `flake.lock` 固定每个 input 的精确 revision 与 hash，rolling 表示更新来源，
   不表示构建时绕过锁文件获取最新提交；
 - Zed 仍由自己的上游 Flake 与独立更新 PR 管理，不随 Darwin input 更新。
 
 Darwin input 更新必须作为可审阅的 Git diff 进入独立维护范围，并至少通过 formatter、
 Flake check、macbook system build 和与已知兼容 seam 对应的 policy check。
+
+三台主机都保留 `home.enableNixpkgsReleaseCheck` 默认值。macbook 的 Home Manager
+release 必须与 `system.nixpkgsRelease` 相同；policy check 固定该关系，不能用关闭检查
+代替 input 对齐。
+
+Darwin 同时设置 `nix.channel.enable = false`，不提供 `nix-channel` 或 mutable channel
+state；system-wide Flake registry 继续固定 nixpkgs，`NIX_PATH` 只保留
+`nixpkgs=flake:nixpkgs`，用于兼容仍使用 `<nixpkgs>` 的表达式。
 
 ### 2. 保持 stateVersion 与实现所有权不变
 
@@ -54,9 +74,10 @@ Obsidian capability 仅在 Darwin 对 `pkgs.obsidian` 做 override：清除错�
 `sourceRoot` 假设，并在解包结果中定位第一个 `Obsidian.app`。Linux 继续直接使用
 原始 `pkgs.obsidian`。
 
-Fish primitive 仅在 Darwin 且 package 版本不低于 4.8 时强制关闭 Home Manager 的
-man-page completion 生成。Fish 自带的 completions 继续进入 profile；Linux 和较旧
-Fish 版本保留 Home Manager 默认行为。
+Home Manager 26.05 曾直接读取 Fish package 中已经移除的
+`create_manpage_completions.py`，因此 Darwin 暂时关闭过 man-page completion 生成。
+锁定的 Home Manager `master` 已改为从 Fish 二进制的内置资源提取生成器；#115 删除该
+本地 workaround，macbook 与 Linux 都恢复 Home Manager 默认 completion generation。
 
 以上兼容层不是通用 patch 集合。上游 package 或 Home Manager 修复后，必须通过 build
 证据删除失效 override，不能无限累积本地分叉。
@@ -67,15 +88,19 @@ Fish 版本保留 Home Manager 默认行为。
 
 - macbook 可以获取当前 Darwin packages 与 nix-darwin module 支持；
 - Linux/NixOS release 基线不被桌面更新节奏带动；
-- 两个真实兼容问题具有窄平台条件、回归检查和明确所有权；
-- Lix、Home Manager 与 stateVersion 的既有边界保持不变。
+- macbook 的 Home Manager 与 Darwin Nixpkgs 回到同一 release line，通用兼容检查保持
+  开启；
+- 已修复的 Fish seam 及时退场，剩余兼容问题仍有窄平台条件和回归检查；
+- Lix、Linux Home Manager release 与 stateVersion 的既有边界保持不变。
 
 ### 代价与风险
 
-- Darwin package 与 module 变化频率提高，每次 input 更新的 build 成本和回归风险更高；
-- Home Manager release 与更新 package set 的组合可能出现新的版本 seam；
-- Home Manager 会明确报告 26.05/26.11 release mismatch warning；当前保留该警告，
-  不用 `home.enableNixpkgsReleaseCheck = false` 隐藏风险；
+- Darwin package、nix-darwin 与 Home Manager module 都采用 rolling refs，每次 input
+  更新的审阅和 build 成本更高；
+- Home Manager `master` 可能引入尚未进入 release branch 的 option 或 activation 变化，
+  必须与 `nixpkgs-darwin` 一起验证；
+- Darwin 不再提供 `nix-channel`；若未来出现经过批准的 mutable channel 需求，必须先以
+  独立 Issue 修订当前 Flake-only 边界；
 - Obsidian DMG 布局或 Fish/Home Manager behavior 修复后，本地兼容层可能过期；
 - macbook 与 NixOS 主机不再共享同一个 nixpkgs cadence，排障时必须注明平台 input。
 
@@ -89,10 +114,20 @@ Fish 版本保留 Home Manager 默认行为。
 
 更新频率更低，但不保留维护者已经 activation 并明确接受的 Darwin rolling 状态。
 
-### Home Manager 同步切换到 master
+### 三台主机的 Home Manager 全部切换到 master
 
-会同时扩大 package、system module 与 user module 三个变化面；当前两个兼容 seam 已能在
-保持 Home Manager release 的情况下窄修，不需要进一步扩大范围。
+会把 macOS 的桌面更新节奏扩散到 nixbox 与 production server，并在 Linux 26.05
+Nixpkgs 上重新制造反向 release mismatch；只为 macbook 拆分 input。
+
+### 关闭 Home Manager release check
+
+可以隐藏 warning，却不会修复版本线差异。维护者要求先升级验证，因此三台主机均保留
+默认检查，并由 policy check 保证 macbook 的两个 rolling inputs 对齐。
+
+### 创建空 root channels 目录
+
+可以让路径存在，却会保留没有需求的 mutable channel interface，并把宿主状态伪装成声明
+完整性；本仓库直接关闭 channel compatibility layer。
 
 ### 把兼容命令放入 activation script
 
@@ -103,17 +138,17 @@ Fish 版本保留 Home Manager 默认行为。
 运行态优先切回 activation 前一代 nix-darwin generation。代码层回滚应在独立 Issue 中：
 
 1. 把 `nixpkgs-darwin` 与 nix-darwin 恢复到审阅过的 release refs；
-2. 更新对应 lock nodes；
-3. 删除只为 rolling inputs 存在且已经不再需要的 Obsidian/Fish 兼容层；
-4. 重新 build macbook output，并由维护者另行批准 activation。
+2. 把 `home-manager-darwin` 恢复到与目标 Nixpkgs 对应的 release ref；
+3. 更新对应 lock nodes；
+4. 删除只为 rolling inputs 存在且已经不再需要的兼容层；
+5. 重新 build macbook output，并由维护者另行批准 activation。
 
 不得通过提高或降低任何 stateVersion 进行回滚。
 
 ## 复审条件
 
-- Home Manager 26.05 与 rolling Darwin packages 持续出现新的兼容问题；
-- release mismatch warning 不再只是可控提示，而开始对应重复 build 或 runtime 回归；
+- Home Manager `master` 与 rolling Darwin packages 出现重复 build 或 runtime 回归；
+- macbook 的 Home Manager 与 Nixpkgs release line 再次分离；
 - nix-darwin master 或 nixpkgs-unstable 引入不可接受的 activation 回归；
 - Obsidian package 修复 DMG source root；
-- Home Manager 修复 Fish 4.8 completion 生成；
 - 维护者希望重新统一 Darwin/Linux 的更新节奏。
