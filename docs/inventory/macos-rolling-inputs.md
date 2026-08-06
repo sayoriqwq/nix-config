@@ -76,5 +76,32 @@ activation；不得用 stateVersion 变化代替回滚。
   `/nix/store/fzfw3dd8hggrwz8w6khzay5dgq4474zg-darwin-system-26.11.15abb8c`。
 
 Home Manager 在 build 中明确报告其 26.05 release 与 Darwin Nixpkgs 26.11 不匹配。
-当前不关闭 `home.enableNixpkgsReleaseCheck`：warning 是已接受组合的持续复审信号，
-不是应被隐藏的噪声。上述 build 没有执行第二次 activation。
+当时保留该 warning 作为已接受组合的持续复审信号；上述 build 没有执行第二次 activation。
+
+## 7. #115 warning 收口
+
+2026-08-06 的后续 activation 再次出现相同 release mismatch warning，并同时报告不存在的
+`/nix/var/nix/profiles/per-user/root/channels`。只读诊断确认：
+
+- release mismatch 是 ADR-0009 已接受组合的静态事实，不是新故障；
+- root channels 路径来自 nix-darwin 默认 `nix.channel.enable = true`，仓库没有使用或恢复
+  mutable channels 的需求；
+- 系统 Flake registry 已固定 nixpkgs，关闭 channel 后仍保留
+  `nixpkgs=flake:nixpkgs` compatibility mapping。
+
+#115 因此仅对 macbook 关闭 Home Manager release check，并在 Darwin 基础层关闭 channel
+compatibility。对应 policy check 固定这两个选择，并确认 nixbox 的 release check 不受影响。
+这不更新 input、不改变 stateVersion，也不创建空 channel state 目录；真实 activation 仍需
+维护者在 PR build 通过后另行批准。
+
+分支验证结果：
+
+- `nix fmt -- --check .`：PASS；
+- `nix build --no-link path:.#checks.aarch64-darwin.macos-rolling-inputs`：PASS；
+- 在仅保留 `NIX_PATH=nixpkgs=flake:nixpkgs` 的环境中执行
+  `darwin-rebuild build --flake path:/Users/sayori/Desktop/nix-config#macbook`：PASS，输出为
+  `/nix/store/rwlf4jl8ih5ya35272pmh3vwgydg4fay-darwin-system-26.11.15abb8c`，构建输出不再
+  包含两条目标 warning；
+- `nix flake check path:.`：PASS；
+- `nix flake check --no-build --all-systems path:.`：PASS；
+- `nix build --no-link path:.#darwinConfigurations.macbook.system`：PASS。

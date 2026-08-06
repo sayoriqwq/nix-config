@@ -23,8 +23,19 @@ assert lib.assertMsg (
   macbookHome.home.stateVersion == "26.05"
 ) "Darwin rolling inputs must not change the established Home Manager stateVersion";
 assert lib.assertMsg (
+  !macbookHome.home.enableNixpkgsReleaseCheck
+) "macbook must explicitly accept the reviewed Home Manager/Darwin Nixpkgs release seam";
+assert lib.assertMsg nixboxHome.home.enableNixpkgsReleaseCheck
+  "Darwin's reviewed release seam must not disable the Home Manager check on nixbox";
+assert lib.assertMsg (
   macbookConfiguration.config.system.stateVersion == 7
 ) "Darwin rolling inputs must not change the established nix-darwin stateVersion";
+assert lib.assertMsg (
+  !macbookConfiguration.config.nix.channel.enable
+) "Flake-only Darwin configuration must not expose mutable Nix channels";
+assert lib.assertMsg (
+  macbookConfiguration.config.nix.nixPath == [ "nixpkgs=flake:nixpkgs" ]
+) "Darwin NIX_PATH must retain only the pinned Flake registry mapping";
 assert lib.assertMsg (macbookObsidian != null) "macbook must continue to provide Obsidian";
 assert lib.assertMsg (
   (macbookObsidian.sourceRoot or null) == null

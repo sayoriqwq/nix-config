@@ -4,6 +4,7 @@
 - **日期：** 2026-08-05
 - **决策范围：** `macbook` 的 nixpkgs、nix-darwin 与 Home Manager 兼容边界
 - **关联 Issue：** [#106](https://github.com/sayoriqwq/nix-config/issues/106)
+- **后续修订：** [#115](https://github.com/sayoriqwq/nix-config/issues/115)
 - **批准记录：** 维护者在真实 activation 后明确决定保留当前改动并正式收口
 
 ## 背景
@@ -26,6 +27,12 @@ Obsidian Darwin DMG 把 `Obsidian.app` 放在版本目录内；Fish 4.8 又与 H
 26.05 的 man-page completion 生成 helper 不兼容。维护者明确选择保留 rolling inputs
 及这两个窄修复，而不是回退到 Darwin release channel。
 
+2026-08-06 的后续 activation 再次证明该组合可工作，但 Home Manager 的通用同版本线
+检查仍会重复报告已经接受的 26.05/26.11 差异。维护者决定继续保留既定组合，并把兼容
+风险交给本 ADR、专用 policy check 与完整 macbook build，而不是让每次求值重复发出同一
+warning。同次诊断还确认 nix-darwin 的默认 channel 兼容层把不存在的 root channels 路径
+加入 `NIX_PATH`；仓库没有 mutable channel 需求。
+
 ## 决策
 
 ### 1. Darwin 与 Linux 使用不同更新节奏
@@ -39,6 +46,14 @@ Obsidian Darwin DMG 把 `Obsidian.app` 放在版本目录内；Fish 4.8 又与 H
 
 Darwin input 更新必须作为可审阅的 Git diff 进入独立维护范围，并至少通过 formatter、
 Flake check、macbook system build 和与已知兼容 seam 对应的 policy check。
+
+macbook 显式设置 `home.enableNixpkgsReleaseCheck = false`。这不宣称 Home Manager 与
+Darwin Nixpkgs 属于同一 release，只表示此差异已经由本 ADR 接受，并由上述验证合同持续
+约束。nixbox 与 server 的 Home Manager release check 保持默认开启。
+
+Darwin 同时设置 `nix.channel.enable = false`，不提供 `nix-channel` 或 mutable channel
+state；system-wide Flake registry 继续固定 nixpkgs，`NIX_PATH` 只保留
+`nixpkgs=flake:nixpkgs`，用于兼容仍使用 `<nixpkgs>` 的表达式。
 
 ### 2. 保持 stateVersion 与实现所有权不变
 
@@ -74,8 +89,10 @@ Fish 版本保留 Home Manager 默认行为。
 
 - Darwin package 与 module 变化频率提高，每次 input 更新的 build 成本和回归风险更高；
 - Home Manager release 与更新 package set 的组合可能出现新的版本 seam；
-- Home Manager 会明确报告 26.05/26.11 release mismatch warning；当前保留该警告，
-  不用 `home.enableNixpkgsReleaseCheck = false` 隐藏风险；
+- Home Manager 的通用 release mismatch warning 已关闭，新的兼容回归必须依靠 policy
+  check、完整 build 与真实 activation 暴露，不能把 warning 消失误解为上游兼容承诺；
+- Darwin 不再提供 `nix-channel`；若未来出现经过批准的 mutable channel 需求，必须先以
+  独立 Issue 修订当前 Flake-only 边界；
 - Obsidian DMG 布局或 Fish/Home Manager behavior 修复后，本地兼容层可能过期；
 - macbook 与 NixOS 主机不再共享同一个 nixpkgs cadence，排障时必须注明平台 input。
 
@@ -93,6 +110,16 @@ Fish 版本保留 Home Manager 默认行为。
 
 会同时扩大 package、system module 与 user module 三个变化面；当前两个兼容 seam 已能在
 保持 Home Manager release 的情况下窄修，不需要进一步扩大范围。
+
+### 持续保留 release mismatch warning
+
+最初把 warning 作为组合风险的持续复审信号，但真实 build 与 activation 已证明它只重复
+报告既知事实，无法区分新回归。#115 因此改由声明断言和完整构建承担复审责任。
+
+### 创建空 root channels 目录
+
+可以让路径存在，却会保留没有需求的 mutable channel interface，并把宿主状态伪装成声明
+完整性；本仓库直接关闭 channel compatibility layer。
 
 ### 把兼容命令放入 activation script
 
