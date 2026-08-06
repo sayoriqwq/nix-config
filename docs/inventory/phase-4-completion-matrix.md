@@ -40,6 +40,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | Chezmoi/dotfiles handoff | #58 | 无仓库实现 PR | Chezmoi 已卸载；旧仓库冻结，Nix 配置链接验证 |
 | 旧 Nix GUI rollback bundle | #61 | 无仓库实现 PR | 七个旧 `/Applications` bundle 移入可恢复 Trash；Nix 应用与共享数据验证通过 |
 | 迁移残留最终收口 | #93 | 本维护 PR | 旧 CLI/runtime/app/formula、六个 root-owned 悬空链接与两个 Trash rollback 目录定向清理；声明源与 live 数据边界复核 |
+| 全局 PostgreSQL 退役 | #60 | 本维护 PR | Homebrew 16 service、formula 与已批准的数据目录已删除；全局 PATH 和 state-path 声明已撤回 |
 
 所有真实 `darwin-rebuild switch` 均由维护者执行。部分工作流经历了安全中止、修订 commit
 和重新 activation；最终通过状态以对应 Issue/PR 的最新验收评论为准，不能只看首次命令。
@@ -55,15 +56,15 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | 旧 dotfiles 活动路径完成 handoff | 完成 | #58；Chezmoi 卸载，旧 source/仓库冻结 |
 | 无重复配置所有权 | 完成 | 旧 bundle 不再拥有配置；Nix 是唯一声明所有者 |
 | 无重复应用实体 | 完成 | 旧 cask、Preview 与七个 `/Applications` rollback bundle 均已清理 |
-| 全部子项完成或明确延期 | 完成 | PostgreSQL 16 由 #60 明确延期；OrbStack 数据保持外部；#61 已完成 |
+| 全部子项完成或明确延期 | 完成 | PostgreSQL 16 已由 #60 退役；OrbStack 数据保持外部；#61 已完成 |
 | 总体 runbook、差异和回滚完成 | 完成 | #59 的 inventory、runbook 与本矩阵 |
 | 文档 PR 经维护者合并 | 由 PR #62 完成 | 本矩阵所在 PR 合并即满足；merge commit 记录在 #59、#36 与 #6 的完成摘要 |
 
-## 4. 有意延期
+## 4. 有意延期与后续完成
 
-- **PostgreSQL 16（#60）：** package、launchd service、数据目录、备份恢复与停机窗口是
-  数据型迁移，不能混入 Phase 4 应用清理。当前 Homebrew 外部所有权明确，因此不阻塞
-  #6，也不授权在 Phase 5 顺带迁移。
+- **PostgreSQL 16（#60）：** Phase 4 当时因 package、launchd service、数据目录和停机
+  窗口而明确延期。2026-08-06，维护者批准放弃旧数据并完成退役；本仓库不再提供全局
+  PostgreSQL package、PATH、service 或可变数据声明。数据库版本与生命周期回到各自消费方。
 - **OrbStack 可变数据：** Homebrew 只声明应用。VM、镜像、容器、volume、网络、context
   与 credential 保持外部；这不是缺失的配置声明。
 - **外部 formula/厂商应用：** 已有明确 owner 和恢复入口；未来换源或清理需新维护 Issue，

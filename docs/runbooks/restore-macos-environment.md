@@ -131,8 +131,9 @@ Codex 进程继承的 PATH 代替。
 3. **Swift 工具链：** 按项目需要安装 Xcode Beta、Command Line Tools、SDK/Simulator，
    再验证外部 XcodeGen；仓库不替你接受许可证。
 4. **厂商/手工应用：** 只从 inventory 中的官方入口恢复，并核对 bundle ID/Team ID。
-5. **外部 formula：** PostgreSQL 16 按 Issue #60 的数据迁移流程处理；XcodeGen 随外部
-   Swift 工具链恢复。项目 Python 由 uv 按项目声明重建，不恢复 Homebrew Python 兼容层。
+5. **外部 formula：** 只按当前需求恢复 XcodeGen 等明确 owner；不要恢复已由 Issue #60
+   退役的全局 PostgreSQL 16。项目 Python 由 uv 按项目声明重建，不恢复 Homebrew Python
+   兼容层。
 6. **数据：** 最后按各应用自己的恢复流程恢复数据库、容器、vault、profile、账号和历史。
 
 ## 3. 所有权验收
@@ -153,8 +154,8 @@ Codex 进程继承的 PATH 代替。
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；
 - Atuin 配置和 `.hushlogin` 来自 Nix Store，但 key/history 保持本机可写状态；
 - `~/.local/share/chezmoi` 不再 apply，旧 dotfiles 不再参与配置生成；
-- PostgreSQL、OrbStack、编辑器、浏览器、Setapp 数据以及 AI CLI 的状态/凭据没有被
-  activation 覆盖。
+- OrbStack、编辑器、浏览器、Setapp 数据以及 AI CLI 的状态/凭据没有被 activation
+  覆盖；数据库由各消费方自己的恢复流程处理。
 
 ## 4. 回滚顺序
 
@@ -180,8 +181,8 @@ CLI 的状态。macOS defaults 的逐键试用前值和定向回滚命令见
 ### 4.3 Setapp、厂商应用与数据
 
 Setapp/厂商应用通过其官方渠道重新安装。若 package 回滚后仍异常，分别恢复应用数据，
-不要删除整个 `Application Support`、容器或数据库目录来“验证干净安装”。OrbStack 和
-PostgreSQL 需要各自的数据 runbook；没有恢复验证时不得执行破坏性迁移。
+不要删除整个 `Application Support`、容器或数据库目录来“验证干净安装”。OrbStack 与
+各消费方数据库需要各自的数据 runbook；没有恢复验证时不得执行破坏性迁移。
 
 ## 5. 后续变更流程
 

@@ -56,8 +56,8 @@ nix eval --json .#darwinConfigurations.macbook.config.home-manager.users.sayori.
 ```
 
 `home.sessionPath` 可以包含平台专用路径，但 Home Manager profile 必须位于
-`/Users/sayori/.local/bin` 之前。本次 macbook 求值结果为 PostgreSQL、Home Manager
-profile、`~/.local/bin`，相对优先级符合约束。
+`/Users/sayori/.local/bin` 之前。#60 删除旧 PostgreSQL compatibility PATH 后，macbook
+只保留 Home Manager profile 与低优先级 `~/.local/bin` 的兼容顺序。
 
 ## 4. 激活后验收关卡（历史）
 
@@ -71,8 +71,7 @@ command -s python3
 python --version
 python3 --version
 uv python find
-cd /Users/sayori/Desktop/work/yanhuang-agent-platform
-make check
+# 进入目标项目后，运行该项目自己的检查命令
 ```
 
 通过条件：
@@ -97,8 +96,8 @@ env PATH="$HOME/.local/bin:$PATH" make dev
 2026-08-03，#93 在确认 Nix uv 为正常入口后，定向删除了 `~/.local/bin/uv`、`uvx`
 以及由系统 Python 用户级 pip 安装的第二份 uv；未扩大为清理整个 `~/.local/bin`。
 
-`yanhuang-agent-platform/backend/.venv` 原先把解释器和 Mach-O framework 硬绑定到
-Homebrew `python@3.12`。清理前使用 uv-managed CPython `3.12.13` 按 `uv.lock` 原子
-重建该 venv，并完成核心依赖 import 与 `tests/test_gateway_config.py`（5 passed）验证；
-项目已有的跟踪修改未被触碰。验证后才删除旧 venv 备份并定向卸载 Homebrew
-`python@3.12`。Nix agent Python `3.14` 与项目 Python `3.12` 的所有权边界保持不变。
+一个旧项目 venv 原先把解释器和 Mach-O framework 硬绑定到 Homebrew `python@3.12`。
+清理前使用 uv-managed CPython `3.12.13` 按该项目 lock file 原子重建 venv，并完成核心
+依赖 import 与项目测试验证；项目已有的跟踪修改未被触碰。验证后才删除旧 venv 备份并
+定向卸载 Homebrew `python@3.12`。Nix agent Python `3.14` 与项目 Python `3.12` 的所有权
+边界保持不变。

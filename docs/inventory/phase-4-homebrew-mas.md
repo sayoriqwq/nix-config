@@ -276,8 +276,8 @@ Homebrew 或 Nix 接管；完整四 CLI 所有权与清理记录见
 - 定向卸载全球版 `lark` cask 和旧 Claude Code cask，并删除手工旧 `Lark.app`；
 - 保留中国区 `feishu` cask、`/Applications/Feishu.app` 及全部 live `~/Library` 数据；
 - 在项目 venv 切换到 uv-managed CPython 并通过测试后，定向卸载 `python@3.12`；
-- 删除无消费者的 `freetype`，保留 PostgreSQL 16、XcodeGen 及其依赖；
-- 保持 `HOMEBREW_NO_AUTOREMOVE=1`，没有触碰 PostgreSQL service/data 或其他 cask。
+- 删除无消费者的 `freetype`，当时保留 PostgreSQL 16、XcodeGen 及其依赖；
+- 保持 `HOMEBREW_NO_AUTOREMOVE=1`，#93 当时没有触碰 PostgreSQL service/data 或其他 cask。
 - 精确删除六个指向已退役 Docker、WARP 与 Zed Preview 应用的 root-owned
   `/usr/local/bin` 悬空链接；OrbStack 和 Nix Zed 的现行入口复验通过。
 
@@ -286,3 +286,6 @@ Homebrew 或 Nix 接管；完整四 CLI 所有权与清理记录见
 bundle ID 为 `com.electron.lark`、Team ID 为 `XY6NLV7YTS`，深度签名和 Gatekeeper
 notarization 验证均通过。#74/#81 的 Lark 恢复步骤继续作为历史证据，不再描述当前
 机器的应用集合；账号、聊天与本地数据未在本维护中读取或验收。
+
+2026-08-06，#60 在新的独立批准下卸载 PostgreSQL 16，并接受 Homebrew 对当时无消费者
+依赖的自动回收；这不改变 #93 的历史执行边界。
