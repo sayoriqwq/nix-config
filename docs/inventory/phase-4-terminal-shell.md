@@ -35,7 +35,7 @@ Ghostty + Zsh 与 WezTerm + Fish 不属于验收矩阵。VS Code/Zed launcher �
 | Node/Bun/pnpm | mise | Nix 只安装 mise 并声明默认 `latest` |
 | GH CLI | Nix package-only | `config.yml` 与 `hosts.yml` 由 GH 保持本机可写，仓库只声明 Git credential helper |
 | OrbStack hook | Darwin integration | 软件迁移与数据留给独立 Issue |
-| PostgreSQL 16 PATH/service/data | 现有 Homebrew service | 本 Issue 原样保留，未来独立迁移 |
+| PostgreSQL 16 PATH/service/data | 现有 Homebrew service | #23 当时原样保留；#60 后续已完成退役 |
 
 ## 4. 可变数据边界
 
@@ -49,7 +49,7 @@ Ghostty + Zsh 与 WezTerm + Fish 不属于验收矩阵。VS Code/Zed launcher �
 - `~/.config/gh/config.yml` 与 `~/.config/gh/hosts.yml`；
 - Ghostty/WezTerm session、window、mux 与登录态；
 - `~/.orbstack` 及 OrbStack container/VM/volume；
-- `/opt/homebrew/var/postgresql@16`；
+- `/opt/homebrew/var/postgresql@16`（#23 当时保留，#60 后续已删除）；
 - `~/.cargo`、`~/.rustup`、`~/.ghcup`、`~/.cabal`。
 
 仓库记录路径只用于说明 ownership，不代表 Git/Nix 管理其内容。
@@ -185,7 +185,8 @@ GREEN recognized-live-hash=1655f96aad74ad3fd074d08a2c38fe4253ba120ed8937996f4deb
    不再次执行 `chsh`，也不要把管理员账户加入 `users.knownUsers`。
 8. 从 `~/Applications/Home Manager Apps` 打开 Ghostty 与 WezTerm，分别验收两套支持环境。
 9. 验证快捷键、主题、字体、Atuin、fzf、zoxide、lazygit、pay-respects、direnv、mise 与 pnpm。
-10. 确认 OrbStack 与 PostgreSQL 仍正常，Rust/Haskell 数据目录未删除。
+10. 当时确认 OrbStack 与 PostgreSQL 仍正常，Rust/Haskell 数据目录未删除；PostgreSQL
+    后续退役证据以 #60 为准。
 11. 完成 Nix 应用验收后，再单独批准定向执行 `brew uninstall --cask ghostty wezterm`。
 12. 清理后再次确认 `/Applications` 不再残留 Homebrew 终端应用，Nix 应用仍可正常启动。
 
@@ -207,5 +208,5 @@ GREEN recognized-live-hash=1655f96aad74ad3fd074d08a2c38fe4253ba120ed8937996f4deb
    已卸载时按 activation 前版本重新安装。
 5. dotfiles handoff 需在其仓库单独 revert，确认所有权恢复后才允许
    chezmoi 重新部署目标。
-6. 不通过删除 Atuin、mise、Shell history、终端状态、OrbStack 或
-   PostgreSQL 数据来“修复”声明问题。
+6. 不通过删除 Atuin、mise、Shell history、终端状态或 OrbStack 数据来“修复”声明问题；
+   PostgreSQL 数据的后续放弃与删除只来自 #60 的独立批准。

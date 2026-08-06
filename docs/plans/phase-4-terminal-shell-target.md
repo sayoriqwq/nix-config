@@ -105,10 +105,11 @@ Ghostty 使用默认 `shell-integration = detect` 自动集成初始 Fish；Home
 - `~/.cargo`、`~/.rustup`、`~/.ghcup`、`~/.cabal`；
 - Atuin、Fish、Zsh、mise、Ghostty、WezTerm 的可变数据；
 - OrbStack 软件与容器数据；
-- Homebrew PostgreSQL 16 service 与数据目录；
+- Homebrew PostgreSQL 16 service 与数据目录（#23 当时保留，#60 后续已退役）；
 - VS Code、Zed 或其配置。
 
-OrbStack 与 PostgreSQL 分别使用独立迁移 Issue。#23 仅隔离并保留当前必要的 Darwin integration。
+OrbStack 与 PostgreSQL 分别使用独立迁移 Issue。#23 仅隔离并保留当时必要的 Darwin
+integration；其中 PostgreSQL integration 已由 #60 后续删除。
 
 ## 7. 验收与人工关卡
 

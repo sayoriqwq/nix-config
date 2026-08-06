@@ -30,7 +30,7 @@
 | Setapp | 14 个订阅应用与 Setapp 客户端 | Setapp 官方客户端、人工登录 |
 | macOS / Apple | 核心系统应用、Command Line Tools | 系统更新或 Apple 官方安装流程 |
 | 厂商/手工 | 不能可靠声明或有意试用的应用 | 本文的官方入口与签名身份 |
-| Homebrew 外部 formula | PostgreSQL、XcodeGen 及其依赖 | 当前本机状态；不属于声明式基线 |
+| Homebrew 外部 formula | XcodeGen 与两个遗留 leaf formula | 当前本机状态；不属于声明式基线 |
 
 这个概览描述安装来源，不表示 Nix 能恢复应用数据。完整恢复顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
@@ -58,7 +58,8 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
   [`macOS AI CLI 所有权`](macos-ai-cli-ownership.md)；
 - uv 负责项目 Python 选择，`.venv`、依赖与 lock file 属于项目；
 - nginx、pkgconf 等项目依赖进入项目 dev shell，不进入全局用户 profile；
-- PostgreSQL 16 数据服务不与普通 CLI 混合迁移，延期到 Issue #60。
+- 数据库工具链和运行态由实际消费方声明，不进入全局用户 profile；旧 PostgreSQL 16 已由
+  Issue #60 完成退役。
 
 ### 3.2 GUI、终端与编辑器
 
@@ -127,14 +128,13 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 
 ### 4.2 当前外部 formula
 
-nix-darwin 不声明任何 Homebrew formula。#93 收口后，当前实机的 14 个 formula 均属 Homebrew
+nix-darwin 不声明任何 Homebrew formula。#60 收口后，当前实机的 3 个 formula 均属 Homebrew
 外部状态：
 
 | 类型 | formula | disposition |
 | --- | --- | --- |
-| 数据服务 | `postgresql@16` | 保留现有服务与数据；Issue #60 单独迁移，不阻塞 Phase 4 |
 | Swift 工具链 | `xcodegen` | 当前 Swift 项目依赖；与 Xcode Beta 一起保持 macbook 外部所有 |
-| 传递依赖 | `ca-certificates`、`gettext`、`icu4c@78`、`krb5`、`libunistring`、`lz4`、`mpdecimal`、`openssl@3`、`readline`、`sqlite`、`xz`、`zstd` | 由上述外部 formula 的 Homebrew 依赖图拥有，不逐项声明 |
+| 遗留 leaf | `icu4c@78`、`sqlite` | 不属于全局声明，也不再归 PostgreSQL 所有；是否删除需后续独立证据与批准 |
 
 Phase 4 已定向删除 35 个旧 formula，并接受 Homebrew 对无消费者依赖的自动回收结果。
 后续卸载命令必须设置 `HOMEBREW_NO_AUTOREMOVE=1`，除非维护者再次明确批准依赖回收。
@@ -236,8 +236,8 @@ receipt 和两个已批准的 Trash rollback 目录；当前只保留声明的 F
 
 ## 10. 已知延期与回滚边界
 
-- PostgreSQL 16 的 package、service 与数据迁移由 Issue #60 负责。明确延期不会使其变成
-  “未分类软件”，也不授权 Phase 5 自动迁移数据库。
+- PostgreSQL 16 的 package、service 与已批准数据目录已由 Issue #60 删除；本仓库不提供
+  替代的全局数据库服务，也不把消费方配置提升为基础设施要求。
 - OrbStack 的应用由 Homebrew cask声明；其可变容器数据永远需要独立备份/恢复流程。
 - Nix generation 回滚只恢复声明和 Nix-owned package 链接；不能回滚 Homebrew adoption、
   MAS receipt、Setapp 登录、厂商应用数据、数据库或容器。

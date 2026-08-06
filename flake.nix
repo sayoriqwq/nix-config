@@ -203,6 +203,10 @@
             profilePackages =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
           };
+          macbook-postgresql-retirement = import ./tests/macos/postgresql-retirement.nix {
+            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+            pkgs = self.darwinConfigurations.macbook.pkgs;
+          };
           macbook-ai-clients = import ./tests/macos/ai-clients.nix {
             pkgs = self.darwinConfigurations.macbook.pkgs;
             profilePackages =
