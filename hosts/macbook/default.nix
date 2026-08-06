@@ -89,11 +89,6 @@
         username = "sayori";
         homeDirectory = "/Users/sayori";
 
-        # ADR-0009 intentionally combines Home Manager 26.05 with the rolling
-        # Darwin package set. Compatibility is enforced by policy checks and
-        # full builds instead of Home Manager's same-release warning.
-        enableNixpkgsReleaseCheck = false;
-
         # This is the first Home Manager adoption. The pinned 26.05 manual
         # requires the initial value to remain unchanged after activation.
         stateVersion = "26.05";

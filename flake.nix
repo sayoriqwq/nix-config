@@ -15,6 +15,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    home-manager-darwin = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -51,6 +56,7 @@
     inputs@{
       self,
       home-manager,
+      home-manager-darwin,
       nix-darwin,
       nixpkgs,
       nixpkgs-darwin,
@@ -123,6 +129,7 @@
         macbookConfiguration = self.darwinConfigurations.macbook;
         nixboxConfiguration = self.nixosConfigurations.nixbox;
         pkgs = darwinPkgs;
+        serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
     in
@@ -134,7 +141,7 @@
         modules = [
           ./hosts/macbook
           ./modules/darwin/base.nix
-          home-manager.darwinModules.home-manager
+          home-manager-darwin.darwinModules.home-manager
         ];
       };
 

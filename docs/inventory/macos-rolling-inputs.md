@@ -1,6 +1,9 @@
 # macOS rolling inputs 收口记录
 
-> 范围：Issue [#106](https://github.com/sayoriqwq/nix-config/issues/106)。本文记录维护者已经执行的真实 activation 与随后批准保留的声明；不授权新的 activation、重启、GC 或 generation 删除。
+> 范围：Issue [#106](https://github.com/sayoriqwq/nix-config/issues/106) 与后续
+> [#115](https://github.com/sayoriqwq/nix-config/issues/115)。本文记录维护者已经执行的真实
+> activation、后续 warning 诊断和构建证据；不授权新的 activation、重启、GC 或 generation
+> 删除。
 
 ## 1. 已确认运行态
 
@@ -28,11 +31,12 @@
 | `nixpkgs-darwin` | `nixpkgs-unstable` | `104240a772428cc2e20d8fd86c9ddbb886bbaff2` | macbook |
 | `nix-darwin` | `master` | `15abb8c98f336cd8bd840d71059adebabe60bf04` | macbook |
 | root `nixpkgs` | `nixos-26.05` | unchanged by #106 | nixbox/server |
-| `home-manager` | `release-26.05` | unchanged by #106 | all composed Home Manager users |
+| `home-manager-darwin` | `master` | `a7c70cc290290f373f50cd820403833d250459ac` | macbook |
+| `home-manager` | `release-26.05` | unchanged by #106/#115 | nixbox/server |
 | `zed` | upstream default ref | unchanged by #106 | macbook/nixbox Zed package |
 
-`nix-darwin.inputs.nixpkgs` 继续 follows `nixpkgs-darwin`。Rolling ref 不绕过
-`flake.lock`，每次更新仍必须形成新的 Git diff。
+`nix-darwin.inputs.nixpkgs` 与 `home-manager-darwin.inputs.nixpkgs` 都 follows
+`nixpkgs-darwin`。Rolling ref 不绕过 `flake.lock`，每次更新仍必须形成新的 Git diff。
 
 ## 3. 兼容层
 
@@ -44,11 +48,12 @@ Darwin 的 unstable Obsidian DMG 当前把 `Obsidian.app` 嵌套在版本目录�
 
 ### Fish
 
-Home Manager 26.05 的 man-page completion 生成会调用 Fish 4.8 已移除的 helper。
-Darwin + Fish >= 4.8 因此关闭该生成步骤，保留 package 自带 completions。nixbox/server
-不受该条件影响。
+Home Manager 26.05 的 man-page completion 生成曾直接读取 Fish 4.8 package 中已移除的
+helper，#106 因此仅在 Darwin 关闭该生成步骤。#115 锁定的 Home Manager `master` 已从
+Fish 二进制内置资源提取生成器；旧 workaround 已删除，macbook 与 Linux 均恢复默认
+completion generation。
 
-## 4. 不在范围内
+## 4. #106 不在范围内
 
 - 不更新或处理 Zed Nightly PR #95；
 - 不改变 nixbox/server package channel、配置或运行态；
@@ -83,25 +88,34 @@ Home Manager 在 build 中明确报告其 26.05 release 与 Darwin Nixpkgs 26.11
 2026-08-06 的后续 activation 再次出现相同 release mismatch warning，并同时报告不存在的
 `/nix/var/nix/profiles/per-user/root/channels`。只读诊断确认：
 
-- release mismatch 是 ADR-0009 已接受组合的静态事实，不是新故障；
+- macbook 的 Home Manager 26.05 确实落后于 Darwin Nixpkgs 26.11，不能用关闭 release
+  check 代替升级验证；
 - root channels 路径来自 nix-darwin 默认 `nix.channel.enable = true`，仓库没有使用或恢复
   mutable channels 的需求；
 - 系统 Flake registry 已固定 nixpkgs，关闭 channel 后仍保留
   `nixpkgs=flake:nixpkgs` compatibility mapping。
 
-#115 因此仅对 macbook 关闭 Home Manager release check，并在 Darwin 基础层关闭 channel
-compatibility。对应 policy check 固定这两个选择，并确认 nixbox 的 release check 不受影响。
-这不更新 input、不改变 stateVersion，也不创建空 channel state 目录；真实 activation 仍需
-维护者在 PR build 通过后另行批准。
+维护者明确要求先升级验证，而不是消音。#115 因此新增仅供 macbook 使用的
+`home-manager-darwin` `master` input；nixbox/server 继续使用 `release-26.05`。求值确认：
+
+- macbook Home Manager release 为 `26.11`，`system.nixpkgsRelease` 也是 `26.11`；
+- macbook 与 nixbox 的 `home.enableNixpkgsReleaseCheck` 都保持 `true`；
+- nixbox Home Manager release 仍为 `26.05`；
+- Home Manager `master` 已修复 Fish 4.8 completion generator 路径，旧 Darwin workaround
+  退场；
+- Darwin channel compatibility 关闭，`nix.nixPath` 只剩
+  `nixpkgs=flake:nixpkgs`。
+
+这不改变任何 stateVersion，也不创建空 channel state 目录；真实 activation 仍需维护者在
+PR build 通过后另行批准。
 
 分支验证结果：
 
 - `nix fmt -- --check .`：PASS；
 - `nix build --no-link path:.#checks.aarch64-darwin.macos-rolling-inputs`：PASS；
-- 在仅保留 `NIX_PATH=nixpkgs=flake:nixpkgs` 的环境中执行
-  `darwin-rebuild build --flake path:/Users/sayori/Desktop/nix-config#macbook`：PASS，输出为
-  `/nix/store/rwlf4jl8ih5ya35272pmh3vwgydg4fay-darwin-system-26.11.15abb8c`，构建输出不再
-  包含两条目标 warning；
+- `darwin-rebuild build --flake path:/Users/sayori/Desktop/nix-config#macbook`：PASS；
+- 针对 release mismatch、root channels、FZF/Atuin `Ctrl-R` conflict 与 build error 的
+  输出扫描：无匹配；
 - `nix flake check path:.`：PASS；
 - `nix flake check --no-build --all-systems path:.`：PASS；
 - `nix build --no-link path:.#darwinConfigurations.macbook.system`：PASS。
