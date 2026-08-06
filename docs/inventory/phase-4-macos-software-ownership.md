@@ -40,7 +40,7 @@
 ### 3.1 通用 CLI 与运行时入口
 
 Home Manager 声明 Atuin、Bat、Btop、Delta、Eza、fd、fastfetch、Fish、fzf、GitHub CLI、
-Gitleaks、Graphviz、Helix、jq、Lazygit、mise、nh、pay-respects、Poppler、Python 3.14、
+Gitleaks、Helix、jq、Lazygit、mise、nh、pay-respects、Python 3.14、
 rclone、ripgrep、rtk、Starship、tmux、tree、uv、yazi 和 zoxide 等用户工具。Zsh 的
 autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formula。
 
@@ -48,6 +48,9 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
 
 - mise 固定 Node、Bun、pnpm、Erlang 29.0.3 与 Elixir 1.20.2-otp-29；
 - Nix 为 macbook AI 辅助运维提供一个裸 Python 3.14 agent 基线，不加入全局第三方包；
+- Graphviz 因未能证明存在真实 caller，已从全局 profile 删除；Poppler 也不再由
+  Home Manager 全局提供，Codex 的 PDF 工作流使用客户端自带 runtime，仓库不承诺其
+  路径或版本；
 - `ai-assisted-operations` capability 由 Nix/Home Manager 唯一提供 `codex` 0.146.0、
   `claude` 2.1.220、`agy` 1.1.9 和 `omp` 17.2.4；Oh My Pi 使用固定官方
   `darwin-arm64` 发布物，四个可执行文件的更新由 Nix 控制，`~/.omp` 状态与凭据保持

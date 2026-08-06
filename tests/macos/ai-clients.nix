@@ -24,14 +24,15 @@ let
   excludedPackages = lib.filter (
     package:
     builtins.elem (lib.getName package) [
+      "graphviz"
       "oh-my-codex"
       "omx"
+      "poppler-utils"
     ]
   ) profilePackages;
 in
-assert lib.assertMsg (
-  excludedPackages == [ ]
-) "macbook AI client profile must not contain the out-of-scope oh-my-codex/omx package";
+assert lib.assertMsg (excludedPackages == [ ])
+  "macbook AI profile must not contain Graphviz, Poppler, or the out-of-scope oh-my-codex/omx package";
 pkgs.runCommand "macbook-ai-clients-check"
   {
     nativeBuildInputs = [

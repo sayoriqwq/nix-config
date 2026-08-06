@@ -50,10 +50,12 @@
 
 ### AI 辅助运维能力（AI-assisted operations capability）
 
-为本地 coding agent 提供命令输出压缩、内容检查、文档解析、关系图生成、不依赖项目
-环境的基础 Python 解释器，以及由 Home Manager 管理的简洁全局 Shell 策略。该策略
+为本地 coding agent 提供命令输出压缩、内容检查、不依赖项目环境的基础 Python
+解释器，以及由 Home Manager 管理的简洁全局 Shell 策略。该策略
 只固定 Nix 管理事实、Fish 登录入口、Python 入口和用户命令展示格式；Nix 管理 RTK
 CLI，外部 `~/.codex/RTK.md` 则由该 CLI 的 Codex init 生命周期生成、更新和卸载。
+Codex 的 PDF 解析与渲染依赖客户端自带 runtime，不形成系统级 Poppler 合同；未证明
+调用者的 Graphviz 不进入全局 profile，未来需求应由对应项目 dev shell 或独立能力声明。
 具体 AI 客户端及其凭据是否存在，由各主机组合决定；
 项目语言版本、虚拟环境和依赖仍属于开发运行时能力。
 

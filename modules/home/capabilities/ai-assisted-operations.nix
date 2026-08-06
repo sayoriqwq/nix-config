@@ -8,12 +8,10 @@
   ];
 
   home.packages = with pkgs; [
-    graphviz
     (pkgs.callPackage ../../../packages/codex-cli { })
     claude-code
     (pkgs.callPackage ../../../packages/antigravity-cli { })
     (pkgs.callPackage ../../../packages/oh-my-pi { })
-    poppler-utils
     rtk
   ];
 
