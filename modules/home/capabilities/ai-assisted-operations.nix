@@ -24,7 +24,7 @@
       path = "${config.home.homeDirectory}/.codex";
       owner = "Codex CLI";
       backup = "separate-policy";
-      description = "Codex CLI authentication, session, history, plugins, hooks, cache, databases, and mutable configuration remain writable and external. Only the stable global AGENTS.md policy is managed by Home Manager and linked into the Nix Store.";
+      description = "Codex CLI authentication, session, history, plugins, hooks, cache, databases, and mutable configuration remain writable and external. Only the stable global AGENTS.md policy is managed by Home Manager and linked into the Nix Store. RTK.md is generated, updated, and removed by the Nix-managed RTK CLI.";
     }
     {
       path = "${config.home.homeDirectory}/.claude";
