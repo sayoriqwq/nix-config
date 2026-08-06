@@ -22,6 +22,11 @@ Home Manager 在共享用户层提供以下通用 CLI：
 dev shell 管理；本批不把 Python、Node、Erlang、Elixir、数据库或服务加入
 全局用户 profile。
 
+这是 Phase 4 当时的历史归类。Phase 5.5 能力化后，`rtk`、Graphviz 与 Poppler 已由
+macbook-only `ai-assisted-operations` capability 选择，不自动扩展到 nixbox/server。
+#67 进一步确认 Nix 只管理 RTK CLI；`RTK.md` 与 Codex integration 由 RTK init 生命周期
+拥有。当前组合与所有权以 capability matrix 和 `macos-ai-cli-ownership.md` 为准。
+
 ## Atuin
 
 Home Manager 管理 Atuin CLI、Fish/Zsh integration 与以下稳定设置：

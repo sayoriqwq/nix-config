@@ -138,9 +138,11 @@ Python 使用不同模型：
 macbook 的 AI 辅助运维能力还管理唯一的稳定全局 Agent 策略入口
 `~/.codex/AGENTS.md`。源码位于 `dotfiles/codex/AGENTS.md`，只固定 Nix 管理事实、
 Fish 登录入口、Python 入口和面向用户的命令格式。文件首行引用的
-`~/.codex/RTK.md` 仍是外部可写依赖，不由当前 Home Manager primitive 管理；后续
-AI 系列工作再单独收口其稳定基线。`~/.codex` 中的 auth、session、history、plugins、
-hooks、cache、数据库及其他可变配置继续外部可写，不进入 Nix Store。
+`~/.codex/RTK.md` 仍是外部可写依赖：RTK CLI 本体由 Nix 管理，该文件由
+`rtk init -g --codex` 生成、更新和卸载，不链接到 Nix Store。Home Manager 不在
+activation 中运行客户端 init；锁定 CLI 的隔离 dry-run check 负责验证生成合同。
+`~/.codex` 中的 auth、session、history、plugins、hooks、cache、数据库及其他可变配置
+继续外部可写，不进入 Nix Store。
 
 详细证据见 `docs/inventory/mise-runtime-ownership.md` 与 `docs/inventory/uv-python-ownership.md`。
 

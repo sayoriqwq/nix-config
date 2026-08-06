@@ -185,6 +185,12 @@
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
           };
+          macbook-rtk-integration = import ./tests/macos/rtk-integration.nix {
+            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+            pkgs = self.darwinConfigurations.macbook.pkgs;
+            profilePackages =
+              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
+          };
           macbook-agent-python = import ./tests/macos/agent-python.nix {
             pkgs = self.darwinConfigurations.macbook.pkgs;
             profilePackages =

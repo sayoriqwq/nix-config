@@ -37,7 +37,7 @@
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
-| AI 辅助运维 | 是 | 否 | 否 | macbook 的 `rtk`、Graphviz、Poppler、裸 Python 3.14 agent 基线、由 Home Manager 管理的简洁全局 Shell/Python 入口策略，以及由 Nix/Home Manager 唯一提供 PATH 来源的 `codex` 0.146.0、`claude` 2.1.220、`agy` 1.1.9、`omp` 17.2.4；RTK 规则、AI 客户端状态与凭据保持外部，详见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
+| AI 辅助运维 | 是 | 否 | 否 | macbook 的 Nix-managed `rtk` CLI、Graphviz、Poppler、裸 Python 3.14 agent 基线、由 Home Manager 管理的简洁全局 Shell/Python 入口策略，以及由 Nix/Home Manager 唯一提供 PATH 来源的 `codex` 0.146.0、`claude` 2.1.220、`agy` 1.1.9、`omp` 17.2.4；`RTK.md` 由 RTK 的 Codex init 生命周期拥有，AI 客户端状态与凭据保持外部，详见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
 | 机密部署 | 是 | 是 | 是 | sops-nix 使用每机独立 SSH host identity 解密本机文件；运行时路径和 mode 受声明控制，不分发管理员 identity。 |
 | 机密管理 | 是 | 否 | 否 | 只有 macbook 提供 SOPS、age 与 SSH-to-age；管理员 identity 与维护者自管恢复副本保持仓库外，nixbox/server 不获得编辑或恢复能力。 |
 

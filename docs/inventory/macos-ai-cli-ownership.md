@@ -61,10 +61,20 @@ macbook 的 `ai-assisted-operations` capability 只把稳定策略
 - 展示给用户的命令默认使用 Fish 语法；
 - 每个需要用户执行的命令或命令块后附一行、恰好一个相关 emoji 的说明。
 
-文件首行继续引用外部 `~/.codex/RTK.md`。当前 capability 不管理该文件，也不把 RTK
-规则内联进策略；RTK 后续由专门的 AI 系列工作纳入稳定基线。旧长版中关于 Nix Store、
-uv/mise、全局安装和 activation 的扩展说明不再属于该全局策略正文；对应所有权和人工
-关卡仍由仓库规范、能力模块、inventory 与专项检查分别维护。
+文件首行继续引用外部 `~/.codex/RTK.md`。RTK CLI 本体由 capability 的 Nix package
+管理；该文件是 `rtk init -g --codex` 从当前 CLI 内嵌模板生成的集成产物，继续由 RTK
+负责幂等更新与 `--uninstall` 清理，不复制到仓库或链接到只读 Nix Store。Home Manager
+也不在 activation 中自动运行客户端 init。专项 check 在隔离 `CODEX_HOME` 中运行
+`rtk -v init -g --codex --dry-run`，验证锁定 CLI 仍生成 `RTK.md` 与绝对路径引用且不写盘。
+
+2026-08-06 的只读核对确认：活动 `rtk 0.44.0` 只有 Home Manager profile 这一来源，
+未发现 Homebrew、`/opt/homebrew/bin`、`/usr/local/bin`、`~/.local/bin` 或 Cargo 重复入口；
+当前 `~/.codex/RTK.md` 与官方 v0.44.0 Codex awareness template 的 SHA-256 一致，
+`rtk init -g --codex --show` 报告两个 global artifact 均正常。核对未读取 RTK analytics、
+command history 或其他 Codex 可变状态。
+
+旧长版中关于 Nix Store、uv/mise、全局安装和 activation 的扩展说明不再属于该全局
+策略正文；对应所有权和人工关卡仍由仓库规范、能力模块、inventory 与专项检查分别维护。
 
 Home Manager 对该精确文件设置 `force`，使激活后的入口不能被手工副本静默漂移。
 源文件不包含 token、session、账号或其他机密，可以安全进入 Nix Store。回滚上一代

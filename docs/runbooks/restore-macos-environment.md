@@ -68,7 +68,14 @@ Nix/Home Manager 提供唯一的声明式 PATH 来源；Oh My Pi 使用固定官
 
 1. 先完成本节 2.3 的 Nix build，确认版本和 lock file；
 2. 另行批准并执行 nix-darwin/Home Manager activation；
-3. 完全退出并重新打开 Fish，在不继承 Codex 进程 PATH 的干净会话中执行：
+3. 运行一次 RTK 的官方 Codex init，恢复由 RTK CLI 拥有的 `~/.codex/RTK.md`；Nix
+   管理的 `AGENTS.md` 已包含绝对路径引用，因此当前版本应只创建或更新 RTK 自己的产物：
+
+```fish
+rtk init -g --codex
+```
+
+4. 完全退出并重新打开 Fish，在不继承 Codex 进程 PATH 的干净会话中执行：
 
 ```fish
 type -a codex claude agy omp
@@ -80,11 +87,17 @@ codex --version
 claude --version
 agy --version
 omp --version
+rtk --version
+rtk init -g --codex --show
 ```
 
 四个 `command -s` 必须命中 Home Manager profile，版本分别符合上述锁定值。#93 已
 删除旧 Homebrew Claude、手工 `agy` 和停用 mise Node 25 树；恢复流程不应重新创建这些
 兼容副本。`ChatGPT.app` 及其 embedded Codex helper 继续保留为应用私有组成。
+
+RTK 本体必须同样命中 Home Manager profile；`--show` 必须把 global `RTK.md` 与
+`AGENTS.md` reference 都报告为 `[ok]`。不要把 `RTK.md` 复制进仓库或链接到 Nix Store；
+后续 RTK package 升级后仍由维护者重新运行 `rtk init -g --codex` 刷新上游模板。
 
 凭据、登录态、token、session、history、skills/hooks、cache、数据库以及 `~/.omp` 和
 项目 Oh My Pi 状态继续保持可写且不进入 Nix Store；路径边界详见
