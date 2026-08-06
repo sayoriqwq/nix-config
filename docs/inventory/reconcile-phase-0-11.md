@@ -66,4 +66,4 @@
 - #99 与未合并 Draft PR #109 已以未计划实施关闭；关闭 root SSH 的配置从未 activation；
 - #110 承接纯文档同步，不修改 Nix 配置或三台机器运行态；
 - nixbox 仍是维护者的次级 NixOS 工作站及 server 的 `x86_64-linux` build/test/deploy 节点；其独立 deploy identity 不等于维护者交互身份，也不是 macbook 直连 server 的必经跳板；
-- 当前开放主线跟踪为 #1；Phase 12 / #14 继续延后；#67 已进入 broader AI/RTK 基线实施，#60（PostgreSQL 16 数据迁移）仍按需启动；开放 PR #95 继续独立审阅；自动生成的 PR #108 已按维护者裁决关闭且未合并，对应远端分支已删除；ECC Tools GitHub App 卸载仍停在 GitHub 账户 sudo-mode 的维护者重新认证关卡。
+- 当前开放主线跟踪为 #1；Phase 12 / #14 继续延后；#67 已进入 broader AI/RTK 基线实施，#60（PostgreSQL 16 数据迁移）仍按需启动；开放 PR #95 继续独立审阅；自动生成的 PR #108 已按维护者裁决关闭且未合并，对应远端分支已删除；维护者已于 2026-08-06 卸载 ECC Tools GitHub App，并在 Installed GitHub Apps 列表中确认其消失，后续不再拥有仓库访问或自动创建 PR 的能力。
