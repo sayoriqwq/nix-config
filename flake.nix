@@ -217,6 +217,13 @@
             zshrc =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
           };
+          editor-capability-launchers = import ./tests/macos/editor-launchers.nix {
+            lib = darwinPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = darwinPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
           macbook-raycast-source = import ./tests/macos/raycast-source.nix {
             inherit (self.darwinConfigurations.macbook.pkgs) lib;
             casks = self.darwinConfigurations.macbook.config.homebrew.casks;

@@ -4,6 +4,9 @@
 
 本文只描述声明式终态，不授权 activation、Homebrew 卸载、数据删除或合并 Pull Request。
 
+> [!NOTE]
+> Issue #118 supersedes only the historical `v`/`z` launcher exclusion below: the merged Phase 4 source omitted those launchers despite the handoff record claiming they were present. `v` now belongs to the VS Code capability on macbook; `z` belongs to the Zed capability on macbook and nixbox. The Phase 4 terminal ownership boundary is unchanged.
+
 ## 1. 支持环境
 
 - 主环境：Ghostty + Fish。
@@ -86,7 +89,7 @@ Ghostty 使用默认 `shell-integration = detect` 自动集成初始 Fish；Home
 - mise：Fish/Zsh 都启用；Node、Bun、pnpm 默认 `latest`，Nix 不直接安装这些 runtime。
 - Starship：Fish/Zsh 使用同一提示符配置。
 
-`v`、`z` 与 VS Code/Zed 的应用、配置和 launcher 全部移出 #23，留给编辑器迁移阶段共同设计。
+在 #23 的原始范围内，`v`、`z` 与 VS Code/Zed 的应用、配置和 launcher 全部被移出终端阶段，留给编辑器迁移阶段共同设计。该延期由维护 Issue #118 修正：`v` 由 VS Code capability 提供，`z` 由 Zed capability 提供。
 
 ## 6. 删除与保留边界
 
@@ -127,7 +130,7 @@ nix build .#darwinConfigurations.macbook.system --no-link
 - 生成的 Ghostty/WezTerm 配置能由对应 CLI 解析；
 - Fish/Zsh 语法通过；
 - Atuin 与 fzf 的最终键位没有 `Ctrl+R` 冲突；
-- `v`、`z`、OpenClaw、thefuck、Rust/Haskell/pnpm 旧 PATH 不出现在生成配置；
+- #23 当时的生成配置不包含 `v`、`z`、OpenClaw、thefuck、Rust/Haskell/pnpm 旧 PATH；当前 `v` 随 macbook 的 VS Code capability 提供，`z` 随 macbook 与 nixbox 的 Zed capability 提供；
 - dotfiles handoff 后 chezmoi 不再管理 WezTerm/Zsh 目标；
 - 可变 history、数据库与状态目录没有被链接进 Nix Store。
 
