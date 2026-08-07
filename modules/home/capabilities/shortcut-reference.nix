@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   inherit (lib) concatMapStringsSep replaceStrings sort;
@@ -23,12 +28,14 @@ let
   '';
 in
 {
-  assertions = [
-    {
-      assertion = reference == builtins.readFile ../../../docs/guide/SHORTCUTS.md;
-      message = ''
-        docs/guide/SHORTCUTS.md is out of sync with capability shortcut metadata.
-      '';
-    }
-  ];
+  # The guide is the macOS user-facing reference and includes Darwin-only
+  # shortcuts. Linux hosts still contribute metadata for their own composition,
+  # but must not make the macOS guide fail when a platform-specific capability
+  # is absent.
+  assertions = lib.optional pkgs.stdenv.hostPlatform.isDarwin {
+    assertion = reference == builtins.readFile ../../../docs/guide/SHORTCUTS.md;
+    message = ''
+      docs/guide/SHORTCUTS.md is out of sync with capability shortcut metadata.
+    '';
+  };
 }

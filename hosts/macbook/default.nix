@@ -74,6 +74,7 @@
         ../../modules/home/capabilities/helix-editor.nix
         ../../modules/home/capabilities/zed-editor.nix
         ../../modules/home/capabilities/macos-vscode-compatibility.nix
+        ../../modules/home/capabilities/macos-editor-launchers.nix
         ../../modules/home/capabilities/ghostty-terminal.nix
         ../../modules/home/capabilities/macos-terminal-compatibility.nix
         ../../modules/home/capabilities/obsidian/darwin.nix
