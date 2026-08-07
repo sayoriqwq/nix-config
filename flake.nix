@@ -217,7 +217,7 @@
             zshrc =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
           };
-          macbook-editor-launchers = import ./tests/macos/editor-launchers.nix {
+          editor-capability-launchers = import ./tests/macos/editor-launchers.nix {
             lib = darwinPkgs.lib;
             macbookConfiguration = self.darwinConfigurations.macbook;
             nixboxConfiguration = self.nixosConfigurations.nixbox;
