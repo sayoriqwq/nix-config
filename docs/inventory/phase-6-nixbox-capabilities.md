@@ -38,6 +38,10 @@
 | Clash Verge Rev | Home Manager 管 Linux package | 不启用 service、TUN、system proxy 或额外端口 | profiles、配置与日志保持可写 |
 | Termius | Home Manager 管 Linux package | 无 service/firewall | 登录、连接、key 与 Electron user data 保持可写，secret 不进入 Git |
 
+`nil`/`nixd` 是 Issue #122 增加的声明式 package ownership。截至 2026-08-09，
+该增量已通过 nixbox 配置求值，但尚未在真实 nixbox 构建或 activation；下文 Phase 6
+运行态与 generation 证据不应被解释为真实 nixbox 已经运行 `nixd`。
+
 LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5353 53317 ]`。`22` 和 `5353` 是既有 SSH/Avahi 基线；本阶段唯一新增值是两个协议的 `53317`。
 
 ## 4. 状态路径与证据

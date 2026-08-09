@@ -26,16 +26,23 @@ activation 保留了现有 live settings 里的 Copilot provider 与
 `session.trust_all_worktrees`，也保留了 keymap/tasks 的原 hash，符合 seed-only
 边界。上述两个 live-only 设置没有进入跨机器 baseline。
 
-## Issue #122：Nix language server 与 macOS GUI PATH
+## Issue #122：Nix language server 与 macOS GUI PATH（2026-08-09 增量）
 
 Zed Nix extension 0.1.4 同时提供 `nil` 与 `nixd`。两台工作站的 Home Manager
 Zed capability 显式拥有两个 package；server 保持 headless，不组合这项能力。
 
 macOS 的 Zed Nightly app 由 launchd 直接启动，Darwin adapter 将 Home Manager
-profile、用户 `.local/bin`、用户 Nix profile 与现有系统 PATH 注入未来的用户
-launchd 进程，使 GUI 启动的 Zed 可以发现声明的 language server。该 adapter 不
-修改 Zed live settings、扩展、workspace/session 或缓存；首次 activation 和
-重启 Zed 仍需维护者按 Issue #122 的人工关卡执行。
+profile、低优先级用户 `.local/bin`、当前 system generation 与既有系统目录注入未来
+的用户 launchd 进程，使 GUI 启动的 Zed 可以发现声明的 language server。adapter
+不引用悬空的 `~/.nix-profile/bin`，也不把 Lix Installer 的 root bootstrap profile
+作为第二个 Nix 命令 authority。
+
+维护者于 2026-08-09 确认从 commit `34b6b794d21cd0f966b84cfd79ab4d03868f5119`
+完成 macbook activation。只读复核确认 launchd PATH 已包含 Home Manager profile，
+`nixd` 为 `2.9.2`；重启 Zed 后，日志先后记录从该 profile 启动 `nil` 与 `nixd`，原
+`nixd` unavailable 错误不再出现。该次 activation 没有修改 Zed live settings、扩展、
+workspace/session 或缓存。后续 reconcile 只收窄 PATH authority；其新 generation
+仍需维护者按 PR #123 的人工关卡 activation 后确认运行态与声明一致。
 
 ## Zed 扩展快照
 
