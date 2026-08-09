@@ -50,6 +50,10 @@
     # ADR-0006: consume only the upstream Nightly package output. Zed keeps
     # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
     zed.url = "github:zed-industries/zed";
+
+    # Issue #120: consume ax's published package output for macbook only.
+    # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
+    ax.url = "github:yusukebe/ax";
   };
 
   outputs =
@@ -208,6 +212,12 @@
             pkgs = self.darwinConfigurations.macbook.pkgs;
           };
           macbook-ai-clients = import ./tests/macos/ai-clients.nix {
+            pkgs = self.darwinConfigurations.macbook.pkgs;
+            profilePackages =
+              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
+          };
+          macbook-ax = import ./tests/macos/ax.nix {
+            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
             profilePackages =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;

@@ -2,7 +2,8 @@
 
 本文记录 Issue [#67](https://github.com/sayoriqwq/nix-config/issues/67) 建立、Issue
 [#93](https://github.com/sayoriqwq/nix-config/issues/93) 最终收口后的 macbook AI 命令行
-客户端边界。#67 的声明已由维护者激活并完成实机验收；#93 随后定向删除旧入口，未
+客户端边界；Issue [#120](https://github.com/sayoriqwq/nix-config/issues/120) 在此基础上
+新增 ax CLI 接入。#67 的声明已由维护者激活并完成实机验收；#93 随后定向删除旧入口，未
 执行新的 nix-darwin activation。
 
 ## 1. 范围与决策
@@ -18,6 +19,13 @@
 | `agy` | Google 官方 Antigravity CLI `1.1.9` | 官方 macOS 发布物；Nix package 负责固定下载、校验和 PATH | wrapper 关闭客户端自动更新；可执行文件仅由 Nix 更新 |
 | `omp` | Oh My Pi `17.2.4` | 官方 `darwin-arm64` 发布物；Nix package 固定版本、校验和 PATH | 只读配置 overlay 关闭启动更新检查；可执行文件仅由 Nix 更新 |
 
+Issue #120 在不改变上述四个命令历史收口范围的前提下，为 macbook 同一 capability
+增加 ax：
+
+| 命令 | 目标版本 | 来源与所有权 | 更新策略 |
+| --- | --- | --- | --- |
+| `ax` | 上游 Flake 锁定 revision 对应的 `0.1.25` | `yusukebe/ax` 官方 Flake 的 `packages.aarch64-darwin.ax`；顶层 Flake 锁定 source 与 Bun/linkedom 构建闭包，Home Manager 提供 PATH | 不运行上游安装器或自更新；版本变化只通过可审阅的 Flake lock diff |
+
 Codex wrapper 关闭启动更新检查，Antigravity wrapper 关闭自动更新，Oh My Pi wrapper
 通过只读配置 overlay 把 `startup.checkUpdate` 固定为 `false`；Claude 的锁定 nixpkgs
 recipe 禁止上游 installer/updater。任何可执行文件版本变更都必须进入仓库声明审阅。
@@ -26,6 +34,10 @@ recipe 禁止上游 installer/updater。任何可执行文件版本变更都必�
 `omp`（Oh My Pi）继续由 Nix 声明，版本固定为 `17.2.4`；`~/.omp` 及其中的登录态、
 配置、session、history、skills/hooks、缓存和数据库保持外部可写。macOS legacy
 Homebrew cask 声明移除 `claude-code`；该声明变化不等于对真实机器执行卸载。
+
+ax 不提供凭据或持久化认证配置。用户临时传入的 header/basic-auth 参数不由仓库声明，
+也不得把 token、请求内容或命令输出写入 Git、Nix Store 或新的 agent policy。ax 的
+上游 agent skill 不在本次接入中自动安装；本仓库只提供 CLI。
 
 ChatGPT.app 仍由既有 `chatgpt` cask 声明并保留 GUI。其 embedded Codex 是应用私有
 helper，不是上述 `codex` PATH 命令的安装来源，也不纳入 Nix 迁移或清理目标。
@@ -103,6 +115,8 @@ Nix Store：
 - `~/.claude.json`（Claude Code 的用户级认证/配置元数据）；
 - `~/.gemini` 中由 Antigravity 使用的状态；
 - `~/.omp` 及各项目的 Oh My Pi 状态目录；
+- `~/.cache/ax/fetch`：ax 的短期页面解析缓存，可能包含用户主动获取的私有页面；上游
+  以 owner-only 权限写入并按约两分钟 TTL 清理，缓存可重建，Nix 只声明路径且不备份或接管内容；
 - 客户端登录态、token、会话、历史、skills/hooks、缓存和数据库。
 
 `sayori.statePaths` 如需记录上述位置，只表示位置、所有者和备份边界，不创建、备份、
@@ -159,3 +173,13 @@ Codex 继续作为应用私有 helper 保留。清理没有使用全局 `brew cl
 - 不改变 ChatGPT GUI、ChatGPT Classic 或其他 macOS 应用的所有权；
 - #93 的维护只删除已验证可替代的旧软件入口；不执行新的 activation；
 - 后续行为兼容或数据迁移仍需独立维护者批准的窄动作记录。
+
+## 8. Issue #120 ax 接入（当前未 activation）
+
+- 只在现有 macbook `ai-assisted-operations` capability 中提供 ax，不修改 nixbox/server
+  的 host composition，也不增加其他主机的负向回归断言；
+- 通过上游 Flake package 接入，不复制上游源码、agent skill 或 cache 内容；
+- 专项 check 在隔离 HOME/PATH 中验证版本、`agent-context` 和本地 HTML extraction，避免外部网络；
+- formatter、Flake check、专项 check 和 macbook system build 通过后，仍需维护者针对精确 commit
+  另行批准 activation；
+- activation 后回滚优先使用上一代 nix-darwin generation，不删除 `~/.cache/ax` 或其他用户状态。

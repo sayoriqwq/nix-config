@@ -26,7 +26,8 @@ dev shell 管理；本批不把 Python、Node、Erlang、Elixir、数据库或�
 macbook-only `ai-assisted-operations` capability 选择，没有扩展到 nixbox/server。
 #67 后续未能证明 Graphviz 存在实际 caller，而 Codex 已通过客户端自带 runtime 提供
 PDF 处理依赖，因此当前 capability 已删除 Graphviz 与 Poppler 的全局 package 声明。
-Nix 只管理 RTK CLI；`RTK.md` 与 Codex integration 由 RTK init 生命周期拥有。当前组合与
+当前 Nix 还管理 macbook-only 的 ax CLI；`RTK.md` 与 Codex integration 由 RTK init 生命周期拥有，
+ax 的短期 fetch cache 仍由 ax 自己拥有。当前组合与
 所有权以 capability matrix 和 `macos-ai-cli-ownership.md` 为准。
 
 ## Atuin
