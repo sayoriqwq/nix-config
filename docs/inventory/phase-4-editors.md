@@ -26,6 +26,17 @@ activation 保留了现有 live settings 里的 Copilot provider 与
 `session.trust_all_worktrees`，也保留了 keymap/tasks 的原 hash，符合 seed-only
 边界。上述两个 live-only 设置没有进入跨机器 baseline。
 
+## Issue #122：Nix language server 与 macOS GUI PATH
+
+Zed Nix extension 0.1.4 同时提供 `nil` 与 `nixd`。两台工作站的 Home Manager
+Zed capability 显式拥有两个 package；server 保持 headless，不组合这项能力。
+
+macOS 的 Zed Nightly app 由 launchd 直接启动，Darwin adapter 将 Home Manager
+profile、用户 `.local/bin`、用户 Nix profile 与现有系统 PATH 注入未来的用户
+launchd 进程，使 GUI 启动的 Zed 可以发现声明的 language server。该 adapter 不
+修改 Zed live settings、扩展、workspace/session 或缓存；首次 activation 和
+重启 Zed 仍需维护者按 Issue #122 的人工关卡执行。
+
 ## Zed 扩展快照
 
 Zed 扩展继续属于可变状态。维护者于 2026-07-26 确认：当前 9 个扩展全部保留，

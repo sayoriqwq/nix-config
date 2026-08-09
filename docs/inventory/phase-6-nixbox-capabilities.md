@@ -32,7 +32,7 @@
 | --- | --- | --- | --- |
 | 常开工作站 | NixOS 管 GDM；Home Manager 管 `sayori` 的 GNOME idle/power 设置 | GDM 不自动 suspend；登录与锁屏会话不因 idle 熄屏或 suspend | 不禁用手动 suspend，不改变合盖或电源键行为 |
 | 可移植 Shell | Home Manager 管 Fish 配置；NixOS 管 package 注册与用户登录 shell | `programs.fish.enable`；`sayori.shell = pkgs.fish` | Fish history 与 universal variables 只声明、不接管 |
-| Zed | Home Manager 管 Nightly package、`z` 快速入口与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
+| Zed | Home Manager 管 Nightly package、`nil`/`nixd` language servers、`z` 快速入口与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
 | Clash Verge Rev | Home Manager 管 Linux package | 不启用 service、TUN、system proxy 或额外端口 | profiles、配置与日志保持可写 |

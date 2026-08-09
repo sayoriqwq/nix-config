@@ -15,6 +15,7 @@
     ../../modules/capabilities/google-chrome/darwin.nix
     ../../modules/capabilities/clash-verge-rev/darwin.nix
     ../../modules/capabilities/termius/darwin.nix
+    ../../modules/capabilities/zed-editor/darwin.nix
     ../../modules/capabilities/localsend/darwin.nix
     ../../modules/capabilities/secret-deployment/darwin.nix
   ];
