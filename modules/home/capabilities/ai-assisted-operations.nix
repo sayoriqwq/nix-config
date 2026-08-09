@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -7,12 +12,13 @@
     ../common/state-paths.nix
   ];
 
-  home.packages = with pkgs; [
+  home.packages = [
+    inputs.ax.packages.${pkgs.system}.ax
     (pkgs.callPackage ../../../packages/codex-cli { })
-    claude-code
+    pkgs.claude-code
     (pkgs.callPackage ../../../packages/antigravity-cli { })
     (pkgs.callPackage ../../../packages/oh-my-pi { })
-    rtk
+    pkgs.rtk
   ];
 
   programs.git.ignores = [ "**/.claude/settings.local.json" ];
@@ -23,6 +29,12 @@
       owner = "Codex CLI";
       backup = "separate-policy";
       description = "Codex CLI authentication, session, history, plugins, hooks, cache, databases, and mutable configuration remain writable and external. Only the stable global AGENTS.md policy is managed by Home Manager and linked into the Nix Store. RTK.md is generated, updated, and removed by the Nix-managed RTK CLI.";
+    }
+    {
+      path = "${config.home.homeDirectory}/.cache/ax/fetch";
+      owner = "ax";
+      backup = "excluded";
+      description = "Short-lived fetched-page cache owned by ax; upstream ax keeps this cache owner-only and expires entries after roughly two minutes. Home Manager only declares the boundary and never manages cache contents or credentials.";
     }
     {
       path = "${config.home.homeDirectory}/.claude";
