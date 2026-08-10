@@ -62,6 +62,7 @@ Git 只同步声明式配置。数据库、浏览器资料、服务数据、备�
 - [Phase 3 macOS 用户层盘点](docs/inventory/phase-3-macos-home.md)
 - [macOS Home Manager 迁移手册](docs/runbooks/migrate-macos-home-manager.md)
 - [Phase 4 macOS 软件所有权终态](docs/inventory/phase-4-macos-software-ownership.md)
+- [macOS 登录项与 launchd 盘点](docs/inventory/macos-startup-items.md)
 - [Phase 4 完成矩阵](docs/inventory/phase-4-completion-matrix.md)
 - [macOS 环境恢复与回滚手册](docs/runbooks/restore-macos-environment.md)
 - [架构决策记录](docs/adr/)
