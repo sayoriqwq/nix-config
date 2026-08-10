@@ -234,6 +234,14 @@
             pkgs = darwinPkgs;
             serverConfiguration = self.nixosConfigurations.server;
           };
+          ghostty-terminal-font-policy = import ./tests/ghostty-terminal/font-policy.nix {
+            inherit username;
+            lib = darwinPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = darwinPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
           macbook-raycast-source = import ./tests/macos/raycast-source.nix {
             inherit (self.darwinConfigurations.macbook.pkgs) lib;
             casks = self.darwinConfigurations.macbook.config.homebrew.casks;
