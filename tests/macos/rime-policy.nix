@@ -7,6 +7,8 @@
   preflight,
   handoff,
   staticRollback,
+  behaviorReconciler,
+  behaviorRollback,
   macbookConfiguration,
   nixboxConfiguration,
   serverConfiguration,
@@ -17,7 +19,7 @@ let
   expectedRevision = "a5f5404e369100fcfc5562f86f1205827453e31c";
   expectedNarHash = "sha256-s3r8cdEliiPnKWs64Wgi0rC9Ngl1mkIrLnr2tIcyXWw=";
   expectedManagedPathDigest = "82df5fa5c31bfffce7ca08b731b56c32106d78c2dc7459ea34dd6f95a7395de1";
-  expectedStateBoundaryDigest = "99b7b044d21aa3237e1705d2dc27d94143414f64204284ecbc61a6cbdfc0ffcf";
+  expectedStateBoundaryDigest = "5a1d16d1f347f51963c5e45cf7cf24deef06bdd0ca9a0144f650678fae20a8f8";
   expectedNetworkFirewallDigest = "674de3335869d227183a27491188df09681ba3517d875cf0cf1564b50bf6030e";
   username = "sayori";
 
@@ -27,7 +29,9 @@ let
   serverHome = serverConfiguration.config.home-manager.users.${username};
 
   dataRoot = lib.removePrefix ".local/share/" contract.targetRoot;
-  expectedTargets = map (path: "${dataRoot}/${path}") contract.managedPaths;
+  upstreamTargets = map (path: "${dataRoot}/${path}") contract.managedPaths;
+  localOverlayTarget = "${dataRoot}/default.custom.yaml";
+  expectedTargets = upstreamTargets ++ [ localOverlayTarget ];
   managedTargetsFor =
     home:
     lib.filter (target: target == dataRoot || lib.hasPrefix "${dataRoot}/" target) (
@@ -47,9 +51,11 @@ let
       || target == absoluteRoot
       || lib.hasPrefix "${absoluteRoot}/" target
     ) (builtins.attrNames home.home.file);
-  expectedHomeTargets = map (
-    path: "${macbookHome.home.homeDirectory}/${contract.targetRoot}/${path}"
-  ) contract.managedPaths;
+  expectedHomeTargets =
+    map (path: "${macbookHome.home.homeDirectory}/${contract.targetRoot}/${path}") contract.managedPaths
+    ++ [
+      "${macbookHome.home.homeDirectory}/${contract.targetRoot}/${contract.localOverlay.relativePath}"
+    ];
 
   expectedStatePaths = map (
     entry:
@@ -66,6 +72,7 @@ let
       roots = [
         "${stateRoot}/${contract.targetRoot}"
         "${stateRoot}/.config/fcitx5"
+        "${stateRoot}/${contract.behavior.journal.relativePath}"
         "${stateRoot}/Library/fcitx5"
         "${stateRoot}/Library/Caches/org.fcitx.inputmethod.Fcitx5"
       ];
@@ -154,6 +161,27 @@ let
     path: toString macbookHome.xdg.dataFile."${dataRoot}/${path}".source == "${rimeIceSource}/${path}"
   ) contract.managedPaths;
 
+  managedFcitxConfigTargetsFor =
+    home:
+    lib.filter (target: target == "fcitx5" || lib.hasPrefix "fcitx5/" target) (
+      builtins.attrNames home.xdg.configFile
+    );
+  managedFcitxHomeTargetsFor =
+    home:
+    let
+      relativeRoot = ".config/fcitx5";
+      absoluteRoot = "${home.home.homeDirectory}/${relativeRoot}";
+    in
+    lib.filter (
+      target:
+      target == relativeRoot
+      || lib.hasPrefix "${relativeRoot}/" target
+      || target == absoluteRoot
+      || lib.hasPrefix "${absoluteRoot}/" target
+    ) (builtins.attrNames home.home.file);
+
+  macbookBehaviorActivation = macbookHome.home.activation.reconcileFcitx5Behavior;
+
   exactManagedSet =
     paths:
     builtins.length paths == 65
@@ -189,20 +217,62 @@ assert lib.assertMsg (
 assert lib.assertMsg (exactManagedSet contract.managedPaths)
   "macbook must manage exactly the 65 reviewed Rime source leaves";
 assert lib.assertMsg (
-  builtins.sort builtins.lessThan macbookTargets == builtins.sort builtins.lessThan expectedTargets
-) "macbook final xdg.dataFile targets must exactly match the 65 reviewed Rime leaves";
+  contract.localOverlay.relativePath == "default.custom.yaml"
+  &&
+    contract.localOverlay.sha256 == "6d68d560d1d46937ee5e9ac10b50498257d5e868aeb2be293581a00c73aa0a30"
+  && builtins.hashFile "sha256" contract.localOverlay.source == contract.localOverlay.sha256
+  &&
+    builtins.readFile contract.localOverlay.source == ''
+      patch:
+        schema_list:
+          - schema: rime_ice
+    ''
+  &&
+    toString macbookHome.xdg.dataFile.${localOverlayTarget}.source
+    == toString contract.localOverlay.source
+) "macbook must add the approved local default.custom.yaml overlay beside the 65 upstream leaves";
+assert lib.assertMsg (
+  contract.behavior.desired.global.Behavior.ShareInputState == "All"
+  && contract.behavior.desired.macosfrontend.AppDefaultIM == { }
+  &&
+    contract.behavior.keep.global.Hotkey.AltTriggerKeys == {
+      "0" = "Shift+Shift_L";
+      "1" = "Shift+Shift_R";
+    }
+  && contract.behavior.keep.macosfrontend.StatusBar == "Hidden"
+  && contract.behavior.keep.rime.InputState == "All"
+) "macbook must preserve the approved Fcitx5 desired values and Keep-only invariants";
+assert lib.assertMsg
+  (builtins.sort builtins.lessThan macbookTargets == builtins.sort builtins.lessThan expectedTargets)
+  "macbook final xdg.dataFile targets must contain 65 reviewed upstream leaves plus one local overlay";
 assert lib.assertMsg targetSourcesMatch
   "every final macbook Rime target must source its corresponding pinned upstream leaf";
 assert lib.assertMsg (
   builtins.sort builtins.lessThan (managedHomeTargetsFor macbookHome)
   == builtins.sort builtins.lessThan expectedHomeTargets
-) "macbook final home.file expansion must not manage the Rime root, mutable state, or extra leaves";
+) "macbook final home.file expansion must manage only the 65 upstream leaves and one local overlay";
 assert lib.assertMsg (
   managedTargetsFor nixboxHome == [ ] && managedHomeTargetsFor nixboxHome == [ ]
 ) "nixbox must not select the macOS Chinese input capability";
 assert lib.assertMsg (
   managedTargetsFor serverHome == [ ] && managedHomeTargetsFor serverHome == [ ]
 ) "server must not select the macOS Chinese input capability";
+assert lib.assertMsg (
+  managedFcitxConfigTargetsFor macbookHome == [ ]
+  && managedFcitxHomeTargetsFor macbookHome == [ ]
+  && managedFcitxConfigTargetsFor nixboxHome == [ ]
+  && managedFcitxHomeTargetsFor nixboxHome == [ ]
+  && managedFcitxConfigTargetsFor serverHome == [ ]
+  && managedFcitxHomeTargetsFor serverHome == [ ]
+) "Fcitx5 writable configuration files must remain outside Store-managed file ownership";
+assert lib.assertMsg (
+  macbookBehaviorActivation.after == [ "writeBoundary" ]
+  && macbookBehaviorActivation.before == [ ]
+  && lib.hasInfix "/bin/fcitx5-behavior-reconciler reconcile" macbookBehaviorActivation.data
+  && lib.hasInfix contract.behavior.journal.relativePath macbookBehaviorActivation.data
+  && !(nixboxHome.home.activation ? reconcileFcitx5Behavior)
+  && !(serverHome.home.activation ? reconcileFcitx5Behavior)
+) "only macbook must reconcile the approved Fcitx5 behavior through the internal adapter";
 assert lib.assertMsg (
   !(lib.any isForbiddenTarget (builtins.attrNames macbookHome.xdg.dataFile))
 ) "Rime root, mutable state, and Squirrel custom configuration must remain unmanaged";
@@ -263,6 +333,8 @@ pkgs.runCommand "macbook-rime-policy"
       preflight
       handoff
       staticRollback
+      behaviorReconciler
+      behaviorRollback
     ];
   }
   ''
@@ -322,6 +394,18 @@ pkgs.runCommand "macbook-rime-policy"
     test -x ${preflight}/bin/macbook-rime-preflight
     test -x ${handoff}/bin/macbook-rime-handoff
     test -x ${staticRollback}/bin/macbook-rime-static-rollback
+    test -x ${behaviorReconciler}/bin/fcitx5-behavior-reconciler
+    test -x ${behaviorRollback}/bin/macbook-fcitx5-behavior-rollback
+
+    rollback_command='nix run .#macbook-fcitx5-behavior-rollback -- --confirm-approved-behavior-rollback'
+    grep -F -- "$rollback_command" ${source}/docs/runbooks/restore-macos-environment.md >/dev/null
+    grep -F -- "$rollback_command" ${source}/docs/plans/macos-chinese-input-stability-research.md >/dev/null
+    if grep -F -- 'nix run path:.#macbook-fcitx5-behavior-rollback' \
+      ${source}/docs/runbooks/restore-macos-environment.md \
+      ${source}/docs/plans/macos-chinese-input-stability-research.md >/dev/null; then
+      echo "behavior rollback documentation must preserve Git revision metadata" >&2
+      exit 1
+    fi
 
     touch "$out"
   ''

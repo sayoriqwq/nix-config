@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  pkgs,
   ...
 }:
 
@@ -25,6 +26,18 @@ let
       value.source = sourcePath path;
     }) contract.managedPaths
   );
+  localOverlayDataFile = {
+    "fcitx5/rime/${contract.localOverlay.relativePath}".source = contract.localOverlay.source;
+  };
+  configAdapter = import ./fcitx5-config-adapter.nix { inherit lib pkgs; };
+  behaviorReconciler = import ./fcitx5-behavior-reconciler.nix {
+    inherit
+      configAdapter
+      contract
+      lib
+      pkgs
+      ;
+  };
   statePaths = map (
     entry:
     (builtins.removeAttrs entry [ "relativePath" ])
@@ -59,12 +72,25 @@ in
       assertion = lib.all (path: sourceEntryType path == "regular") contract.managedPaths;
       message = "Every reviewed Rime Ice source leaf must be a regular non-symlink file.";
     }
+    {
+      assertion =
+        contract.isSafeRelativePath contract.localOverlay.relativePath
+        && !(contract.isForbiddenManagedPath contract.localOverlay.relativePath)
+        && !(builtins.elem contract.localOverlay.relativePath contract.managedPaths)
+        && builtins.hashFile "sha256" contract.localOverlay.source == contract.localOverlay.sha256;
+      message = "The local Rime overlay must be a distinct, reviewed, safe static leaf.";
+    }
   ];
 
   # The parent user-data tree stays writable. Only these reviewed source leaves
-  # are linked into it; Fcitx5.app, its plugin payload, and runtime state remain
-  # externally owned and are never installed or mutated by this capability.
-  xdg.dataFile = managedDataFiles;
+  # are linked into it. Fcitx5 owns its app, plugin payload, writable config-file
+  # lifecycle, and unknown fields; the reconciler changes only two approved
+  # semantic values through the official local API.
+  xdg.dataFile = managedDataFiles // localOverlayDataFile;
+
+  home.activation.reconcileFcitx5Behavior = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run ${lib.getExe behaviorReconciler} reconcile "${config.home.homeDirectory}/${contract.behavior.journal.relativePath}"
+  '';
 
   sayori.statePaths = statePaths;
 }

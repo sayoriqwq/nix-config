@@ -1,6 +1,21 @@
 { lib }:
 
 let
+  behavior = {
+    desired = {
+      global.Behavior.ShareInputState = "All";
+      macosfrontend.AppDefaultIM = { };
+    };
+    keep = {
+      global.Hotkey.AltTriggerKeys = {
+        "0" = "Shift+Shift_L";
+        "1" = "Shift+Shift_R";
+      };
+      macosfrontend.StatusBar = "Hidden";
+      rime.InputState = "All";
+    };
+    journal.relativePath = ".local/state/nix-config/macos-chinese-input/fcitx5-behavior";
+  };
   managedPaths = [
     "LICENSE"
     "cn_dicts/41448.dict.yaml"
@@ -107,6 +122,13 @@ in
 
   targetRoot = ".local/share/fcitx5/rime";
   expectedManagedPathCount = 65;
+  localOverlay = {
+    relativePath = "default.custom.yaml";
+    source = ./default.custom.yaml;
+    sha256 = "6d68d560d1d46937ee5e9ac10b50498257d5e868aeb2be293581a00c73aa0a30";
+  };
+
+  inherit behavior;
 
   inherit
     forbiddenBasenames
@@ -157,7 +179,13 @@ in
       relativePath = ".config/fcitx5";
       owner = "Fcitx5";
       backup = "required";
-      description = "Fcitx5 profile, frontend, and writable application configuration remain externally owned.";
+      description = "Fcitx5 owns the writable mixed-state tree and all unapproved fields; nix-config reconciles only two approved semantic behavior values through the official API.";
+    }
+    {
+      relativePath = behavior.journal.relativePath;
+      owner = "nix-config macOS Chinese input behavior adapter";
+      backup = "required";
+      description = "Owner-only semantic rollback journal; generation rollback does not automatically restore it.";
     }
     {
       relativePath = "Library/fcitx5";

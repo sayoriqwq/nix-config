@@ -95,7 +95,8 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 `macbook` 通过一次显式 import 选择纯 Home Manager 的 macOS 中文输入能力。其声明目标
 是从 non-Flake source 固定 rime-ice 2025.04.06 的完整 commit
 `a5f5404e369100fcfc5562f86f1205827453e31c`，并通过封闭 allowlist 逐个管理恰好 65 个
-静态 regular-file leaves。仓库不 vendor 上游源码、不建立个人 Rime 仓库、不管理
+上游静态 regular-file leaves，另管理 1 个只公开 `rime_ice` 的本地
+`default.custom.yaml` overlay。仓库不 vendor 上游源码、不建立个人 Rime 仓库、不管理
 `~/.local/share/fcitx5/rime` 根节点，也不递归链接静态源与可变状态混合的目录。
 
 安装与运行时所有权保持分离：
@@ -109,8 +110,21 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 - 65 个上游静态叶子的目标内容由 Home Manager 拥有；路径或内容与锁定 source 不一致时
   preflight 失败关闭，不允许 force 覆盖；其中上游 `squirrel.yaml` 只是完整锁定集合的一员，
   不形成 Squirrel 安装或运行时 owner；
+- 本地 overlay 是第 66 个独立静态 leaf，仅把 schema 列表收窄到 `rime_ice`；它不修改
+  pinned `default.yaml`，也不改变左右 Shift、简繁、标点或用户数据；
+- `~/.config/fcitx5` 及其中 regular files 继续由 Fcitx5 外部拥有并保持可写。能力不得 raw
+  patch INI、接管整文件或建立 Store symlink，只能通过 bundle 自带的官方本地配置 API
+  收敛全局 `ShareInputState=All` 和有效 `AppDefaultIM` 为空；左右 Shift 的
+  `AltTriggerKeys`、`StatusBar=Hidden`、Rime `InputState=All` 等 Keep 字段只做语义检查；
+- 未经批准不改变 `VimMode` 中的 MacVim 条目、剪贴板/Beast 配置、密码框策略或其他外部字段；
 - 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
   preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
+
+2026-08-11 已确认的故障链路是：macOS frontend 的 Terminal `AppDefaultIM` 主动选择
+`keyboard-us`，随后全局 `ShareInputState=All` 把 inactive 状态传播到其他 input context。
+运行时 red/green 探针从 `2 → 1 → 1` 变为 `2 → 2 → 2`；维护者批准窗口内已用官方
+`fcitx5-curl` 清空 live `AppDefaultIM`，未 raw patch、restart、deploy 或 activation。
+该 live mitigation 已验证，但声明式 adapter 与本地 overlay 在 activation 前仍只是仓库目标。
 
 可变状态只登记路径、内容 owner 与备份边界，不读取词条正文、不链接到 Nix Store：
 
@@ -122,14 +136,17 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 | `~/.local/share/fcitx5/rime/sync` | Rime | separate-policy | 同步导出状态；仓库不实现同步或备份。 |
 | `~/.local/share/fcitx5/rime/installation.yaml` | Rime | required | 可写 installation identity。 |
 | `~/.local/share/fcitx5/rime/user.yaml` | Rime | required | 可写用户运行与部署状态。 |
-| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile 与用户配置，整棵目录保持应用可写。 |
+| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile 与用户配置，整棵目录及配置文件保持应用可写；Nix 仅经官方 API 收敛两个获批字段，不取得文件所有权。 |
+| `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior` | nix-config macOS 中文输入 behavior adapter | required | mode 0700 的目录保存 mode 0600 `last-change.json` 事务 journal 与终态归档；generation rollback 不自动恢复其记录的外部字段，固定目标 rollback helper 只在 CAS 预检通过时恢复。 |
 | `~/Library/fcitx5` | Fcitx5/plugin | separate-policy | plugin/shared payload 与应用状态，继续外部所有。 |
 | `~/Library/Caches/org.fcitx.inputmethod.Fcitx5` | Fcitx5 | excluded | 可重建 cache，不属于备份承诺。 |
 
-Issue #127 当前首先建立声明、policy check、只读 preflight 和恢复合同。仓库出现能力声明或
-build 成功，不代表现有机器已经完成 owner-only rollback 备份、65 个静态 leaf 的首次
-所有权交接、nix-darwin/Home Manager activation、Rime 重新部署或真实中文输入验收。
-这些步骤必须绑定 Draft PR 的 exact commit，由维护者分别批准并记录；详细顺序见
+Issue #127 已建立 65 个上游 leaf 的声明、policy check、只读 preflight 和恢复合同；
+Issue #132 在其上增加 1 个本地 overlay 与 Fcitx 行为 adapter。仓库出现能力声明或 build
+成功，不代表现有机器已经完成 nix-darwin/Home Manager activation、Rime 重新部署或真实
+中文输入验收。已完成的 live `AppDefaultIM` 应急缓解及其 owner-only 副本只属于事故窗口，
+不能被描述为 generation rollback，也不能代替声明式 activation。这些后续步骤必须绑定
+Draft PR 的 exact commit，由维护者分别批准并记录；详细顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
 
 ## 4. Homebrew 所有权
@@ -286,8 +303,10 @@ receipt 和两个已批准的 Trash rollback 目录；当前只保留声明的 F
 - Nix generation 回滚只恢复声明和 Nix-owned package 链接；不能回滚 Homebrew adoption、
   MAS receipt、Setapp 登录、厂商应用数据、数据库或容器。
 - macOS 中文输入的 generation 回滚也不会恢复 Rime `build`、userdb、sync、installation/user
-  state 或 Fcitx plugin/config；静态交接必须另以 65-leaf rollback 恢复，再由维护者人工重新部署
-  Rime 并完成输入验收。
+  state 或 Fcitx plugin/config；它可以恢复 Nix-owned 的 65 个上游 leaf 与 1 个本地 overlay，
+  但 Fcitx 外部字段必须由固定目标 rollback helper 按 owner-only semantic journal 经官方 API 恢复。2026-08-11 的 live
+  应急副本只可用于对应事故缓解的定向回退，不是通用 generation rollback。Rime 重新部署
+  与输入验收仍由维护者人工执行。
 - Homebrew/MAS/Setapp/厂商应用的具体恢复和故障顺序见 Mac 总体 runbook。
 - #93 还发现并精确删除六个指向已删除 Docker、WARP 与 Zed Preview 应用的 root-owned
   `/usr/local/bin` 悬空链接。删除后 `docker`/`kubectl` 继续由 OrbStack 提供，`zed` 只
