@@ -61,9 +61,7 @@ in
       values.deployPublicKey
     ];
 
-    root.openssh.authorizedKeys.keys = lib.mkForce [
-      values.maintenancePublicKey
-    ];
+    root.openssh.authorizedKeys.keys = lib.mkForce [ ];
   };
 
   environment.systemPackages = [

@@ -1,6 +1,8 @@
 # Phase 0–11 Reconcile 记录
 
 > 范围：Issue #103，基线为 `main@4178a8ee3ad4e0c858aae85e136f2bbc7fb0887f`。本文记录 2026-08-04 的全仓、GitHub、主机只读状态与维护者批准的清理结果；不授权 activation、Nix GC、generation 删除、PostgreSQL 变更或其他生产修改。
+>
+> **后续决策：** 第 7 节记录的 2026-08-05 root 直连选择已于 2026-08-10 被取代；当前目标见第 8 节。历史运行态证据保持原文。
 
 ## 1. 当前阶段结论
 
@@ -68,3 +70,12 @@
 - nixbox 仍是维护者的次级 NixOS 工作站及 server 的 `x86_64-linux` build/test/deploy 节点；其独立 deploy identity 不等于维护者交互身份，也不是 macbook 直连 server 的必经跳板；
 - 2026-08-06 只读核对发现 macbook 的 RTK `0.44.0` 数据目录仍为 `0755`、数据文件仍为 `0644`；维护者批准后已将 `~/Library/Application Support/rtk` 下的 2 个目录收紧为 `0700`、23 个普通文件收紧为 `0600`，未删除或读取其中内容。RTK 上游 `0.44.2` 已包含同类 owner-only 修复，但 nixpkgs-unstable 仍停留在 `0.44.0`，后续优先等待 nixpkgs 正常跟进，不引入临时 overlay；
 - 当前开放主线跟踪为 #1；Phase 12 / #14 继续延后；#67 已进入 broader AI/RTK 基线实施；#60 已在维护者批准放弃旧数据后完成 PostgreSQL 16 的 service、formula、数据目录与声明退役；开放 PR #95 继续独立审阅；自动生成的 PR #108 已按维护者裁决关闭且未合并，对应远端分支已删除；维护者已于 2026-08-06 卸载 ECC Tools GitHub App，并在 Installed GitHub Apps 列表中确认其消失，后续不再拥有仓库访问或自动创建 PR 的能力。
+
+## 8. 2026-08-10 管理模型复审
+
+- 维护者重新打开 #99，以独立维护变更恢复 server 的 `sayori + sudo` 交互模型；2026-08-05 的 root 日常直连决定不再是目标状态；
+- macbook maintenance identity 与 nixbox deploy identity 保持不同 private key，但都登录远端实际 Unix 用户 `sayori`；独立 key 便于分别保管、撤销、轮换和识别认证来源，不构成 Unix 权限隔离；
+- 单条特权命令使用 `sudo`，连续 root 操作使用 `sudo -i`；不使用 `su` 或 root password；
+- 目标 SSH policy 为 `PermitRootLogin=no`、root authorized keys 为空，password 与 keyboard-interactive 继续关闭；
+- #99 同时批准 Helix、Yazi、系统级诊断 CLI 与面向维护者的排查手册，但不批准 production activation、network/firewall 变更或业务恢复；
+- production 当前运行态只有在后续独立行动卡获批并 activation 后才能按新声明重新验收，本文不把仓库目标误报为已应用。

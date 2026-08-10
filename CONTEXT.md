@@ -99,15 +99,15 @@ nixbox 拉取锁定输入、构建并验证 server closure，再把不可变 clo
 
 ### 维护者交互管理身份（Maintainer interactive administration identity）
 
-维护者本人从 macbook 执行 `ssh sayori` 管理 server；其中 `sayori` 是 macbook 本地 SSH Host 别名，远端用户固定为 `root`，不是 server 上的普通用户登录名。当前 server 是维护者个人使用的单管理员主机，因此交互管理不增加普通用户登录后再 `sudo` 的额外一层。该决定只保留 public-key root SSH；password 与 keyboard-interactive 继续关闭，Contabo VNC 作为已实连验证的带外恢复路径。
+维护者本人从 macbook 执行 `ssh sayori` 管理 server；其中 `sayori` 是 macbook 本地 SSH Host 别名，远端用户固定为实际 Unix 用户 `sayori`。macbook maintenance identity 只提供 SSH 认证；登录后以 `sudo` 执行单条特权命令，确需连续 root 操作时使用 `sudo -i`。不使用 `su`，不依赖 root password，也不允许 root 经 SSH 登录。Password 与 keyboard-interactive 继续关闭，Contabo VNC 作为已实连验证的带外恢复路径。
 
 ### Nixbox 机器部署身份（Nixbox machine deployment identity）
 
-nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，构建、验证并仅在获批部署中使用 `sudo -n` 应用 server closure；该 identity 是机器到机器的部署边界，不代表维护者本人，也不获得 macbook maintenance private key。nixbox 不是 server 的必经 bastion，故障时不影响 macbook 直达 server 的管理链路。
+nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，构建、验证并仅在获批部署中使用 `sudo -n` 应用 server closure；该 identity 是机器到机器的凭据边界，不代表维护者本人，也不获得 macbook maintenance private key。两把 key 映射到同一个远端 Unix 用户和同一套 sudo policy，因此它们不是权限隔离边界；分开保存是为了能够独立撤销、轮换并从 SSH 认证日志追溯凭据来源。nixbox 不是 server 的必经 bastion，故障时不影响 macbook 直达 server 的管理链路。
 
 ### Server 直接管理链路（Direct server management path）
 
-macbook 到 server 的独立 root public-key SSH 管理与救援路径，用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
+macbook 使用 maintenance identity 直接登录 `server:sayori`，再经 sudo 边界完成管理与救援；该链路用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不允许 root SSH，不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
 
 ### Git 基础能力（Git foundation capability）
 
@@ -208,7 +208,7 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
 4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；维护者本人从 macbook 以 root public-key-only 直连，nixbox 使用独立机器部署身份；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
+6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；macbook maintenance identity 与 nixbox deploy identity 都只登录远端 `sayori`，经 sudo 边界提权，root SSH 关闭；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责
