@@ -141,6 +141,22 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 桌面用户能力中的终端体验，以 Ghostty + Fish 为两台工作站的主路径。WezTerm + Zsh 只作为 macOS 兼容能力保留。
 
+### macOS 中文输入能力（macOS Chinese input capability）
+
+只由 `macbook` 选择的纯 Home Manager 用户能力。Home Manager 从锁定到 commit
+`a5f5404e369100fcfc5562f86f1205827453e31c` 的 rime-ice 2025.04.06 source 逐个管理经审阅的
+65 个静态叶子，但不接管 Rime 用户目录根节点。`Fcitx5.app`、Rime plugin payload 与
+macOS 输入源注册继续由官方安装器/updater 和系统运行态外部拥有；能力只记录其恢复入口、
+可变状态边界与人工关卡，不构建、安装或更新这些外部组件。
+
+Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
+`luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
+`~/.config/fcitx5` 必须保护；`sync` 与 `~/Library/fcitx5` 使用独立备份策略。声明和构建
+成功不表示真实机器已经完成静态所有权交接、activation、Rime 重新部署或输入验收；这些
+动作始终受 exact commit 的人工批准约束。65 个上游叶子中的 `squirrel.yaml` 只保留锁定
+release 的完整静态集合，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、
+preferences、cache、`squirrel.custom.yaml` 与 `~/Library/Rime` 保持不变。
+
 ### 主编辑器角色（Primary editor role）
 
 桌面用户环境中唯一负责默认编辑器契约的应用角色。其他编辑器可以继续安装为备用工具，但不得同时竞争该角色。
