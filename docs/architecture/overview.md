@@ -131,19 +131,19 @@ Phase 11 建立了 SOPS + sops-nix + age 基础：
 维护者、macbook 与 nixbox 不能被折叠成同一个“管理员”身份：
 
 ```text
-维护者 ──macbook 本地 Host alias `sayori`──▶ server:root
-   │                                           ▲
-   └──Unix 用户 `sayori`──▶ nixbox ────────────┘
+维护者 ──macbook maintenance identity──▶ server:sayori ──sudo / sudo -i──▶ root
+   │                                         ▲
+   └──Unix 用户 `sayori`──▶ nixbox ──────────┘
                            独立 deploy identity
 ```
 
-- 维护者本人通过 macbook 直达 server 的 `root`，不经过 nixbox，也不先登录 server 普通用户再 `sudo`；
-- `ssh sayori` 中的 `sayori` 是 macbook 本地 Host alias，不能误写成 server 的 Unix username；
-- root SSH 只允许维护者公钥，password 与 keyboard-interactive 保持关闭；Contabo VNC 提供已实连验证的带外恢复；
+- 维护者本人通过 macbook 直达 server 的实际 Unix 用户 `sayori`，不经过 nixbox；单条特权操作使用 `sudo`，连续 root 操作使用 `sudo -i`，不使用 `su` 或 root password；
+- `ssh sayori` 中的 `sayori` 同时是 macbook 本地 Host alias 与该 Host 当前配置的远端 Unix username，文档必须分别说明，不能再把它解释为 `root`；
+- root SSH、password 与 keyboard-interactive 保持关闭；Contabo VNC 提供已实连验证的带外恢复；
 - 维护者在 nixbox 上使用实际 Unix 用户 `sayori`；nixbox 同时是 `x86_64-linux` build/test 节点，并以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，只在获批部署中使用 `sudo -n` 应用 closure；
-- nixbox 的机器身份不等于维护者本人，不获得 macbook maintenance private key，也不形成 macbook 管理 server 的必经 bastion。
+- nixbox 的机器身份不等于维护者本人，不获得 macbook maintenance private key，也不形成 macbook 管理 server 的必经 bastion；两把 key 共享远端 account 与 sudo policy，分离的是凭据生命周期和认证来源，不是 Unix 授权。
 
-这一单管理员模型是维护者对当前个人 server 的明确取舍。若未来增加管理员、自动化主体或合规审计要求，应另建 Issue 重新评估 root 直连、sudo 边界和 deploy identity，不从当前单用户前提外推。
+这一单管理员模型是维护者对当前个人 server 的明确取舍。若未来增加管理员、自动化主体或合规审计要求，应另建 Issue 重新评估 account、sudo 边界和 deploy identity，不从当前单用户前提外推。
 
 ## 4. 工具选择与引入顺序
 

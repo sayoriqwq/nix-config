@@ -6,7 +6,7 @@
 >
 > 维护者于 2026-07-30 批准本文推荐的 public routing facts、双管理 key、首次 key-only root break-glass、保留 SSH host identity 与 source-data waiver 方案。该批准是 Phase 8–10 的设计输入，不是 production 执行授权。
 >
-> **后续决策：** 本文关于“二次启动后关闭 root SSH”的建议已被维护者于 2026-08-05 的单管理员决策取代。当前长期模型是 macbook 的本地 Host alias `sayori` 直达 server `root`，仅允许维护者公钥；#99 / PR #109 已关闭且从未 activation。本文其余迁移期证据与风险控制原则继续作为历史记录。
+> **后续决策：** 本文关于“二次启动后关闭 root SSH”的建议曾被维护者于 2026-08-05 的 root 单管理员决策取代；该选择又于 2026-08-10 被复审取代。当前目标是 macbook maintenance identity 与 nixbox deploy identity 都登录 `server:sayori`，经 sudo 提权并关闭 root SSH；#99 已重新打开，production activation 仍待独立批准。本文其余迁移期证据与风险控制原则继续作为历史记录。
 
 ## 1. 结论
 

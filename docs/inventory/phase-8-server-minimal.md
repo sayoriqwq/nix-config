@@ -2,7 +2,7 @@
 
 > 范围：Issue #11 的声明、非破坏性 evaluation/build 与后续关卡输入。本文不授权连接或修改 production Ubuntu server，也不授权运行 disko、nixos-anywhere、kexec、format、reboot、Rescue、Reinstall 或任何 Contabo 电源动作。
 >
-> **后续决策：** Phase 8 将 root SSH 标为首次替换 break-glass；维护者于 2026-08-05 在任何关闭配置 activation 前明确采用单管理员 root public-key-only 长期模型。当前声明保持本页已验证的 key-only root 路径，#99 / PR #109 不实施。
+> **后续决策：** Phase 8 将 root SSH 标为首次替换 break-glass；维护者于 2026-08-05 曾在任何关闭配置 activation 前采用单管理员 root public-key-only 模型，又于 2026-08-10 重新打开 #99 并恢复 `sayori + sudo` 目标。当前仓库声明关闭 root SSH；production 只有在独立行动卡获批并 activation 后才改变。本文表格中的首次安装事实保持历史原貌。
 
 ## 1. 证据到声明的映射
 
@@ -24,10 +24,13 @@
 
 固定版本的 disko 在发现 `EF02` 分区时会从 disk device 自动生成 `boot.loader.grub.devices`。Phase 8 曾同时声明单值 `boot.loader.grub.device`，非破坏性 evaluation 发现 duplicated devices 断言后已删除重复声明；最终生成值仍是上表的稳定 disk alias。
 
+2026-08-10 的 #99 在不改变 disk、boot、network、firewall 或服务边界的前提下，新增 Helix、Yazi 与系统级 `lsof`、`dig`、`mtr`、`tcpdump`、`strace`。这些 package 不启用 daemon 或 listener；其中抓包、跨进程检查和跨进程追踪按需经 sudo。
+
 ## 2. 组合边界
 
 - `hosts/server/default.nix` 只组合 server host facts、disko、network 与已批准 capability；
 - `modules/nixos/server.nix` 只承载 server 的 firewall、sudo 与 SSH root policy；
+- `modules/nixos/server-diagnostics.nix` 只提供已批准的系统级诊断 CLI，不启用 service、listener 或 firewall rule；
 - `modules/nixos/base.nix` 改为接收 host composition 传入的 `username`，不再夹带 nixbox 的 authorized key 或 root policy；
 - `hosts/nixbox/default.nix` 显式保留原 authorized key 与 `PermitRootLogin = "no"`，从而保持既有 nixbox 行为；
 - server 不声明 production service、旧容器、数据、secret、GitHub credential 或自行 checkout/build 的机制。
@@ -64,7 +67,7 @@ Phase 9 必须从当前 server output 派生测试 variant，但用 `lib.mkForce
 | IPv4 | RFC 5737 dummy address/gateway | static address 与 default route 正确，不依赖 DHCP |
 | IPv6 | RFC 3849 dummy address；link-local dummy gateway | `GatewayOnLink=true` 的 route 可用，不依赖 RA |
 | DNS | 隔离测试 resolver | 生成的 link DNS 正确；测试不依赖 production DNS |
-| SSH | 测试专用 ephemeral client/host keys | `sayori` key login、`sudo -n true` 与 key-only root break-glass 通过；password/keyboard-interactive 失败 |
+| SSH | 测试专用 ephemeral client/host keys | 两类 `sayori` key login 与 `sudo -n true` 通过；maintenance/deploy key 的 root login、password 和 keyboard-interactive 均失败 |
 | firewall | 测试 network namespace | TCP 22 可达；未声明端口不可达；无旧业务 listener |
 
 VM test 还必须断言：`stateVersion = 26.05`、Atuin 没有 sync 设置、没有 GitHub collaboration/GUI/工作站 bundle、最终 closure 不依赖 server checkout。测试产生的 ephemeral key 与 disk image 不进入 Git，测试结束后删除。

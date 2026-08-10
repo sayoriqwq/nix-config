@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `macbook` | 主工作站 | 保留完整 GUI、CLI、迁移兼容与已确认试点能力；它是能力的全量组合，不再是其他主机的继承源。 |
 | `nixbox` | 次级工作站、Linux 试验站、Server 预生产验证站 | 只选择明确需要的 macbook 能力，并增加 NixOS/Linux 自身需求；不镜像 macbook。 |
-| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；维护者从 macbook 以 root public-key-only 直达，nixbox 以独立机器身份承担 build/test/deploy；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
+| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；macbook maintenance identity 与 nixbox deploy identity 都登录远端 `sayori`，经 sudo 边界提权，root SSH 关闭；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
 
 ## 已确认目标组合
 
@@ -23,10 +23,11 @@
 | GitHub 协作 | 是 | 是 | 否 | `gh`、GitHub credential helper、lazygit、gitleaks；凭据不进入 server。 |
 | 交互式 Shell 辅助 | 是 | 是 | 是 | `pay-respects` 及 Fish integration。 |
 | 主机概览与诊断 | 是 | 是 | 是 | `fastfetch` 与 `btop`；不替代生产监控。 |
+| Server 深度诊断 | 否 | 否 | 是 | 系统级提供 `lsof`、`dig`、`mtr`、`tcpdump` 与 `strace`；不启用服务、不增加 listener 或 firewall 规则，抓包和跨进程追踪按需经 sudo。 |
 | 工作站开发运行时 | 是 | 是 | 否 | mise 管 Node/Bun/pnpm，uv 管 Python，direnv 进入项目环境。 |
 | macOS 开发运行时试点 | 是 | 否 | 否 | 保留 macbook 现有 Erlang/Elixir mise defaults，不随工作站能力迁移。 |
-| 终端文件工作流 | 是 | 是 | 否 | Yazi；低使用频率不取消已确认的迁移方向。 |
-| Helix | 是 | 是 | 否 | 备用终端编辑器；server 的最小编辑需求在 server Phase 再确认。 |
+| 终端文件工作流 | 是 | 是 | 是 | Yazi；server 用于只读浏览与用户可写文件操作，不接管 production 数据。 |
+| Helix | 是 | 是 | 是 | 备用终端编辑器；server 上用于临时记录和获批配置操作，不把生成的 `/etc` 状态当作配置源。 |
 | Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish。 |
 | Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` language server；live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
@@ -54,5 +55,5 @@
 
 - macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
 - server 已运行最小 NixOS，只组合 headless 基线与明确需要的共享能力。
-- server 当前采用维护者明确批准的单管理员模型；macbook 的本地 Host alias `sayori` 直达远端 `root`，nixbox 不是交互身份或必经跳板。
+- server 当前目标采用维护者明确批准的单管理员 `sayori + sudo` 模型；macbook 与 nixbox 使用独立 key 登录同一远端用户，root SSH 关闭，nixbox 不是交互身份或必经跳板。该目标只有在独立 production action card 获批并 activation 后才成为运行态事实。
 - Phase 12 已延后；新增能力继续按本矩阵和独立 Issue 审批，不从其他主机继承 bundle。

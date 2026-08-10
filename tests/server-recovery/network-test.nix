@@ -218,7 +218,7 @@ pkgs.testers.runNixOSTest {
         gateway.succeed("ssh ${sshOptions} -i /root/.ssh/maintenance ${username}@${values.ipv4Host} true")
         gateway.succeed("ssh ${sshOptions} -i /root/.ssh/deploy ${username}@${values.ipv4Host} true")
         gateway.succeed("ssh ${sshOptions} -i /root/.ssh/maintenance ${username}@${values.ipv4Host} sudo -n true")
-        gateway.succeed("ssh ${sshOptions} -i /root/.ssh/maintenance root@${values.ipv4Host} true")
+        gateway.fail("ssh ${sshOptions} -i /root/.ssh/maintenance root@${values.ipv4Host} true")
         gateway.fail("ssh ${sshOptions} -i /root/.ssh/deploy root@${values.ipv4Host} true")
         gateway.fail("ssh ${sshOptions} -o PubkeyAuthentication=no -o PreferredAuthentications=password ${username}@${values.ipv4Host} true")
         gateway.fail("ssh ${sshOptions} -o PubkeyAuthentication=no -o PreferredAuthentications=keyboard-interactive ${username}@${values.ipv4Host} true")
@@ -241,6 +241,7 @@ pkgs.testers.runNixOSTest {
         assert first_host_key == second_host_key
         gateway.succeed("ssh ${sshOptions} -i /root/.ssh/maintenance ${username}@${values.ipv4Host} true")
         gateway.succeed("ssh ${sshOptions} -i /root/.ssh/deploy ${username}@${values.ipv4Host} sudo -n true")
+        gateway.fail("ssh ${sshOptions} -i /root/.ssh/maintenance root@${values.ipv4Host} true")
         gateway.succeed("nc -6 -z -w 2 ${values.ipv6Host} 22")
 
     with subtest("ephemeral test credentials are removed before shutdown"):

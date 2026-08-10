@@ -22,6 +22,17 @@ let
   rootKeys = config.users.users.root.openssh.authorizedKeys.keys;
   homeConfig = config.home-manager.users.${username};
   homePackageNames = map lib.getName homeConfig.home.packages;
+  systemPackageNames = map lib.getName config.environment.systemPackages;
+  requiredSystemPackageNames = map lib.getName (
+    with pkgs;
+    [
+      dnsutils
+      lsof
+      mtr
+      tcpdump
+      strace
+    ]
+  );
   forbiddenHomePackages = [
     "gh"
     "google-chrome"
@@ -53,6 +64,14 @@ let
     stateVersion = {
       home = homeConfig.home.stateVersion;
       system = config.system.stateVersion;
+    };
+    terminal = {
+      diagnostics = requiredSystemPackageNames;
+      helix = {
+        enabled = homeConfig.programs.helix.enable;
+        theme = homeConfig.programs.helix.settings.theme;
+      };
+      yazi = lib.elem (lib.getName pkgs.yazi) homePackageNames;
     };
   };
 in
@@ -89,8 +108,8 @@ assert
   evidence.ssh == {
     KbdInteractiveAuthentication = false;
     PasswordAuthentication = false;
-    PermitRootLogin = "prohibit-password";
-    rootKeys = [ values.maintenancePublicKey ];
+    PermitRootLogin = "no";
+    rootKeys = [ ];
     userKeys = [
       values.maintenancePublicKey
       values.deployPublicKey
@@ -100,6 +119,16 @@ assert
   evidence.stateVersion == {
     home = "26.05";
     system = "26.05";
+  };
+assert lib.all (package: lib.elem package systemPackageNames) requiredSystemPackageNames;
+assert
+  evidence.terminal == {
+    diagnostics = requiredSystemPackageNames;
+    helix = {
+      enabled = true;
+      theme = "ayu_dark";
+    };
+    yazi = true;
   };
 assert !(homeConfig.programs.atuin.settings ? sync);
 assert lib.intersectLists forbiddenHomePackages homePackageNames == [ ];
