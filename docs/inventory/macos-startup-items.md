@@ -35,7 +35,7 @@ Mos package 已由 Home Manager 唯一拥有，而旧登录项指向已经退役
 | 8 | SideNotes | Trash 中的退役应用 | 失效 | 删除旧记录 |
 | 9 | AlDente Pro | Setapp | 有效 | 按维护者要求删除登录项；应用保留 |
 | 10 | Raycast | Homebrew 声明应用 | 有效 | 保留，应用所有 |
-| 11 | Bartender | Setapp | 有效 | 保留，应用所有 |
+| 11 | Bartender | Setapp | 有效 | 按维护者要求删除登录项；应用保留并可通过 Raycast 按需启动 |
 | 12 | Paste | Setapp | 有效 | 保留，应用所有 |
 | 13 | Typeless | Trash 中的退役应用 | 失效 | 删除旧记录 |
 | 14 | FigmaAgent | Figma Application Support | 有效 | 按维护者要求删除登录项；应用保留 |
@@ -61,22 +61,21 @@ Mos package 已由 Home Manager 唯一拥有，而旧登录项指向已经退役
 12. HazeOver
 13. Vorssaint
 
-维护者随后明确要求 MEGAsync、AlDente Pro 与 FigmaAgent 不再登录启动。删除这 3 个仍有效
-但非必需的记录后，当前“登录时打开”完整清单为以下 10 项：
+维护者随后明确要求 MEGAsync、AlDente Pro、FigmaAgent 与 Bartender 不再登录启动。删除这
+4 个仍有效但非必需的记录后，当前“登录时打开”完整清单为以下 9 项：
 
 1. CleanShot X
 2. Timing Tracker
 3. Slidepad
 4. One Thing
 5. Raycast
-6. Bartender
-7. Paste
-8. Setapp
-9. HazeOver
-10. Vorssaint
+6. Paste
+7. Setapp
+8. HazeOver
+9. Vorssaint
 
-Bartender 当前仍保留；它是否改为只在使用内建屏幕时通过 Raycast 按需启动，是一个待
-维护者确认的可逆偏好决定，不与 Mos 的 Nix 所有权混合。
+Bartender 应用及其数据保持不变；维护者在家和公司主要使用外接屏幕，携带 Mac 外出时可
+通过 Raycast 按需启动，因此不再为偶发场景长期占用登录启动入口。
 
 ## 3. Nix Mos 登录启动合同
 
@@ -91,9 +90,11 @@ Bartender 当前仍保留；它是否改为只在使用内建屏幕时通过 Ray
 - Mos 偏好、设备状态、日志和 Accessibility/Input Monitoring 等 macOS 授权保持可写、
   不进入 Nix Store。
 
-构建不会改变当前登录项。只有维护者审阅精确 commit 并单独批准 activation 后，新的
-LaunchAgent 才会安装和 bootstrap。它属于声明式启动 job，不要求重新创建旧的 mutable
-“登录时打开”数据库记录。
+构建不会改变当前登录项。维护者审阅并批准精确 commit 后，实机 activation 已安装和
+bootstrap 新 LaunchAgent。首次验证时，Mos 同时在原生 SessionLoginItems 中生成了一个
+指向 Home Manager Apps bundle 的记录；维护者随后批准删除该原生记录。即时复核确认
+SessionLoginItems 中不再有 Mos，`org.nix-community.home.mos` 仍加载且最近退出码为 0，
+因此当前只有 Nix 声明的启动入口；下一次真实登录后的持久性验证仍待维护者反馈。
 
 ## 4. 文件型 launchd 盘点
 
@@ -105,9 +106,9 @@ LaunchAgent 才会安装和 bootstrap。它属于声明式启动 job，不要求
 | `/Library/LaunchAgents` | 3 | 0；均为 Logi 组件 |
 | `/Library/LaunchDaemons` | 14 | nix-darwin 声明 2 个；Lix bootstrap 另有必要组件 |
 
-清理后，`~/Library/LaunchAgents` 为 13 个，`/Library/LaunchAgents` 仍为 3 个，
-`/Library/LaunchDaemons` 为 8 个。数量只用于证明精确变化；所有权仍以 label、plist
-内容与父应用为准。
+清理后、activation 前，`~/Library/LaunchAgents` 为 13 个；activation 增加 Mos 后为
+14 个。`/Library/LaunchAgents` 仍为 3 个，`/Library/LaunchDaemons` 为 8 个。数量只用于
+证明精确变化；所有权仍以 label、plist 内容与父应用为准。
 
 Issue #124 精确清理以下孤儿 job，不触碰其他 plist：
 
@@ -129,7 +130,7 @@ Nix activation 是两个独立人工关卡。
 
 ## 5. 明确保留或外置的启动项
 
-- `dev.sayori.remotelocation.cleanup-guardian`：由 Pinshift 项目的签名安装、更新和回滚流程
+- `dev.sayori.pinshift.cleanup-guardian`：由 Pinshift 项目的签名安装、更新和回滚流程
   唯一拥有；本仓库不复制 plist 或设备专属参数。
 - `local.sayori.NuPhyKeyProbe`：当前手工应用与 Agent 保持外部；若未来成为稳定工作站需求，
   另建 Issue 决定 package、签名和 TCC 所有权。
@@ -144,14 +145,15 @@ Agent 可完成备份、精确清理、Nix evaluation/build 和 Draft PR，但�
 activation 关卡批准前运行 `darwin-rebuild switch`。清理验收至少确认：
 
 - 第一轮清理精确保留原有 13 个有效登录项；随后只按维护者新要求移除 MEGAsync、
-  AlDente Pro 与 FigmaAgent，当前清单为 10 项；
+  AlDente Pro、FigmaAgent 与 Bartender，当前清单为 9 项；
 - 6 个失效登录项不再出现；
 - 8 个孤儿 label 不再加载，Nyanpasu 不再重试，Docker/Mihomo 孤儿进程停止；
 - OrbStack、Clash Verge、Pinshift、NuPhy Key Probe 与 Nix/Lix 服务仍保持原状态；
 - activation 后 `org.nix-community.home.mos` 已加载，Mos 从 Home Manager Apps 路径运行；
+  首次出现的 Mos 原生 SessionLoginItems 记录已获批删除，真实重新登录验证待维护者反馈；
 - rollback 目录仍存在且只能由维护者访问。
 
 root 清理回滚使用同一私有目录中的短 helper 恢复精确文件并 bootstrap 原 label。Nix
 activation 若后来出现问题，优先回滚上一代 system generation；两类回滚互不替代。
-三个有效应用登录项可从各应用设置或 System Settings 重新启用；六个失效记录的原始目标
+四个有效应用登录项可从各应用设置或 System Settings 重新启用；六个失效记录的原始目标
 已经不存在，因此只保留清理前快照，不伪造不可用的恢复入口。

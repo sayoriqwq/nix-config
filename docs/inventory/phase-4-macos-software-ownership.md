@@ -181,8 +181,8 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 
 账号、订阅、授权、电池策略、菜单栏布局、截图/录制、云端挂载、数据库连接、剪贴板
 历史和其他运行数据不进入 Git。SideNotes、Lungo、NotchNook、Sip 与 iStat Menus 已退役。
-Issue #124 按维护者要求移除了 AlDente Pro 的登录启动记录；Bartender 当前仍保留登录
-启动，是否改为内建屏幕场景下通过 Raycast 按需启动，保持为独立可逆决定。
+Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动记录；应用及数据保持
+不变。Bartender 只在携带 Mac 外出、使用内建屏幕时可能需要，可通过 Raycast 按需启动。
 
 ## 7. 厂商、手工与有意试用应用
 
@@ -234,8 +234,8 @@ Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明�
 
 #124 又清理了 iStat Menus、cDock、Nyanpasu、Mihomo Party 与 Docker Desktop 留下的
 8 个孤儿 launchd label，并移除了 6 个已经无法解析目标的旧登录项。MEGAsync、
-AlDente Pro 与 FigmaAgent 应用继续由原 owner 管理，只是不再登录启动；该清理不删除
-它们的应用或数据。
+AlDente Pro、FigmaAgent 与 Bartender 应用继续由原 owner 管理，只是不再登录启动；该
+清理不删除它们的应用或数据。
 
 Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移动到可恢复 Trash。#74
 恢复并人工验收了旧应用与数据，随后全球版 `lark` cask 安装了 `LarkSuite.app`。维护者
