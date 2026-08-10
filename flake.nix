@@ -129,8 +129,38 @@
       rimeIceContract = import ./modules/home/capabilities/macos-chinese-input/contract.nix {
         lib = macbookPkgs.lib;
       };
-      macbookRimePreflight = import ./tests/macos/rime-preflight.nix {
+      macbookFcitx5ConfigAdapter =
+        import ./modules/home/capabilities/macos-chinese-input/fcitx5-config-adapter.nix
+          {
+            lib = macbookPkgs.lib;
+            pkgs = macbookPkgs;
+          };
+      macbookFcitx5BehaviorReconciler =
+        import ./modules/home/capabilities/macos-chinese-input/fcitx5-behavior-reconciler.nix
+          {
+            configAdapter = macbookFcitx5ConfigAdapter;
+            contract = rimeIceContract;
+            lib = macbookPkgs.lib;
+            pkgs = macbookPkgs;
+          };
+      macbookFcitx5BehaviorRollback = import ./tests/macos/fcitx5-behavior-rollback.nix {
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
+        inherit configurationRevision;
         contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        lib = macbookPkgs.lib;
+        pkgs = macbookPkgs;
+      };
+      macbookRimePreflight = import ./tests/macos/rime-preflight.nix {
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
+        contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        pkgs = macbookPkgs;
+        rimeIceSource = inputs.rime-ice;
+      };
+      macbookRimeStaticPreflight = import ./tests/macos/rime-preflight.nix {
+        contract = rimeIceContract;
+        fullCapability = false;
         homeDirectory = macbookHome.home.homeDirectory;
         pkgs = macbookPkgs;
         rimeIceSource = inputs.rime-ice;
@@ -140,16 +170,18 @@
         contract = rimeIceContract;
         homeDirectory = macbookHome.home.homeDirectory;
         pkgs = macbookPkgs;
-        preflight = macbookRimePreflight;
+        preflight = macbookRimeStaticPreflight;
       };
       macbookRimeStaticRollback = import ./tests/macos/rime-static-rollback.nix {
         inherit configurationRevision;
         contract = rimeIceContract;
         homeDirectory = macbookHome.home.homeDirectory;
         pkgs = macbookPkgs;
-        preflight = macbookRimePreflight;
+        preflight = macbookRimeStaticPreflight;
       };
       macbookRimePolicy = import ./tests/macos/rime-policy.nix {
+        behaviorRollback = macbookFcitx5BehaviorRollback;
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
         contract = rimeIceContract;
         handoff = macbookRimeHandoff;
         lib = macbookPkgs.lib;
@@ -161,6 +193,11 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
         staticRollback = macbookRimeStaticRollback;
+      };
+      macbookFcitx5BehaviorAdapter = import ./tests/macos/fcitx5-behavior-adapter.nix {
+        contract = rimeIceContract;
+        lib = macbookPkgs.lib;
+        pkgs = macbookPkgs;
       };
       phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
         adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
@@ -224,6 +261,7 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
+          macbook-fcitx5-behavior-rollback = macbookFcitx5BehaviorRollback;
           macbook-rime-handoff = macbookRimeHandoff;
           macbook-rime-preflight = macbookRimePreflight;
           macbook-rime-static-rollback = macbookRimeStaticRollback;
@@ -243,6 +281,10 @@
       };
 
       apps.aarch64-darwin = {
+        macbook-fcitx5-behavior-rollback = {
+          type = "app";
+          program = "${macbookFcitx5BehaviorRollback}/bin/macbook-fcitx5-behavior-rollback";
+        };
         macbook-rime-handoff = {
           type = "app";
           program = "${macbookRimeHandoff}/bin/macbook-rime-handoff";
@@ -320,6 +362,7 @@
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
           macbook-rime-policy = macbookRimePolicy;
+          macbook-fcitx5-behavior-adapter = macbookFcitx5BehaviorAdapter;
         };
         x86_64-linux = {
           server-recovery-network = serverRecoveryNetworkTest;

@@ -3,12 +3,16 @@
   contract,
   rimeIceSource,
   homeDirectory,
+  behaviorReconciler ? null,
+  fullCapability ? true,
 }:
 
 let
   inherit (pkgs) lib;
   quote = lib.escapeShellArg;
   targetRoot = "${homeDirectory}/${contract.targetRoot}";
+  localOverlaySource = toString contract.localOverlay.source;
+  localOverlayTarget = "${targetRoot}/${contract.localOverlay.relativePath}";
   mutablePaths = map (entry: "${homeDirectory}/${entry.relativePath}") contract.mutableStatePaths;
 in
 assert lib.assertMsg (
@@ -27,6 +31,9 @@ assert lib.assertMsg (lib.all (entry: contract.isSafeRelativePath entry.relative
 assert lib.assertMsg (lib.all (path: !(contract.isForbiddenManagedPath path))
   contract.managedPaths
 ) "macbook Rime preflight must not inspect mutable Rime paths as managed leaves";
+assert lib.assertMsg (
+  !fullCapability || behaviorReconciler != null
+) "the full macbook Chinese-input preflight requires the behavior reconciler";
 pkgs.writeShellApplication {
   name = "macbook-rime-preflight";
   runtimeInputs = [ pkgs.coreutils ];
@@ -122,6 +129,54 @@ pkgs.writeShellApplication {
 
     ${lib.concatMapStringsSep "\n" (path: "check_static_leaf ${quote path}") contract.managedPaths}
 
+    ${lib.optionalString fullCapability ''
+      overlay_source=${quote localOverlaySource}
+      overlay_target=${quote localOverlayTarget}
+      overlay_relative=${quote contract.localOverlay.relativePath}
+      overlay_source_real="$(realpath "$overlay_source")"
+
+      if ! test -f "$overlay_source" || test -L "$overlay_source"; then
+        echo "preflight: local overlay source is missing, non-regular, or a symlink: $overlay_relative" >&2
+        exit 1
+      fi
+      case "$overlay_source_real" in
+        /nix/store/*) ;;
+        *)
+          echo "preflight: local overlay source is not in the Nix store" >&2
+          exit 1
+          ;;
+      esac
+
+      if test -L "$overlay_target"; then
+        overlay_live_real="$(realpath "$overlay_target" 2>/dev/null || true)"
+        if test "$overlay_live_real" != "$overlay_source_real"; then
+          echo "preflight: local overlay symlink does not resolve to its declared source" >&2
+          exit 1
+        fi
+      elif test -f "$overlay_target"; then
+        overlay_live_real="$(realpath "$overlay_target")"
+        case "$overlay_live_real" in
+          "$target_root_real"/*) ;;
+          *)
+            echo "preflight: regular local overlay escapes the Rime target root" >&2
+            exit 1
+            ;;
+        esac
+        overlay_source_hash="$(sha256sum "$overlay_source" | cut -d ' ' -f 1)"
+        overlay_live_hash="$(sha256sum "$overlay_target" | cut -d ' ' -f 1)"
+        if test "$overlay_live_hash" != "$overlay_source_hash"; then
+          echo "preflight: local overlay content drift" >&2
+          exit 1
+        fi
+      elif test -e "$overlay_target"; then
+        echo "preflight: local overlay has an unsupported file type" >&2
+        exit 1
+      else
+        echo "preflight: local overlay is missing" >&2
+        exit 1
+      fi
+    ''}
+
     check_mutable_path_metadata() {
       mutable_path="$1"
       # stat is deliberately non-recursive. It reads only the path's own
@@ -141,7 +196,21 @@ pkgs.writeShellApplication {
 
     ${lib.concatMapStringsSep "\n" (path: "check_mutable_path_metadata ${quote path}") mutablePaths}
 
-    echo "preflight: 65 Rime static leaves match the pinned ${contract.release} source"
+    ${lib.optionalString fullCapability ''
+      ${lib.getExe behaviorReconciler} check
+    ''}
+
+    ${
+      if fullCapability then
+        ''
+          echo "preflight: 65 pinned Rime leaves and 1 local overlay match their declarations"
+          echo "preflight: approved Fcitx5 behavior and Keep invariants match the contract"
+        ''
+      else
+        ''
+          echo "preflight: 65 pinned Rime leaves match the static handoff contract"
+        ''
+    }
     echo "preflight: mutable state paths remain outside the Nix store"
   '';
 }
