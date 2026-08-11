@@ -270,6 +270,6 @@ phase10-install 复用完全相同的本地冻结检查，但还要求真实交�
 - nixbox 专用 deploy identity、dedicated known-hosts 与 macbook 管理 identity 继续作为仓库外运行时输入；private path、private key、credential、fingerprint 与 secret 均未写入 Git、Issue 或 plan 输出；
 - server 不持有 GitHub 协作凭据，不依赖 mutable checkout 自行构建；
 - 旧 Ubuntu、容器、数据库、业务数据与 production secret 均未恢复，符合已记录的全量丢失 waiver；
-- Phase 10 当时把 key-only root SSH 作为安装期 break-glass 保留，并要求任何关闭动作另建窄 Issue。后续 #99 / PR #109 完成非激活实现与验证，但维护者于 2026-08-05 在 activation 前明确采用单管理员 root 直连模型；两者已以未计划实施关闭，production 从未应用关闭 root 的配置；
+- Phase 10 当时把 key-only root SSH 作为安装期 break-glass 保留，并要求任何关闭动作另建窄 Issue。后续 #99 / PR #109 完成非激活实现与验证，但维护者于 2026-08-05 在 activation 前曾采用单管理员 root 直连模型；#99 / PR #109 当时以未计划实施关闭，production 从未应用关闭 root 的配置。维护者于 2026-08-10 再次复审并重新打开 #99，当前目标改为双 key 登录 `server:sayori`、经 sudo 提权并关闭 root SSH，仍不构成 production activation 授权；
 - 2026-08-05，维护者再次通过 Contabo 当前 VNC endpoint 实际打开 NixOS 控制台，端到端恢复路径 PASS；Rescue 的最近真实演练仍是本记录第 1 节的 Phase 10 历史证据；
 - Phase 11 已在 Issue #10 / PR #102 完成；它没有授权 production secret 迁移或真实服务恢复。Phase 12 已由维护者明确延后，后续业务只通过新的独立需求进入。

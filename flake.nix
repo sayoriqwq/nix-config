@@ -35,6 +35,13 @@
       flake = false;
     };
 
+    # Issue #127: preserve the audited Rime Ice behavior during ownership
+    # adoption. Upgrades are reviewed separately from this pinned source.
+    rime-ice = {
+      url = "github:iDvel/rime-ice/a5f5404e369100fcfc5562f86f1205827453e31c";
+      flake = false;
+    };
+
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -110,6 +117,88 @@
         pkgs = serverRecoveryPkgs;
       };
       darwinPkgs = packagesFor "aarch64-darwin";
+      macbookPkgs = self.darwinConfigurations.macbook.pkgs;
+      macbookHome = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+      configurationRevision =
+        if self ? rev then
+          self.rev
+        else if self ? dirtyRev then
+          self.dirtyRev
+        else
+          "";
+      rimeIceContract = import ./modules/home/capabilities/macos-chinese-input/contract.nix {
+        lib = macbookPkgs.lib;
+      };
+      macbookFcitx5ConfigAdapter =
+        import ./modules/home/capabilities/macos-chinese-input/fcitx5-config-adapter.nix
+          {
+            lib = macbookPkgs.lib;
+            pkgs = macbookPkgs;
+          };
+      macbookFcitx5BehaviorReconciler =
+        import ./modules/home/capabilities/macos-chinese-input/fcitx5-behavior-reconciler.nix
+          {
+            configAdapter = macbookFcitx5ConfigAdapter;
+            contract = rimeIceContract;
+            lib = macbookPkgs.lib;
+            pkgs = macbookPkgs;
+          };
+      macbookFcitx5BehaviorRollback = import ./tests/macos/fcitx5-behavior-rollback.nix {
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
+        inherit configurationRevision;
+        contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        lib = macbookPkgs.lib;
+        pkgs = macbookPkgs;
+      };
+      macbookRimePreflight = import ./tests/macos/rime-preflight.nix {
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
+        contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        pkgs = macbookPkgs;
+        rimeIceSource = inputs.rime-ice;
+      };
+      macbookRimeStaticPreflight = import ./tests/macos/rime-preflight.nix {
+        contract = rimeIceContract;
+        fullCapability = false;
+        homeDirectory = macbookHome.home.homeDirectory;
+        pkgs = macbookPkgs;
+        rimeIceSource = inputs.rime-ice;
+      };
+      macbookRimeHandoff = import ./tests/macos/rime-handoff.nix {
+        inherit configurationRevision;
+        contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        pkgs = macbookPkgs;
+        preflight = macbookRimeStaticPreflight;
+      };
+      macbookRimeStaticRollback = import ./tests/macos/rime-static-rollback.nix {
+        inherit configurationRevision;
+        contract = rimeIceContract;
+        homeDirectory = macbookHome.home.homeDirectory;
+        pkgs = macbookPkgs;
+        preflight = macbookRimeStaticPreflight;
+      };
+      macbookRimePolicy = import ./tests/macos/rime-policy.nix {
+        behaviorRollback = macbookFcitx5BehaviorRollback;
+        behaviorReconciler = macbookFcitx5BehaviorReconciler;
+        contract = rimeIceContract;
+        handoff = macbookRimeHandoff;
+        lib = macbookPkgs.lib;
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = macbookPkgs;
+        preflight = macbookRimePreflight;
+        rimeIceSource = inputs.rime-ice;
+        serverConfiguration = self.nixosConfigurations.server;
+        source = ./.;
+        staticRollback = macbookRimeStaticRollback;
+      };
+      macbookFcitx5BehaviorAdapter = import ./tests/macos/fcitx5-behavior-adapter.nix {
+        contract = rimeIceContract;
+        lib = macbookPkgs.lib;
+        pkgs = macbookPkgs;
+      };
       phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
         adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
         hostRecipients = {
@@ -172,6 +261,10 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
+          macbook-fcitx5-behavior-rollback = macbookFcitx5BehaviorRollback;
+          macbook-rime-handoff = macbookRimeHandoff;
+          macbook-rime-preflight = macbookRimePreflight;
+          macbook-rime-static-rollback = macbookRimeStaticRollback;
           zed-nightly = inputs.zed.packages.aarch64-darwin.default;
         };
         x86_64-linux = {
@@ -184,6 +277,25 @@
         server-recovery-test = {
           type = "app";
           program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+        };
+      };
+
+      apps.aarch64-darwin = {
+        macbook-fcitx5-behavior-rollback = {
+          type = "app";
+          program = "${macbookFcitx5BehaviorRollback}/bin/macbook-fcitx5-behavior-rollback";
+        };
+        macbook-rime-handoff = {
+          type = "app";
+          program = "${macbookRimeHandoff}/bin/macbook-rime-handoff";
+        };
+        macbook-rime-preflight = {
+          type = "app";
+          program = "${macbookRimePreflight}/bin/macbook-rime-preflight";
+        };
+        macbook-rime-static-rollback = {
+          type = "app";
+          program = "${macbookRimeStaticRollback}/bin/macbook-rime-static-rollback";
         };
       };
 
@@ -238,6 +350,14 @@
             pkgs = darwinPkgs;
             serverConfiguration = self.nixosConfigurations.server;
           };
+          ghostty-terminal-font-policy = import ./tests/ghostty-terminal/font-policy.nix {
+            inherit username;
+            lib = darwinPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = darwinPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
           macbook-raycast-source = import ./tests/macos/raycast-source.nix {
             inherit (self.darwinConfigurations.macbook.pkgs) lib;
             casks = self.darwinConfigurations.macbook.config.homebrew.casks;
@@ -245,6 +365,8 @@
             scriptCommands =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
+          macbook-rime-policy = macbookRimePolicy;
+          macbook-fcitx5-behavior-adapter = macbookFcitx5BehaviorAdapter;
         };
         x86_64-linux = {
           server-recovery-network = serverRecoveryNetworkTest;

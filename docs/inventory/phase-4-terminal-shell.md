@@ -37,6 +37,9 @@ Ghostty + Zsh 与 WezTerm + Fish 不属于验收矩阵。VS Code/Zed launcher �
 | OrbStack hook | Darwin integration | 软件迁移与数据留给独立 Issue |
 | PostgreSQL 16 PATH/service/data | 现有 Homebrew service | #23 当时原样保留；#60 后续已完成退役 |
 
+> [!NOTE]
+> Issue [#128](https://github.com/sayoriqwq/nix-config/issues/128) 后续补齐了 nixbox 的 Maple Mono NF-CN Home Manager package ownership。上表保留 #23 完成时的 macOS 历史事实；server 不选择 Ghostty，因而不安装该字体。
+
 ## 4. 可变数据边界
 
 以下路径或状态不得因本次迁移被删除、覆盖或链接到只读 Nix Store：

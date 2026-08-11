@@ -9,7 +9,7 @@
 
 ## 当前状态
 
-Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。Server 的长期交互管理采用单管理员、root public-key-only 模型；关闭 root SSH 的 #99 / PR #109 已明确不实施。
+Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。Issue #99 正在把 server 的长期交互管理恢复为 `sayori + sudo`：macbook 与 nixbox 使用不同现有密钥登录同一个远端 `sayori` 用户，root SSH 关闭；仓库变更不等于 production 已 activation。
 
 ## 目标模型
 
@@ -30,13 +30,13 @@ server 当前运行已经验收的最小 NixOS。旧 Ubuntu、业务与数据不
 当前控制关系为：
 
 ```text
-维护者 ──macbook 上的 `ssh sayori`──▶ server:root
-   │                                      ▲
-   └──实际 Unix 用户 `sayori`──▶ nixbox ──┘
-                              build/test/deploy identity
+维护者 ──macbook maintenance identity──▶ server:sayori ──sudo / sudo -i──▶ root
+   │                                         ▲
+   └──实际 Unix 用户 `sayori`──▶ nixbox ─────┘
+                                  独立 deploy identity
 ```
 
-macbook 上的 `sayori` 是指向 server 的本地 SSH Host 别名，远端用户为 `root`，不是 server 上的普通用户登录名。nixbox 是维护者的次级 NixOS 工作站和 `x86_64-linux` 预生产节点；它以独立 deploy identity 登录 server 的实际 Unix 用户 `sayori`，并只在获批部署中使用 `sudo -n`。这条机器链路不是维护者的交互身份，也不是 macbook 管理 server 的必经跳板。root SSH 继续关闭 password 与 keyboard-interactive，只接受维护者公钥；Contabo VNC 是已实连验证的带外恢复路径。
+macbook 上的 `sayori` 是指向 server 的本地 SSH Host 别名，远端用户也固定为实际 Unix 用户 `sayori`。维护者使用 maintenance identity，日常单条提权用 `sudo`，确需连续 root 操作时用 `sudo -i`；不使用 `su`，也不设置 root password。nixbox 是维护者的次级 NixOS 工作站和 `x86_64-linux` 预生产节点；它以独立 deploy identity 登录同一个远端用户，并只在获批部署中使用 `sudo -n`。两把 key 的区别是凭据来源、撤销和轮换边界，不是两套 Unix 权限；root SSH、password 与 keyboard-interactive 登录均关闭，Contabo VNC 是已实连验证的带外恢复路径。
 
 Git 只同步声明式配置。数据库、浏览器资料、服务数据、备份和其他可变状态不通过此仓库同步。
 
@@ -58,6 +58,7 @@ Git 只同步声明式配置。数据库、浏览器资料、服务数据、备�
 - [主机角色与能力矩阵](docs/architecture/capability-matrix.md)
 - [迁移路线图](docs/plans/migration-roadmap.md)
 - [主机盘点手册](docs/runbooks/host-inventory.md)
+- [Server 终端运维与故障排查手册](docs/runbooks/server-terminal-troubleshooting.md)
 - [macOS 最小 nix-darwin 接入手册](docs/runbooks/bootstrap-macos.md)
 - [Phase 3 macOS 用户层盘点](docs/inventory/phase-3-macos-home.md)
 - [macOS Home Manager 迁移手册](docs/runbooks/migrate-macos-home-manager.md)

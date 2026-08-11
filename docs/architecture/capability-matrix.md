@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `macbook` | 主工作站 | 保留完整 GUI、CLI、迁移兼容与已确认试点能力；它是能力的全量组合，不再是其他主机的继承源。 |
 | `nixbox` | 次级工作站、Linux 试验站、Server 预生产验证站 | 只选择明确需要的 macbook 能力，并增加 NixOS/Linux 自身需求；不镜像 macbook。 |
-| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；维护者从 macbook 以 root public-key-only 直达，nixbox 以独立机器身份承担 build/test/deploy；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
+| `server` | Headless NixOS production host | 只选择 CLI、生产运行与救援能力，以配置一致性简化验证；macbook maintenance identity 与 nixbox deploy identity 都登录远端 `sayori`，经 sudo 边界提权，root SSH 关闭；不继承工作站 GUI、可变开发运行时或 GitHub 凭据。 |
 
 ## 已确认目标组合
 
@@ -23,16 +23,18 @@
 | GitHub 协作 | 是 | 是 | 否 | `gh`、GitHub credential helper、lazygit、gitleaks；凭据不进入 server。 |
 | 交互式 Shell 辅助 | 是 | 是 | 是 | `pay-respects` 及 Fish integration。 |
 | 主机概览与诊断 | 是 | 是 | 是 | `fastfetch` 与 `btop`；不替代生产监控。 |
+| Server 深度诊断 | 否 | 否 | 是 | 系统级提供 `lsof`、`dig`、`mtr`、`tcpdump` 与 `strace`；不启用服务、不增加 listener 或 firewall 规则，抓包和跨进程追踪按需经 sudo。 |
 | 工作站开发运行时 | 是 | 是 | 否 | mise 管 Node/Bun/pnpm，uv 管 Python，direnv 进入项目环境。 |
 | macOS 开发运行时试点 | 是 | 否 | 否 | 保留 macbook 现有 Erlang/Elixir mise defaults，不随工作站能力迁移。 |
-| 终端文件工作流 | 是 | 是 | 否 | Yazi；低使用频率不取消已确认的迁移方向。 |
-| Helix | 是 | 是 | 否 | 备用终端编辑器；server 的最小编辑需求在 server Phase 再确认。 |
-| Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish。 |
+| 终端文件工作流 | 是 | 是 | 是 | Yazi；server 用于只读浏览与用户可写文件操作，不接管 production 数据。 |
+| Helix | 是 | 是 | 是 | 备用终端编辑器；server 上用于临时记录和获批配置操作，不把生成的 `/etc` 状态当作配置源。 |
+| Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish；共享配置引用 Maple Mono NF-CN，macbook 由 nix-darwin 提供字体，nixbox 由 Ghostty Home Manager capability 与用户 fontconfig 提供，server 不安装。 |
 | Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` language server；live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
 | Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
+| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：从锁定到 commit `a5f5404e369100fcfc5562f86f1205827453e31c` 的 rime-ice 2025.04.06 精确管理 65 个上游静态叶子，并增加只公开 `rime_ice` 的 1 个本地 overlay。`Fcitx5.app`、Rime plugin payload、macOS 输入源与可写配置文件保持外部所有；能力只通过官方本地配置 API 收敛 `ShareInputState=All` 与空 `AppDefaultIM`，并只读验证左右 Shift 和隐藏状态栏等 Keep 字段。Squirrel 不接管、不清理。activation、Rime 重新部署与真实输入验收仍是人工关卡。 |
 | macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
@@ -53,6 +55,10 @@
 ## 当前状态
 
 - macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
+- macbook 的中文输入声明目标是纯 Home Manager 能力；仓库中的 capability import、锁定 source、
+  65 个上游静态叶子、1 个本地 overlay 与行为 adapter 不等于实机已完成 activation。当前通过
+  官方 `fcitx5-curl` 验证过的 live `AppDefaultIM` 应急缓解也不替代声明式 activation；activation、
+  Rime 重新部署与原生/日常 GUI 应用输入验收必须由维护者另行批准并记录。
 - server 已运行最小 NixOS，只组合 headless 基线与明确需要的共享能力。
-- server 当前采用维护者明确批准的单管理员模型；macbook 的本地 Host alias `sayori` 直达远端 `root`，nixbox 不是交互身份或必经跳板。
+- server 当前目标采用维护者明确批准的单管理员 `sayori + sudo` 模型；macbook 与 nixbox 使用独立 key 登录同一远端用户，root SSH 关闭，nixbox 不是交互身份或必经跳板。该目标只有在独立 production action card 获批并 activation 后才成为运行态事实。
 - Phase 12 已延后；新增能力继续按本矩阵和独立 Issue 审批，不从其他主机继承 bundle。

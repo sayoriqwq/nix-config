@@ -91,8 +91,7 @@ ambiguous VM 关闭后，再同时启动 1536 MiB server 与 512 MiB gateway。�
 该层对三台 VM 都显式清空测试框架默认的 QEMU networking options，不创建隐式 SLiRP NIC，也不提供默认外网出口。
 ambiguous VM 只连接两张测试 VLAN NIC；server 与 gateway 各只连接双方共享的一张测试 VLAN NIC。
 
-该层验证真实 TCP/SSH 交互：双栈 TCP 22、DNS、`sayori` 两类 key、`sudo -n`、仅 maintenance key 的 root
-break-glass、password 与 keyboard-interactive 拒绝，以及 firewall 对未声明 TCP 8080 listener 的阻断。
+该层验证真实 TCP/SSH 交互：双栈 TCP 22、DNS、`sayori` 两类 key、`sudo -n`、password 与 keyboard-interactive 拒绝，以及 firewall 对未声明 TCP 8080 listener 的阻断。原始 Phase 9 还验证仅 maintenance key 的 root break-glass；2026-08-10 的 #99 将长期 `server-recovery-test` 更新为两类 key 的 root login 都必须失败，历史演练结果不改写。
 
 ## 4. Key 与秘密边界
 
