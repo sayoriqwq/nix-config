@@ -34,7 +34,7 @@
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
 | Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
-| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：从锁定到 commit `a5f5404e369100fcfc5562f86f1205827453e31c` 的 rime-ice 2025.04.06 精确管理 65 个上游静态叶子，并增加只公开 `rime_ice` 的 1 个本地 overlay。`Fcitx5.app`、Rime plugin payload、macOS 输入源与可写配置文件保持外部所有；能力只通过官方本地配置 API 收敛 `ShareInputState=All`、空 `AppDefaultIM` 与 `StatusBar=Hidden`，并只读验证左右 Shift 和 Rime 共享状态。Squirrel 不接管、不清理。activation、Rime 重新部署与真实输入验收仍是人工关卡。 |
+| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：从锁定到 commit `a5f5404e369100fcfc5562f86f1205827453e31c` 的 rime-ice 2025.04.06 精确管理 65 个上游静态叶子，并增加只公开 `rime_ice` 的 1 个本地 overlay。`Fcitx5.app`、Rime plugin payload、macOS 输入源与可写配置文件保持外部所有；能力只通过官方本地配置 API 收敛 `ShareInputState=All`、空 `AppDefaultIM` 与 `StatusBar=Hidden`，并只读验证左右 Shift 和 Rime 共享状态。首次 65-leaf 交接已验收，一次性写入 helper 已退役；未来新机必须另开 Issue。Squirrel 不接管、不清理。activation、Rime 重新部署与真实输入验收仍是人工关卡。 |
 | macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
@@ -60,6 +60,11 @@
   没有再次 deploy Rime，飞书日报/Terminal 往返输入也未记录为完成。Issue #134 只把维护者
   手动形成的 `StatusBar=Hidden` 升级为第三项 Desired，并修正 overlay preflight；该增量在
   exact commit/current-window activation 前仍只是声明目标，且不要求再次部署 Rime。
+- 更早的 #127 首次 65-leaf 所有权交接已在配置提交
+  `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成实机验收：generation 42→43、65/65
+  Store symlink、9/9 可写且非 Store 的 mutable boundaries、Rime 重新部署与真实输入均为
+  PASS。#131 仅退役这次交接的写入型 helper；长期 preflight、policy、65+1 声明、行为回滚和
+  仓库外 owner-only evidence 保持不变。
 - server 已运行最小 NixOS，只组合 headless 基线与明确需要的共享能力。
 - server 当前目标采用维护者明确批准的单管理员 `sayori + sudo` 模型；macbook 与 nixbox 使用独立 key 登录同一远端用户，root SSH 关闭，nixbox 不是交互身份或必经跳板。该目标只有在独立 production action card 获批并 activation 后才成为运行态事实。
 - Phase 12 已延后；新增能力继续按本矩阵和独立 Issue 审批，不从其他主机继承 bundle。

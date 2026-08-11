@@ -4,8 +4,9 @@
 - **收口日期：** 2026-07-28
 - **维护修订：** 2026-08-03，Issue #74 恢复 Lark 数据，#81 将当前渠道更正为中国区
   Feishu，#67 增加 agent Python 基线并收口四个 AI CLI 所有权，#93 清理已验收替代的
-  迁移残留；2026-08-10，Issue #127 增加 macOS 中文输入能力的声明目标与状态边界
-- **决策来源：** Issue #6、#36、#127 及 Phase 4 各实施 Issue
+  迁移残留；2026-08-10，Issue #127 增加并验收 macOS 中文输入能力的首次静态所有权交接，
+  Issue #131 退役该次交接的写入型 helper
+- **决策来源：** Issue #6、#36、#127、#131 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
 ## 1. 终态原则
@@ -149,7 +150,16 @@ Issue #134 中批准把这个已验收结果升级为 adapter-owned Desired。�
 | `~/Library/fcitx5` | Fcitx5/plugin | separate-policy | plugin/shared payload 与应用状态，继续外部所有。 |
 | `~/Library/Caches/org.fcitx.inputmethod.Fcitx5` | Fcitx5 | excluded | 可重建 cache，不属于备份承诺。 |
 
-Issue #127 已建立 65 个上游 leaf 的声明、policy check、只读 preflight 和恢复合同；
+Issue #127 已建立 65 个上游 leaf 的声明、policy check、只读 preflight 和恢复合同，并在
+配置提交 `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成首次实机交接：system generation
+42→43，65/65 个静态 leaf 均为有效 Store symlink，9/9 个可变状态边界保持可写且不在
+Store，Fcitx5 仍为 selected input source，Rime 重新部署与真实输入均为 PASS。接管前 65 项
+checksum 与 `RELEASED` 清单已经核验；仓库外 owner-only rollback evidence 继续保留且不由
+仓库读取、移动、重新打包或管理。#131 只退役服务该次 regular-file 交接的写入型 helper；
+长期 preflight、policy、锁定 source、声明、状态边界与抽象恢复顺序保持不变。未来新机器若
+再次需要 unmanaged-file handoff，必须另开 Issue，根据当时 live facts 与 exact commit 重新
+提供窄入口并取得人工批准。
+
 Issue #132 在其上增加 1 个本地 overlay 与两项 Fcitx 行为 Desired，并已随 generation 44
 完成 activation 与机器侧配置合同记录；当时没有再次 deploy Rime，飞书日报/Terminal 往返
 输入也未记录为完成。Issue #134 只把维护者手动形成的 `StatusBar=Hidden` 升级为第三项
@@ -321,8 +331,10 @@ receipt 和两个已批准的 Trash rollback 目录；当前只保留声明的 F
 - macOS 中文输入的 generation 回滚也不会恢复 Rime `build`、userdb、sync、installation/user
   state 或 Fcitx plugin/config；它可以恢复 Nix-owned 的 65 个上游 leaf 与 1 个本地 overlay，
   但 Fcitx 外部字段必须由固定目标 rollback helper 按 owner-only semantic journal 经官方 API 恢复。2026-08-11 的 live
-  应急副本只可用于对应事故缓解的定向回退，不是通用 generation rollback。Rime 重新部署
-  与输入验收仍由维护者人工执行。
+  应急副本只可用于对应事故缓解的定向回退，不是通用 generation rollback。首次静态交接与
+  静态回滚的写入型 helper 已退役；若需把 65 个静态 leaf 恢复成 regular files，必须从仓库外
+  owner-only evidence 或锁定 source 按独立 Issue 的窄流程恢复，保留全部 mutable state，再由
+  维护者人工重新部署 Rime 并完成输入验收。
 - Homebrew/MAS/Setapp/厂商应用的具体恢复和故障顺序见 Mac 总体 runbook。
 - #93 还发现并精确删除六个指向已删除 Docker、WARP 与 Zed Preview 应用的 root-owned
   `/usr/local/bin` 悬空链接。删除后 `docker`/`kubectl` 继续由 OrbStack 提供，`zed` 只

@@ -5,8 +5,6 @@
   rimeIceSource,
   source,
   preflight,
-  handoff,
-  staticRollback,
   behaviorReconciler,
   behaviorRollback,
   macbookConfiguration,
@@ -332,8 +330,6 @@ pkgs.runCommand "macbook-rime-policy"
       pkgs.coreutils
       pkgs.jq
       preflight
-      handoff
-      staticRollback
       behaviorReconciler
       behaviorRollback
     ];
@@ -393,8 +389,6 @@ pkgs.runCommand "macbook-rime-policy"
     # Merely depending on the package builds the fixed-target preflight. The
     # policy check must never execute it against the maintainer's live files.
     test -x ${preflight}/bin/macbook-rime-preflight
-    test -x ${handoff}/bin/macbook-rime-handoff
-    test -x ${staticRollback}/bin/macbook-rime-static-rollback
     test -x ${behaviorReconciler}/bin/fcitx5-behavior-reconciler
     test -x ${behaviorRollback}/bin/macbook-fcitx5-behavior-rollback
 

@@ -161,12 +161,17 @@ semantic journal 配合官方 API 回滚；Nix generation rollback 不会自动�
 
 Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
-`~/.config/fcitx5` 必须保护；`sync` 与 `~/Library/fcitx5` 使用独立备份策略。声明和构建
-成功不表示真实机器已经完成本地 overlay activation、Rime 重新部署或输入验收；这些动作
-始终受 exact commit 的人工批准约束。已通过官方 `fcitx5-curl` 完成并验证的 live
-`AppDefaultIM` 应急缓解不等于声明式 activation。65 个上游叶子中的 `squirrel.yaml` 只保留锁定
-release 的完整静态集合，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、
-preferences、cache、`squirrel.custom.yaml` 与 `~/Library/Rime` 保持不变。
+`~/.config/fcitx5` 必须保护；`sync` 与 `~/Library/fcitx5` 使用独立备份策略。#127 的首次
+65-leaf 所有权交接已在配置提交
+`87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成：system generation 从 42 切换到 43，
+65/65 个静态叶子均成为有效 Store symlink，9/9 个可变状态边界保持可写且不在 Store，Rime
+重新部署与真实输入验收均为 PASS。仅服务该次交接的写入型 helper 已按 #131 退役；长期只
+保留只读 preflight、policy 和仓库外 owner-only rollback evidence。未来新机器若再次出现
+unmanaged regular leaves，必须另开 Issue 按届时事实重新建立窄交接入口，不能复用历史工具。
+声明和构建成功仍不表示未来 activation、Rime 重新部署或输入验收已获授权，这些动作始终受
+exact commit 的人工批准约束。65 个上游叶子中的 `squirrel.yaml` 只保留锁定 release 的完整
+静态集合，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、preferences、cache、
+`squirrel.custom.yaml` 与 `~/Library/Rime` 保持不变。
 
 ### 主编辑器角色（Primary editor role）
 
