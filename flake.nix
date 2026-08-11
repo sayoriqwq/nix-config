@@ -241,32 +241,10 @@
 
             touch "$out"
           '';
-      macbookRimeStaticPreflight = import ./tests/macos/rime-preflight.nix {
-        contract = rimeIceContract;
-        fullCapability = false;
-        homeDirectory = macbookHome.home.homeDirectory;
-        pkgs = macbookPkgs;
-        rimeIceSource = inputs.rime-ice;
-      };
-      macbookRimeHandoff = import ./tests/macos/rime-handoff.nix {
-        inherit configurationRevision;
-        contract = rimeIceContract;
-        homeDirectory = macbookHome.home.homeDirectory;
-        pkgs = macbookPkgs;
-        preflight = macbookRimeStaticPreflight;
-      };
-      macbookRimeStaticRollback = import ./tests/macos/rime-static-rollback.nix {
-        inherit configurationRevision;
-        contract = rimeIceContract;
-        homeDirectory = macbookHome.home.homeDirectory;
-        pkgs = macbookPkgs;
-        preflight = macbookRimeStaticPreflight;
-      };
       macbookRimePolicy = import ./tests/macos/rime-policy.nix {
         behaviorRollback = macbookFcitx5BehaviorRollback;
         behaviorReconciler = macbookFcitx5BehaviorReconciler;
         contract = rimeIceContract;
-        handoff = macbookRimeHandoff;
         lib = macbookPkgs.lib;
         macbookConfiguration = self.darwinConfigurations.macbook;
         nixboxConfiguration = self.nixosConfigurations.nixbox;
@@ -275,7 +253,6 @@
         rimeIceSource = inputs.rime-ice;
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
-        staticRollback = macbookRimeStaticRollback;
       };
       macbookFcitx5BehaviorAdapter = import ./tests/macos/fcitx5-behavior-adapter.nix {
         contract = rimeIceContract;
@@ -345,9 +322,7 @@
       packages = {
         aarch64-darwin = {
           macbook-fcitx5-behavior-rollback = macbookFcitx5BehaviorRollback;
-          macbook-rime-handoff = macbookRimeHandoff;
           macbook-rime-preflight = macbookRimePreflight;
-          macbook-rime-static-rollback = macbookRimeStaticRollback;
           zed-nightly = inputs.zed.packages.aarch64-darwin.default;
         };
         x86_64-linux = {
@@ -368,17 +343,9 @@
           type = "app";
           program = "${macbookFcitx5BehaviorRollback}/bin/macbook-fcitx5-behavior-rollback";
         };
-        macbook-rime-handoff = {
-          type = "app";
-          program = "${macbookRimeHandoff}/bin/macbook-rime-handoff";
-        };
         macbook-rime-preflight = {
           type = "app";
           program = "${macbookRimePreflight}/bin/macbook-rime-preflight";
-        };
-        macbook-rime-static-rollback = {
-          type = "app";
-          program = "${macbookRimeStaticRollback}/bin/macbook-rime-static-rollback";
         };
       };
 

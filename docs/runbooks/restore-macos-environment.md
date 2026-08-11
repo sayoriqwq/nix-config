@@ -126,24 +126,33 @@ English 状态传播到其他应用。维护者批准窗口内已用官方 API �
 这只是已验证的 live mitigation，仓库中的长期声明在 activation 前仍未应用。对应 owner-only
 应急副本只用于回退这次 live 操作，不是 Nix generation rollback。
 
-在任何首次静态所有权交接前，确认 Flake 锁定 rime-ice 2025.04.06 commit
-`a5f5404e369100fcfc5562f86f1205827453e31c`。首次交接 helper 会调用同一 preflight
-builder 的内部 static-only profile，只检查原 65 个上游 regular leaves；它不会提前要求尚未
-activation 的本地 overlay 或行为字段。公开的完整 preflight 则用于 activation 后验收：
+当前 `macbook` 的首次静态所有权交接已经完成。Issue #127 记录的终态证据为：配置提交
+`87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 已 activation，system generation 从 42 切换到
+43；65/65 个静态叶子均为有效 Store symlink；9/9 个可变状态边界保持可写且不在 Store；
+Fcitx5 仍为 selected input source；Rime 重新部署与真实输入验收均为 PASS。接管前 65 项
+checksum 与 `RELEASED` 清单已验证，owner-only rollback evidence 继续保留在仓库外且不由
+仓库读取、移动、重新打包或管理。Squirrel、userdb、sync 与 Fcitx5 外部状态未被该次
+activation 接管或清理。
+
+#131 已退役仅服务该次 regular-file 交接的写入型 helper。长期保留锁定到 rime-ice
+2025.04.06 commit `a5f5404e369100fcfc5562f86f1205827453e31c` 的 source、65-leaf
+declaration、完整 policy assertions 与公开只读 preflight：
 
 ```fish
 nix run path:.#macbook-rime-preflight
 ```
 
-🔍 核对 65 个 live 上游静态叶子、1 个本地 overlay 目标、锁定 source、Fcitx 行为语义与可变状态边界，不激活或重新部署输入法；首次 activation 前因 overlay 尚不存在而失败是预期行为。
+🔍 核对 65 个 live 上游静态叶子、1 个本地 overlay 目标、锁定 source、Fcitx 行为语义与可变状态边界，不激活或重新部署输入法。
 
 本地 overlay 经过 Home Manager 时可以解析到内容相同但 Store identity 不同的
 `hm_default.custom.yaml`；preflight 必须按批准 hash/内容验证这个 regular Store leaf，而不是
 要求它与原始 Flake source 是同一个 Store path。source 缺失、hash drift、内容 drift、
-非 Store、broken link、路径逃逸或未知目标冲突仍必须失败关闭；required
-rollback 证据由紧随其后的人工关卡单独确认。它不得遍历、hash、打印或复制 `luna_pinyin.userdb`、
-`rime_ice.userdb` 与 `sync` 的词条正文。维护者确认以下仓库外数据保护后，才能针对 Draft PR
-的 exact commit 单独批准首次交接和 activation：
+非 Store、broken link、路径逃逸或未知目标冲突仍必须失败关闭。它不得遍历、hash、打印或
+复制 `luna_pinyin.userdb`、`rime_ice.userdb` 与 `sync` 的词条正文。
+
+未来新机器若再次出现尚未托管的 65 个 regular leaves，不得寻找或复用历史 helper，也不得
+直接覆盖。必须另开 Issue，根据当时 live facts 重新提供窄交接方案；维护者确认以下仓库外
+数据保护后，才能针对 Draft PR 的 exact commit 单独批准交接和 activation：
 
 - 既有 owner-only static rollback 包含校验和，并能恢复首次交接前的 65 个 regular files；
 - `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
@@ -155,19 +164,9 @@ rollback 证据由紧随其后的人工关卡单独确认。它不得遍历、ha
   `squirrel.custom.yaml` 保持不变；allowlist 内的上游 `squirrel.yaml` 只用于保持锁定
   release 的 65-leaf 完整集合，不启用 Squirrel。
 
-Draft PR 在人工批准前可以提供临时、写入型的静态交接 helper；它不会被 activation 或 check
-自动调用。只有维护者已在当前 Issue/PR 记录目标机器、exact commit、执行窗口、helper 内置
-static-only preflight PASS 和上述数据保护证据后，才执行：
-
-```fish
-nix run .#macbook-rime-handoff -- --confirm-approved-static-handoff
-```
-
-🧳 为当前 clean checkout 建立 owner-only、带校验和的 65-leaf rollback，再只释放这些静态叶子；不 activation、不触碰可变状态。
-
-helper 必须在复制及校验全部静态叶子后才逐项释放 live regular files；任何 drift、缺失、已有
-rollback 或非 clean checkout 都应失败关闭。成功交接并完成实机验收后，从实施 PR 删除该
-临时 app；它不是长期维护接口。
+新 Issue 必须记录目标机器、exact commit、执行窗口、static-only preflight、上述数据保护证据
+与 owner-only rollback 位置，再由维护者分别批准交接与 activation。任何新交接工具都只能
+服务该次事实，并应在成功验收后退役；它不得被 activation 或 check 自动调用。
 
 获批的 activation 应用 Nix/Home Manager declaration：链接 65 个上游 leaf 和 1 个本地
 overlay，并通过官方本地配置 API 收敛三个批准字段。adapter 已满足目标时严格 no-op；
@@ -308,14 +307,10 @@ CLI 的状态。macOS defaults 的逐键试用前值和定向回滚命令见
    飞书、Terminal、原生应用与浏览器的输入、左右 Shift、候选、userdb 可写性和既有状态验收，
    并在 Issue/PR 记录结果。
 
-若当前获批 Draft PR 仍包含临时 rollback helper，并且上一代已移除 Home Manager 静态链接，
-可在第 2 步使用短入口恢复已校验的 65 个 regular files：
-
-```fish
-nix run .#macbook-rime-static-rollback -- --confirm-approved-static-rollback
-```
-
-↩️ 从 handoff 记录的 owner-only rollback 恢复静态叶子并重新运行只读 preflight；不恢复 userdb、sync，也不重新部署 Rime。
+首次静态交接与静态回滚的写入型 helper 已退役，因此第 2 步没有仓库内写入型短入口。若上一代
+已移除 Home Manager 静态链接，必须依据 owner-only evidence 的 checksum/`RELEASED` 清单或
+锁定 source，使用独立 Issue 审阅并批准的窄流程恢复恰好 65 个 regular leaves；随后重新运行
+只读 preflight。该流程不得恢复 userdb、sync，也不自动重新部署 Rime。
 
 切回 generation 只能恢复 Nix declaration 和 Nix-owned 静态 leaf，不能恢复用户学习数据、
 sync、installation/user state、Fcitx 配置/plugin 状态或 Squirrel 遗留状态。Fcitx 外部字段
