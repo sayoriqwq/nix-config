@@ -23,6 +23,10 @@ let
   semanticSuggestion = pkgs.writeText "rime_ice_suggestion.yaml" ''
     config_version: "suggestion-fixture"
     fixture_include_marker: loaded
+    ascii_composer:
+      switch_key:
+        Shift_L: commit_code
+        Shift_R: noop
     schema_list:
       - schema: obsolete
   '';
@@ -266,7 +270,9 @@ pkgs.runCommand "macbook-rime-data-layout"
     ${pkgs.yq-go}/bin/yq eval -o=json ${productionView}/default.custom.yaml \
       | ${pkgs.jq}/bin/jq -e \
         '.patch.__include == "rime_ice_suggestion:/"
-         and .patch.schema_list == [{"schema": "rime_ice"}]' >/dev/null
+         and .patch.schema_list == [{"schema": "rime_ice"}]
+         and .patch."ascii_composer/switch_key/Shift_L" == "commit_code"
+         and .patch."ascii_composer/switch_key/Shift_R" == "commit_code"' >/dev/null
 
     semantic_root="$TMPDIR/rime-overlay-semantics"
     mkdir -p "$semantic_root/user" "$semantic_root/shared" "$semantic_root/staging"
@@ -283,7 +289,9 @@ pkgs.runCommand "macbook-rime-data-layout"
       | ${pkgs.jq}/bin/jq -e \
         '.fixture_include_marker == "loaded"
          and (.schema_list | length) == 1
-         and .schema_list[0].schema == "rime_ice"' >/dev/null
+         and .schema_list[0].schema == "rime_ice"
+         and .ascii_composer.switch_key.Shift_L == "commit_code"
+         and .ascii_composer.switch_key.Shift_R == "commit_code"' >/dev/null
 
     test -f ${safeView}/nested/static.yaml
     test -f ${safeView}/default.custom.yaml

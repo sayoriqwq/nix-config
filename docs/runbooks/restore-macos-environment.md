@@ -108,8 +108,9 @@ RTK 本体必须同样命中 Home Manager profile；`--show` 必须把 global `R
 
 该能力声明 Home Manager 可安全拥有的 Rime 静态数据：消费锁定 Darwin nixpkgs 中的
 `pkgs.rime-ice` 2026.06.30，经薄 data view 排除整个 `build` 子树和所有已知可变名称，再合入
-本地 `default.custom.yaml`。overlay 通过 `rime_ice_suggestion:/` 接入上游建议并只启用
-`rime_ice`；合并结果以 recursive leaf semantics 投影，用户目录根节点保持可写。恢复 Fcitx5 时，
+本地 `default.custom.yaml`。overlay 通过 `rime_ice_suggestion:/` 接入上游建议，只启用
+`rime_ice`，并把左右 Shift 都声明为 Rime 内部中文/ASCII 切换键；合并结果以 recursive leaf
+semantics 投影，用户目录根节点保持可写。恢复 Fcitx5 时，
 从 [Fcitx5 macOS 官方 installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)
 人工安装 `/Library/Input Methods/Fcitx5.app` 及其 Rime plugin；应用 bundle、plugin payload
 和 macOS 输入源不由 Nix 安装或修改。installer 的精确语义版本若仍无法由 bundle metadata
@@ -123,9 +124,17 @@ channel 本身损坏，也不表示单独的 macbook system build 必然失败�
 
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
 INI、用 Store symlink 接管整文件、调用配置 API 或阻塞 activation 审计运行时字段。为保持
-当前已验证的体验，维护者在 Fcitx GUI 中人工复核以下推荐值：全局共享输入状态、清空 Terminal
-应用默认输入法、隐藏输入法名称，以及左右 Shift 都可切换。它们是 external reference，不是
-Nix Desired/Keep；菜单栏“小企鹅”、MacVim、剪贴板、Beast 和其他偏好也都由 Fcitx/用户拥有。
+目标体验，维护者在 Fcitx GUI 中人工复核以下推荐值：全局共享输入状态、清空 Terminal 应用
+默认输入法、隐藏输入法名称，并把 `AltTriggerKeys` 设为空。Fcitx 不再用普通左右 Shift 在
+`rime` 与 `keyboard-us` 之间临时切换；`Control+Shift_L` 保留为显式的完整恢复键。这些值是
+external reference，不是 Nix Desired/Keep；菜单栏“小企鹅”、MacVim、剪贴板、Beast 和其他
+偏好也都由 Fcitx/用户拥有。
+
+排障时必须区分三层状态：macOS 输入源菜单顶层的“小企鹅”表示系统仍选择 Fcitx；其下的
+“中州韵 / 键盘 - 英语（美国）”勾选表示 Fcitx 当前引擎；只有勾选“中州韵”时，普通左右
+Shift 才由 Rime 在中文与 ASCII mode 之间切换，且勾选不会移动。若勾选落到“键盘 - 英语
+（美国）”，这是 Fcitx 切到了 fallback engine，不是 Rime 英文模式；应使用保留的
+`Control+Shift_L` 恢复到 Rime，再检查 `AltTriggerKeys` 是否为空。
 
 2026-08-11 已确认 Terminal `AppDefaultIM → keyboard-us` 与 `ShareInputState=All` 的组合会把
 English 状态传播到其他应用。维护者批准窗口内已用官方 API 清空 live `AppDefaultIM`，
@@ -152,7 +161,8 @@ Issue，记录目标机器、exact commit、执行窗口和 mutable-state 保护
 Rime `build` 和 Fcitx cache 可重建且排除备份；`~/Library/Rime` 与 Squirrel 全部保持不变。
 
 获批的 activation 只应用 Nix/Home Manager 静态 declaration，不修改 Fcitx 输入源、配置字段，
-不停止或重启 Fcitx5，也不触发 Rime deploy。当前 #140 声明尚未 activation。
+不停止或重启 Fcitx5，也不触发 Rime deploy。#143 的 Shift overlay 变更在获得 exact
+commit/current-window 批准前不得 activation；build 或文档完成不表示真实机器已经应用。
 
 仅在首次引入、恢复或实际变更 local overlay 时，维护者才在可观察、可回滚的窗口人工重新部署
 Rime。需要 deploy 时，当前 bundle
@@ -170,7 +180,9 @@ Rime。需要 deploy 时，当前 bundle
    Rime，可选 schema 只有 `rime_ice`；
 2. 在飞书日报、Terminal、一个 macOS 原生应用和一个浏览器输入框验证中文输入；切入
    Terminal 再返回时保持 Rime，不再出现 `2 → 1 → 1`；
-3. 左右 Shift 都按现有 Fcitx `AltTriggerKeys` 切换，状态栏仍隐藏且菜单栏只显示“小企鹅”；
+3. Fcitx `AltTriggerKeys` 为空；左右 Shift 都只在 Rime 内部执行中文/ASCII 切换，菜单勾选始终
+   保持“中州韵”；`Control+Shift_L` 仍能作为完整 Fcitx 恢复键，状态栏保持隐藏且菜单栏只
+   显示“小企鹅”；
 4. 新输入仍能更新 userdb，既有 userdb、sync、installation/user state 均保留；
 5. Fcitx5 bundle/plugin、Squirrel、nixbox/server、launchd/service、network 与 firewall
    均未被该能力改变。
