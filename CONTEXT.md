@@ -143,34 +143,30 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 ### macOS 中文输入能力（macOS Chinese input capability）
 
-只由 `macbook` 选择的纯 Home Manager 用户能力。Home Manager 从锁定到 commit
-`a5f5404e369100fcfc5562f86f1205827453e31c` 的 rime-ice 2025.04.06 source 逐个管理经审阅的
-65 个上游静态叶子，并额外管理一个只暴露 `rime_ice` 的本地 `default.custom.yaml` overlay，
-但不接管 Rime 用户目录根节点。`Fcitx5.app`、Rime plugin payload 与 macOS 输入源注册
-继续由官方安装器/updater 和系统运行态外部拥有；能力只记录其恢复入口、可变状态边界与
-人工关卡，不构建、安装或更新这些外部组件。
+只由 `macbook` 选择的纯 Home Manager 用户能力。Home Manager 消费当前 Darwin nixpkgs
+锁定的 `pkgs.rime-ice` 2026.06.30，从 `$out/share/rime-data` 构造一个薄 data view：排除整个
+`build` 子树并拒绝 userdb、sync、installation/user state 等可变名称，再合入只启用
+`rime_ice` 的本地 `default.custom.yaml` overlay。合并结果以 recursive leaf semantics 投影到
+`~/.local/share/fcitx5/rime`，但不接管用户目录根节点或任何可写状态。
 
-`~/.config/fcitx5` 及其中配置文件始终是 Fcitx-owned、可写的外部状态，不能由 Store symlink
-或整文件模板接管。能力只通过 Fcitx5 bundle 自带的官方本地配置 API 收敛三个已批准行为：
-全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空，以及 `StatusBar=Hidden` 只保留 macOS
-“小企鹅”输入源图标；左右 Shift 仍由 Fcitx `AltTriggerKeys` 同时切换并只读验证，其他字段
-保持外部所有。Fcitx 外部字段发生真实修改时使用固定目标
-`macbook-fcitx5-behavior-rollback` helper 和
-`~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior/last-change.json` 的 owner-only
-semantic journal 配合官方 API 回滚；Nix generation rollback 不会自动逆转这些字段。
+`Fcitx5.app`、Rime plugin payload、macOS 输入源注册、`~/.config/fcitx5` 与全部 GUI/runtime
+偏好均由官方 installer/updater、macOS、Fcitx 和维护者外部拥有。Nix 不再自动收敛或审计
+`ShareInputState`、`AppDefaultIM`、`StatusBar`、左右 Shift、`InputState` 等字段，也不提供行为
+journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。推荐体验仍记录在恢复
+runbook 中，供维护者通过 Fcitx GUI 人工设置和 smoke test。
 
 Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
 `~/.config/fcitx5` 必须保护；`sync` 与 `~/Library/fcitx5` 使用独立备份策略。#127 的首次
-65-leaf 所有权交接已在配置提交
+静态所有权交接已在配置提交
 `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成：system generation 从 42 切换到 43，
 65/65 个静态叶子均成为有效 Store symlink，9/9 个可变状态边界保持可写且不在 Store，Rime
-重新部署与真实输入验收均为 PASS。仅服务该次交接的写入型 helper 已按 #131 退役；长期只
-保留只读 preflight、policy 和仓库外 owner-only rollback evidence。未来新机器若再次出现
+重新部署与真实输入验收均为 PASS；这是历史证据，不是新 data view 已 activation 的声明。
+仅服务该次交接的写入型 helper 已按 #131 退役。未来新机器若再次出现
 unmanaged regular leaves，必须另开 Issue 按届时事实重新建立窄交接入口，不能复用历史工具。
 声明和构建成功仍不表示未来 activation、Rime 重新部署或输入验收已获授权，这些动作始终受
-exact commit 的人工批准约束。65 个上游叶子中的 `squirrel.yaml` 只保留锁定 release 的完整
-静态集合，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、preferences、cache、
+exact commit 的人工批准约束。data view 中的 `squirrel.yaml` 只是 `pkgs.rime-ice` 静态发行
+内容，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、preferences、cache、
 `squirrel.custom.yaml` 与 `~/Library/Rime` 保持不变。
 
 ### 主编辑器角色（Primary editor role）
