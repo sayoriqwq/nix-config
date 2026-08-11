@@ -35,13 +35,6 @@
       flake = false;
     };
 
-    # Issue #127: preserve the audited Rime Ice behavior during ownership
-    # adoption. Upgrades are reviewed separately from this pinned source.
-    rime-ice = {
-      url = "github:iDvel/rime-ice/a5f5404e369100fcfc5562f86f1205827453e31c";
-      flake = false;
-    };
-
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -119,146 +112,6 @@
       darwinPkgs = packagesFor "aarch64-darwin";
       macbookPkgs = self.darwinConfigurations.macbook.pkgs;
       macbookHome = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-      configurationRevision =
-        if self ? rev then
-          self.rev
-        else if self ? dirtyRev then
-          self.dirtyRev
-        else
-          "";
-      rimeIceContract = import ./modules/home/capabilities/macos-chinese-input/contract.nix {
-        lib = macbookPkgs.lib;
-      };
-      macbookFcitx5ConfigAdapter =
-        import ./modules/home/capabilities/macos-chinese-input/fcitx5-config-adapter.nix
-          {
-            lib = macbookPkgs.lib;
-            pkgs = macbookPkgs;
-          };
-      macbookFcitx5BehaviorReconciler =
-        import ./modules/home/capabilities/macos-chinese-input/fcitx5-behavior-reconciler.nix
-          {
-            configAdapter = macbookFcitx5ConfigAdapter;
-            contract = rimeIceContract;
-            lib = macbookPkgs.lib;
-            pkgs = macbookPkgs;
-          };
-      macbookFcitx5BehaviorRollback = import ./tests/macos/fcitx5-behavior-rollback.nix {
-        behaviorReconciler = macbookFcitx5BehaviorReconciler;
-        inherit configurationRevision;
-        contract = rimeIceContract;
-        homeDirectory = macbookHome.home.homeDirectory;
-        lib = macbookPkgs.lib;
-        pkgs = macbookPkgs;
-      };
-      macbookRimePreflight = import ./tests/macos/rime-preflight.nix {
-        behaviorReconciler = macbookFcitx5BehaviorReconciler;
-        contract = rimeIceContract;
-        homeDirectory = macbookHome.home.homeDirectory;
-        pkgs = macbookPkgs;
-        rimeIceSource = inputs.rime-ice;
-      };
-      macbookRimeOverlayCopy = macbookPkgs.writeText "hm_default.custom.yaml" (
-        builtins.readFile rimeIceContract.localOverlay.source
-      );
-      macbookRimeOverlayDrift = macbookPkgs.writeText "hm_default.custom.yaml" ''
-        patch:
-          schema_list:
-            - schema: luna_pinyin
-      '';
-      macbookRimePreflightFixture = import ./tests/macos/rime-preflight.nix {
-        contract = rimeIceContract;
-        checkOverlay = true;
-        fixtureMode = true;
-        fullCapability = false;
-        homeDirectory = "/fixture";
-        pkgs = macbookPkgs;
-        rimeIceSource = inputs.rime-ice;
-      };
-      macbookRimePreflightHashDriftFixture = import ./tests/macos/rime-preflight.nix {
-        contract = rimeIceContract // {
-          localOverlay = rimeIceContract.localOverlay // {
-            sha256 = "0000000000000000000000000000000000000000000000000000000000000000";
-          };
-        };
-        checkOverlay = true;
-        fixtureMode = true;
-        fullCapability = false;
-        homeDirectory = "/fixture";
-        pkgs = macbookPkgs;
-        rimeIceSource = inputs.rime-ice;
-      };
-      macbookRimePreflightFixtureCheck =
-        macbookPkgs.runCommand "macbook-rime-preflight-fixture"
-          {
-            nativeBuildInputs = [ macbookPkgs.coreutils ];
-          }
-          ''
-            set -euo pipefail
-            target_root="$TMPDIR/home/${rimeIceContract.targetRoot}"
-
-            reset_target() {
-              rm -rf -- "$TMPDIR/home"
-              mkdir -p -- "$target_root"
-              ${macbookPkgs.lib.concatMapStringsSep "\n" (path: ''
-                mkdir -p -- "$target_root/$(dirname ${macbookPkgs.lib.escapeShellArg path})"
-                ln -s -- "${inputs.rime-ice}/${path}" "$target_root/${path}"
-              '') rimeIceContract.managedPaths}
-            }
-
-            expect_failure() {
-              if MACBOOK_RIME_PREFLIGHT_FIXTURE_TARGET_ROOT="$target_root" "$1"; then
-                echo "fixture: expected local overlay preflight failure" >&2
-                exit 1
-              fi
-            }
-
-            reset_target
-            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayCopy)} "$target_root/.hm_default.custom.yaml"
-            ln -s -- "$target_root/.hm_default.custom.yaml" "$target_root/${rimeIceContract.localOverlay.relativePath}"
-            MACBOOK_RIME_PREFLIGHT_FIXTURE_TARGET_ROOT="$target_root" \
-              ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
-
-            reset_target
-            ln -s -- "$target_root/missing-overlay" "$target_root/${rimeIceContract.localOverlay.relativePath}"
-            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
-
-            reset_target
-            cp -- ${macbookPkgs.lib.escapeShellArg (toString rimeIceContract.localOverlay.source)} \
-              "$target_root/local-copy"
-            ln -s -- "$target_root/local-copy" "$target_root/${rimeIceContract.localOverlay.relativePath}"
-            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
-
-            reset_target
-            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayDrift)} \
-              "$target_root/${rimeIceContract.localOverlay.relativePath}"
-            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
-
-            reset_target
-            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayCopy)} \
-              "$target_root/${rimeIceContract.localOverlay.relativePath}"
-            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightHashDriftFixture}
-
-            touch "$out"
-          '';
-      macbookRimePolicy = import ./tests/macos/rime-policy.nix {
-        behaviorRollback = macbookFcitx5BehaviorRollback;
-        behaviorReconciler = macbookFcitx5BehaviorReconciler;
-        contract = rimeIceContract;
-        lib = macbookPkgs.lib;
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        pkgs = macbookPkgs;
-        preflight = macbookRimePreflight;
-        rimeIceSource = inputs.rime-ice;
-        serverConfiguration = self.nixosConfigurations.server;
-        source = ./.;
-      };
-      macbookFcitx5BehaviorAdapter = import ./tests/macos/fcitx5-behavior-adapter.nix {
-        contract = rimeIceContract;
-        lib = macbookPkgs.lib;
-        pkgs = macbookPkgs;
-      };
       phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
         adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
         hostRecipients = {
@@ -284,6 +137,15 @@
         pkgs = darwinPkgs;
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
+      };
+      macbookRimeDataLayout = import ./tests/macos/rime-data-layout.nix {
+        flakeInputs = inputs;
+        flakeOutputs = self;
+        lib = macbookPkgs.lib;
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = macbookPkgs;
+        serverConfiguration = self.nixosConfigurations.server;
       };
     in
     {
@@ -321,8 +183,6 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
-          macbook-fcitx5-behavior-rollback = macbookFcitx5BehaviorRollback;
-          macbook-rime-preflight = macbookRimePreflight;
           zed-nightly = inputs.zed.packages.aarch64-darwin.default;
         };
         x86_64-linux = {
@@ -338,17 +198,6 @@
         };
       };
 
-      apps.aarch64-darwin = {
-        macbook-fcitx5-behavior-rollback = {
-          type = "app";
-          program = "${macbookFcitx5BehaviorRollback}/bin/macbook-fcitx5-behavior-rollback";
-        };
-        macbook-rime-preflight = {
-          type = "app";
-          program = "${macbookRimePreflight}/bin/macbook-rime-preflight";
-        };
-      };
-
       checks = {
         aarch64-darwin = {
           sops-age-policy = phase11SopsPolicy;
@@ -358,7 +207,6 @@
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
           };
-          macbook-rime-preflight-fixture = macbookRimePreflightFixtureCheck;
           macbook-rtk-integration = import ./tests/macos/rtk-integration.nix {
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
@@ -416,8 +264,7 @@
             scriptCommands =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
-          macbook-rime-policy = macbookRimePolicy;
-          macbook-fcitx5-behavior-adapter = macbookFcitx5BehaviorAdapter;
+          macbook-rime-data-layout = macbookRimeDataLayout;
         };
         x86_64-linux = {
           server-recovery-network = serverRecoveryNetworkTest;

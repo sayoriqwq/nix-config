@@ -106,25 +106,32 @@ RTK 本体必须同样命中 Home Manager profile；`--show` 必须把 global `R
 
 ### 2.5 恢复 macOS 中文输入能力
 
-该能力声明 Home Manager 可安全拥有的 65 个 rime-ice 上游静态叶子和 1 个本地
-`default.custom.yaml` overlay；overlay 只把 schema 列表收窄到 `rime_ice`。恢复 Fcitx5 应用时，
+该能力声明 Home Manager 可安全拥有的 Rime 静态数据：消费锁定 Darwin nixpkgs 中的
+`pkgs.rime-ice` 2026.06.30，经薄 data view 排除整个 `build` 子树和所有已知可变名称，再合入
+本地 `default.custom.yaml`。overlay 通过 `rime_ice_suggestion:/` 接入上游建议并只启用
+`rime_ice`；合并结果以 recursive leaf semantics 投影，用户目录根节点保持可写。恢复 Fcitx5 时，
 从 [Fcitx5 macOS 官方 installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)
 人工安装 `/Library/Input Methods/Fcitx5.app` 及其 Rime plugin；应用 bundle、plugin payload
 和 macOS 输入源不由 Nix 安装或修改。installer 的精确语义版本若仍无法由 bundle metadata
 证明，应如实记录未知，不用猜测值填补。不要安装、启用、清理或迁移遗留 Squirrel。
 
+`macbook-rime-data-layout` 中对 `2026.06.30` 的单一静态 policy check 是刻意的
+update-policy gate：Darwin nixpkgs lock 将来提供不同 `pkgs.rime-ice` 版本时，该 check 失败
+表示需要先审阅新版本、package output/data-view、overlay 兼容性与 deploy 需求，不表示 nixpkgs
+channel 本身损坏，也不表示单独的 macbook system build 必然失败。只有在独立获批的依赖更新中
+完成这些审阅后，才同步更新版本 gate；不要为了让 check 继续通过而静默放宽策略。
+
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
-INI、用 Store symlink 接管整文件或覆盖未知字段；行为 adapter 只通过 bundle 自带的
-`fcitx5-curl` 官方本地配置 API 收敛 `ShareInputState=All`、空 `AppDefaultIM` 和
-`StatusBar=Hidden`。其中隐藏状态栏表示只保留 macOS“小企鹅”输入源图标；左右 Shift
-继续保留在 Fcitx `AltTriggerKeys`，Rime `InputState=All` 等 Keep 字段只读验证；MacVim
-与其他未批准字段不得修改。
+INI、用 Store symlink 接管整文件、调用配置 API 或阻塞 activation 审计运行时字段。为保持
+当前已验证的体验，维护者在 Fcitx GUI 中人工复核以下推荐值：全局共享输入状态、清空 Terminal
+应用默认输入法、隐藏输入法名称，以及左右 Shift 都可切换。它们是 external reference，不是
+Nix Desired/Keep；菜单栏“小企鹅”、MacVim、剪贴板、Beast 和其他偏好也都由 Fcitx/用户拥有。
 
 2026-08-11 已确认 Terminal `AppDefaultIM → keyboard-us` 与 `ShareInputState=All` 的组合会把
 English 状态传播到其他应用。维护者批准窗口内已用官方 API 清空 live `AppDefaultIM`，
 运行时探针由 `2 → 1 → 1` 变为 `2 → 2 → 2`；未 raw patch、restart、deploy 或 activation。
-这只是已验证的 live mitigation，仓库中的长期声明在 activation 前仍未应用。对应 owner-only
-应急副本只用于回退这次 live 操作，不是 Nix generation rollback。
+这只是已验证的历史 live mitigation，不是当前 Nix 合同。对应 owner-only 应急副本只用于
+回退该次操作，不是 Nix generation rollback。
 
 当前 `macbook` 的首次静态所有权交接已经完成。Issue #127 记录的终态证据为：配置提交
 `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 已 activation，system generation 从 42 切换到
@@ -134,67 +141,28 @@ checksum 与 `RELEASED` 清单已验证，owner-only rollback evidence 继续保
 仓库读取、移动、重新打包或管理。Squirrel、userdb、sync 与 Fcitx5 外部状态未被该次
 activation 接管或清理。
 
-#131 已退役仅服务该次 regular-file 交接的写入型 helper。长期保留锁定到 rime-ice
-2025.04.06 commit `a5f5404e369100fcfc5562f86f1205827453e31c` 的 source、65-leaf
-declaration、完整 policy assertions 与公开只读 preflight：
+#131 已退役仅服务首次 regular-file 交接的写入型 helper。#140 同时退役逐 leaf manifest、公开
+runtime preflight、Fcitx behavior adapter/journal/rollback helper；长期检查只证明 package output、
+data-view 过滤、overlay 冲突和投影布局，不读取 live Fcitx 偏好或 userdb 正文。
 
-```fish
-nix run path:.#macbook-rime-preflight
-```
+未来新机器若目标路径存在 unmanaged regular files，不得直接覆盖或复用历史 helper。必须另开
+Issue，记录目标机器、exact commit、执行窗口和 mutable-state 保护证据，再按当时 live facts
+设计窄交接。`luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
+`~/.config/fcitx5` 按 required 边界保护；`sync` 与 `~/Library/fcitx5` 按 separate-policy 处理；
+Rime `build` 和 Fcitx cache 可重建且排除备份；`~/Library/Rime` 与 Squirrel 全部保持不变。
 
-🔍 核对 65 个 live 上游静态叶子、1 个本地 overlay 目标、锁定 source、Fcitx 行为语义与可变状态边界，不激活或重新部署输入法。
-
-本地 overlay 经过 Home Manager 时可以解析到内容相同但 Store identity 不同的
-`hm_default.custom.yaml`；preflight 必须按批准 hash/内容验证这个 regular Store leaf，而不是
-要求它与原始 Flake source 是同一个 Store path。source 缺失、hash drift、内容 drift、
-非 Store、broken link、路径逃逸或未知目标冲突仍必须失败关闭。它不得遍历、hash、打印或
-复制 `luna_pinyin.userdb`、`rime_ice.userdb` 与 `sync` 的词条正文。
-
-未来新机器若再次出现尚未托管的 65 个 regular leaves，不得寻找或复用历史 helper，也不得
-直接覆盖。必须另开 Issue，根据当时 live facts 重新提供窄交接方案；维护者确认以下仓库外
-数据保护后，才能针对 Draft PR 的 exact commit 单独批准交接和 activation：
-
-- 既有 owner-only static rollback 包含校验和，并能恢复首次交接前的 65 个 regular files；
-- `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
-  `~/.config/fcitx5` 按 required 边界保护；
-- `sync` 与 `~/Library/fcitx5` 按 separate-policy 另行处理；
-- Rime `build` 与 `~/Library/Caches/org.fcitx.inputmethod.Fcitx5` 为 excluded 的可重建
-  缓存，不作为恢复承诺；
-- `~/Library/Rime` 与 Squirrel bundle、receipt、preferences、cache 及
-  `squirrel.custom.yaml` 保持不变；allowlist 内的上游 `squirrel.yaml` 只用于保持锁定
-  release 的 65-leaf 完整集合，不启用 Squirrel。
-
-新 Issue 必须记录目标机器、exact commit、执行窗口、static-only preflight、上述数据保护证据
-与 owner-only rollback 位置，再由维护者分别批准交接与 activation。任何新交接工具都只能
-服务该次事实，并应在成功验收后退役；它不得被 activation 或 check 自动调用。
-
-获批的 activation 应用 Nix/Home Manager declaration：链接 65 个上游 leaf 和 1 个本地
-overlay，并通过官方本地配置 API 收敛三个批准字段。adapter 已满足目标时严格 no-op；
-API/socket 缺失、响应歧义、Keep 字段漂移或回读验证失败时失败关闭。它不修改 macOS 输入源，
-不 raw patch Fcitx 文件，不停止或重启 Fcitx5，也不触发 Rime deploy。发生真实外部字段修改时，
-owner-only semantic journal 记录修改前语义，供官方 API 定向恢复。
-journal 位于
-`~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior/last-change.json`；目录 mode 0700、
-文件 mode 0600。它只记录 adapter 拥有字段的 before/after 语义，不包含用户输入内容。
-加入 `StatusBar` ownership 后使用 v3 journal；它同时记录 transaction、逐项 applied 标记和
-`prepared` / `committed` / `rolled-back` / `rollback-incomplete` 状态；未完成回滚可由固定 helper
-在完整 CAS 预检通过后继续，不能手工猜值或覆盖 journal。
-adapter 同时兼容既有 v2 journal：终态记录可以保留或在下一次 drift 时归档；v2 的 frontend
-entry 只恢复当时拥有的 `AppDefaultIM`，并通过官方 partial API 保留当前 `StatusBar`；若 journal
-还记录了已应用的 global entry，则同一事务也会恢复 `ShareInputState`。v2 `prepared` 不允许由
-新版本猜测续跑，必须在任何 POST 前失败关闭，并进入绑定原实施 revision 的受监督恢复窗口。
-若以后再次出现 drift，adapter 只会把先前的 `committed` / `rolled-back` 终态记录原子归档为
-`last-change.<transaction>.<status>.json`，再建立新事务；未完成状态绝不会被覆盖。
+获批的 activation 只应用 Nix/Home Manager 静态 declaration，不修改 Fcitx 输入源、配置字段，
+不停止或重启 Fcitx5，也不触发 Rime deploy。当前 #140 声明尚未 activation。
 
 仅在首次引入、恢复或实际变更 local overlay 时，维护者才在可观察、可回滚的窗口人工重新部署
-Rime；Issue #134 的 StatusBar/preflight 增量不执行新的 deploy。需要 deploy 时，当前 bundle
+Rime。需要 deploy 时，当前 bundle
 已确认存在官方 `fcitx5-curl`，使用官方 Rime deploy 端点：
 
 ```fish
 /Library/Input\ Methods/Fcitx5.app/Contents/bin/fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'
 ```
 
-⌨️ 通过 Fcitx5 官方本地 API 重新部署 Rime，使第 66 个本地 overlay 生效；执行前仍需当前窗口人工批准。
+⌨️ 通过 Fcitx5 官方本地 API 重新部署 Rime，使新的 data view 与本地 overlay 生效；执行前仍需当前窗口人工批准。
 
 完成适用的 activation，以及仅在需要时完成 deploy 后，至少完成以下实机验收：
 
@@ -208,7 +176,7 @@ Rime；Issue #134 的 StatusBar/preflight 增量不执行新的 deploy。需要 
    均未被该能力改变。
 
 在维护者把当前 Issue 要求的 activation 与输入结果记录到 Issue/PR 前，文档只能称本次增量的
-“声明目标已建立”；只有首次引入、恢复或变更 local overlay 的 Issue 才额外要求 deploy 记录。
+“声明目标已建立”；activation 与 deploy 必须分别批准和记录。
 
 ### 2.6 验证声明式层
 
@@ -259,9 +227,9 @@ Codex 进程继承的 PATH 代替。
 - `ChatGPT.app` 是 `com.openai.codex`，`ChatGPT Classic.app` 是 `com.openai.chat`；
 - OrbStack 是唯一容器运行时，`docker ps` 在启动 OrbStack 后正常；
 - Atuin 配置和 `.hushlogin` 来自 Nix Store，但 key/history 保持本机可写状态；
-- macOS 中文输入管理锁定 rime-ice 2025.04.06 的 65 个上游静态叶子与 1 个本地 overlay；
-  Fcitx5.app、plugin、输入源与可写配置文件仍由各自 owner 管理，行为字段仅经官方 API
-  收敛，且已分别记录 live mitigation、人工 activation/redeploy 与输入验收；
+- macOS 中文输入消费锁定 Darwin nixpkgs 的 `pkgs.rime-ice` 2026.06.30，经薄 data view 合入
+  本地 overlay 并递归投影静态 leaves；Fcitx5.app、plugin、输入源、可写配置与全部 GUI/runtime
+  偏好仍由各自 owner 管理，且已分别记录人工 activation、deploy 与真实输入 smoke；
 - `~/.local/share/chezmoi` 不再 apply，旧 dotfiles 不再参与配置生成；
 - OrbStack、编辑器、浏览器、Setapp 数据以及 AI CLI 的状态/凭据没有被 activation
   覆盖；数据库由各消费方自己的恢复流程处理。
@@ -282,40 +250,33 @@ CLI 的状态。macOS defaults 的逐键试用前值和定向回滚命令见
 
 ### 4.2 macOS 中文输入
 
-中文输入异常时，Nix-owned 静态文件、Fcitx 外部字段与用户数据是三个不同边界，按以下顺序
+中文输入异常时，Nix-owned 静态文件、Fcitx 外部状态与用户数据是三个不同边界，按以下顺序
 停止并回滚：
 
-1. 选择 activation 前记录的 nix-darwin generation；
-2. 上一代恢复 Nix-owned 的 65 个上游 leaf，并撤回或恢复对应 generation 的本地 overlay；
-3. generation rollback 不会逆转 Fcitx 外部字段。若本次 activation 的 semantic journal 记录了
-   真实修改，先验证当前值未并发漂移，再通过官方 API 定向恢复；2026-08-11 的 owner-only
-   live 应急副本只可回退对应事故缓解，不可作为通用回滚来源；
-
-   在 Issue/PR 对 exact commit 与当前回滚窗口单独批准后，运行固定目标 helper：
-
-   ```fish
-   nix run .#macbook-fcitx5-behavior-rollback -- --confirm-approved-behavior-rollback
-   ```
-
-   ↩️ 校验 committed semantic journal 与当前字段后，经官方 API 逆序恢复该事务中 `applied=true` 的 owned change；遇到第三方并发漂移时失败关闭。
-
-4. 保留 `luna_pinyin.userdb`、`rime_ice.userdb`、`sync`、`installation.yaml`、
+1. 先检查候选旧 generation 的配置来源和行为语义。若它早于 #140，可能重新包含
+   activation-time Fcitx behavior provider，并在 activation 时通过官方 API POST 旧 Desired；
+   必须在当前窗口单独记录和批准这项副作用，不能把 generation rollback 当成静态-only 动作；
+2. 通过上述人工关卡后，选择 activation 前记录的 nix-darwin generation；
+3. 上一代恢复其自身 Nix-owned 的 Rime 静态声明与 overlay；#140 之后的 generation 使用薄
+   data view，#140 之前的 generation 可能恢复旧 65-leaf closure；
+4. generation rollback 不会自动恢复 Fcitx GUI/runtime 偏好的“正确值”。当前 #140 终态不再
+   提供行为 rollback helper；若旧 provider 未被允许运行或偏好仍异常，通过 Fcitx GUI 对照本节
+   推荐值人工修正。2026-08-11 的 owner-only live 应急副本只可回退对应事故缓解，不可作为
+   通用回滚来源；
+5. 保留 `luna_pinyin.userdb`、`rime_ice.userdb`、`sync`、`installation.yaml`、
    `user.yaml` 与 Fcitx 可变状态；只有出现数据损坏证据时才按对应备份策略恢复，禁止为
    回滚清空 Rime 用户目录或无条件覆盖当前 userdb；
-5. 仅当该回滚实际改变静态 overlay 或 compiled Rime 配置时，由维护者人工重新部署 Rime；
-   Issue #134 的行为/preflight 回滚不 deploy。只有另有证据和当前批准时才重启 Fcitx5；随后重新完成
+6. 仅当该回滚实际改变静态 overlay 或 compiled Rime 配置时，由维护者人工重新部署 Rime；
+   只有另有证据和当前批准时才重启 Fcitx5；随后重新完成
    飞书、Terminal、原生应用与浏览器的输入、左右 Shift、候选、userdb 可写性和既有状态验收，
    并在 Issue/PR 记录结果。
 
-首次静态交接与静态回滚的写入型 helper 已退役，因此第 2 步没有仓库内写入型短入口。若上一代
-已移除 Home Manager 静态链接，必须依据 owner-only evidence 的 checksum/`RELEASED` 清单或
-锁定 source，使用独立 Issue 审阅并批准的窄流程恢复恰好 65 个 regular leaves；随后重新运行
-只读 preflight。该流程不得恢复 userdb、sync，也不自动重新部署 Rime。
+若上一代移除 Home Manager 静态链接且目标已有 unmanaged regular files，必须使用独立 Issue
+审阅并批准的窄流程恢复；不得恢复或覆盖 userdb、sync，也不自动重新部署 Rime。
 
 切回 generation 只能恢复 Nix declaration 和 Nix-owned 静态 leaf，不能恢复用户学习数据、
-sync、installation/user state、Fcitx 配置/plugin 状态或 Squirrel 遗留状态。Fcitx 外部字段
-只能根据 semantic journal 经官方 API 定向恢复。任何回滚、重启或重新部署仍需当前 Issue/PR
-中针对 exact commit 与执行窗口的人工批准。
+sync、installation/user state、Fcitx 配置/plugin/偏好或 Squirrel 遗留状态。任何回滚、重启或
+重新部署仍需当前 Issue/PR 中针对 exact commit 与执行窗口的人工批准。
 
 ### 4.3 Homebrew 与 MAS
 

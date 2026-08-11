@@ -1,4 +1,13 @@
-# macOS 中文输入稳定性研究
+# macOS 中文输入稳定性研究（历史快照）
+
+- **状态：** 已由 [#139](https://github.com/sayoriqwq/nix-config/issues/139) 的维护边界研究和
+  [#140](https://github.com/sayoriqwq/nix-config/issues/140) 的静态声明实现取代
+- **当前入口：** [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md#25-恢复-macos-中文输入能力)
+
+本文保留 2026-08-11 输入状态事故的诊断证据，以及 #132/#134 当时采用的 65-leaf、
+Desired/Keep、官方 API adapter、semantic journal 与 CAS rollback 设计。它们均是**已退役的历史
+架构**，不是当前 Nix ownership 或可执行运维指令。#140 之后，nix-config 只声明
+`pkgs.rime-ice` 的薄静态 data view 与本地 overlay；Fcitx GUI/runtime preference 完全外部所有。
 
 ## 1. 结论
 
@@ -16,7 +25,7 @@ input context。修复前为 `Rime(2) → Terminal(1) → Codex(1)`；维护者�
 该操作没有 raw patch、restart、deploy 或 activation；它是已验证的 live mitigation，不代表
 本研究提出的声明式配置已经激活。
 
-面向这台机器的稳定目标应为：
+当时面向这台机器提出的稳定目标为：
 
 - 全局 `ShareInputState=All`、Rime `InputState=All`、`ActiveByDefault=True`、
   `resetStateWhenFocusIn=No`，有效 `AppDefaultIM` 为空；
@@ -342,21 +351,18 @@ Rime 官方把用户词典、sync snapshot、`installation.yaml`、`user.yaml` �
    [Rime 定制指南](https://github.com/rime/home/wiki/CustomizationGuide#重新佈署的操作方法)。
 6. 完成第 9 节真实应用验收后，才清理一次性交接 helper。
 
-### 8.2 回滚顺序
+### 8.2 已退役的回滚设计
 
-1. 切回上一 Darwin generation，恢复 Nix-owned 的 65 个上游 leaf 与对应 generation 的本地 overlay；
-2. generation rollback 不会逆转 Fcitx 外部字段；若 semantic journal 记录了真实修改，先验证
-   当前语义未并发漂移，再从实施 exact commit 运行固定目标 helper：
+#132/#134 曾提供基于 semantic journal 的字段级 rollback helper；#140 已删除该 package/app、
+activation-time behavior provider 与 journal/CAS 生命周期，因此本节不再提供可执行命令。不要尝试
+从旧提交运行该 helper，也不要把 generation rollback 误认为只会恢复静态文件：切回 #140 之前的
+generation 可能重新带回旧 provider，并通过官方 API POST 当时的 Desired。
 
-   ```fish
-   nix run .#macbook-fcitx5-behavior-rollback -- --confirm-approved-behavior-rollback
-   ```
-
-   ↩️ 仅在当前值仍匹配 committed journal 时，经官方 API 逆序恢复 adapter-owned 行为字段。
-3. 2026-08-11 live mitigation 的 owner-only 应急副本只可回退那次 live 操作，不是通用
-   generation rollback；
-4. 经人工批准再 deploy Rime；只有另有证据和批准时才重启 Fcitx5；
-5. 复测飞书、Terminal、左右 Shift、普通编辑器和密码框，全程不覆盖 userdb/sync/installation/user state。
+当前回滚必须遵循
+[`restore-macos-environment.md` 的“macOS 中文输入”回滚顺序](../runbooks/restore-macos-environment.md#42-macos-中文输入)：
+先审阅候选旧 generation 的行为副作用并单独取得批准，再恢复 Nix-owned 静态声明；Fcitx 偏好通过
+GUI 人工复核。始终保留 userdb、sync、installation/user state，Rime deploy 与 Fcitx restart 仍是
+独立人工关卡。
 
 ## 9. 真实应用验收矩阵
 

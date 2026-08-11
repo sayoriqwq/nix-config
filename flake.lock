@@ -390,23 +390,6 @@
         "type": "github"
       }
     },
-    "rime-ice": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1743514618,
-        "narHash": "sha256-s3r8cdEliiPnKWs64Wgi0rC9Ngl1mkIrLnr2tIcyXWw=",
-        "owner": "iDvel",
-        "repo": "rime-ice",
-        "rev": "a5f5404e369100fcfc5562f86f1205827453e31c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "iDvel",
-        "repo": "rime-ice",
-        "rev": "a5f5404e369100fcfc5562f86f1205827453e31c",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "ax": "ax",
@@ -419,7 +402,6 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-darwin": "nixpkgs-darwin",
         "raycast-source": "raycast-source",
-        "rime-ice": "rime-ice",
         "sops-nix": "sops-nix",
         "zed": "zed"
       }

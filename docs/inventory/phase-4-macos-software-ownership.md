@@ -5,8 +5,9 @@
 - **维护修订：** 2026-08-03，Issue #74 恢复 Lark 数据，#81 将当前渠道更正为中国区
   Feishu，#67 增加 agent Python 基线并收口四个 AI CLI 所有权，#93 清理已验收替代的
   迁移残留；2026-08-10，Issue #127 增加并验收 macOS 中文输入能力的首次静态所有权交接，
-  Issue #131 退役该次交接的写入型 helper
-- **决策来源：** Issue #6、#36、#127、#131 及 Phase 4 各实施 Issue
+  Issue #131 退役该次交接的写入型 helper；2026-08-11，Issue #139 完成中文输入维护边界
+  研究，Issue #140 采用静态 data-view 终态并退役 Fcitx runtime provider
+- **决策来源：** Issue #6、#36、#127、#131、#139、#140 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
 ## 1. 终态原则
@@ -97,11 +98,17 @@ Home Manager Apps 中的当前 bundle，不保活 GUI 进程，也不接管 Mos 
 ### 3.3 macOS 中文输入能力
 
 `macbook` 通过一次显式 import 选择纯 Home Manager 的 macOS 中文输入能力。其声明目标
-是从 non-Flake source 固定 rime-ice 2025.04.06 的完整 commit
-`a5f5404e369100fcfc5562f86f1205827453e31c`，并通过封闭 allowlist 逐个管理恰好 65 个
-上游静态 regular-file leaves，另管理 1 个只公开 `rime_ice` 的本地
-`default.custom.yaml` overlay。仓库不 vendor 上游源码、不建立个人 Rime 仓库、不管理
-`~/.local/share/fcitx5/rime` 根节点，也不递归链接静态源与可变状态混合的目录。
+是消费当前 Darwin nixpkgs 锁定的 `pkgs.rime-ice` 2026.06.30。能力从
+`$out/share/rime-data` 构造薄 data view：排除整个 `build` 子树，拒绝 userdb、sync、
+`installation.yaml`、`user.yaml` 等可变名称，并在上游同名冲突时失败关闭地合入本地
+`default.custom.yaml`。单一合并结果以 recursive leaf semantics 投影到用户目录；仓库不
+vendor 上游源码、不建立个人 Rime 仓库，也不管理 `~/.local/share/fcitx5/rime` 根节点。
+
+`macbook-rime-data-layout` 中对 `2026.06.30` 的单一静态 policy check 是刻意的
+update-policy gate，不是对 nixpkgs channel 可用性的假设或故障兜底。未来 Darwin nixpkgs lock
+带来新的 `pkgs.rime-ice` 版本时，该 check 应先失败，要求维护者审阅版本、package
+output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy，再在获批更新中同步推进
+该 gate；这不表示单独的 macbook system build 必然失败，也不应被误诊为 channel breakage。
 
 安装与运行时所有权保持分离：
 
@@ -111,16 +118,14 @@ Home Manager Apps 中的当前 bundle，不保活 GUI 进程，也不接管 Mos 
   证明；
 - macOS 输入源注册与当前选择由 macOS/runtime 和维护者拥有；Home Manager 不修改输入源
   数据库、不 kill 或更新 Fcitx5，也不在 activation 中触发 Rime deploy；
-- 65 个上游静态叶子的目标内容由 Home Manager 拥有；路径或内容与锁定 source 不一致时
-  preflight 失败关闭，不允许 force 覆盖；其中上游 `squirrel.yaml` 只是完整锁定集合的一员，
-  不形成 Squirrel 安装或运行时 owner；
-- 本地 overlay 是第 66 个独立静态 leaf，仅把 schema 列表收窄到 `rime_ice`；它不修改
-  pinned `default.yaml`，也不改变左右 Shift、简繁、标点或用户数据；
+- `pkgs.rime-ice`、过滤/合并 data view 和本地 overlay 的静态内容由 Home Manager 拥有；
+  能力不再维护上游 leaf allowlist，也不把 raw package output 递归投影到用户目录；
+- 本地 overlay 通过 `__include: rime_ice_suggestion:/` 接入 nixpkgs 重命名后的上游建议，
+  并只启用 `rime_ice`；它不改变左右 Shift、简繁、标点或用户数据；
 - `~/.config/fcitx5` 及其中 regular files 继续由 Fcitx5 外部拥有并保持可写。能力不得 raw
-  patch INI、接管整文件或建立 Store symlink，只能通过 bundle 自带的官方本地配置 API
-  收敛全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空和 `StatusBar=Hidden`；左右 Shift 的
-  `AltTriggerKeys` 与 Rime `InputState=All` 等 Keep 字段只做语义检查；
-- 未经批准不改变 `VimMode` 中的 MacVim 条目、剪贴板/Beast 配置、密码框策略或其他外部字段；
+  patch INI、接管整文件、建立 Store symlink、调用配置 API 或审计运行时字段；
+- `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、左右 Shift 均为维护者
+  通过 Fcitx GUI 维护的推荐体验，不是 Nix Desired/Keep；其他 Fcitx 偏好同样保持外部；
 - 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
   preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
 
@@ -128,12 +133,12 @@ Home Manager Apps 中的当前 bundle，不保活 GUI 进程，也不接管 Mos 
 `keyboard-us`，随后全局 `ShareInputState=All` 把 inactive 状态传播到其他 input context。
 运行时 red/green 探针从 `2 → 1 → 1` 变为 `2 → 2 → 2`；维护者批准窗口内已用官方
 `fcitx5-curl` 清空 live `AppDefaultIM`，未 raw patch、restart、deploy 或 activation。
-该 live mitigation 已验证，但声明式 adapter 与本地 overlay 在 activation 前仍只是仓库目标。
+该 live mitigation 已验证，但它属于历史事故处理证据，不是 #140 终态的声明式合同。
 
 维护者随后确认，live `StatusBar=Hidden` 来自本人在 Fcitx5 UI 点击“隐藏输入法名称”，并在
-Issue #134 中批准把这个已验收结果升级为 adapter-owned Desired。仓库仍不拥有
-`macosfrontend.conf` 文件；只有该标量与既有两个字段共享官方 API、CAS、semantic journal
-和定向 rollback 边界。
+Issue #134 中曾批准把这个已验收结果升级为 adapter-owned Desired。Issue #140 采用新的维护
+边界后，仓库仍不拥有 `macosfrontend.conf` 文件，也不再拥有该标量、另外两个字段或其
+API/journal/rollback 生命周期；这些值只作为人工推荐值保留。
 
 可变状态只登记路径、内容 owner 与备份边界，不读取词条正文、不链接到 Nix Store：
 
@@ -145,8 +150,7 @@ Issue #134 中批准把这个已验收结果升级为 adapter-owned Desired。�
 | `~/.local/share/fcitx5/rime/sync` | Rime | separate-policy | 同步导出状态；仓库不实现同步或备份。 |
 | `~/.local/share/fcitx5/rime/installation.yaml` | Rime | required | 可写 installation identity。 |
 | `~/.local/share/fcitx5/rime/user.yaml` | Rime | required | 可写用户运行与部署状态。 |
-| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile 与用户配置，整棵目录及配置文件保持应用可写；Nix 仅经官方 API 收敛三个获批字段，不取得文件所有权。 |
-| `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior` | nix-config macOS 中文输入 behavior adapter | required | mode 0700 的目录保存 mode 0600 `last-change.json` 事务 journal 与终态归档；generation rollback 不自动恢复其记录的外部字段，固定目标 rollback helper 只在 CAS 预检通过时恢复。 |
+| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile、GUI 偏好与用户配置，整棵目录及配置文件保持应用可写；Nix 不调用配置 API，也不取得字段或文件所有权。 |
 | `~/Library/fcitx5` | Fcitx5/plugin | separate-policy | plugin/shared payload 与应用状态，继续外部所有。 |
 | `~/Library/Caches/org.fcitx.inputmethod.Fcitx5` | Fcitx5 | excluded | 可重建 cache，不属于备份承诺。 |
 
@@ -156,16 +160,14 @@ Issue #127 已建立 65 个上游 leaf 的声明、policy check、只读 preflig
 Store，Fcitx5 仍为 selected input source，Rime 重新部署与真实输入均为 PASS。接管前 65 项
 checksum 与 `RELEASED` 清单已经核验；仓库外 owner-only rollback evidence 继续保留且不由
 仓库读取、移动、重新打包或管理。#131 只退役服务该次 regular-file 交接的写入型 helper；
-长期 preflight、policy、锁定 source、声明、状态边界与抽象恢复顺序保持不变。未来新机器若
+这些历史数字与 evidence 不再构成当前逐 leaf manifest 或 runtime preflight 合同。未来新机器若
 再次需要 unmanaged-file handoff，必须另开 Issue，根据当时 live facts 与 exact commit 重新
 提供窄入口并取得人工批准。
 
-Issue #132 在其上增加 1 个本地 overlay 与两项 Fcitx 行为 Desired，并已随 generation 44
-完成 activation 与机器侧配置合同记录；当时没有再次 deploy Rime，飞书日报/Terminal 往返
-输入也未记录为完成。Issue #134 只把维护者手动形成的 `StatusBar=Hidden` 升级为第三项
-Desired，并修正 overlay preflight；这项增量在绑定 Draft PR exact commit 的 activation 和
-实机菜单栏/输入验收前仍只是声明目标，且不要求再次部署 Rime。
-已完成的 live 应急副本不能被描述为 generation rollback。详细顺序见
+Issue #132 和 #134 曾引入本地 overlay 与三个 Fcitx 行为 Desired。Issue #140 正在把静态
+来源升级为 `pkgs.rime-ice` 2026.06.30 + 薄 data view，并删除行为 Desired/Keep、runtime
+preflight、journal 与 rollback helper；该新声明尚未 activation 或 deploy。已完成的 live
+应急副本不能被描述为 generation rollback。详细顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
 
 ## 4. Homebrew 所有权
@@ -269,7 +271,7 @@ Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动
 | ChatGPT Classic | [OpenAI](https://openai.com/chatgpt/desktop/)，bundle `com.openai.chat` | 保留，与 Homebrew ChatGPT/Codex 身份分离；账号和对话外部 |
 | Collaborator | [官网](https://collab.computer/)、[GitHub releases](https://github.com/collabs-inc/collab-public/releases)，Team ID `93MDU2WLAD` | 保留；账号、项目与 session 外部 |
 | EVPlayer | [Mac App Store 1190222875](https://apps.apple.com/app/id1190222875)，bundle `cn.ieway.EVPlayer` | 保留；媒体和 history 外部 |
-| Fcitx5 | [官方 macOS installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)，bundle `org.fcitx.inputmethod.Fcitx5` | `/Library/Input Methods/Fcitx5.app`、Rime plugin、updater 与输入源注册保持外部；bundle metadata 无法证明 installer 精确语义版本。Home Manager 只拥有 3.3 节列出的锁定静态叶子，不拥有应用或混合用户树。 |
+| Fcitx5 | [官方 macOS installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)，bundle `org.fcitx.inputmethod.Fcitx5` | `/Library/Input Methods/Fcitx5.app`、Rime plugin、updater、输入源注册与全部 GUI/runtime 偏好保持外部；bundle metadata 无法证明 installer 精确语义版本。Home Manager 只拥有 3.3 节列出的 `pkgs.rime-ice` 薄静态 data view 与 overlay，不拥有应用或混合用户树。 |
 | iLoader | 当前签名应用，bundle `me.nabdev.iloader`，Team ID `42Q7QX86GV` | 保留；更新来源和应用数据由厂商渠道拥有 |
 | LiteEdit | [官网](https://arietan.github.io/lite-edit/)、[GitHub releases](https://github.com/arietan/lite-edit/releases)，bundle `com.liteedit.app` | 保留；当前 1.0.0 为 ad-hoc 签名，下载后需人工核验 |
 | Mole | [官网](https://mole.fit/)，bundle `com.tw93.MoleApp`，Team ID `5EH69Y5X38` | 保留；偏好外部；不得用 Nixpkgs 同名 SSH CLI 替代 |
@@ -328,13 +330,15 @@ receipt 和两个已批准的 Trash rollback 目录；当前只保留声明的 F
 - OrbStack 的应用由 Homebrew cask声明；其可变容器数据永远需要独立备份/恢复流程。
 - Nix generation 回滚只恢复声明和 Nix-owned package 链接；不能回滚 Homebrew adoption、
   MAS receipt、Setapp 登录、厂商应用数据、数据库或容器。
-- macOS 中文输入的 generation 回滚也不会恢复 Rime `build`、userdb、sync、installation/user
-  state 或 Fcitx plugin/config；它可以恢复 Nix-owned 的 65 个上游 leaf 与 1 个本地 overlay，
-  但 Fcitx 外部字段必须由固定目标 rollback helper 按 owner-only semantic journal 经官方 API 恢复。2026-08-11 的 live
-  应急副本只可用于对应事故缓解的定向回退，不是通用 generation rollback。首次静态交接与
-  静态回滚的写入型 helper 已退役；若需把 65 个静态 leaf 恢复成 regular files，必须从仓库外
-  owner-only evidence 或锁定 source 按独立 Issue 的窄流程恢复，保留全部 mutable state，再由
-  维护者人工重新部署 Rime 并完成输入验收。
+- macOS 中文输入在 #140 及其后续 generation 中只恢复 Nix-owned 的 Rime 静态 data view 与
+  overlay，不恢复 Rime `build`、userdb、sync、installation/user state、Fcitx plugin/config
+  或任何 GUI 偏好，且仓库不再提供字段级 rollback helper。但切回 #140 之前的旧 generation
+  可能重新带回旧 activation-time Fcitx behavior provider，并在 activation 时通过官方 API POST
+  旧 Desired 值；执行这种旧 generation 前必须人工审阅该 closure 的行为语义并单独批准，不能
+  把“当前终态不拥有偏好”误认为旧 generation 也不会修改偏好。2026-08-11 的 live 应急副本只
+  可用于对应事故缓解的定向回退，不是通用 generation rollback。若目标上有 unmanaged regular
+  files，必须按独立 Issue 的窄流程处理，保留全部 mutable state，再由维护者人工 deploy Rime
+  并完成输入 smoke test。
 - Homebrew/MAS/Setapp/厂商应用的具体恢复和故障顺序见 Mac 总体 runbook。
 - #93 还发现并精确删除六个指向已删除 Docker、WARP 与 Zed Preview 应用的 root-owned
   `/usr/local/bin` 悬空链接。删除后 `docker`/`kubectl` 继续由 OrbStack 提供，`zed` 只
