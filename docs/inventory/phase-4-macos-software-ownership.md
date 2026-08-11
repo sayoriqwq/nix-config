@@ -6,8 +6,9 @@
   Feishu，#67 增加 agent Python 基线并收口四个 AI CLI 所有权，#93 清理已验收替代的
   迁移残留；2026-08-10，Issue #127 增加并验收 macOS 中文输入能力的首次静态所有权交接，
   Issue #131 退役该次交接的写入型 helper；2026-08-11，Issue #139 完成中文输入维护边界
-  研究，Issue #140 采用静态 data-view 终态并退役 Fcitx runtime provider
-- **决策来源：** Issue #6、#36、#127、#131、#139、#140 及 Phase 4 各实施 Issue
+  研究，Issue #140 采用静态 data-view 终态并退役 Fcitx runtime provider，Issue #143 完成
+  Shift ownership 调整；Issue #145 取代其 fallback 决策，目标是移除用户可见的恢复通道
+- **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
 ## 1. 终态原则
@@ -125,9 +126,10 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
   简繁、标点或用户数据；
 - `~/.config/fcitx5` 及其中 regular files 继续由 Fcitx5 外部拥有并保持可写。能力不得 raw
   patch INI、接管整文件、建立 Store symlink、调用配置 API 或审计运行时字段；
-- `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、Fcitx
-  `AltTriggerKeys` 为空均为维护者通过 Fcitx GUI/官方 API 维护的推荐体验，不是 Nix
-  Desired/Keep；`Control+Shift_L` 保留为完整 Fcitx 恢复键，其他 Fcitx 偏好同样保持外部；
+- `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、`Default` group 唯一
+  item 为 `rime`、`DefaultIM=rime`、`Default Layout=us`，以及 Fcitx `TriggerKeys` 与
+  `AltTriggerKeys` 均为空，是维护者通过 Fcitx GUI/官方 API 维护的推荐体验，不是 Nix
+  Desired/Keep；普通左右 Shift 属于 Rime，不保留完整 Fcitx trigger 或菜单 fallback；
 - 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
   preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
 
@@ -137,12 +139,15 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
 `fcitx5-curl` 清空 live `AppDefaultIM`，未 raw patch、restart、deploy 或 activation。
 该 live mitigation 已验证，但它属于历史事故处理证据，不是 #140 终态的声明式合同。
 
-Issue #143 进一步取代 #132/#134 的旧 Shift Keep 决策：macOS 外层仍选择“小企鹅”，Fcitx
-内层正常保持“中州韵”，普通左右 Shift 只在 Rime 内部切换中文/ASCII mode。Fcitx profile 中
-的 `keyboard-us` 继续作为 fallback engine 存在，但不再由 modifier-only Shift 选中；菜单勾选
-落到“键盘 - 英语（美国）”表示 Fcitx engine 已切换，不能解释为 Rime ASCII mode。该目标需要
-分别经过静态 overlay activation、Rime deploy 与外部 Fcitx 偏好人工关卡；本文不声称这些
-真实机器动作已经完成。
+Issue #143 已完成左右 Shift ownership 调整：普通左右 Shift 只在 Rime 内部切换中文/ASCII
+mode。Issue #145 又取代 #143 保留 fallback 的决策，目标是让 `Default` group 只含 `rime`，
+并清空 `TriggerKeys` 与 `AltTriggerKeys`；菜单不再显示“键盘 - 英语（美国）”，也不保留
+`Control+Shift_L` 等人工切出 Rime 的通道。`DefaultIM=rime` 与 `Default Layout=us` 保持不变。
+本 PR 只建立文档目标；live profile/API mutation 与真人 smoke 尚未完成，不能描述为机器终态。
+
+从 group 移除 `keyboard-us` 不删除 keyboard addon 或系统 keyboard resources。密码/安全输入在
+`AllowInputMethodForPassword=False` 时仍可由 Fcitx core 使用底层 `keyboard-us`，且配置无效时
+core 可能重建默认 group；这些属于安全与自愈机制，不是用户菜单 fallback，也不是恢复通道。
 
 维护者随后确认，live `StatusBar=Hidden` 来自本人在 Fcitx5 UI 点击“隐藏输入法名称”，并在
 Issue #134 中曾批准把这个已验收结果升级为 adapter-owned Desired。Issue #140 采用新的维护
@@ -175,9 +180,10 @@ checksum 与 `RELEASED` 清单已经核验；仓库外 owner-only rollback evide
 
 Issue #132 和 #134 曾引入本地 overlay 与三个 Fcitx 行为 Desired。Issue #140 已把静态来源
 收敛为 `pkgs.rime-ice` 2026.06.30 + 薄 data view，并删除行为 Desired/Keep、runtime preflight、
-journal 与 rollback helper；Issue #143 只继续调整 Nix-owned Rime Shift overlay 与 external
-Fcitx `AltTriggerKeys` 目标。声明或 build 状态不表示 #143 已 activation、deploy 或修改 live
-偏好。已完成的历史 live 应急副本不能被描述为 generation rollback。详细顺序见
+journal 与 rollback helper；Issue #143 完成 Nix-owned Rime Shift overlay 与 external
+`AltTriggerKeys` 调整，#145 只进一步修改 external group/trigger 目标，不恢复 Nix provider。
+文档声明不表示 #145 已修改 live profile/API 或完成真人 smoke。已完成的历史 live 应急副本
+不能被描述为 generation rollback。详细顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
 
 ## 4. Homebrew 所有权

@@ -2,7 +2,8 @@
 
 - **状态：** 已由 [#139](https://github.com/sayoriqwq/nix-config/issues/139) 的维护边界研究和
   [#140](https://github.com/sayoriqwq/nix-config/issues/140) 的静态声明实现取代；其中 Shift
-  ownership 决策又由 [#143](https://github.com/sayoriqwq/nix-config/issues/143) 明确取代
+  ownership 决策由 [#143](https://github.com/sayoriqwq/nix-config/issues/143) 明确取代，
+  其保留 fallback 的决定又由 [#145](https://github.com/sayoriqwq/nix-config/issues/145) 取代
 - **当前入口：** [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md#25-恢复-macos-中文输入能力)
 
 本文保留 2026-08-11 输入状态事故的诊断证据，以及 #132/#134 当时采用的 65-leaf、
@@ -12,7 +13,7 @@ Desired/Keep、官方 API adapter、semantic journal 与 CAS rollback 设计。�
 
 ## 1. 结论
 
-本次问题不是雾凇拼音静态方案消失，而是输入链路同时存在三层容易混淆的状态：
+当时的问题不是雾凇拼音静态方案消失，而是事故现场同时存在三层容易混淆的状态：
 
 1. macOS 外层是否选择“小企鹅”输入源；
 2. Fcitx5 核心当前是 `keyboard-us` 还是 `rime`（菜单分别显示“键盘 - 英语（美国）”或
@@ -20,8 +21,9 @@ Desired/Keep、官方 API adapter、semantic journal 与 CAS rollback 设计。�
 3. 只有 Fcitx 保持 `rime` 时才存在的 Rime 会话内部「中文/ASCII、简/繁、中/英标点、方案」
    状态。
 
-因此 Rime ASCII mode 仍会让 Fcitx 菜单勾选保持“中州韵”；勾选移动到“键盘 - 英语（美国）”
-则表示 Fcitx 已切换 engine，不是同一个英文状态。
+因此 Rime ASCII mode 会让 Fcitx 菜单勾选保持“中州韵”；事故现场若勾选移动到“键盘 - 英语
+（美国）”，表示 Fcitx 已切换 engine，不是同一个英文状态。#145 的目标会从 current group
+移除这个用户可选分支，但不抹除该历史诊断证据。
 
 Fcitx5 官方对“切换应用后沿用前一应用输入法”的明确建议是：不要为目标应用设置应用默认输入法，并将全局 `ShareInputState` 设为 `All`；Rime 的 `InputState` 又优先于全局设置。[Fcitx5 macOS FAQ](https://fcitx-contrib.github.io/docs/faq.html#如何在切换应用时保留前一个应用的输入法)，[Fcitx5 macOS Rime 文档](https://fcitx-contrib.github.io/docs/im/rime.html#共享输入状态)。
 
@@ -32,13 +34,16 @@ input context。修复前为 `Rime(2) → Terminal(1) → Codex(1)`；维护者�
 该操作没有 raw patch、restart、deploy 或 activation；它是已验证的 live mitigation，不代表
 本研究提出的声明式配置已经激活。
 
-当时面向这台机器提出的稳定目标如下；其中关于 Shift 的两项 Keep/只读验证已被 #143
-明确取代，不再是现行目标：
+当时面向这台机器提出的稳定目标如下；其中 Shift 的 Keep/只读验证已被 #143 取代，#143
+保留的 fallback 决策又被 #145 取代：
 
 - 全局 `ShareInputState=All`、Rime `InputState=All`、`ActiveByDefault=True`、
   `resetStateWhenFocusIn=No`，有效 `AppDefaultIM` 为空；
 - **历史、已取代：** 左右 Shift 继续由 Fcitx `AltTriggerKeys` 同时切换；现行目标改为
   Fcitx `AltTriggerKeys` 为空、左右 Shift 由 Rime 内部中文/ASCII 切换拥有；
+- **#145 目标：** `Default` group 只含 `rime`，保持 `DefaultIM=rime` 与
+  `Default Layout=us`；`TriggerKeys` 和 `AltTriggerKeys` 均为空，不再提供菜单
+  `keyboard-us` 或完整 trigger 的人工恢复通道；
 - `StatusBar=Hidden`，菜单栏只保留 macOS“小企鹅”输入源图标；密码框继续禁用输入法和预编辑；
 - 65 个锁定上游静态叶子保持不变，另加 1 个本地 `default.custom.yaml`，只公开 `rime_ice`；
 - Fcitx/Rime 用户数据继续可写且不进入 Git；`~/.config/fcitx5` 及其中配置文件由 Fcitx5
@@ -46,7 +51,8 @@ input context。修复前为 `Rime(2) → Terminal(1) → Codex(1)`；维护者�
 - **历史、已退役：** Nix 通过官方本地配置 API 收敛 `ShareInputState=All`、空
   `AppDefaultIM` 与 `StatusBar=Hidden`，并把 Fcitx 左右 Shift 与 Rime `InputState=All` 作为
   Keep gate。#140 已退役整个 runtime provider；#143 只在静态 Rime overlay 声明 Shift，Fcitx
-  `AltTriggerKeys` 继续是 external GUI/API preference。
+  `TriggerKeys`、`AltTriggerKeys` 与 profile group 继续是 external GUI/API preference。#145 的
+  文档变更只声明目标，不表示 live mutation 或真人 smoke 已完成。
 
 Issue #132 的初始自动化只把 `StatusBar=Hidden` 当作 Keep gate；维护者随后确认该 live 值来自
 本人点击“隐藏输入法名称”，并在 Issue #134 中批准把它升级为 Desired。升级后 Keep gate 只
@@ -120,13 +126,15 @@ Codex 后仍为 `1`；用官方 API 清空 `AppDefaultIM` 后，同一路径保�
 **#132 历史决策，已由 #143 取代：** 当时保留 Fcitx ownership，让 `AltTriggerKeys` 同时包含
 `Shift+Shift_L` 与 `Shift+Shift_R`，并且不在 local overlay 改写 Rime Shift。后续复现证明这会
 把“Fcitx 在 `rime`/`keyboard-us` 之间切换”与“Rime 内部中文/ASCII 切换”压在同一对按键上。
-#143 的现行目标改为：Fcitx `AltTriggerKeys` 为空；local overlay 将 `Shift_L`、`Shift_R` 都
-声明为 `commit_code`；普通 Shift 不改变 Fcitx 当前引擎，`Control+Shift_L` 继续作为完整的
-Fcitx 引擎层恢复键。Fcitx 字段仍为 external GUI/API preference，不恢复 Nix runtime provider。
+#143 已完成的 Shift 目标是：Fcitx `AltTriggerKeys` 为空；local overlay 将 `Shift_L`、
+`Shift_R` 都声明为 `commit_code`；普通 Shift 不改变 Fcitx 当前引擎。#145 进一步取代其
+fallback 决策：`TriggerKeys` 也为空，`Default` group 只保留 `rime`，不再保留
+`Control+Shift_L` 或 `keyboard-us` 菜单项作为恢复通道。Fcitx 字段仍为 external GUI/API
+preference，不恢复 Nix runtime provider。
 
 ### 3.5 密码框与预编辑
 
-**官方事实：** Fcitx5 core 在 `AllowInputMethodForPassword=False` 时把密码输入上下文强制降级到 fallback keyboard；`ShowPreeditForPassword=False` 时即使有 preedit 也只输出遮蔽点。[`instance.cpp` fallback](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L132-L151)，[`instance.cpp` input method selection](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L1738-L1757)，[`instance.cpp` password preedit](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L2366-L2388)。
+**官方事实：** Fcitx5 core 在 `AllowInputMethodForPassword=False` 时把密码输入上下文强制降级到 `keyboard-DefaultLayout`；这不要求 `keyboard-us` 位于 current group。`ShowPreeditForPassword=False` 时即使有 preedit 也只输出遮蔽点。[`instance.cpp` fallback](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L132-L151)，[`instance.cpp` input method selection](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L1738-L1757)，[`instance.cpp` password preedit](https://github.com/fcitx/fcitx5/blob/8bdc4ec023d8d3d33b8882b5938511d00a0b0b94/src/lib/fcitx/instance.cpp#L2366-L2388)。
 
 **官方事实：** Fcitx5 macOS 同时注册英文、简体中文和繁体中文三个 input mode；英文注册允许浏览器/Terminal 密码框使用，中文注册让 macOS 在这些密码框禁用它。[`MacOSXBundleInfo.plist.in`](https://github.com/fcitx-contrib/fcitx5-macos/blob/363566b5cd622dfeefa207735e7b41110d6a2445/cmake/MacOSXBundleInfo.plist.in#L35-L61)。本机当前选择的是简体中文 input source，因此密码框切到系统 ABC/英文是预期安全行为，不应通过开启 password IM 来“修复”。
 
@@ -152,7 +160,7 @@ Fcitx 引擎层恢复键。Fcitx 字段仍为 external GUI/API preference，不�
 | 配置 | 本机值 | 目标 | 理由 |
 | --- | --- | --- | --- |
 | `EnumerateWithTriggerKeys` | `False` | Keep | 避免按住修饰键继续轮换 IM。 |
-| `TriggerKeys` | `Control+Shift_L`、日文/韩文硬件键 | Keep | `Control+Shift_L` 是 macOS 官方引擎层恢复键；未使用的硬件键无害，不为整洁而扩大变更。 |
+| `TriggerKeys` | `Control+Shift_L`、日文/韩文硬件键 | #145 Change → empty | 不再保留完整 Fcitx trigger 的人工恢复通道；字段仍由官方 API 外部维护。 |
 | `AltTriggerKeys` | 左、右 Shift | 历史 Keep，已由 #143 取代 | 现行目标为空；普通 Shift 交给 Rime，Fcitx 字段仍由 GUI/API 外部维护。 |
 | activate/deactivate keys | 韩文专用键 | External / unchanged | 未获批准，不因审计而清理。 |
 | group forward/backward | `Super+space` 组合 | External / unchanged | 未获批准，不因只有一个 group 而清理。 |
@@ -170,20 +178,24 @@ Fcitx 引擎层恢复键。Fcitx 字段仍为 external GUI/API preference，不�
 
 ### 4.2 `~/.config/fcitx5/profile`
 
-本机只有一个 `Default` group，layout 为 `us`，顺序为 `keyboard-us`、`rime`，`DefaultIM=rime`。
+本机审计快照只有一个 `Default` group，layout 为 `us`，顺序为 `keyboard-us`、`rime`，
+`DefaultIM=rime`；这是 #145 live mutation 前的历史值。
 
 | 决策 | 结果 |
 | --- | --- |
-| Keep | 保持一个 group、fallback `keyboard-us` 和唯一中文引擎 `rime`。 |
-| Change | 无；但应在 activation 后语义校验顺序与 `DefaultIM`。 |
+| Keep | 保持 `DefaultIM=rime` 与 `Default Layout=us`。 |
+| #145 Change | 通过官方“输入法”界面只从 `Default` group 移除 `keyboard-us`，使唯一 item 为 `rime`。 |
 | External | 当前 active/last state 不写入此声明；由运行中 input context 管理。 |
+
+移除 group item 不删除 keyboard addon 或系统 keyboard resources。密码/安全输入仍可使用底层
+`keyboard-us`；配置无效时 core 也可能重建默认 group。二者都是组件机制，不是用户菜单 fallback。
 
 ### 4.3 `~/.config/fcitx5/conf/macosfrontend.conf`
 
 | 配置 | 本机值 | 目标 | 理由 |
 | --- | --- | --- | --- |
 | `StatusBar` | `Hidden` | Desired | 维护者明确只保留“小企鹅”，并在 Issue #134 批准由官方 API 收敛。 |
-| `AppDefaultIM` | 审计时 Terminal → `keyboard-us`；live 已清空 | Change → empty | 已确认回归根因；官方 API live 缓解已通过 `2 → 2 → 2` 验证，声明式 activation 尚未完成。 |
+| `AppDefaultIM` | 审计时 Terminal → `keyboard-us`；live 已清空 | Change → empty | 已确认回归根因；官方 API live 缓解已通过 `2 → 2 → 2` 验证。旧声明式 provider 后由 #140 退役，当前字段为 external，不存在待完成的声明式 activation。 |
 | `VimMode` | MacVim | External / unchanged | 未获批准，不删除或改写。 |
 | simulated key release | `False`, 100ms | Keep | 仅并击方案需要；雾凇全拼不需要。 |
 | monitor pasteboard | `False` | Keep | 隐私与最小能力；无需把剪贴板交给 IM。 |
@@ -269,10 +281,10 @@ Rime 官方建议不要直接修改发行版文件，而应以同名 `.custom.ya
 
 | 分类 | 项目 |
 | --- | --- |
-| Keep | `ActiveByDefault=True`、`resetStateWhenFocusIn=No`、Rime `InputState=All`、profile 只有 keyboard-us+rime 且默认 rime、`Control+Shift_L` 完整恢复键、应用/Rime preedit、密码保护、30 分钟 autosave、Rime deploy key、FollowCaret false、当前候选/配色、webpanel plugins/unsafe API 关闭、monitor pasteboard 关闭、Beast 仅 Unix socket、无 cloud input。 |
-| Change / Desired | 静态 Rime overlay：只公开 `rime_ice` schema，并把左右 Shift 都声明为 Rime `commit_code`。Fcitx `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden` 与 `AltTriggerKeys` 为空仅为 external GUI/API 推荐值，不是 Nix Desired。 |
+| Keep | `ActiveByDefault=True`、`resetStateWhenFocusIn=No`、Rime `InputState=All`、`DefaultIM=rime`、`Default Layout=us`、应用/Rime preedit、密码保护、30 分钟 autosave、Rime deploy key、FollowCaret false、当前候选/配色、webpanel plugins/unsafe API 关闭、monitor pasteboard 关闭、Beast 仅 Unix socket、无 cloud input。 |
+| Change / Desired | 静态 Rime overlay：只公开 `rime_ice` schema，并把左右 Shift 都声明为 Rime `commit_code`。Fcitx `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、`Default` group 唯一 item=`rime`、`TriggerKeys` 与 `AltTriggerKeys` 均为空仅为 external GUI/API 推荐值，不是 Nix Desired。 |
 | External | Fcitx5.app、plugin payload/updater、macOS input source registration、整个 `~/.config/fcitx5` 及配置文件所有权、MacVim `VimMode`、缺失的 `clipboard.conf`/`beast.conf`、`macosnotifications.conf`、`cached_layouts`、Rime `build`、`*.userdb`、`sync`、`installation.yaml`、`user.yaml`、Fcitx cache。 |
-| Human-only | activation、Rime deploy、真实应用输入验收、Fcitx5 app/plugin 更新，以及未来任何新的视觉/快捷键/简繁/标点策略变更。 |
+| Human-only | activation、Rime deploy、#145 的 live group/trigger 修改、真实应用输入验收、Fcitx5 app/plugin 更新，以及未来任何新的视觉/快捷键/简繁/标点策略变更。 |
 
 ## 6. 配置加载、写回与可声明 seam
 
@@ -392,23 +404,28 @@ GUI 人工复核。始终保留 userdb、sync、installation/user state，Rime d
 | 跨应用 | 飞书中文 → TextEdit/备忘录 → 浏览器 contenteditable → 回飞书 | 所有普通文本框保持同一个 active Rime 状态。 |
 | 同应用多字段 | 在飞书日报不同输入框来回点击 | 不因新 InputContext 退回 `keyboard-us`。 |
 | 菜单栏 | 观察 macOS 输入源菜单与图标 | `StatusBar=Hidden`，不出现额外 Fcitx 文本状态栏，只保留“小企鹅”。 |
-| 快捷键 | 连续快速输入、分别单按左右 Shift、按 Ctrl+Shift_L | 左右 Shift 均只切换 Rime 内部中文/ASCII mode，菜单勾选保持“中州韵”；完整 trigger key 仍可恢复 Fcitx 引擎层。 |
+| 快捷键 | 连续快速输入、分别单按左右 Shift，并确认完整 trigger 已清空 | 左右 Shift 均只切换 Rime 内部中文/ASCII mode，菜单只显示并勾选“中州韵”；不存在人工切出 Rime 的完整 trigger。 |
 | 候选/预编辑 | 输入、Backspace、左右箭头、Tab、`-`/`=`、Esc | 应用 preedit、候选位置和翻页无双处理、吞键或光标跳动。 |
 | Browser/Electron | Chrome 地址栏、网页输入框、飞书富文本 | Backspace、箭头和候选上屏均正常。 |
 | Terminal/IDE | 从 Rime 聚焦 Terminal，再返回其他应用；另测 Esc/Ctrl+C/Backspace | 保持 active Rime，运行时路径为 `2 → 2 → 2`；控制键不双处理。 |
-| 密码框 | 浏览器密码框和 Terminal sudo prompt | 使用系统 ABC/fallback，不显示中文候选或明文 preedit；退出密码框后恢复 Rime 共享状态。 |
+| 密码框 | 浏览器密码框和 Terminal sudo prompt | 使用系统 ABC/底层 `keyboard-us` 安全路径，不显示中文候选或明文 preedit；该路径不要求 `keyboard-us` 出现在 current group 菜单，退出密码框后恢复 Rime 共享状态。 |
 | 简繁/标点 | 确认为简体、中式逗号句号；切换一次再跨应用 | 记忆策略与批准结果一致，不出现应用间随机差异。 |
 | deploy/session | deploy 完成后重新登录或切换用户会话再复测 | schema 只有 rime_ice，候选和用户学习仍存在；无 Squirrel 并发访问。 |
 
 ## 10. 最终实施决策
 
-1. 清空全部 `AppDefaultIM`；live mitigation 已验证，声明式 activation 尚未完成。
-2. **历史、已由 #143 取代：** Fcitx `AltTriggerKeys` 保持左右 Shift。现行目标为
-   `AltTriggerKeys` 为空，普通 Shift 不再切换 Fcitx engine；`Control+Shift_L` 保留为完整恢复键。
-   `StatusBar=Hidden` 与只保留“小企鹅”的目标不变。
+1. **历史：** 清空全部 `AppDefaultIM`；live mitigation 已验证。#132/#134 曾设计的声明式
+   provider 后由 #140 退役，当前字段为 external，不存在待完成的声明式 activation。
+2. **历史、已由 #143 取代：** Fcitx `AltTriggerKeys` 保持左右 Shift。#143 已完成普通 Shift
+   归属 Rime 的决策；#145 又取代其 fallback 决策，目标为 `TriggerKeys`、`AltTriggerKeys` 均为空，
+   `Default` group 唯一 item=`rime`，不保留 `Control+Shift_L` 或菜单 `keyboard-us` 恢复通道。
+   `DefaultIM=rime`、`Default Layout=us`、`StatusBar=Hidden` 与只保留“小企鹅”的目标不变。
 3. 增加独立 `default.custom.yaml`，schema list 只包含 `rime_ice`；#143 又在同一 overlay 将左右
    Shift 都声明为 Rime `commit_code`。旧 65-leaf 计数只属于本历史架构，#140 已改为薄 data view。
 4. MacVim、剪贴板/Beast、密码框、候选窗视觉、简繁与标点等未批准项不修改。
-5. activation、Rime deploy、真实应用验收和任何 restart 都保留人工关卡；generation rollback
-   不自动逆转 Fcitx 外部字段。#140 已退役 semantic journal；#143 调整 `AltTriggerKeys` 前必须
-   记录旧值，回滚时通过 Fcitx GUI/官方 API 精确恢复，不从旧提交复活 helper。
+5. 未来若再变更 Nix-owned overlay，activation、Rime deploy 与 restart 仍需各自的独立 Issue 和
+   人工关卡；generation rollback 不自动逆转 Fcitx 外部字段。#145 本身不需要 activation、
+   Rime deploy 或 restart，只需在获批窗口通过 Fcitx GUI/官方 API 修改 live profile 与
+   `TriggerKeys`，再完成真人 smoke。#140 已退役 semantic journal；修改前必须记录精确旧值，
+   回滚时只做字段级恢复，不从旧提交复活 helper。本 PR 阶段只声明目标，live mutation 与真人
+   验收尚未完成。
