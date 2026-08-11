@@ -152,16 +152,19 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 `Fcitx5.app`、Rime plugin payload、macOS 输入源注册、`~/.config/fcitx5` 与全部 GUI/runtime
 偏好均由官方 installer/updater、macOS、Fcitx 和维护者外部拥有。Nix 不再自动收敛或审计
-`ShareInputState`、`AppDefaultIM`、`StatusBar`、`AltTriggerKeys`、`InputState` 等字段，也不提供
-行为 journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。推荐的外部偏好是
-清空 Fcitx `AltTriggerKeys`，让普通左右 Shift 交给 Rime；`Control+Shift_L` 继续作为显式的
-Fcitx 引擎层恢复键。该偏好仍由维护者通过 Fcitx GUI/官方 API 设置和 smoke test，不是 Nix
-Desired/Keep。
+`ShareInputState`、`AppDefaultIM`、`StatusBar`、`TriggerKeys`、`AltTriggerKeys`、`InputState` 等
+字段，也不提供行为 journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。
+Issue #145 的外部偏好目标是：`Default` group 只含 `rime`，同时保持 `DefaultIM=rime` 与
+`Default Layout=us`；`TriggerKeys`、`AltTriggerKeys` 均为空，普通左右 Shift 只交给 Rime
+切换中文/ASCII。该偏好仍由维护者通过 Fcitx GUI/官方 API 设置和 smoke test，不是 Nix
+Desired/Keep；文档合入不表示 live profile 已修改或真人验收已完成。
 
-输入状态必须按三层理解：macOS 外层选择“小企鹅”；Fcitx 内层选择“中州韵”或 fallback
-`keyboard-us`；只有在“中州韵”保持 active 时，Rime 才在内部切换中文/ASCII mode。普通 Shift
-切换不应改变 Fcitx 当前引擎；若菜单勾选落到“键盘 - 英语（美国）”，那是 Fcitx engine
-切换，不是 Rime ASCII mode。
+输入状态仍需区分 macOS 外层与 Rime 内层：macOS 外层选择“小企鹅”，其菜单内只应出现
+“中州韵”；普通 Shift 只切换 Rime 内部中文/ASCII mode，不再提供可人工切到
+`keyboard-us` 的 Fcitx 菜单或完整 trigger 通道。底层 keyboard addon 与 `Default Layout=us`
+并未删除：密码/安全输入在 `AllowInputMethodForPassword=False` 时仍可由 core 使用
+`keyboard-us`；配置无效时 core 也可能重建默认 group。这些是组件安全或自愈机制，不是用户
+可选择的恢复通道。
 
 Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
