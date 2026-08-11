@@ -146,14 +146,22 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 只由 `macbook` 选择的纯 Home Manager 用户能力。Home Manager 消费当前 Darwin nixpkgs
 锁定的 `pkgs.rime-ice` 2026.06.30，从 `$out/share/rime-data` 构造一个薄 data view：排除整个
 `build` 子树并拒绝 userdb、sync、installation/user state 等可变名称，再合入只启用
-`rime_ice` 的本地 `default.custom.yaml` overlay。合并结果以 recursive leaf semantics 投影到
+`rime_ice`、并把左右 Shift 都声明为 Rime 内部中文/ASCII 切换键的本地
+`default.custom.yaml` overlay。合并结果以 recursive leaf semantics 投影到
 `~/.local/share/fcitx5/rime`，但不接管用户目录根节点或任何可写状态。
 
 `Fcitx5.app`、Rime plugin payload、macOS 输入源注册、`~/.config/fcitx5` 与全部 GUI/runtime
 偏好均由官方 installer/updater、macOS、Fcitx 和维护者外部拥有。Nix 不再自动收敛或审计
-`ShareInputState`、`AppDefaultIM`、`StatusBar`、左右 Shift、`InputState` 等字段，也不提供行为
-journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。推荐体验仍记录在恢复
-runbook 中，供维护者通过 Fcitx GUI 人工设置和 smoke test。
+`ShareInputState`、`AppDefaultIM`、`StatusBar`、`AltTriggerKeys`、`InputState` 等字段，也不提供
+行为 journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。推荐的外部偏好是
+清空 Fcitx `AltTriggerKeys`，让普通左右 Shift 交给 Rime；`Control+Shift_L` 继续作为显式的
+Fcitx 引擎层恢复键。该偏好仍由维护者通过 Fcitx GUI/官方 API 设置和 smoke test，不是 Nix
+Desired/Keep。
+
+输入状态必须按三层理解：macOS 外层选择“小企鹅”；Fcitx 内层选择“中州韵”或 fallback
+`keyboard-us`；只有在“中州韵”保持 active 时，Rime 才在内部切换中文/ASCII mode。普通 Shift
+切换不应改变 Fcitx 当前引擎；若菜单勾选落到“键盘 - 英语（美国）”，那是 Fcitx engine
+切换，不是 Rime ASCII mode。
 
 Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与

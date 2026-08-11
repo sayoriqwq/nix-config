@@ -121,11 +121,13 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
 - `pkgs.rime-ice`、过滤/合并 data view 和本地 overlay 的静态内容由 Home Manager 拥有；
   能力不再维护上游 leaf allowlist，也不把 raw package output 递归投影到用户目录；
 - 本地 overlay 通过 `__include: rime_ice_suggestion:/` 接入 nixpkgs 重命名后的上游建议，
-  并只启用 `rime_ice`；它不改变左右 Shift、简繁、标点或用户数据；
+  只启用 `rime_ice`，并显式把左右 Shift 都声明为 Rime 内部中文/ASCII 切换键；它不改变
+  简繁、标点或用户数据；
 - `~/.config/fcitx5` 及其中 regular files 继续由 Fcitx5 外部拥有并保持可写。能力不得 raw
   patch INI、接管整文件、建立 Store symlink、调用配置 API 或审计运行时字段；
-- `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、左右 Shift 均为维护者
-  通过 Fcitx GUI 维护的推荐体验，不是 Nix Desired/Keep；其他 Fcitx 偏好同样保持外部；
+- `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`、Fcitx
+  `AltTriggerKeys` 为空均为维护者通过 Fcitx GUI/官方 API 维护的推荐体验，不是 Nix
+  Desired/Keep；`Control+Shift_L` 保留为完整 Fcitx 恢复键，其他 Fcitx 偏好同样保持外部；
 - 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
   preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
 
@@ -134,6 +136,13 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
 运行时 red/green 探针从 `2 → 1 → 1` 变为 `2 → 2 → 2`；维护者批准窗口内已用官方
 `fcitx5-curl` 清空 live `AppDefaultIM`，未 raw patch、restart、deploy 或 activation。
 该 live mitigation 已验证，但它属于历史事故处理证据，不是 #140 终态的声明式合同。
+
+Issue #143 进一步取代 #132/#134 的旧 Shift Keep 决策：macOS 外层仍选择“小企鹅”，Fcitx
+内层正常保持“中州韵”，普通左右 Shift 只在 Rime 内部切换中文/ASCII mode。Fcitx profile 中
+的 `keyboard-us` 继续作为 fallback engine 存在，但不再由 modifier-only Shift 选中；菜单勾选
+落到“键盘 - 英语（美国）”表示 Fcitx engine 已切换，不能解释为 Rime ASCII mode。该目标需要
+分别经过静态 overlay activation、Rime deploy 与外部 Fcitx 偏好人工关卡；本文不声称这些
+真实机器动作已经完成。
 
 维护者随后确认，live `StatusBar=Hidden` 来自本人在 Fcitx5 UI 点击“隐藏输入法名称”，并在
 Issue #134 中曾批准把这个已验收结果升级为 adapter-owned Desired。Issue #140 采用新的维护
@@ -164,10 +173,11 @@ checksum 与 `RELEASED` 清单已经核验；仓库外 owner-only rollback evide
 再次需要 unmanaged-file handoff，必须另开 Issue，根据当时 live facts 与 exact commit 重新
 提供窄入口并取得人工批准。
 
-Issue #132 和 #134 曾引入本地 overlay 与三个 Fcitx 行为 Desired。Issue #140 正在把静态
-来源升级为 `pkgs.rime-ice` 2026.06.30 + 薄 data view，并删除行为 Desired/Keep、runtime
-preflight、journal 与 rollback helper；该新声明尚未 activation 或 deploy。已完成的 live
-应急副本不能被描述为 generation rollback。详细顺序见
+Issue #132 和 #134 曾引入本地 overlay 与三个 Fcitx 行为 Desired。Issue #140 已把静态来源
+收敛为 `pkgs.rime-ice` 2026.06.30 + 薄 data view，并删除行为 Desired/Keep、runtime preflight、
+journal 与 rollback helper；Issue #143 只继续调整 Nix-owned Rime Shift overlay 与 external
+Fcitx `AltTriggerKeys` 目标。声明或 build 状态不表示 #143 已 activation、deploy 或修改 live
+偏好。已完成的历史 live 应急副本不能被描述为 generation rollback。详细顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
 
 ## 4. Homebrew 所有权
