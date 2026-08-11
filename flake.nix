@@ -323,6 +323,10 @@
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
           };
+          macbook-mos-login = import ./tests/macos/mos-login.nix {
+            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+            pkgs = self.darwinConfigurations.macbook.pkgs;
+          };
           macbook-ai-clients = import ./tests/macos/ai-clients.nix {
             pkgs = self.darwinConfigurations.macbook.pkgs;
             profilePackages =
