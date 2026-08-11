@@ -72,7 +72,7 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
 | IINA | package | history、播放列表和偏好外部 |
 | LocalSend | package | 设备、历史与接收目录外部 |
 | MonitorControl | package | 显示器设备状态与偏好外部 |
-| Mos | package | 鼠标设备状态与偏好外部 |
+| Mos | package 与一次性登录 LaunchAgent | 鼠标设备状态与偏好外部 |
 | Obsidian | package | vault、插件、同步与应用状态外部 |
 | Upscayl | package | 模型、缓存与输出外部 |
 | Visual Studio Code | package与 seed-only settings baseline | 扩展、登录态、history、workspace 与 live settings 可写 |
@@ -82,6 +82,9 @@ autosuggestions 与 syntax highlighting 也来自 Nix，而不是 Homebrew formu
 
 Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager Apps`。编辑器
 只在 live 配置缺失时初始化 baseline，之后通过人工审查回流，不做双向自动同步。
+Issue #124 为 Mos 增加 `org.nix-community.home.mos` GUI LaunchAgent：登录时只打开
+Home Manager Apps 中的当前 bundle，不保活 GUI 进程，也不接管 Mos 的可变偏好或 TCC
+授权。完整启动项边界见 [`macOS 登录项与 launchd 盘点`](macos-startup-items.md)。
 
 最终审计发现 Atuin、Discord、IINA、MonitorControl、Mos、Obsidian 与 Upscayl 曾各有
 一份 activation 前保留的 `/Applications` rollback bundle。Issue #61 已在不删除共享
@@ -244,6 +247,8 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 
 账号、订阅、授权、电池策略、菜单栏布局、截图/录制、云端挂载、数据库连接、剪贴板
 历史和其他运行数据不进入 Git。SideNotes、Lungo、NotchNook、Sip 与 iStat Menus 已退役。
+Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动记录；应用及数据保持
+不变。Bartender 只在携带 Mac 外出、使用内建屏幕时可能需要，可通过 Raycast 按需启动。
 
 ## 7. 厂商、手工与有意试用应用
 
@@ -283,7 +288,7 @@ Setapp 客户端、订阅与自更新是唯一所有者。新机器安装 Setapp
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
 | VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
 | GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner；四个 AI CLI 另由 Nix/Home Manager 唯一提供 |
-| Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时，旧 Docker Desktop helper 已清理 |
+| Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时；#124 已卸载并备份旧 Docker Desktop socket/vmnetd helper |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
 | 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置源；旧仓库冻结归档 |
@@ -293,6 +298,11 @@ Itsycal、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Pre
 Warp 及 #55/#56 中列出的旧 formula/cask。删除均通过窄 Issue 和明确批准完成。#93
 又在核对精确路径后永久删除 #57/#61 的两个 Trash rollback 目录；仓库外私有备份及
 应用 live 数据不在清理范围内。
+
+#124 又清理了 iStat Menus、cDock、Nyanpasu、Mihomo Party 与 Docker Desktop 留下的
+8 个孤儿 launchd label，并移除了 6 个已经无法解析目标的旧登录项。MEGAsync、
+AlDente Pro、FigmaAgent 与 Bartender 应用继续由原 owner 管理，只是不再登录启动；该
+清理不删除它们的应用或数据。
 
 Lark 曾在 #57 中按当时决定退役，旧 `Lark.app` 与专属数据被移动到可恢复 Trash。#74
 恢复并人工验收了旧应用与数据，随后全球版 `lark` cask 安装了 `LarkSuite.app`。维护者
