@@ -84,7 +84,7 @@ in
 
   # The parent user-data tree stays writable. Only these reviewed source leaves
   # are linked into it. Fcitx5 owns its app, plugin payload, writable config-file
-  # lifecycle, and unknown fields; the reconciler changes only two approved
+  # lifecycle, and unknown fields; the reconciler changes only three approved
   # semantic values through the official local API.
   xdg.dataFile = managedDataFiles // localOverlayDataFile;
 

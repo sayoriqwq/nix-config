@@ -4,14 +4,16 @@ let
   behavior = {
     desired = {
       global.Behavior.ShareInputState = "All";
-      macosfrontend.AppDefaultIM = { };
+      macosfrontend = {
+        AppDefaultIM = { };
+        StatusBar = "Hidden";
+      };
     };
     keep = {
       global.Hotkey.AltTriggerKeys = {
         "0" = "Shift+Shift_L";
         "1" = "Shift+Shift_R";
       };
-      macosfrontend.StatusBar = "Hidden";
       rime.InputState = "All";
     };
     journal.relativePath = ".local/state/nix-config/macos-chinese-input/fcitx5-behavior";
@@ -179,7 +181,7 @@ in
       relativePath = ".config/fcitx5";
       owner = "Fcitx5";
       backup = "required";
-      description = "Fcitx5 owns the writable mixed-state tree and all unapproved fields; nix-config reconciles only two approved semantic behavior values through the official API.";
+      description = "Fcitx5 owns the writable mixed-state tree and all unapproved fields; nix-config reconciles only three approved semantic behavior values through the official API.";
     }
     {
       relativePath = behavior.journal.relativePath;

@@ -16,7 +16,7 @@ pkgs.writeShellApplication {
     socket_path=${lib.escapeShellArg socketPath}
 
     usage() {
-      echo "usage: fcitx5-config-adapter probe | get <global|macosfrontend|rime> | set <global|macosfrontend>" >&2
+      echo "usage: fcitx5-config-adapter probe | get <global|macosfrontend|rime> | set <global|macosfrontend> | set-legacy-app-default-im macosfrontend" >&2
       exit 64
     }
 
@@ -78,16 +78,40 @@ pkgs.writeShellApplication {
                   and ($entry.imName | type == "string")
               end;
             type == "object"
-            and keys == ["AppDefaultIM"]
+            and keys == ["AppDefaultIM", "StatusBar"]
             and (.AppDefaultIM | type == "object")
             and (.AppDefaultIM | all(keys[]; test("^(0|[1-9][0-9]*)$")))
             and (.AppDefaultIM | all(.[]; valid_app_entry))
+            and (.StatusBar | type == "string")
+            and (.StatusBar == "Hidden" or .StatusBar == "Toggle input method" or .StatusBar == "Menu")
           ' <<< "$payload" >/dev/null
           ;;
         *)
           return 1
           ;;
       esac
+    }
+
+    validate_legacy_app_default_im_payload() {
+      local payload="$1"
+      jq -e '
+        def valid_app_entry:
+          if type != "string" then
+            false
+          else
+            (try fromjson catch null) as $entry
+            | ($entry | type == "object")
+              and ($entry | keys == ["appId", "appPath", "imName"])
+              and ($entry.appId | type == "string")
+              and ($entry.appPath | type == "string")
+              and ($entry.imName | type == "string")
+          end;
+        type == "object"
+        and keys == ["AppDefaultIM"]
+        and (.AppDefaultIM | type == "object")
+        and (.AppDefaultIM | all(keys[]; test("^(0|[1-9][0-9]*)$")))
+        and (.AppDefaultIM | all(.[]; valid_app_entry))
+      ' <<< "$payload" >/dev/null
     }
 
     verb="''${1:-}"
@@ -145,6 +169,23 @@ pkgs.writeShellApplication {
             --data-binary @-)"
         if [[ -n "$response" ]]; then
           echo "fcitx5-config-adapter: successful POST returned a non-empty response" >&2
+          exit 1
+        fi
+        ;;
+      set-legacy-app-default-im)
+        [[ "$#" -eq 2 && "$2" == macosfrontend ]] || usage
+        payload="$(cat)"
+        if ! validate_legacy_app_default_im_payload "$payload"; then
+          echo "fcitx5-config-adapter: rejected non-allowlisted legacy AppDefaultIM payload" >&2
+          exit 1
+        fi
+        require_client
+        response="$(printf '%s' "$payload" | request /config/addon/macosfrontend \
+            --request POST \
+            --header 'Content-Type: application/json' \
+            --data-binary @-)"
+        if [[ -n "$response" ]]; then
+          echo "fcitx5-config-adapter: successful legacy POST returned a non-empty response" >&2
           exit 1
         fi
         ;;

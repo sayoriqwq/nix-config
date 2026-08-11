@@ -12,7 +12,6 @@ let
   desiredGlobalPayload = builtins.toJSON contract.behavior.desired.global;
   desiredFrontendPayload = builtins.toJSON contract.behavior.desired.macosfrontend;
   keepAltTriggerKeys = builtins.toJSON contract.behavior.keep.global.Hotkey.AltTriggerKeys;
-  keepStatusBar = contract.behavior.keep.macosfrontend.StatusBar;
   keepRimeInputState = contract.behavior.keep.rime.InputState;
 in
 pkgs.writeShellApplication {
@@ -28,7 +27,6 @@ pkgs.writeShellApplication {
     desired_global_payload=${lib.escapeShellArg desiredGlobalPayload}
     desired_frontend_payload=${lib.escapeShellArg desiredFrontendPayload}
     keep_alt_trigger_keys=${lib.escapeShellArg keepAltTriggerKeys}
-    keep_status_bar=${lib.escapeShellArg keepStatusBar}
     keep_rime_input_state=${lib.escapeShellArg keepRimeInputState}
     umask 077
 
@@ -101,7 +99,7 @@ pkgs.writeShellApplication {
 
     validate_frontend() {
       local file="$1"
-      jq -e --arg keep "$keep_status_bar" '
+      jq -e '
         def valid_app_entry:
           if type != "string" then
             false
@@ -117,7 +115,11 @@ pkgs.writeShellApplication {
         and (.Children | type == "array")
         and ([.Children[] | select(type == "object" and .Option? == "StatusBar")] | length == 1)
         and ([.Children[] | select(type == "object" and .Option? == "AppDefaultIM")] | length == 1)
-        and ([.Children[] | select(.Option == "StatusBar") | .Value][0] == $keep)
+        and (
+          [.Children[] | select(.Option == "StatusBar") | .Value][0]
+          | type == "string"
+            and (. == "Hidden" or . == "Toggle input method" or . == "Menu")
+        )
         and (
           [.Children[] | select(.Option == "AppDefaultIM") | .Value][0]
           | (
@@ -155,6 +157,10 @@ pkgs.writeShellApplication {
         [.Children[] | select(.Option == "AppDefaultIM") | .Value][0]
         | if . == "" then {} else . end
       ' "$1"
+    }
+
+    read_status_bar() {
+      jq -er '[.Children[] | select(.Option == "StatusBar") | .Value][0]' "$1"
     }
 
     fetch_target() {
@@ -195,7 +201,29 @@ pkgs.writeShellApplication {
           jq -cn --arg value "$(read_share_input_state "$work_root/global.json")" '$value'
           ;;
         macosfrontend)
+          jq -cn \
+            --argjson appDefaultIM "$(read_app_default_im "$work_root/macosfrontend.json")" \
+            --arg statusBar "$(read_status_bar "$work_root/macosfrontend.json")" \
+            '{AppDefaultIM:$appDefaultIM, StatusBar:$statusBar}'
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+    }
+
+    read_journal_value_json() {
+      local target="$1"
+      local path="$2"
+      case "$target:$path" in
+        global:Behavior.ShareInputState)
+          jq -cn --arg value "$(read_share_input_state "$work_root/global.json")" '$value'
+          ;;
+        macosfrontend:AppDefaultIM)
           read_app_default_im "$work_root/macosfrontend.json"
+          ;;
+        macosfrontend:AppDefaultIM+StatusBar)
+          read_owned_value_json macosfrontend
           ;;
         *)
           return 1
@@ -207,6 +235,11 @@ pkgs.writeShellApplication {
       local target="$1"
       local payload="$2"
       printf '%s' "$payload" | "$adapter" set "$target"
+    }
+
+    adapter_set_legacy_app_default_im() {
+      local payload="$1"
+      printf '%s' "$payload" | "$adapter" set-legacy-app-default-im macosfrontend
     }
 
     verify_owned_value_json() {
@@ -222,7 +255,8 @@ pkgs.writeShellApplication {
       local file="$1"
       jq -e \
         --arg globalAfter "$desired_share_input_state" \
-        --argjson frontendAfter "$desired_app_default_im" '
+        --argjson legacyFrontendAfter "$desired_app_default_im" \
+        --argjson frontendAfter "$desired_frontend_payload" '
         def valid_share_input_state:
           type == "string" and (. == "No" or . == "All" or . == "Program");
         def valid_app_entry:
@@ -240,7 +274,15 @@ pkgs.writeShellApplication {
           type == "object"
           and all(keys[]; test("^(0|[1-9][0-9]*)$"))
           and all(.[]; valid_app_entry);
-        .version == 2
+        def valid_status_bar:
+          type == "string" and (. == "Hidden" or . == "Toggle input method" or . == "Menu");
+        def valid_frontend:
+          type == "object"
+          and keys == ["AppDefaultIM", "StatusBar"]
+          and (.AppDefaultIM | valid_app_default_im)
+          and (.StatusBar | valid_status_bar);
+        .version as $version
+        | ($version == 2 or $version == 3)
         and (.transaction | type == "string" and test("^[0-9]{8}T[0-9]{6}Z-[0-9]+$"))
         and (.status == "prepared"
           or .status == "committed"
@@ -259,10 +301,15 @@ pkgs.writeShellApplication {
               and (.before | valid_share_input_state)
               and (.after | valid_share_input_state)
               and .after == $globalAfter
-            elif .target == "macosfrontend" then
+            elif .target == "macosfrontend" and $version == 2 then
               .path == "AppDefaultIM"
               and (.before | valid_app_default_im)
               and (.after | valid_app_default_im)
+              and .after == $legacyFrontendAfter
+            elif .target == "macosfrontend" and $version == 3 then
+              .path == "AppDefaultIM+StatusBar"
+              and (.before | valid_frontend)
+              and (.after | valid_frontend)
               and .after == $frontendAfter
             else
               false
@@ -364,13 +411,13 @@ pkgs.writeShellApplication {
           --argjson changes "$changes" \
           --argjson before "$frontend_before_value" \
           --argjson after "$frontend_after_value" \
-          '$changes + [{target:"macosfrontend", path:"AppDefaultIM", before:$before, after:$after, applied:false}]')"
+          '$changes + [{target:"macosfrontend", path:"AppDefaultIM+StatusBar", before:$before, after:$after, applied:false}]')"
       fi
 
       document="$(jq -cn \
         --arg transaction "$transaction" \
         --argjson changes "$changes" \
-        '{version:2, transaction:$transaction, status:"prepared", changes:$changes}')"
+        '{version:3, transaction:$transaction, status:"prepared", changes:$changes}')"
       atomic_write_journal "$document"
     }
 
@@ -467,12 +514,15 @@ pkgs.writeShellApplication {
 
     rollback_journal_transaction() {
       local failed=0
-      local count index target before after applied current payload
+      local count index target path before after applied current payload
+      local journal_version
       count="$(jq -r '.changes | length' "$journal_file")" || return 1
+      journal_version="$(jq -r '.version' "$journal_file")" || return 1
 
       # Complete the CAS preflight for every item before the first rollback POST.
       for ((index=count - 1; index >= 0; index--)); do
         target="$(jq -r --argjson index "$index" '.changes[$index].target' "$journal_file")"
+        path="$(jq -r --argjson index "$index" '.changes[$index].path' "$journal_file")"
         before="$(jq -c --argjson index "$index" '.changes[$index].before' "$journal_file")"
         after="$(jq -c --argjson index "$index" '.changes[$index].after' "$journal_file")"
         applied="$(jq -r --argjson index "$index" '.changes[$index].applied' "$journal_file")"
@@ -481,7 +531,7 @@ pkgs.writeShellApplication {
           failed=1
           continue
         fi
-        current="$(read_owned_value_json "$target")" || {
+        current="$(read_journal_value_json "$target" "$path")" || {
           failed=1
           continue
         }
@@ -502,6 +552,7 @@ pkgs.writeShellApplication {
 
       for ((index=count - 1; index >= 0; index--)); do
         target="$(jq -r --argjson index "$index" '.changes[$index].target' "$journal_file")"
+        path="$(jq -r --argjson index "$index" '.changes[$index].path' "$journal_file")"
         before="$(jq -c --argjson index "$index" '.changes[$index].before' "$journal_file")"
         after="$(jq -c --argjson index "$index" '.changes[$index].after' "$journal_file")"
         applied="$(jq -r --argjson index "$index" '.changes[$index].applied' "$journal_file")"
@@ -510,7 +561,7 @@ pkgs.writeShellApplication {
           failed=1
           continue
         fi
-        current="$(read_owned_value_json "$target")" || {
+        current="$(read_journal_value_json "$target" "$path")" || {
           failed=1
           continue
         }
@@ -534,19 +585,43 @@ pkgs.writeShellApplication {
             payload="$(jq -cn --argjson value "$before" '{Behavior:{ShareInputState:$value}}')"
             ;;
           macosfrontend)
-            payload="$(jq -cn --argjson value "$before" '{AppDefaultIM:$value}')"
+            if [[ "$journal_version" -eq 2 ]]; then
+              payload="$(jq -cn --argjson appDefaultIM "$before" '{AppDefaultIM:$appDefaultIM}')"
+            else
+              payload="$before"
+            fi
             ;;
           *)
             failed=1
             continue
             ;;
         esac
-        if ! adapter_set "$target" "$payload"; then
+        if [[ "$journal_version" -eq 2 && "$target" == macosfrontend ]]; then
+          if ! adapter_set_legacy_app_default_im "$payload"; then
+            echo "fcitx5-behavior-reconciler: legacy AppDefaultIM rollback POST failed for $target" >&2
+            failed=1
+            continue
+          fi
+        elif ! adapter_set "$target" "$payload"; then
           echo "fcitx5-behavior-reconciler: rollback POST failed for $target" >&2
           failed=1
           continue
         fi
-        if ! verify_owned_value_json "$target" "$before"; then
+        if [[ "$journal_version" -eq 2 && "$target" == macosfrontend ]]; then
+          if ! fetch_and_validate_target macosfrontend; then
+            echo "fcitx5-behavior-reconciler: rollback verification GET failed for $target" >&2
+            failed=1
+            continue
+          fi
+          current="$(read_app_default_im "$work_root/macosfrontend.json")" || {
+            failed=1
+            continue
+          }
+          if ! json_equal "$current" "$before"; then
+            echo "fcitx5-behavior-reconciler: legacy AppDefaultIM rollback verification failed" >&2
+            failed=1
+          fi
+        elif ! verify_owned_value_json "$target" "$before"; then
           echo "fcitx5-behavior-reconciler: rollback verification failed for $target" >&2
           failed=1
         fi
@@ -590,6 +665,12 @@ pkgs.writeShellApplication {
         [[ "$journal_exists" -eq 1 ]] || fail "rollback requires an existing journal"
         case "$(jq -r '.status' "$journal_file")" in
           committed|rollback-incomplete) ;;
+          prepared)
+            if [[ "$(jq -r '.version' "$journal_file")" -eq 2 ]]; then
+              fail "legacy v2 prepared journal requires recovery with the base exact revision"
+            fi
+            fail "rollback requires journal status committed or rollback-incomplete"
+            ;;
           *) fail "rollback requires journal status committed or rollback-incomplete" ;;
         esac
         ;;
@@ -608,13 +689,12 @@ pkgs.writeShellApplication {
     fi
 
     share_before="$(read_share_input_state "$work_root/global.json")"
-    frontend_before="$(read_app_default_im "$work_root/macosfrontend.json")"
     global_before_value="$(jq -cn --arg value "$share_before" '$value')"
     global_after_value="$(jq -cn --arg value "$desired_share_input_state" '$value')"
-    frontend_before_value="$frontend_before"
-    frontend_after_value="$desired_app_default_im"
+    frontend_before_value="$(read_owned_value_json macosfrontend)"
+    frontend_after_value="$desired_frontend_payload"
     global_before_payload="$(jq -cn --arg value "$share_before" '{Behavior:{ShareInputState:$value}}')"
-    frontend_before_payload="$(jq -cn --argjson value "$frontend_before" '{AppDefaultIM:$value}')"
+    frontend_before_payload="$frontend_before_value"
 
     need_global=0
     need_frontend=0
@@ -623,7 +703,13 @@ pkgs.writeShellApplication {
 
     if [[ "$mode" == reconcile && "$journal_exists" -eq 1 ]]; then
       case "$(jq -r '.status' "$journal_file")" in
-        prepared|rollback-incomplete)
+        prepared)
+          if [[ "$(jq -r '.version' "$journal_file")" -eq 2 ]]; then
+            fail "legacy v2 prepared journal requires recovery with the base exact revision"
+          fi
+          fail "existing incomplete journal requires manual recovery"
+          ;;
+        rollback-incomplete)
           fail "existing incomplete journal requires manual recovery"
           ;;
       esac
@@ -657,9 +743,9 @@ pkgs.writeShellApplication {
     if [[ "$need_frontend" -eq 1 ]]; then
       verify_owned_value_json macosfrontend "$frontend_before_value" || abort_with_rollback "macOS frontend configuration changed before reconciliation"
       attempted_targets+=(macosfrontend)
-      adapter_set macosfrontend "$desired_frontend_payload" || abort_with_rollback "failed to clear AppDefaultIM"
-      verify_owned_value_json macosfrontend "$frontend_after_value" || abort_with_rollback "AppDefaultIM verification failed"
-      journal_mark_applied macosfrontend || abort_with_rollback "could not journal applied AppDefaultIM"
+      adapter_set macosfrontend "$desired_frontend_payload" || abort_with_rollback "failed to set AppDefaultIM and StatusBar"
+      verify_owned_value_json macosfrontend "$frontend_after_value" || abort_with_rollback "AppDefaultIM and StatusBar verification failed"
+      journal_mark_applied macosfrontend || abort_with_rollback "could not journal applied AppDefaultIM and StatusBar"
     fi
 
     fetch_and_validate_all || abort_with_rollback "final Keep-invariant verification failed"
