@@ -25,11 +25,13 @@ input context。修复前为 `Rime(2) → Terminal(1) → Codex(1)`；维护者�
 - 65 个锁定上游静态叶子保持不变，另加 1 个本地 `default.custom.yaml`，只公开 `rime_ice`；
 - Fcitx/Rime 用户数据继续可写且不进入 Git；`~/.config/fcitx5` 及其中配置文件由 Fcitx5
   外部拥有，不使用 Store symlink 或整文件模板接管；
-- Nix 只通过官方本地配置 API 收敛 `ShareInputState=All` 与空 `AppDefaultIM`，其余批准的
-  Keep 字段只读验证，未批准字段保持不变。
+- Nix 只通过官方本地配置 API 收敛 `ShareInputState=All`、空 `AppDefaultIM` 与
+  `StatusBar=Hidden`；左右 Shift 与 Rime `InputState=All` 继续只读验证，未批准字段保持不变。
 
-本 Issue 的自动化 Keep gate 只覆盖左右 Shift、`StatusBar=Hidden` 与 Rime `InputState=All`；
-本节列出的其他现状是审计基线和人工验收项，不因此扩大 Nix 的字段所有权。
+Issue #132 的初始自动化只把 `StatusBar=Hidden` 当作 Keep gate；维护者随后确认该 live 值来自
+本人点击“隐藏输入法名称”，并在 Issue #134 中批准把它升级为 Desired。升级后 Keep gate 只
+覆盖左右 Shift 与 Rime `InputState=All`；本节列出的其他现状仍是审计基线和人工验收项，
+不因此扩大 Nix 的字段所有权。
 
 ## 2. 范围、证据与限制
 
@@ -112,7 +114,8 @@ Codex 后仍为 `1`；用官方 API 清空 `AppDefaultIM` 后，同一路径保�
 **官方事实：** macOS 前端状态栏可设为 Menu、Toggle Input Method 或 Hidden；文字会展示当前 IM/submode，而不是只有 macOS 的“小企鹅”外壳名称。[macOS 前端文档](https://fcitx-contrib.github.io/docs/advanced/macosfrontend.html#状态栏)，[`updateStatusItemText`](https://github.com/fcitx-contrib/fcitx5-macos/blob/363566b5cd622dfeefa207735e7b41110d6a2445/macosfrontend/macosfrontend.cpp#L42-L70)。
 
 **维护者决策：** 保持 `StatusBar=Hidden`，不新增 Fcitx 文本状态栏；菜单栏只保留 macOS
-“小企鹅”输入源图标。可观测性通过语义 preflight、官方配置 API 回读与真实应用验收提供。
+“小企鹅”输入源图标。该 live 值最初由维护者点击“隐藏输入法名称”形成，Issue #134 已批准
+由官方配置 API 声明收敛。可观测性通过语义 preflight、API 回读与真实应用验收提供。
 
 **官方事实：** 候选窗默认不跟随 caret，而固定在 preedit 开头，避免输入时频繁移动。[主题调整文档](https://fcitx-contrib.github.io/docs/theme/adjust.html#跟随光标)。当前 `FollowCaret=False` 与官方默认一致。
 
@@ -135,7 +138,7 @@ Codex 后仍为 `1`；用官方 API 清空 `AppDefaultIM` 后，同一路径保�
 | `ModifierOnlyKeyTimeout` | `250` | Keep | 左右 Shift 由 Fcitx 接管时保留当前判定窗口。 |
 | `ActiveByDefault` | `True` | Keep | 新上下文默认进入 active Rime。 |
 | `resetStateWhenFocusIn` | `No` | Keep | 避免 focus-in 与共享状态争抢。 |
-| `ShareInputState` | `All` | Keep | 官方跨应用保留建议；是飞书问题的核心策略。 |
+| `ShareInputState` | `All` | Desired | 官方跨应用保留建议；是飞书问题的核心策略，并由官方 API 收敛。 |
 | `PreeditEnabledByDefault` | `True` | Keep | macOS 编辑器兼容所需。 |
 | IM information flags | switch 时显示、focus 时不显示、compact | Keep | 与隐藏文本状态栏并不冲突，切换提示保持现状。 |
 | `DefaultPageSize` | `5` | Keep | 与 pinned Rime `menu/page_size=5` 一致。 |
@@ -156,7 +159,7 @@ Codex 后仍为 `1`；用官方 API 清空 `AppDefaultIM` 后，同一路径保�
 
 | 配置 | 本机值 | 目标 | 理由 |
 | --- | --- | --- | --- |
-| `StatusBar` | `Hidden` | Keep invariant | 维护者明确只保留“小企鹅”，不新增 Fcitx 文本状态栏。 |
+| `StatusBar` | `Hidden` | Desired | 维护者明确只保留“小企鹅”，并在 Issue #134 批准由官方 API 收敛。 |
 | `AppDefaultIM` | 审计时 Terminal → `keyboard-us`；live 已清空 | Change → empty | 已确认回归根因；官方 API live 缓解已通过 `2 → 2 → 2` 验证，声明式 activation 尚未完成。 |
 | `VimMode` | MacVim | External / unchanged | 未获批准，不删除或改写。 |
 | simulated key release | `False`, 100ms | Keep | 仅并击方案需要；雾凇全拼不需要。 |
@@ -164,8 +167,9 @@ Codex 后仍为 `1`；用官方 API 清空 `AppDefaultIM` 后，同一路径保�
 | remove tracking params | `True` | Keep | monitor 关闭时无作用；未来启用时保持保护。 |
 | polling interval | 2s | Keep | monitor 关闭时无作用。 |
 
-Terminal 默认英文、VimMode 和状态栏占位原本都是主观选择；本次只批准清空全部
-`AppDefaultIM`。MacVim 与状态栏分别保持 external/unchanged 和 Keep invariant。
+Terminal 默认英文、VimMode 和状态栏占位原本都是主观选择。Issue #132 只批准清空全部
+`AppDefaultIM`；Issue #134 随后批准 `StatusBar=Hidden` 为 Desired。MacVim 继续保持
+external/unchanged。
 
 ### 4.4 `~/.config/fcitx5/conf/rime.conf`
 
@@ -242,8 +246,8 @@ Rime 官方建议不要直接修改发行版文件，而应以同名 `.custom.ya
 
 | 分类 | 项目 |
 | --- | --- |
-| Keep | `ActiveByDefault=True`、`resetStateWhenFocusIn=No`、global/Rime shared state 均为 `All`、左右 Shift 的 Fcitx `AltTriggerKeys`、`StatusBar=Hidden`、profile 只有 keyboard-us+rime 且默认 rime、应用/Rime preedit、密码保护、30 分钟 autosave、Rime deploy key、FollowCaret false、当前候选/配色、webpanel plugins/unsafe API 关闭、monitor pasteboard 关闭、Beast 仅 Unix socket、无 cloud input。 |
-| Change | 有效 `AppDefaultIM` 为空；新增 `default.custom.yaml`，只公开 `rime_ice` schema。 |
+| Keep | `ActiveByDefault=True`、`resetStateWhenFocusIn=No`、Rime `InputState=All`、左右 Shift 的 Fcitx `AltTriggerKeys`、profile 只有 keyboard-us+rime 且默认 rime、应用/Rime preedit、密码保护、30 分钟 autosave、Rime deploy key、FollowCaret false、当前候选/配色、webpanel plugins/unsafe API 关闭、monitor pasteboard 关闭、Beast 仅 Unix socket、无 cloud input。 |
+| Change / Desired | 全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空、`StatusBar=Hidden`；新增 `default.custom.yaml`，只公开 `rime_ice` schema。 |
 | External | Fcitx5.app、plugin payload/updater、macOS input source registration、整个 `~/.config/fcitx5` 及配置文件所有权、MacVim `VimMode`、缺失的 `clipboard.conf`/`beast.conf`、`macosnotifications.conf`、`cached_layouts`、Rime `build`、`*.userdb`、`sync`、`installation.yaml`、`user.yaml`、Fcitx cache。 |
 | Human-only | activation、Rime deploy、真实应用输入验收、Fcitx5 app/plugin 更新，以及未来任何新的视觉/快捷键/简繁/标点策略变更。 |
 
@@ -265,10 +269,10 @@ Home Manager 的 host interface 仍只有一次 capability import，不暴露任
 
 内部合同分为三类：
 
-- owned behavior：全局 `ShareInputState=All` 与有效 `AppDefaultIM` 为空；只有这两个字段允许
-  adapter 经官方 API 收敛；
-- Keep verification：左右 Shift 的 Fcitx `AltTriggerKeys`、`StatusBar=Hidden`、Rime
-  `InputState=All` 等已批准现状只读验证，发生漂移时失败关闭，不自动修复；
+- owned behavior：全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空与
+  `StatusBar=Hidden`；只有这三个字段允许 adapter 经官方 API 收敛；
+- Keep verification：左右 Shift 的 Fcitx `AltTriggerKeys` 与 Rime `InputState=All` 等
+  已批准现状只读验证，发生漂移时失败关闭，不自动修复；
 - local managed file：`~/.local/share/fcitx5/rime/default.custom.yaml` 作为 65 个 upstream
   leaves 之外的独立第 66 个静态 leaf，只声明 `rime_ice` schema。
 
@@ -278,9 +282,14 @@ adapter 先读取全部目标；若语义已经满足则严格 no-op。CLI/socke
 已经逆转 Fcitx-owned 配置。journal 固定在
 `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior/last-change.json`，恢复时必须先验证
 当前语义，再通过同一官方 API 定向写回。
-v2 journal 记录 transaction、逐项 applied 状态及
+Issue #134 将 owned frontend 结果扩展为 `AppDefaultIM+StatusBar` 后，journal schema 升级为
+v3；它记录 transaction、逐项 applied 状态及
 `prepared` / `committed` / `rolled-back` / `rollback-incomplete`，固定 rollback helper 只在全部
 当前值仍等于 before/after 之一时继续；第三值一律失败关闭。
+validator 同时保留 v2 兼容：legacy 终态 journal 可保留或归档；v2 的 frontend entry 只恢复
+当时拥有的 `AppDefaultIM`，并通过官方 partial API 保留当前 `StatusBar`；若 journal 还记录了
+已应用的 global entry，同一事务也恢复 `ShareInputState`。v2 `prepared` 在任何 POST 前失败
+关闭，要求进入绑定原实施 revision 的受监督恢复窗口，不能由新版本猜测续跑。
 后续再次漂移时，终态 journal 先以 transaction/status 命名原子归档，未完成 journal 则阻止
 新事务，避免“只可收敛一次”或覆盖恢复证据。
 
@@ -313,12 +322,13 @@ Rime 官方把用户词典、sync snapshot、`installation.yaml`、`user.yaml` �
    helper 内置的 static-only preflight 验证它们。完整公开 preflight 此时会因本地 overlay 尚未
    链接而失败，这是预期结果，不把它当作 activation 前置条件。
 2. 构建并在获得 exact commit/current-window 批准后激活新的 Darwin/Home Manager generation；
-   adapter 通过官方 API 收敛两个 owned 字段，不在 build 阶段触碰 live 状态。
+   adapter 通过官方 API 收敛三个 owned 字段，不在 build 阶段触碰 live 状态。
 3. activation 后运行公开只读 preflight，验证 app/plugin、官方 CLI/socket、Fcitx owned/Keep
    语义、65+1 static leaf、mutable data 类型和备份边界。
 4. activation 不自动退出或重启 Fcitx5；官方 API 会 safe-save 并即时 reload 目标配置。只有出现
    独立证据并获得当前批准时才重启。
-5. 另获人工批准后触发 Rime deploy，使本地 `default.custom.yaml` 生效。当前 bundle 已确认存在：
+5. 仅在首次引入、恢复或实际变更 `default.custom.yaml` 时，另获人工批准后触发 Rime deploy；
+   Issue #134 的 StatusBar/preflight 增量不执行新的 deploy。需要 deploy 时，当前 bundle 已确认存在：
 
    ```fish
    /Library/Input\ Methods/Fcitx5.app/Contents/bin/fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'

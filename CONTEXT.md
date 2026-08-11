@@ -151,10 +151,10 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 人工关卡，不构建、安装或更新这些外部组件。
 
 `~/.config/fcitx5` 及其中配置文件始终是 Fcitx-owned、可写的外部状态，不能由 Store symlink
-或整文件模板接管。能力只通过 Fcitx5 bundle 自带的官方本地配置 API 收敛两个已批准行为：
-全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空；左右 Shift 仍由 Fcitx
-`AltTriggerKeys` 同时切换，`StatusBar=Hidden` 只保留 macOS“小企鹅”输入源图标，其他字段
-只读验证或保持外部所有。Fcitx 外部字段发生真实修改时使用固定目标
+或整文件模板接管。能力只通过 Fcitx5 bundle 自带的官方本地配置 API 收敛三个已批准行为：
+全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空，以及 `StatusBar=Hidden` 只保留 macOS
+“小企鹅”输入源图标；左右 Shift 仍由 Fcitx `AltTriggerKeys` 同时切换并只读验证，其他字段
+保持外部所有。Fcitx 外部字段发生真实修改时使用固定目标
 `macbook-fcitx5-behavior-rollback` helper 和
 `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior/last-change.json` 的 owner-only
 semantic journal 配合官方 API 回滚；Nix generation rollback 不会自动逆转这些字段。

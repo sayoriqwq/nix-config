@@ -115,9 +115,10 @@ RTK 本体必须同样命中 Home Manager profile；`--show` 必须把 global `R
 
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
 INI、用 Store symlink 接管整文件或覆盖未知字段；行为 adapter 只通过 bundle 自带的
-`fcitx5-curl` 官方本地配置 API 收敛 `ShareInputState=All` 和空 `AppDefaultIM`。左右 Shift
-继续保留在 Fcitx `AltTriggerKeys`，`StatusBar=Hidden` 只保留 macOS“小企鹅”输入源图标，
-Rime `InputState=All` 等 Keep 字段只读验证；MacVim 与其他未批准字段不得修改。
+`fcitx5-curl` 官方本地配置 API 收敛 `ShareInputState=All`、空 `AppDefaultIM` 和
+`StatusBar=Hidden`。其中隐藏状态栏表示只保留 macOS“小企鹅”输入源图标；左右 Shift
+继续保留在 Fcitx `AltTriggerKeys`，Rime `InputState=All` 等 Keep 字段只读验证；MacVim
+与其他未批准字段不得修改。
 
 2026-08-11 已确认 Terminal `AppDefaultIM → keyboard-us` 与 `ShareInputState=All` 的组合会把
 English 状态传播到其他应用。维护者批准窗口内已用官方 API 清空 live `AppDefaultIM`，
@@ -136,7 +137,10 @@ nix run path:.#macbook-rime-preflight
 
 🔍 核对 65 个 live 上游静态叶子、1 个本地 overlay 目标、锁定 source、Fcitx 行为语义与可变状态边界，不激活或重新部署输入法；首次 activation 前因 overlay 尚不存在而失败是预期行为。
 
-preflight 必须在 source 缺失、hash drift、路径逃逸或未知目标冲突时失败关闭；required
+本地 overlay 经过 Home Manager 时可以解析到内容相同但 Store identity 不同的
+`hm_default.custom.yaml`；preflight 必须按批准 hash/内容验证这个 regular Store leaf，而不是
+要求它与原始 Flake source 是同一个 Store path。source 缺失、hash drift、内容 drift、
+非 Store、broken link、路径逃逸或未知目标冲突仍必须失败关闭；required
 rollback 证据由紧随其后的人工关卡单独确认。它不得遍历、hash、打印或复制 `luna_pinyin.userdb`、
 `rime_ice.userdb` 与 `sync` 的词条正文。维护者确认以下仓库外数据保护后，才能针对 Draft PR
 的 exact commit 单独批准首次交接和 activation：
@@ -166,21 +170,26 @@ rollback 或非 clean checkout 都应失败关闭。成功交接并完成实机�
 临时 app；它不是长期维护接口。
 
 获批的 activation 应用 Nix/Home Manager declaration：链接 65 个上游 leaf 和 1 个本地
-overlay，并通过官方本地配置 API 收敛两个批准字段。adapter 已满足目标时严格 no-op；
+overlay，并通过官方本地配置 API 收敛三个批准字段。adapter 已满足目标时严格 no-op；
 API/socket 缺失、响应歧义、Keep 字段漂移或回读验证失败时失败关闭。它不修改 macOS 输入源，
 不 raw patch Fcitx 文件，不停止或重启 Fcitx5，也不触发 Rime deploy。发生真实外部字段修改时，
 owner-only semantic journal 记录修改前语义，供官方 API 定向恢复。
 journal 位于
 `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior/last-change.json`；目录 mode 0700、
 文件 mode 0600。它只记录 adapter 拥有字段的 before/after 语义，不包含用户输入内容。
-v2 journal 同时记录 transaction、逐项 applied 标记和
+加入 `StatusBar` ownership 后使用 v3 journal；它同时记录 transaction、逐项 applied 标记和
 `prepared` / `committed` / `rolled-back` / `rollback-incomplete` 状态；未完成回滚可由固定 helper
 在完整 CAS 预检通过后继续，不能手工猜值或覆盖 journal。
+adapter 同时兼容既有 v2 journal：终态记录可以保留或在下一次 drift 时归档；v2 的 frontend
+entry 只恢复当时拥有的 `AppDefaultIM`，并通过官方 partial API 保留当前 `StatusBar`；若 journal
+还记录了已应用的 global entry，则同一事务也会恢复 `ShareInputState`。v2 `prepared` 不允许由
+新版本猜测续跑，必须在任何 POST 前失败关闭，并进入绑定原实施 revision 的受监督恢复窗口。
 若以后再次出现 drift，adapter 只会把先前的 `committed` / `rolled-back` 终态记录原子归档为
 `last-change.<transaction>.<status>.json`，再建立新事务；未完成状态绝不会被覆盖。
 
-activation 成功后，维护者在可观察、可回滚的窗口人工重新部署 Rime。当前 bundle 已确认存在
-官方 `fcitx5-curl`，使用官方 Rime deploy 端点：
+仅在首次引入、恢复或实际变更 local overlay 时，维护者才在可观察、可回滚的窗口人工重新部署
+Rime；Issue #134 的 StatusBar/preflight 增量不执行新的 deploy。需要 deploy 时，当前 bundle
+已确认存在官方 `fcitx5-curl`，使用官方 Rime deploy 端点：
 
 ```fish
 /Library/Input\ Methods/Fcitx5.app/Contents/bin/fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'
@@ -188,7 +197,7 @@ activation 成功后，维护者在可观察、可回滚的窗口人工重新部
 
 ⌨️ 通过 Fcitx5 官方本地 API 重新部署 Rime，使第 66 个本地 overlay 生效；执行前仍需当前窗口人工批准。
 
-重新部署后至少完成以下实机验收：
+完成适用的 activation，以及仅在需要时完成 deploy 后，至少完成以下实机验收：
 
 1. macOS selected input source 仍为 Fcitx5 简体输入模式，Fcitx profile 默认输入法仍为
    Rime，可选 schema 只有 `rime_ice`；
@@ -199,8 +208,8 @@ activation 成功后，维护者在可观察、可回滚的窗口人工重新部
 5. Fcitx5 bundle/plugin、Squirrel、nixbox/server、launchd/service、network 与 firewall
    均未被该能力改变。
 
-在维护者把上述 activation、重新部署与输入结果记录到 Issue/PR 前，文档只能称该能力的
-“声明目标已建立”，不能称真实机器恢复或迁移已经完成。
+在维护者把当前 Issue 要求的 activation 与输入结果记录到 Issue/PR 前，文档只能称本次增量的
+“声明目标已建立”；只有首次引入、恢复或变更 local overlay 的 Issue 才额外要求 deploy 记录。
 
 ### 2.6 验证声明式层
 
@@ -289,12 +298,13 @@ CLI 的状态。macOS defaults 的逐键试用前值和定向回滚命令见
    nix run .#macbook-fcitx5-behavior-rollback -- --confirm-approved-behavior-rollback
    ```
 
-   ↩️ 校验 committed semantic journal 与当前字段后，经官方 API 逆序恢复两个 adapter-owned 值；遇到第三方并发漂移时失败关闭。
+   ↩️ 校验 committed semantic journal 与当前字段后，经官方 API 逆序恢复该事务中 `applied=true` 的 owned change；遇到第三方并发漂移时失败关闭。
 
 4. 保留 `luna_pinyin.userdb`、`rime_ice.userdb`、`sync`、`installation.yaml`、
    `user.yaml` 与 Fcitx 可变状态；只有出现数据损坏证据时才按对应备份策略恢复，禁止为
    回滚清空 Rime 用户目录或无条件覆盖当前 userdb；
-5. 由维护者人工重新部署 Rime；只有另有证据和当前批准时才重启 Fcitx5；随后重新完成
+5. 仅当该回滚实际改变静态 overlay 或 compiled Rime 配置时，由维护者人工重新部署 Rime；
+   Issue #134 的行为/preflight 回滚不 deploy。只有另有证据和当前批准时才重启 Fcitx5；随后重新完成
    飞书、Terminal、原生应用与浏览器的输入、左右 Shift、候选、userdb 可写性和既有状态验收，
    并在 Issue/PR 记录结果。
 

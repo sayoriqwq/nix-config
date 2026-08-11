@@ -90,7 +90,7 @@ let
   initialFrontend = pkgs.writeText "fcitx5-frontend-drift.json" (
     builtins.toJSON {
       Children = [
-        (statusBar "Hidden")
+        (statusBar "Menu")
         (appDefaultIM terminalAppDefaultIM)
         vimMode
       ];
@@ -100,6 +100,24 @@ let
     builtins.toJSON {
       Children = [
         (statusBar "Hidden")
+        (appDefaultIM "")
+        vimMode
+      ];
+    }
+  );
+  appOnlyDriftFrontend = pkgs.writeText "fcitx5-frontend-app-only-drift.json" (
+    builtins.toJSON {
+      Children = [
+        (statusBar "Hidden")
+        (appDefaultIM terminalAppDefaultIM)
+        vimMode
+      ];
+    }
+  );
+  statusOnlyDriftFrontend = pkgs.writeText "fcitx5-frontend-status-only-drift.json" (
+    builtins.toJSON {
+      Children = [
+        (statusBar "Toggle input method")
         (appDefaultIM "")
         vimMode
       ];
@@ -258,6 +276,8 @@ let
               jq --argjson patch "$payload" '
                 (.Children[] | select(.Option == "AppDefaultIM") | .Value)
                   = (if $patch.AppDefaultIM == {} then "" else $patch.AppDefaultIM end)
+                | (.Children[] | select(.Option == "StatusBar") | .Value)
+                  = $patch.StatusBar
               ' "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
               mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
               ;;
@@ -270,6 +290,23 @@ let
             echo "fixture: injected post-apply failure for $target" >&2
             exit 1
           fi
+          ;;
+        set-legacy-app-default-im)
+          test "$#" -eq 2
+          test "$target" = macosfrontend
+          payload="$(cat)"
+          printf '%s\t%s\n' "$target" "$payload" >> "$FCITX_FIXTURE_ROOT/post.log"
+          if test "''${FCITX_DRIFT_STATUS_BEFORE_LEGACY_SET:-0}" = 1; then
+            jq '
+              (.Children[] | select(.Option == "StatusBar") | .Value) = "Menu"
+            ' "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
+            mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
+          fi
+          jq --argjson patch "$payload" '
+            (.Children[] | select(.Option == "AppDefaultIM") | .Value)
+              = (if $patch.AppDefaultIM == {} then "" else $patch.AppDefaultIM end)
+          ' "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
+          mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
           ;;
         *)
           echo "fixture: unsupported verb: $verb" >&2
@@ -341,20 +378,59 @@ pkgs.runCommand "macbook-fcitx5-behavior-adapter"
       test "$calls_after" = "$calls_before"
     }
 
+    write_legacy_frontend_journal() {
+      local root="$1"
+      local status="$2"
+      local applied="$3"
+      local before
+      mkdir -m 0700 "$root"
+      before="$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${appOnlyDriftFrontend})"
+      jq -cn \
+        --arg status "$status" \
+        --argjson applied "$applied" \
+        --argjson before "$before" \
+        '{
+          version: 2,
+          transaction: "20260811T020304Z-4343",
+          status: $status,
+          changes: [{
+            target: "macosfrontend",
+            path: "AppDefaultIM",
+            before: $before,
+            after: {},
+            applied: $applied
+          }]
+        }' > "$root/last-change.json"
+      chmod 0600 "$root/last-change.json"
+    }
+
     # Production adapter validates its exact partial-update allowlist before I/O.
     export FCITX_CLIENT_LOG="$TMPDIR/production-client.log"
     touch "$FCITX_CLIENT_LOG"
     printf '%s' '{"Behavior":{"ShareInputState":"All"}}' | ${lib.getExe productionAdapter} set global
-    printf '%s' '{"AppDefaultIM":{"0":"{\"appId\":\"com.apple.Terminal\",\"appPath\":\"/System/Applications/Utilities/Terminal.app\",\"imName\":\"keyboard-us\"}"}}' \
+    printf '%s' '{"AppDefaultIM":{"0":"{\"appId\":\"com.apple.Terminal\",\"appPath\":\"/System/Applications/Utilities/Terminal.app\",\"imName\":\"keyboard-us\"}"},"StatusBar":"Hidden"}' \
       | ${lib.getExe productionAdapter} set macosfrontend
-    test "$(wc -l < "$FCITX_CLIENT_LOG" | tr -d ' ')" = 2
+    printf '%s' '{"AppDefaultIM":{},"StatusBar":"Toggle input method"}' \
+      | ${lib.getExe productionAdapter} set macosfrontend
+    printf '%s' '{"AppDefaultIM":{}}' \
+      | ${lib.getExe productionAdapter} set-legacy-app-default-im macosfrontend
+    test "$(wc -l < "$FCITX_CLIENT_LOG" | tr -d ' ')" = 4
     expect_adapter_rejection global '{"Behavior":{"ShareInputState":"All"},"Extra":true}'
     expect_adapter_rejection global '{"Behavior":{"ShareInputState":"All","Extra":true}}'
     expect_adapter_rejection global '{"Behavior":{"ShareInputState":"Invalid"}}'
-    expect_adapter_rejection macosfrontend '{"AppDefaultIM":{},"Extra":true}'
+    expect_adapter_rejection macosfrontend '{"AppDefaultIM":{},"StatusBar":"Hidden","Extra":true}'
+    expect_adapter_rejection macosfrontend '{"AppDefaultIM":{},"StatusBar":"Invalid"}'
+    expect_adapter_rejection macosfrontend '{"StatusBar":"Hidden"}'
     expect_adapter_rejection macosfrontend '{"AppDefaultIM":{"0":"not-json"}}'
     expect_adapter_rejection macosfrontend '{"AppDefaultIM":{"0":"{\"appId\":\"com.apple.Terminal\",\"appPath\":1,\"imName\":\"keyboard-us\"}"}}'
     expect_adapter_rejection macosfrontend '{"AppDefaultIM":{"0":"{\"appId\":\"com.apple.Terminal\",\"appPath\":\"/System/Applications/Utilities/Terminal.app\",\"extra\":true,\"imName\":\"keyboard-us\"}"}}'
+    legacy_calls_before="$(wc -l < "$FCITX_CLIENT_LOG" | tr -d ' ')"
+    if printf '%s' '{"AppDefaultIM":{},"StatusBar":"Hidden"}' \
+      | ${lib.getExe productionAdapter} set-legacy-app-default-im macosfrontend; then
+      echo "fixture: legacy partial adapter accepted StatusBar" >&2
+      exit 1
+    fi
+    test "$(wc -l < "$FCITX_CLIENT_LOG" | tr -d ' ')" = "$legacy_calls_before"
 
     # Approved owned drift is reconciled without changing Keep or unowned values.
     export FCITX_FIXTURE_ROOT="$TMPDIR/approved-drift"
@@ -375,7 +451,7 @@ pkgs.runCommand "macbook-fcitx5-behavior-adapter"
     test "$(stat -c '%a' "$journal_root")" = 700
     test "$(stat -c '%a' "$journal_root/last-change.json")" = 600
     jq -e '
-      .version == 2
+      .version == 3
       and (.transaction | type == "string" and length > 0)
       and .status == "committed"
       and (.changes | length == 2)
@@ -388,11 +464,14 @@ pkgs.runCommand "macbook-fcitx5-behavior-adapter"
       })
       and (.changes[1] == {
         target: "macosfrontend",
-        path: "AppDefaultIM",
+        path: "AppDefaultIM+StatusBar",
         before: {
-          "0": "{\"appId\":\"com.apple.Terminal\",\"appPath\":\"/System/Applications/Utilities/Terminal.app\",\"imName\":\"keyboard-us\"}"
+          AppDefaultIM: {
+            "0": "{\"appId\":\"com.apple.Terminal\",\"appPath\":\"/System/Applications/Utilities/Terminal.app\",\"imName\":\"keyboard-us\"}"
+          },
+          StatusBar: "Menu"
         },
-        after: {},
+        after: {AppDefaultIM: {}, StatusBar: "Hidden"},
         applied: true
       })
     ' "$journal_root/last-change.json" >/dev/null
@@ -437,6 +516,96 @@ pkgs.runCommand "macbook-fcitx5-behavior-adapter"
     test "$(stat -c '%a' "$no_op_journal")" = 700
     test ! -e "$no_op_journal/last-change.json"
     test ! -e "$no_op_journal/.lock"
+
+    # A terminal v2 journal remains valid and byte-stable during a v3 no-op.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/legacy-terminal-no-op"
+    legacy_terminal_journal="$TMPDIR/legacy-terminal-no-op-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${desiredFrontend} ${initialRime}
+    write_legacy_frontend_journal "$legacy_terminal_journal" committed true
+    legacy_terminal_hash="$(sha256sum "$legacy_terminal_journal/last-change.json" | cut -d ' ' -f1)"
+    ${lib.getExe reconciler} reconcile "$legacy_terminal_journal"
+    test ! -e "$FCITX_FIXTURE_ROOT/post.log"
+    test "$(sha256sum "$legacy_terminal_journal/last-change.json" | cut -d ' ' -f1)" = "$legacy_terminal_hash"
+
+    # A committed v2 frontend rollback restores AppDefaultIM and preserves current StatusBar.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/legacy-committed-rollback"
+    legacy_committed_journal="$TMPDIR/legacy-committed-rollback-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${statusOnlyDriftFrontend} ${initialRime}
+    write_legacy_frontend_journal "$legacy_committed_journal" committed true
+    FCITX_DRIFT_STATUS_BEFORE_LEGACY_SET=1 \
+      ${lib.getExe reconciler} rollback "$legacy_committed_journal"
+    test "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${appOnlyDriftFrontend})"
+    test "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = Menu
+    test "$(wc -l < "$FCITX_FIXTURE_ROOT/post.log" | tr -d ' ')" = 1
+    test "$(jq -r '.status' "$legacy_committed_journal/last-change.json")" = rolled-back
+
+    # A v2 rollback-incomplete transaction may be retried without changing StatusBar.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/legacy-incomplete-retry"
+    legacy_incomplete_journal="$TMPDIR/legacy-incomplete-retry-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${initialFrontend} ${initialRime}
+    cp -f ${desiredFrontend} "$FCITX_FIXTURE_ROOT/macosfrontend.json"
+    jq '(.Children[] | select(.Option == "StatusBar") | .Value) = "Menu"' \
+      "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
+    mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
+    write_legacy_frontend_journal "$legacy_incomplete_journal" rollback-incomplete true
+    ${lib.getExe reconciler} rollback "$legacy_incomplete_journal"
+    test "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${appOnlyDriftFrontend})"
+    test "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = Menu
+    test "$(jq -r '.status' "$legacy_incomplete_journal/last-change.json")" = rolled-back
+
+    # A v2 prepared journal fails closed before any config POST.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/legacy-prepared"
+    legacy_prepared_journal="$TMPDIR/legacy-prepared-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${desiredFrontend} ${initialRime}
+    write_legacy_frontend_journal "$legacy_prepared_journal" prepared false
+    if ${lib.getExe reconciler} rollback "$legacy_prepared_journal" 2> "$TMPDIR/legacy-prepared.err"; then
+      echo "fixture: legacy prepared journal must fail closed" >&2
+      exit 1
+    fi
+    test ! -e "$FCITX_FIXTURE_ROOT/post.log"
+    grep -F "base exact revision" "$TMPDIR/legacy-prepared.err" >/dev/null
+
+    # AppDefaultIM-only drift is still independently reconciled and rolled back.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/app-only-drift"
+    app_only_journal="$TMPDIR/app-only-drift-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${appOnlyDriftFrontend} ${initialRime}
+    ${lib.getExe reconciler} reconcile "$app_only_journal"
+    test "$(wc -l < "$FCITX_FIXTURE_ROOT/post.log" | tr -d ' ')" = 1
+    test "$(cut -f1 "$FCITX_FIXTURE_ROOT/post.log")" = macosfrontend
+    test "$(jq -r '.changes[0].before.StatusBar' "$app_only_journal/last-change.json")" = Hidden
+    test "$(jq -r '.changes[0].after.StatusBar' "$app_only_journal/last-change.json")" = Hidden
+    ${lib.getExe reconciler} rollback "$app_only_journal"
+    test "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${appOnlyDriftFrontend})"
+    test "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = Hidden
+
+    # StatusBar-only drift converges to Hidden and restores the exact official enum value.
+    export FCITX_FIXTURE_ROOT="$TMPDIR/status-only-drift"
+    status_only_journal="$TMPDIR/status-only-drift-journal"
+    prepare_fixture "$FCITX_FIXTURE_ROOT" ${desiredGlobal} ${statusOnlyDriftFrontend} ${initialRime}
+    ${lib.getExe reconciler} reconcile "$status_only_journal"
+    test "$(wc -l < "$FCITX_FIXTURE_ROOT/post.log" | tr -d ' ')" = 1
+    test "$(cut -f1 "$FCITX_FIXTURE_ROOT/post.log")" = macosfrontend
+    test "$(jq -r '.Children[] | select(.Option == "AppDefaultIM") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = ""
+    test "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = Hidden
+    test "$(jq -r '.changes[0].before.StatusBar' "$status_only_journal/last-change.json")" = "Toggle input method"
+    test "$(jq -r '.changes[0].after.StatusBar' "$status_only_journal/last-change.json")" = Hidden
+    jq '
+      (.Children[] | select(.Option == "StatusBar") | .Value) = "Menu"
+    ' "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
+    mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
+    if ${lib.getExe reconciler} rollback "$status_only_journal"; then
+      echo "fixture: StatusBar rollback CAS must reject a third official value" >&2
+      exit 1
+    fi
+    test "$(wc -l < "$FCITX_FIXTURE_ROOT/post.log" | tr -d ' ')" = 1
+    test "$(jq -r '.status' "$status_only_journal/last-change.json")" = rollback-incomplete
+    jq '
+      (.Children[] | select(.Option == "StatusBar") | .Value) = "Hidden"
+    ' "$FCITX_FIXTURE_ROOT/macosfrontend.json" > "$FCITX_FIXTURE_ROOT/macosfrontend.next"
+    mv "$FCITX_FIXTURE_ROOT/macosfrontend.next" "$FCITX_FIXTURE_ROOT/macosfrontend.json"
+    ${lib.getExe reconciler} rollback "$status_only_journal"
+    test "$(jq -r '.Children[] | select(.Option == "AppDefaultIM") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = ""
+    test "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' "$FCITX_FIXTURE_ROOT/macosfrontend.json")" = "Toggle input method"
 
     # New drift archives a committed journal and starts a fresh transaction.
     export FCITX_FIXTURE_ROOT="$TMPDIR/committed-redrift"
@@ -579,18 +748,21 @@ pkgs.runCommand "macbook-fcitx5-behavior-adapter"
     unapplied_journal="$TMPDIR/unapplied-journal-item-journal"
     prepare_fixture "$FCITX_FIXTURE_ROOT" ${initialGlobal} ${desiredFrontend} ${initialRime}
     mkdir -m 0700 "$unapplied_journal"
-    unapplied_before="$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${initialFrontend})"
+    unapplied_before="$(jq -cn \
+      --argjson appDefaultIM "$(jq -c '.Children[] | select(.Option == "AppDefaultIM") | .Value' ${initialFrontend})" \
+      --arg statusBar "$(jq -r '.Children[] | select(.Option == "StatusBar") | .Value' ${initialFrontend})" \
+      '{AppDefaultIM:$appDefaultIM, StatusBar:$statusBar}')"
     jq -cn \
       --argjson before "$unapplied_before" \
       '{
-        version: 2,
+        version: 3,
         transaction: "20260811T010203Z-4242",
         status: "rollback-incomplete",
         changes: [{
           target: "macosfrontend",
-          path: "AppDefaultIM",
+          path: "AppDefaultIM+StatusBar",
           before: $before,
-          after: {},
+          after: {AppDefaultIM: {}, StatusBar: "Hidden"},
           applied: false
         }]
       }' > "$unapplied_journal/last-change.json"

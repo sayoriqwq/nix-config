@@ -5,6 +5,8 @@
   homeDirectory,
   behaviorReconciler ? null,
   fullCapability ? true,
+  fixtureMode ? false,
+  checkOverlay ? fullCapability,
 }:
 
 let
@@ -12,14 +14,13 @@ let
   quote = lib.escapeShellArg;
   targetRoot = "${homeDirectory}/${contract.targetRoot}";
   localOverlaySource = toString contract.localOverlay.source;
-  localOverlayTarget = "${targetRoot}/${contract.localOverlay.relativePath}";
   mutablePaths = map (entry: "${homeDirectory}/${entry.relativePath}") contract.mutableStatePaths;
 in
 assert lib.assertMsg (
   builtins.length contract.managedPaths == 65
 ) "macbook Rime preflight requires the reviewed set of exactly 65 static leaves";
 assert lib.assertMsg (
-  homeDirectory == "/Users/sayori"
+  fixtureMode || homeDirectory == "/Users/sayori"
 ) "macbook Rime preflight must retain its fixed audited home target";
 assert lib.assertMsg (contract.isSafeRelativePath contract.targetRoot)
   "macbook Rime preflight target root must be a safe relative path";
@@ -49,7 +50,12 @@ pkgs.writeShellApplication {
     fi
 
     source_root=${quote (toString rimeIceSource)}
-    target_root=${quote targetRoot}
+    ${
+      if fixtureMode then
+        ''target_root="''${MACBOOK_RIME_PREFLIGHT_FIXTURE_TARGET_ROOT:?fixture target root is required}"''
+      else
+        "target_root=${quote targetRoot}"
+    }
 
     source_root_real="$(realpath "$source_root")"
     case "$source_root_real" in
@@ -129,10 +135,10 @@ pkgs.writeShellApplication {
 
     ${lib.concatMapStringsSep "\n" (path: "check_static_leaf ${quote path}") contract.managedPaths}
 
-    ${lib.optionalString fullCapability ''
+    ${lib.optionalString checkOverlay ''
       overlay_source=${quote localOverlaySource}
-      overlay_target=${quote localOverlayTarget}
       overlay_relative=${quote contract.localOverlay.relativePath}
+      overlay_target="$target_root/$overlay_relative"
       overlay_source_real="$(realpath "$overlay_source")"
 
       if ! test -f "$overlay_source" || test -L "$overlay_source"; then
@@ -147,32 +153,41 @@ pkgs.writeShellApplication {
           ;;
       esac
 
-      if test -L "$overlay_target"; then
-        overlay_live_real="$(realpath "$overlay_target" 2>/dev/null || true)"
-        if test "$overlay_live_real" != "$overlay_source_real"; then
-          echo "preflight: local overlay symlink does not resolve to its declared source" >&2
-          exit 1
+      overlay_source_hash="$(sha256sum "$overlay_source" | cut -d ' ' -f 1)"
+      if test "$overlay_source_hash" != ${quote contract.localOverlay.sha256}; then
+        echo "preflight: local overlay declared source does not match the approved hash" >&2
+        exit 1
+      fi
+
+      if ! test -f "$overlay_target"; then
+        if test -e "$overlay_target" || test -L "$overlay_target"; then
+          echo "preflight: local overlay has an unsupported or broken file type" >&2
+        else
+          echo "preflight: local overlay is missing" >&2
         fi
-      elif test -f "$overlay_target"; then
-        overlay_live_real="$(realpath "$overlay_target")"
-        case "$overlay_live_real" in
-          "$target_root_real"/*) ;;
-          *)
-            echo "preflight: regular local overlay escapes the Rime target root" >&2
-            exit 1
-            ;;
-        esac
-        overlay_source_hash="$(sha256sum "$overlay_source" | cut -d ' ' -f 1)"
-        overlay_live_hash="$(sha256sum "$overlay_target" | cut -d ' ' -f 1)"
-        if test "$overlay_live_hash" != "$overlay_source_hash"; then
-          echo "preflight: local overlay content drift" >&2
+        exit 1
+      fi
+
+      overlay_live_real="$(realpath "$overlay_target" 2>/dev/null || true)"
+      case "$overlay_live_real" in
+        /nix/store/*) ;;
+        *)
+          echo "preflight: local overlay must resolve to a regular Nix Store file" >&2
           exit 1
-        fi
-      elif test -e "$overlay_target"; then
+          ;;
+      esac
+      if ! test -f "$overlay_live_real" || test -L "$overlay_live_real"; then
         echo "preflight: local overlay has an unsupported file type" >&2
         exit 1
-      else
-        echo "preflight: local overlay is missing" >&2
+      fi
+
+      overlay_live_hash="$(sha256sum "$overlay_live_real" | cut -d ' ' -f 1)"
+      if test "$overlay_live_hash" != ${quote contract.localOverlay.sha256}; then
+        echo "preflight: local overlay content hash drift" >&2
+        exit 1
+      fi
+      if ! cmp -s -- "$overlay_source" "$overlay_live_real"; then
+        echo "preflight: local overlay content drift" >&2
         exit 1
       fi
     ''}
@@ -194,23 +209,23 @@ pkgs.writeShellApplication {
       esac
     }
 
-    ${lib.concatMapStringsSep "\n" (path: "check_mutable_path_metadata ${quote path}") mutablePaths}
+    ${lib.optionalString (!fixtureMode) (
+      lib.concatMapStringsSep "\n" (path: "check_mutable_path_metadata ${quote path}") mutablePaths
+    )}
 
     ${lib.optionalString fullCapability ''
       ${lib.getExe behaviorReconciler} check
     ''}
 
     ${
-      if fullCapability then
-        ''
-          echo "preflight: 65 pinned Rime leaves and 1 local overlay match their declarations"
-          echo "preflight: approved Fcitx5 behavior and Keep invariants match the contract"
-        ''
+      if checkOverlay then
+        ''echo "preflight: 65 pinned Rime leaves and 1 local overlay match their declarations"''
       else
-        ''
-          echo "preflight: 65 pinned Rime leaves match the static handoff contract"
-        ''
+        ''echo "preflight: 65 pinned Rime leaves match the static handoff contract"''
     }
+    ${lib.optionalString fullCapability ''
+      echo "preflight: approved Fcitx5 behavior and Keep invariants match the contract"
+    ''}
     echo "preflight: mutable state paths remain outside the Nix store"
   '';
 }

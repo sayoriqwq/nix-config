@@ -114,8 +114,8 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
   pinned `default.yaml`，也不改变左右 Shift、简繁、标点或用户数据；
 - `~/.config/fcitx5` 及其中 regular files 继续由 Fcitx5 外部拥有并保持可写。能力不得 raw
   patch INI、接管整文件或建立 Store symlink，只能通过 bundle 自带的官方本地配置 API
-  收敛全局 `ShareInputState=All` 和有效 `AppDefaultIM` 为空；左右 Shift 的
-  `AltTriggerKeys`、`StatusBar=Hidden`、Rime `InputState=All` 等 Keep 字段只做语义检查；
+  收敛全局 `ShareInputState=All`、有效 `AppDefaultIM` 为空和 `StatusBar=Hidden`；左右 Shift 的
+  `AltTriggerKeys` 与 Rime `InputState=All` 等 Keep 字段只做语义检查；
 - 未经批准不改变 `VimMode` 中的 MacVim 条目、剪贴板/Beast 配置、密码框策略或其他外部字段；
 - 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
   preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
@@ -125,6 +125,11 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 运行时 red/green 探针从 `2 → 1 → 1` 变为 `2 → 2 → 2`；维护者批准窗口内已用官方
 `fcitx5-curl` 清空 live `AppDefaultIM`，未 raw patch、restart、deploy 或 activation。
 该 live mitigation 已验证，但声明式 adapter 与本地 overlay 在 activation 前仍只是仓库目标。
+
+维护者随后确认，live `StatusBar=Hidden` 来自本人在 Fcitx5 UI 点击“隐藏输入法名称”，并在
+Issue #134 中批准把这个已验收结果升级为 adapter-owned Desired。仓库仍不拥有
+`macosfrontend.conf` 文件；只有该标量与既有两个字段共享官方 API、CAS、semantic journal
+和定向 rollback 边界。
 
 可变状态只登记路径、内容 owner 与备份边界，不读取词条正文、不链接到 Nix Store：
 
@@ -136,17 +141,18 @@ Nix 应用在 macOS 上由 Home Manager 复制到 `~/Applications/Home Manager A
 | `~/.local/share/fcitx5/rime/sync` | Rime | separate-policy | 同步导出状态；仓库不实现同步或备份。 |
 | `~/.local/share/fcitx5/rime/installation.yaml` | Rime | required | 可写 installation identity。 |
 | `~/.local/share/fcitx5/rime/user.yaml` | Rime | required | 可写用户运行与部署状态。 |
-| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile 与用户配置，整棵目录及配置文件保持应用可写；Nix 仅经官方 API 收敛两个获批字段，不取得文件所有权。 |
+| `~/.config/fcitx5` | Fcitx5 | required | Fcitx profile 与用户配置，整棵目录及配置文件保持应用可写；Nix 仅经官方 API 收敛三个获批字段，不取得文件所有权。 |
 | `~/.local/state/nix-config/macos-chinese-input/fcitx5-behavior` | nix-config macOS 中文输入 behavior adapter | required | mode 0700 的目录保存 mode 0600 `last-change.json` 事务 journal 与终态归档；generation rollback 不自动恢复其记录的外部字段，固定目标 rollback helper 只在 CAS 预检通过时恢复。 |
 | `~/Library/fcitx5` | Fcitx5/plugin | separate-policy | plugin/shared payload 与应用状态，继续外部所有。 |
 | `~/Library/Caches/org.fcitx.inputmethod.Fcitx5` | Fcitx5 | excluded | 可重建 cache，不属于备份承诺。 |
 
 Issue #127 已建立 65 个上游 leaf 的声明、policy check、只读 preflight 和恢复合同；
-Issue #132 在其上增加 1 个本地 overlay 与 Fcitx 行为 adapter。仓库出现能力声明或 build
-成功，不代表现有机器已经完成 nix-darwin/Home Manager activation、Rime 重新部署或真实
-中文输入验收。已完成的 live `AppDefaultIM` 应急缓解及其 owner-only 副本只属于事故窗口，
-不能被描述为 generation rollback，也不能代替声明式 activation。这些后续步骤必须绑定
-Draft PR 的 exact commit，由维护者分别批准并记录；详细顺序见
+Issue #132 在其上增加 1 个本地 overlay 与两项 Fcitx 行为 Desired，并已随 generation 44
+完成 activation 与机器侧配置合同记录；当时没有再次 deploy Rime，飞书日报/Terminal 往返
+输入也未记录为完成。Issue #134 只把维护者手动形成的 `StatusBar=Hidden` 升级为第三项
+Desired，并修正 overlay preflight；这项增量在绑定 Draft PR exact commit 的 activation 和
+实机菜单栏/输入验收前仍只是声明目标，且不要求再次部署 Rime。
+已完成的 live 应急副本不能被描述为 generation rollback。详细顺序见
 [`restore-macos-environment.md`](../runbooks/restore-macos-environment.md)。
 
 ## 4. Homebrew 所有权

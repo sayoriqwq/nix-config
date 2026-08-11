@@ -234,12 +234,13 @@ assert lib.assertMsg (
 assert lib.assertMsg (
   contract.behavior.desired.global.Behavior.ShareInputState == "All"
   && contract.behavior.desired.macosfrontend.AppDefaultIM == { }
+  && contract.behavior.desired.macosfrontend.StatusBar == "Hidden"
   &&
     contract.behavior.keep.global.Hotkey.AltTriggerKeys == {
       "0" = "Shift+Shift_L";
       "1" = "Shift+Shift_R";
     }
-  && contract.behavior.keep.macosfrontend.StatusBar == "Hidden"
+  && !(contract.behavior.keep ? macosfrontend)
   && contract.behavior.keep.rime.InputState == "All"
 ) "macbook must preserve the approved Fcitx5 desired values and Keep-only invariants";
 assert lib.assertMsg

@@ -158,6 +158,89 @@
         pkgs = macbookPkgs;
         rimeIceSource = inputs.rime-ice;
       };
+      macbookRimeOverlayCopy = macbookPkgs.writeText "hm_default.custom.yaml" (
+        builtins.readFile rimeIceContract.localOverlay.source
+      );
+      macbookRimeOverlayDrift = macbookPkgs.writeText "hm_default.custom.yaml" ''
+        patch:
+          schema_list:
+            - schema: luna_pinyin
+      '';
+      macbookRimePreflightFixture = import ./tests/macos/rime-preflight.nix {
+        contract = rimeIceContract;
+        checkOverlay = true;
+        fixtureMode = true;
+        fullCapability = false;
+        homeDirectory = "/fixture";
+        pkgs = macbookPkgs;
+        rimeIceSource = inputs.rime-ice;
+      };
+      macbookRimePreflightHashDriftFixture = import ./tests/macos/rime-preflight.nix {
+        contract = rimeIceContract // {
+          localOverlay = rimeIceContract.localOverlay // {
+            sha256 = "0000000000000000000000000000000000000000000000000000000000000000";
+          };
+        };
+        checkOverlay = true;
+        fixtureMode = true;
+        fullCapability = false;
+        homeDirectory = "/fixture";
+        pkgs = macbookPkgs;
+        rimeIceSource = inputs.rime-ice;
+      };
+      macbookRimePreflightFixtureCheck =
+        macbookPkgs.runCommand "macbook-rime-preflight-fixture"
+          {
+            nativeBuildInputs = [ macbookPkgs.coreutils ];
+          }
+          ''
+            set -euo pipefail
+            target_root="$TMPDIR/home/${rimeIceContract.targetRoot}"
+
+            reset_target() {
+              rm -rf -- "$TMPDIR/home"
+              mkdir -p -- "$target_root"
+              ${macbookPkgs.lib.concatMapStringsSep "\n" (path: ''
+                mkdir -p -- "$target_root/$(dirname ${macbookPkgs.lib.escapeShellArg path})"
+                ln -s -- "${inputs.rime-ice}/${path}" "$target_root/${path}"
+              '') rimeIceContract.managedPaths}
+            }
+
+            expect_failure() {
+              if MACBOOK_RIME_PREFLIGHT_FIXTURE_TARGET_ROOT="$target_root" "$1"; then
+                echo "fixture: expected local overlay preflight failure" >&2
+                exit 1
+              fi
+            }
+
+            reset_target
+            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayCopy)} "$target_root/.hm_default.custom.yaml"
+            ln -s -- "$target_root/.hm_default.custom.yaml" "$target_root/${rimeIceContract.localOverlay.relativePath}"
+            MACBOOK_RIME_PREFLIGHT_FIXTURE_TARGET_ROOT="$target_root" \
+              ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
+
+            reset_target
+            ln -s -- "$target_root/missing-overlay" "$target_root/${rimeIceContract.localOverlay.relativePath}"
+            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
+
+            reset_target
+            cp -- ${macbookPkgs.lib.escapeShellArg (toString rimeIceContract.localOverlay.source)} \
+              "$target_root/local-copy"
+            ln -s -- "$target_root/local-copy" "$target_root/${rimeIceContract.localOverlay.relativePath}"
+            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
+
+            reset_target
+            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayDrift)} \
+              "$target_root/${rimeIceContract.localOverlay.relativePath}"
+            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightFixture}
+
+            reset_target
+            ln -s -- ${macbookPkgs.lib.escapeShellArg (toString macbookRimeOverlayCopy)} \
+              "$target_root/${rimeIceContract.localOverlay.relativePath}"
+            expect_failure ${macbookPkgs.lib.getExe macbookRimePreflightHashDriftFixture}
+
+            touch "$out"
+          '';
       macbookRimeStaticPreflight = import ./tests/macos/rime-preflight.nix {
         contract = rimeIceContract;
         fullCapability = false;
@@ -308,6 +391,7 @@
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
           };
+          macbook-rime-preflight-fixture = macbookRimePreflightFixtureCheck;
           macbook-rtk-integration = import ./tests/macos/rtk-integration.nix {
             homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
             pkgs = self.darwinConfigurations.macbook.pkgs;
