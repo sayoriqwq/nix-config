@@ -1,14 +1,19 @@
-{ lib, ... }:
+{ ... }:
 
 {
-  dconf.settings = {
-    "org/gnome/desktop/session".idle-delay = lib.hm.gvariant.mkUint32 0;
+  # This capability owns the absence of idle actions. Hyprland still keeps a
+  # lock/sleep coordinator, but no timer may lock, power off displays or
+  # suspend the workstation automatically.
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+        before_sleep_cmd = "loginctl lock-session";
+        lock_cmd = "pidof hyprlock || hyprlock";
+      };
 
-    "org/gnome/settings-daemon/plugins/power" = {
-      sleep-inactive-ac-timeout = lib.hm.gvariant.mkInt32 0;
-      sleep-inactive-ac-type = "nothing";
-      sleep-inactive-battery-timeout = lib.hm.gvariant.mkInt32 0;
-      sleep-inactive-battery-type = "nothing";
+      listener = [ ];
     };
   };
 }

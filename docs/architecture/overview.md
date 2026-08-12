@@ -24,7 +24,8 @@ flake.nix + flake.lock
 ├── nixosConfigurations.<workstation-host>
 │   ├── hosts/<workstation-host>
 │   ├── modules/nixos/base.nix
-│   ├── modules/nixos/desktop.nix
+│   ├── modules/capabilities/<desktop>/nixos.nix
+│   │   └── internal modules/nixos/graphical-workstation.nix primitive
 │   ├── modules/capabilities/*/nixos.nix
 │   └── Home Manager: 已批准的 capability subset
 │

@@ -177,7 +177,6 @@
         modules = [
           ./hosts/nixbox
           ./modules/nixos/base.nix
-          ./modules/nixos/desktop.nix
           home-manager.nixosModules.home-manager
         ];
       };
@@ -285,6 +284,12 @@
             pkgs = nixboxPkgs;
             serverConfiguration = self.nixosConfigurations.server;
             source = ./.;
+          };
+          nixbox-hyprland-desktop = import ./tests/nixbox/hyprland-desktop.nix {
+            inherit username;
+            lib = nixboxPkgs.lib;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = nixboxPkgs;
           };
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;

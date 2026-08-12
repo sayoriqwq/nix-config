@@ -7,6 +7,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/capabilities/hyprland-desktop/nixos.nix
     ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
     ../../modules/capabilities/zed-editor/nixos.nix
