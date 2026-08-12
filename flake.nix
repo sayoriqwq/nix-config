@@ -35,6 +35,13 @@
       flake = false;
     };
 
+    # Issue #155: consume the reviewed terminal design contract as data. The
+    # runtime adapters remain owned by this repository, so this is not a Flake.
+    yume-design = {
+      url = "github:sayoriqwq/yume-design/047c1f44518ed353b8f5d821fc1f3f347ded9206";
+      flake = false;
+    };
+
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -157,6 +164,16 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
+      terminalThemePolicyFor =
+        pkgs:
+        import ./tests/terminal-theme/policy.nix {
+          inherit inputs pkgs username;
+          inherit (pkgs) lib;
+          macbookConfiguration = self.darwinConfigurations.macbook;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -276,6 +293,7 @@
           };
           macbook-rime-data-layout = macbookRimeDataLayout;
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
+          terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
         };
         x86_64-linux = {
           nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
@@ -288,6 +306,7 @@
           };
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
+          terminal-theme-policy = terminalThemePolicyFor nixboxPkgs;
         };
       };
 

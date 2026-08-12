@@ -19,9 +19,9 @@
 
 | 能力 | 安装所有者 | 稳定配置所有者 | 可变状态 |
 | --- | --- | --- | --- |
-| Ghostty | Home Manager/Nix；Darwin 使用 `ghostty-bin`，Linux 使用 `ghostty` | `modules/home/desktop/terminal/` | 窗口、session、登录态与 macOS preferences 保持可写 |
-| WezTerm | Home Manager/Nixpkgs | `modules/home/desktop/terminal/` | 窗口、mux 与运行时状态保持可写 |
-| Fish/Zsh | Home Manager；macOS 登录 Fish 由 nix-darwin 声明 | `modules/home/common/shell/` | history 与 universal variables 保持可写 |
+| Ghostty | Home Manager/Nix；Darwin 使用 `ghostty-bin`，Linux 使用 `ghostty` | 颜色与语义 Token：锁定的 `yume-design` input；运行时 adapter：`modules/home/desktop/terminal/` | 窗口、session、登录态与 macOS preferences 保持可写 |
+| WezTerm | Home Manager/Nixpkgs | 颜色与语义 Token：锁定的 `yume-design` input；运行时 adapter：`modules/home/desktop/terminal/` | 窗口、mux 与运行时状态保持可写 |
+| Fish/Zsh | Home Manager；macOS 登录 Fish 由 nix-darwin 声明 | 语义颜色：锁定的 `yume-design` input；Shell 行为与 adapter：`modules/home/common/shell/` | history 与 universal variables 保持可写 |
 | Node/Bun/pnpm | mise | Nix 管理 mise 本体、默认值和 Shell integration | mise runtime/cache/state 保持可写 |
 | Maple Mono NF-CN | macOS 由 nix-darwin 安装；选择 Ghostty 的 Linux 工作站由 Home Manager 安装 | macOS：`modules/darwin/fonts.nix`；Linux：`modules/home/capabilities/ghostty-terminal.nix` | 无用户数据；headless server 不安装字体 |
 
@@ -38,6 +38,7 @@ Ghostty 与 WezTerm 的应用本体不再由 Homebrew 声明。`homebrew.onActiv
 modules/home/
 ├── common/
 │   ├── default.nix
+│   ├── terminal-theme.nix       # 锁定设计源的共享 provider
 │   ├── shell/
 │   └── cli/
 ├── desktop/
@@ -46,7 +47,6 @@ modules/home/
 │       ├── default.nix
 │       ├── appearance.nix
 │       ├── keybindings.nix
-│       ├── themes/
 │       └── adapters/
 └── darwin/
     ├── default.nix
@@ -64,10 +64,15 @@ modules/home/
 
 ## 4. 终端主题与行为
 
-`sayoriqwq-obsidian.nix` 是 Ghostty/WezTerm 的唯一主题数据源，Ghostty 当前值为权威：
+锁定的 `yume-design/terminal/obsidian-theme/theme.json` 是颜色、ANSI palette、语义 Token
+与 appearance 的唯一设计源。`nix-config` 的跨平台 Home Manager provider 一次读取并校验
+JSON，再通过 `terminalTheme` interface 供 Ghostty、WezTerm、Fish 与 Starship adapter 消费；
+adapter 不保存 HEX 副本。字体、透明度、窗口与 Shell/prompt 行为仍由本仓库拥有。
 
-- ANSI yellow：`#BDBDBD`，有意设计为中性灰；
-- bright yellow：`#FFFFFF`；
+Issue #155 接受历史主题对 warning 语义的较新裁决：
+
+- ANSI yellow：`#D4A373`，映射 `tokens.intent.warning`；
+- bright yellow：`#E6C280`，保留 warning 语义与 ANSI 槽位辨识度；
 - Maple Mono NF-CN，字号 `20`；
 - 背景透明度 `0.95`；
 - 背景模糊 `10`。
@@ -135,3 +140,7 @@ nix build .#darwinConfigurations.macbook.system --no-link
 - 可变 history、数据库与状态目录没有被链接进 Nix Store。
 
 真实机器 activation、登录 Shell 切换、Homebrew 定向卸载与任何数据删除均是独立人工关卡。回滚优先切回上一代 nix-darwin/Home Manager generation；Homebrew app 需要按 activation 前清单单独恢复。
+
+主题 input 或 adapter 回滚通过 revert Issue #155 的变更完成：恢复仓库内旧 Nix 主题与 Fish/
+Starship 颜色副本后重新 build。构建成功仍不授权 activation；若维护者之后已批准并应用新
+yellow 配色，运行态回滚应切回 activation 前一代 generation。

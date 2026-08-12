@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../common/terminal-theme.nix
     ../common/shortcut-reference.nix
     ../common/state-paths.nix
     ../common/shell/fish.nix

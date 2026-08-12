@@ -112,6 +112,13 @@ server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的
 
 会被程序持续写入的数据库、缓存、session 和 profile 目录不能整体链接到只读 Nix Store。
 
+终端主题在外部设计源与本仓库运行时 adapter 之间建立一个数据 seam：`yume-design` 的
+锁定非 Flake input 只拥有颜色、语义 Token、appearance 与消费合同；跨平台 Home Manager
+provider 一次读取并校验 JSON，通过一个 `terminalTheme` interface 向 Ghostty、WezTerm、
+Fish 与 Starship adapter 提供数据。本仓库继续拥有字体、透明度、窗口、Shell/prompt 行为
+及部署声明。Capability 必须显式 import provider；adapter 不复制 HEX，也不从 ANSI 槽位
+反推语义 Token。
+
 ### 3.6 机密层
 
 Phase 11 建立了 SOPS + sops-nix + age 基础：
