@@ -8,9 +8,9 @@ nixbox 当前以 GNOME + GDM 为桌面基线，并已有 Ghostty、Zed、Yazi、
 
 1. **现在就能体验**：不安装、不改声明，先验证现有 GNOME 会话已有能力；
 2. **低风险加一项**：单一用户工具，能够说清 package owner 与可变状态；
-3. **独立桌面会话实验**：保留 GNOME/GDM，在登录界面额外选择 niri、Hyprland、Sway 或 Plasma；
+3. **可回滚的桌面 configuration 实验**：候选 configuration 只保留 niri、Hyprland、Sway 或 Plasma 这一套桌面 owner；首次 `test` 期间，已验收的 GNOME/GDM 仍是当前默认 system generation；
 4. **需要系统级 Issue**：会增加 daemon、libvirt、Flatpak runtime、设备访问、input hook、特权 tracing、网络或硬件控制；
-5. **不建议现在做**：替换 GNOME 基线、堆叠扩展、双重 package owner、为兼容性全局放宽安全边界。
+5. **不建议现在做**：在同一 configuration 永久并装完整桌面、候选稳定前删除唯一已验收 system generation 或其 GC root、堆叠扩展、双重 package owner 或为兼容性全局放宽安全边界。
 
 真正值得优先感受的 Linux 差异是“系统各层可以被看见并重新连接”：桌面会话是可替换组件，音频是可观察的 graph，应用可经 portal 获得窄权限，VM 可直接使用 KVM，程序与 kernel 的交互可用 `strace`、`perf`、Sysprof、rr 与 eBPF 拆开观察，Nix closure 又能被搜索、比较和浏览。
 
@@ -24,7 +24,7 @@ nixbox 当前以 GNOME + GDM 为桌面基线，并已有 Ghostty、Zed、Yazi、
 - **Wayland compositor** 同时负责合成显示、输入、窗口排列与协议实现。niri、Hyprland、Sway 都是 compositor，不等于一套开箱即用的完整 DE；特别是 Hyprland 官方安装文档明确提醒它不是完整 DE，launcher、bar、portal、polkit agent、锁屏等组件需要自行组合。[Hyprland：Installation](https://wiki.hypr.land/Getting-Started/Installation/)
 - **GNOME Shell extension** 是加载进 GNOME Shell 的扩展代码，不是独立桌面。它可以补 clipboard、tiling 或 dock 行为，但会跟随 Shell API 变化；GNOME 官方也明确提示第三方扩展可能造成 Shell 崩溃或异常。[GNOME Extensions：About](https://extensions.gnome.org/about/)
 
-所以“想试自动平铺”并不等于“应该卸载 GNOME”。更稳妥的顺序是：先用 GNOME 原生分屏与工作区；再只加一个可撤销的小工具；确实喜欢键盘平铺后，才在 GDM 中增加独立会话，始终保留 GNOME 恢复入口。
+所以“想试自动平铺”不要求在同一 configuration 并装两个桌面。更稳妥的顺序是：先用 GNOME 原生分屏与工作区；再只加一个可撤销的小工具；确实要换 compositor 时，为目标桌面建立单一 owner 的候选 configuration。首次 `nixos-rebuild test` 不更新 system profile，恢复点仍是当前默认的 GNOME generation；候选通过 smoke 并被提升后，GNOME 才成为上一代 generation。
 
 ### 2.2 GNOME：先榨干当前基线
 
@@ -46,7 +46,7 @@ PaperWM 是更强的 scrollable-tiling 范式，会管理部分 GNOME 设置，�
 
 Plasma 更像一套可以逐项显式配置的桌面：KRunner 能启动应用、搜索桌面数据、计算和执行插件动作；Klipper 是原生 clipboard history；KWin 提供窗口规则和效果；Activities 可让不同任务拥有不同 widgets、主题和桌面上下文。[KDE：KRunner](https://docs.kde.org/stable_kf6/en/plasma-desktop/plasma-desktop/krunner.html)，[KDE：Activities](https://docs.kde.org/stable_kf6/en/plasma-desktop/kcontrol/kcmactivities/index.html)，[KDE：Klipper](https://docs.kde.org/stable5/en/plasma-workspace/klipper/)
 
-它和 macOS 的差异在于：窗口规则、global shortcut、launcher、clipboard、panel 与 widgets 都更公开、更可组合。代价是配置面更大，GNOME/GTK 与 KDE/Qt 两套 portal、keyring、默认应用和视觉设置可能同时出现。Plasma 应作为**完整独立会话实验**，不应为了一个 clipboard history 或 launcher 就替换现有 GNOME。
+它和 macOS 的差异在于：窗口规则、global shortcut、launcher、clipboard、panel 与 widgets 都更公开、更可组合。代价是配置面更大；若与 GNOME 同时存在，还会出现两套 portal、keyring、默认应用和视觉设置。Plasma 应作为**完整 replacement configuration 实验**，不应为了一个 clipboard history 或 launcher 就引入整套 DE。
 
 ### 2.4 niri、Hyprland 与 Sway：三种 Wayland 平铺方向
 
@@ -54,7 +54,7 @@ Plasma 更像一套可以逐项显式配置的桌面：KRunner 能启动应用�
 - **Hyprland** 强调动态平铺、动画、窗口组、special workspace、IPC 与插件，视觉可塑性最高；但官方也明确它不是完整 DE，外围组件的选择、拼装与升级兼容都由用户承担。[Hyprland 官网](https://hypr.land/)，[Hyprland：Must-have utilities](https://wiki.hypr.land/Useful-Utilities/Must-have/)
 - **Sway** 是与 i3 配置和操作模型兼容的 Wayland compositor，默认网格式平铺、键盘驱动、配置面稳定清晰；它最适合想学习“窗口树 + 明确快捷键”的用户，但完整桌面体验同样需要 bar、launcher、notification daemon、portal 和锁屏等配套。[Sway 官网](https://swaywm.org/)，[Sway 官方仓库](https://github.com/swaywm/sway)
 
-三者都不应直接取代 GNOME/GDM。正确实验形态是额外 GDM session、独立配置目录、明确 portal/polkit/notification/lock contract，并以“注销即可回 GNOME”为恢复路径。
+三者都可以在候选 configuration 中直接取代 GNOME desktop。正确实验形态是：独立配置目录，明确 portal/polkit/notification/lock contract，运行中的 configuration 只有一套 desktop session owner；首次可暂时沿用已知可用的 GDM，把 display manager 更换留作后续独立决策。锁定 NixOS 的 GDM 模块自身仍以 GNOME Shell/Session 运行 greeter，因此“移除 GNOME desktop session”不等于 closure 中没有任何 GNOME package。`test` 阶段的恢复路径是 reboot 进入仍为默认的 GNOME/GDM generation，而不是依赖同一 configuration 内注销换会话。
 
 ## 3. Top 12 微观体验
 
@@ -70,7 +70,7 @@ Plasma 更像一套可以逐项显式配置的桌面：KRunner 能启动应用�
 | 8 | GNOME Boxes | 用几次点击体验 KVM VM、snapshot、USB、clipboard 和文件共享 | 需要系统级 Issue |
 | 9 | rootless Podman + Distrobox | 在 NixOS 上临时进入传统发行版 userland，理解兼容层与 owner 边界 | 需要系统级 Issue |
 | 10 | `strace`，再到 Sysprof 与 rr | 从 syscall 到 GUI flame chart，再到确定性重放一个故障 | `strace` 低风险；Sysprof service 与 rr 权限另审 |
-| 11 | niri 独立会话 | 在不动 GNOME 的前提下体验 scrollable tiling | 独立桌面会话实验 |
+| 11 | niri replacement configuration | 用 system configuration 边界体验 scrollable tiling，首次失败时 reboot 回到当前默认 GNOME generation | 可回滚的桌面 configuration 实验 |
 | 12 | Proton + Gamescope + MangoHud | 体验 Linux 游戏兼容、嵌套 compositor、缩放和帧时间观测 | 需要系统级 Issue；非开发主线 |
 
 去重说明：Ghostty、Zed、Yazi、btop、LocalSend、Tailscale、Codex、ax、RTK、Fish、tmux、direnv、mise/uv、Obsidian、Chrome、Clash 与 Termius 已属于 nixbox 基线，不重复列为“新发现”。上表中的 Resources 补充 btop 的桌面与 GPU 视角；Nix 微工具补充已有 `nh`，不是替换它。
@@ -214,7 +214,7 @@ GNOME 官方应用目录收录的是遵循 GNOME 设计、与当前桌面一致�
 
 ### 第 4 周：只选一条分支
 
-- **桌面分支：** 在独立 Issue 里设计 niri GDM session，只体验 scrollable tiling 与恢复到 GNOME；或
+- **桌面分支：** 在独立 Issue 里设计 niri replacement configuration，只体验 scrollable tiling，并从当前默认 GNOME generation 验证首次恢复；或
 - **虚拟化分支：** 为 Boxes 设计 KVM/libvirt、disk state、guest network、snapshot 与卸载合同；或
 - **兼容分支：** 针对一个真实非 FHS/vendor 工具设计 rootless Podman + Distrobox spike；或
 - **游戏分支：** 针对一款明确游戏核对 Steam/Proton、GPU、32-bit graphics、Gamescope/MangoHud 与 game state。
@@ -266,11 +266,12 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 - `nix-index` + `comma` 作为一个组合，或单独增加 `nix-tree`；`nh` 已携带 `nom` runtime，不重复加 `nix-output-monitor`；
 - `strace` 先用于自己启动的 demo，不 attach 别人的进程，也不放宽 system-wide tracing 权限。
 
-### 独立桌面会话实验
+### 可回滚的桌面 configuration 实验
 
 - 第一候选是 niri；第二候选按偏好选择 Plasma（完整 DE）、Sway（i3 模型）或 Hyprland（视觉与插件）；
-- 必须保留 GNOME/GDM，使用独立 session/config；每个 session 对 bar、launcher、notification、clipboard、polkit agent、locker 与 idle manager 各自只能有一个 owner；portal backend 必须按 `XDG_CURRENT_DESKTOP` 配置，不能全局抢占；
-- 一次只加一个会话，不同时比较四套桌面。
+- 候选 configuration 移除 GNOME desktop，只组合目标 session/config；bar、launcher、notification、clipboard、polkit agent、locker、idle manager 与 portal backend 各自只能有一个 owner；
+- 首次 `test` 期间，当前默认的 GNOME/GDM system generation 及其 GC root 必须保留；若后续用 `boot` 或 `switch` 提升候选，还要验证 systemd-boot 中仍有已验收 GNOME generation 的启动项；display manager 是否更换与 desktop 是否更换分开决策；
+- 一次只试一个桌面，不同时比较四套桌面。
 
 ### 需要系统级 Issue
 
@@ -285,7 +286,8 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 
 ### 不建议现在做
 
-- 卸载 GNOME、把 GDM 换掉或把实验 compositor 设为唯一桌面；
+- 在同一候选 configuration 永久并装 GNOME 与另一套完整桌面；
+- 在同一步同时更换 desktop、display manager 与底层输入策略，或在候选稳定前删除已验收 GNOME system generation、其 GC root 或启动项；
 - 一次加入大量 GNOME extensions 或复制网络上的“必装扩展清单”；
 - 同时运行 GNOME + Plasma 两套默认应用/portal/keyring 而不定义 owner；
 - 同一 app 同时用 Nix package 与 Flatpak，或同时部署 Bottles、Lutris、系统 Wine 与多套 Proton；
@@ -315,9 +317,9 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 4. mutable state、downloaded runtime、index、prefix、VM disk、game library、trace 与 credential 在哪里，谁备份，卸载时保留什么；
 5. 是否新增 daemon、socket、listener、firewall、portal backend、network remote、udev rule、input/device access、group、capability 或 sudo；
 6. 离线 build/evaluation 能证明什么，真实 GNOME/Wayland、GPU、audio、device、sleep 与 reboot 又需要哪些真人 smoke；
-7. 如何在不删可变数据的情况下禁用或回到当前 GNOME generation。
+7. 如何在不删可变数据的情况下恢复：`test` 阶段 reboot 回当前默认 generation；候选提升后再从上一代启动或 rollback。
 
-本文没有授权执行 `nixos-rebuild switch`、Home Manager activation、Flatpak remote/app 安装、container pull、libvirt/VM 创建、desktop session 切换、Steam/Wine runner 下载、input/udev/driver 修改、网络/firewall 变更、特权 trace、reboot、boot 或 disk 操作。设计的默认恢复点始终是当前的 GNOME/GDM nixbox 基线；尚未完成的真人验证关卡仍以对应 Issue 的记录为准。
+本文没有授权执行 `nixos-rebuild test` / `boot` / `switch`、Home Manager activation、Flatpak remote/app 安装、container pull、libvirt/VM 创建、desktop session 切换、Steam/Wine runner 下载、input/udev/driver 修改、网络/firewall 变更、特权 trace、reboot、删除 system generation/GC root、boot 或 disk 操作。首次 `test` 的默认恢复点是当前默认 GNOME/GDM generation；候选被提升后，恢复点才是保留下来的上一代 GNOME/GDM generation。尚未完成的真人验证关卡仍以对应 Issue 的记录为准。
 
 ## 12. 如果要换桌面：候选、利弊与社区建议
 
@@ -325,16 +327,20 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 
 ### 12.1 建议顺序
 
-1. **GNOME 不换：** 先用一周原生工作区；它既是候选，也是所有实验的恢复基线。
-2. **niri：** 第一套额外会话，最小成本验证自己是否真喜欢键盘驱动与 scrollable tiling。
+1. **GNOME 不换：** 先用一周原生工作区；若决定换桌面，首次 `test` 时它仍是当前默认 generation，候选提升后才成为上一代已验收 generation。
+2. **niri：** 第一套 replacement configuration，最小成本验证自己是否真喜欢键盘驱动与 scrollable tiling。
 3. **Plasma：** 如果想比较的是完整桌面，而不是窗口排列算法，第二个试它。
 4. **COSMIC：** 想要“完整 DE + 内建自动平铺”时做预览性实验；当前不取代基线。
 5. **Sway / Hyprland 二选一：** 前者学习稳定、显式的 i3 树模型；后者追求动画、special workspace 和深度定制。不要同时组装两套外围组件。
 6. **Xfce：** 仅在“传统桌面、X11 或低资源占用”成为明确需求时进入候选，不是当前 Wayland-first nixbox 的默认升级方向。
 
-所有切换实验都应保持 GDM 与 GNOME 可登录；第一恢复动作是注销并在 GDM 选择 GNOME。若新会话无法注销或黑屏，恢复设计必须允许进入 TTY 或选择上一代 generation；这些路径要在对应 Issue 里先写清、后由真人验证，本文不授权执行。
+所有切换实验都应把恢复能力留在 system profile 与 boot entry，而不是在当前桌面里。NixOS 26.05 手册说明：`nixos-rebuild test` 只切换运行态，不更新 system profile 或默认启动配置；因此首次候选锁死时应 reboot 回到仍为默认的 GNOME generation，不能把 `nixos-rebuild switch --rollback` 当成撤销 `test`，因为 profile 从未指向候选。只有候选经 `boot` 或 `switch` 被提升为 system generation 后，保留下来的上一代 GNOME generation 才能作为 boot/rollback 目标。[NixOS Manual：Changing the Configuration](https://nixos.org/manual/nixos/stable/#sec-changing-config)，[Rolling Back Configuration Changes](https://nixos.org/manual/nixos/stable/#sec-rollback)
 
-### 12.2 GNOME：保留基线，而不是“什么都不做”
+nixbox 使用 systemd-boot；其可见历史还受 `boot.loader.systemd-boot.configurationLimit` 和实际生成的 boot entry 约束。当前配置没有收紧该 limit，但候选 Issue 仍应在提升前记录已验收 generation，在提升后核对对应 entry，而不是仅凭 Store 中仍有 closure 就假定 boot menu 一定可恢复。[NixOS Options：systemd-boot configurationLimit](https://search.nixos.org/options?show=boot.loader.systemd-boot.configurationLimit&query=boot.loader.systemd-boot.configurationLimit)
+
+这不是 mutable-data rollback：目标桌面写入的 dconf、`~/.config`、portal permission、clipboard history、Flatpak 数据、浏览器 profile 与其他应用状态不会随 system generation 自动倒退。候选 Issue 必须先记录这些状态的 owner 和保留/清理边界；失败时优先保留证据并回到旧 generation，不删除用户数据。
+
+### 12.2 GNOME：已验收基线，而不是候选 configuration 的永久共存项
 
 - **范式与强项：** 完整、克制的 DE；Overview、动态工作区、搜索、通知、设置、keyring 与 portal 已形成一致体验，当前 GNOME 50 还把 fractional scaling、VRR、远程桌面等能力放在同一系统中。[GNOME 50 Release Notes](https://release.gnome.org/50/)
 - **明显缺点：** 原生平铺较浅；深入定制常依赖 extension/dconf，Shell 大版本升级会扩大兼容与恢复成本。
@@ -346,7 +352,7 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 
 - **范式与强项：** 传统桌面骨架加高度可配置的 KWin、panel、KRunner、Klipper、窗口规则与 Activities；对从 macOS 来、但希望系统把设置显式展示出来的人最友好。[KDE Plasma](https://kde.org/plasma-desktop/)
 - **明显缺点：** 选项与状态面很大，Qt/KDE 与 GTK/GNOME 应用的主题、默认应用、wallet/keyring 和设置可能形成两套心智模型。
-- **NixOS 整合：** 锁定 `services.desktopManager.plasma6.enable` 会加入 KDE/GTK portal、KWallet、polkit agent 和系统包，注册 Plasma 会话并把默认会话设为 `plasma`；它会预配置 SDDM 的 package/theme/Wayland defaults，但不会因此自动启用 SDDM。保留 GDM 实验时，应显式保持单一 display manager，并决定默认会话是否继续为 GNOME，再按会话检查 file chooser、screen sharing、secret portal 与默认应用。
+- **NixOS 整合：** 锁定 `services.desktopManager.plasma6.enable` 会加入 KDE/GTK portal、KWallet、polkit agent 和系统包，注册 Plasma 会话并把默认会话设为 `plasma`；它会预配置 SDDM 的 package/theme/Wayland defaults，但不会因此自动启用 SDDM。候选 configuration 应移除 GNOME desktop、显式保持单一 display manager，再检查 file chooser、screen sharing、secret portal 与默认应用。
 - **适合谁 / 建议：** 喜欢传统 panel/taskbar、GUI 设置和窗口规则，希望开箱完整而不是自己拼 bar/launcher 的人。排在 niri 后，是因为它引入的是整套 DE，而非一个小会话。
 - **经验信号：** NixOS 讨论里既有“GNOME/Plasma 完整省心”，也有“二者声明式管理不如文本配置 WM 顺手”的报告；把它理解为配置模型取舍，不应推导为 Plasma 不可靠。[NixOS Discourse：No love for GNOME?](https://discourse.nixos.org/t/no-love-for-gnome/73226)
 
@@ -355,7 +361,7 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 - **范式与强项：** 横向无限列的 scrollable tiling；窗口不会因新窗口加入而被不断压缩，各显示器有独立动态工作区，心智模型比树状平铺更接近 GNOME 工作区。[niri 官方仓库](https://github.com/YaLTeR/niri)
 - **明显缺点：** 不是完整 DE；bar、launcher、通知、idle/lock、polkit agent 仍要选 owner，旧 X11 应用还要核对 `xwayland-satellite`。
 - **NixOS 整合：** 锁定 `programs.niri.enable` 已注册 display-manager session，并为 GNOME/GTK portal、GNOME Keyring、Nautilus file chooser 和 screencast 提供系统侧默认，显著减少手拼成本；外围应用仍须单独声明。
-- **适合谁 / 建议：** 想真正改变窗口组织方式，又不想先承担 Hyprland 全套美化工程的人；作为第一套额外会话试一周。
+- **适合谁 / 建议：** 想真正改变窗口组织方式，又不想先承担 Hyprland 全套美化工程的人；作为第一套 replacement configuration 试一周。
 - **经验信号：** 有用户从复杂手配转为只启用 NixOS niri 模块后获得可用 screen sharing，也有用户因额外堆 portal 导致困惑；信号是“先信模块默认、少加组件”，不是零故障保证。[NixOS Discourse：GNOME portal 与 niri](https://discourse.nixos.org/t/gnome-portal-niri/69280)，[How to install Niri?](https://discourse.nixos.org/t/how-to-install-niri/63975)
 
 ### 12.5 Sway：最清楚的键盘与窗口树课程
@@ -378,9 +384,9 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 
 - **范式与强项：** Rust/Wayland-native 的完整 DE，把 launcher、panel/dock、动态或固定工作区、逐工作区自动平铺、floating 与 window stacking 做成同一套产品体验；比 GNOME 更显式，比手拼 compositor 更完整。[System76：COSMIC](https://system76.com/cosmic)，[COSMIC 桌面基础](https://support.system76.com/support/articles/pop-basics)
 - **明显缺点：** 生态、设置覆盖和跨发行版经验都比 GNOME/Plasma 年轻；当前 NixOS 没有高层声明式 COSMIC settings options，用户设置写入 `~/.config/cosmic/` 的 RON 状态。[NixOS Wiki：COSMIC](https://wiki.nixos.org/wiki/COSMIC)
-- **NixOS 整合：** 锁定 `services.desktopManager.cosmic.enable` 是整套系统模块，不是轻量 session：它加入 COSMIC/GTK portal、polkit、rtkit、accounts-daemon、UPower、GeoClue，并默认启用 NetworkManager/Bluetooth；必须逐项审查与现有 GNOME owner 的合并效果。
-- **适合谁 / 建议：** 想要自动平铺但不想自己选 bar/launcher/setting daemon 的人。当前排在 Plasma 之后作为预览，不作为唯一恢复桌面。
-- **经验信号：** 近期 NixOS 用户既有日用报告，也有初始设置、键盘布局和多 portal 并存问题；样本说明它已经可试，但仍应采用“一套额外会话 + 完整 smoke”心态。[NixOS Discourse：COSMIC 初始设置案例](https://discourse.nixos.org/t/cosmic-wont-let-me-get-past-the-initial-setup/77095)，[portal discovery 冲突](https://discourse.nixos.org/t/hyprland-home-manager-module-breaks-portal-discovery-for-other-desktop-environments/78042)
+- **NixOS 整合：** 锁定 `services.desktopManager.cosmic.enable` 是整套系统模块，不是轻量 session：它加入 COSMIC/GTK portal、polkit、rtkit、accounts-daemon、UPower、GeoClue，并默认启用 NetworkManager/Bluetooth；候选 configuration 必须移除 GNOME desktop，并逐项审查它对现有非桌面系统 owner 的影响。
+- **适合谁 / 建议：** 想要自动平铺但不想自己选 bar/launcher/setting daemon 的人。当前排在 Plasma 之后作为预览；首次 `test` 的恢复入口仍是当前默认 GNOME generation，候选提升后才是上一代 GNOME generation。
+- **经验信号：** 近期 NixOS 用户既有日用报告，也有初始设置、键盘布局和多 portal 并存问题；样本说明它已经可试，但更适合“单桌面 candidate configuration + 完整 smoke”。[NixOS Discourse：COSMIC 初始设置案例](https://discourse.nixos.org/t/cosmic-wont-let-me-get-past-the-initial-setup/77095)，[portal discovery 冲突](https://discourse.nixos.org/t/hyprland-home-manager-module-breaks-portal-discovery-for-other-desktop-environments/78042)
 
 ### 12.8 Xfce：有条件保留，不作为 Wayland-first 首选
 
@@ -392,4 +398,4 @@ GPU/Vulkan、VRR/HDR、fractional scaling、多显示器、摄像头、麦克风
 
 ### 12.9 每个候选都用同一张验收表
 
-只在一个候选通过以下 smoke 后才讨论默认切换：登录/注销；锁屏/解锁；睡眠/唤醒；多显示器插拔与缩放；键盘布局和输入法；文件选择；浏览器 screen sharing；通知；secret/keyring；音频输入输出；截图录屏；XWayland 应用；default app/URI；polkit 提权提示。失败时先回 GNOME，保留失败证据；不要靠全局增加 portal、关闭安全边界或同时安装另一套组件来“碰运气修好”。
+只在一个候选通过以下 smoke 后才把它提升为默认启动 generation：登录/注销；锁屏/解锁；睡眠/唤醒；多显示器插拔与缩放；键盘布局和输入法；文件选择；浏览器 screen sharing；通知；secret/keyring；音频输入输出；截图录屏；XWayland 应用；default app/URI；polkit 提权提示。`test` 阶段失败时 reboot 回当前默认 GNOME generation；候选提升后失败时，才从仍有启动项的上一代 GNOME generation 启动或 rollback。两种情况都应保留失败证据；不要靠全局增加 portal、关闭安全边界或同时安装另一套组件来“碰运气修好”。
