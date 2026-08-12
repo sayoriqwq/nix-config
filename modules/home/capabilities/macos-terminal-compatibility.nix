@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../common/terminal-theme.nix
     ../common/state-paths.nix
     ../common/shell/zsh.nix
     ../common/cli/zoxide/zsh.nix

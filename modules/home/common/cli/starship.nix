@@ -1,5 +1,8 @@
-{ lib, ... }:
+{ lib, terminalTheme, ... }:
 
+let
+  inherit (terminalTheme.tokens) intent text;
+in
 {
   programs.starship = {
     enable = true;
@@ -13,28 +16,28 @@
         truncation_length = 3;
         truncation_symbol = "…/";
         truncate_to_repo = false;
-        style = "#64B5F6";
-        before_repo_root_style = "#BDBDBD";
-        repo_root_style = "#64B5F6";
+        style = intent.info;
+        before_repo_root_style = text.subtle;
+        repo_root_style = intent.info;
         format = "[$read_only]($read_only_style)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style) ";
         read_only = " 🔒";
-        read_only_style = "#CF6679";
+        read_only_style = intent.danger;
       };
 
       character = {
-        success_symbol = "[❯](#A291B5)";
-        error_symbol = "[❯](#CF6679)";
-        vimcmd_symbol = "[❮](#81C784)";
+        success_symbol = "[❯](${intent.accent})";
+        error_symbol = "[❯](${intent.danger})";
+        vimcmd_symbol = "[❮](${intent.success})";
       };
 
       git_branch = {
         format = "[$branch]($style)";
-        style = "#A291B5";
+        style = intent.accent;
       };
 
       git_status = {
-        format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](#D4A373) ($ahead_behind$stashed)]($style)";
-        style = "#76C1E1";
+        format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](${intent.warning}) ($ahead_behind$stashed)]($style)";
+        style = intent.structure;
         conflicted = "!";
         untracked = "?";
         modified = "*";
@@ -46,17 +49,17 @@
 
       git_state = {
         format = "\\([$state( $progress_current/$progress_total)]($style)\\) ";
-        style = "#454545";
+        style = text.faint;
       };
 
       cmd_duration = {
         format = "[$duration]($style) ";
-        style = "#D4A373";
+        style = intent.warning;
       };
 
       python = {
         format = "[$virtualenv]($style) ";
-        style = "#454545";
+        style = text.faint;
         detect_extensions = [ ];
         detect_files = [ ];
       };

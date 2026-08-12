@@ -2,13 +2,14 @@
   config,
   lib,
   pkgs,
+  terminalTheme,
   ...
 }:
 
 let
   appearance = import ../appearance.nix;
   keybindings = import ../keybindings.nix { inherit lib; };
-  theme = import ../themes/sayoriqwq-obsidian.nix;
+  theme = terminalTheme.terminal;
 in
 {
   programs.wezterm = {
@@ -19,7 +20,7 @@ in
     settings = {
       automatically_reload_config = true;
       check_for_updates = false;
-      color_scheme = theme.name;
+      color_scheme = terminalTheme.id;
       default_prog = [
         (lib.getExe config.programs.zsh.package)
         "-l"
@@ -35,7 +36,7 @@ in
       window_decorations = "RESIZE";
     };
 
-    colorSchemes.${theme.name} = {
+    colorSchemes.${terminalTheme.id} = {
       inherit (theme) ansi brights;
       inherit (theme) background foreground;
       cursor_bg = theme.cursor;

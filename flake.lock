@@ -403,6 +403,7 @@
         "nixpkgs-darwin": "nixpkgs-darwin",
         "raycast-source": "raycast-source",
         "sops-nix": "sops-nix",
+        "yume-design": "yume-design",
         "zed": "zed"
       }
     },
@@ -523,6 +524,23 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "yume-design": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786545517,
+        "narHash": "sha256-8gR1Rg5QQTfevIOosGNG1PyollUgY2/zp5JCJJDMI3o=",
+        "owner": "sayoriqwq",
+        "repo": "yume-design",
+        "rev": "047c1f44518ed353b8f5d821fc1f3f347ded9206",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sayoriqwq",
+        "repo": "yume-design",
+        "rev": "047c1f44518ed353b8f5d821fc1f3f347ded9206",
         "type": "github"
       }
     },
