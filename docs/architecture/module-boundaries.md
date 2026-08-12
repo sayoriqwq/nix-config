@@ -73,6 +73,17 @@ machine name 与 NixOS firewall 的 UDP 41641 声明增量；运行中的 tailsc
 维护 overlay iptables chains。登录、MagicDNS、Grants、SSH alias 和 vendor state 内容不进入
 能力声明，server 不组合该 seam。
 
+Clash Verge Rev 的跨层 seam 位于 `modules/capabilities/clash-verge-rev/`。Darwin adapter
+继续只拥有既有 Homebrew cask；NixOS adapter 是 Linux package 与 systemd Service Mode 的
+唯一所有者，通过窄、精确锁定的 package source seam 提供 2.5.2，而不改变 Linux 根
+`nixpkgs` cadence。Home Manager attachment 只记录可写 profile/state path，不重复安装
+package。NixOS adapter 声明 root service、专用 `clash-verge` socket group 并只把已确认的
+交互用户 `sayori` 加入该组；`tunMode = false`，因此不创建 root-owned GUI capability wrapper，
+应用内 TUN 留给绑定 exact commit 的人工关卡，由维护者在 GUI 中开关并通过声明式 service 验证。该 seam 不声明
+firewall、Tailscale、SSH、DNS、route、network interface 或 system proxy，server 不组合。
+不得恢复 GUI 的 DEB/RPM installer sidecar、写入 mutable `/usr/bin` 或
+`/etc/systemd/system`，也不得用 activation script 绕过 NixOS module。
+
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
 ## 4. Import 方向

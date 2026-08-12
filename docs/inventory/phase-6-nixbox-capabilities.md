@@ -38,12 +38,35 @@ Issue [#128](https://github.com/sayoriqwq/nix-config/issues/128) 的后续声明
 | Ghostty | Home Manager capability 管 Linux package、Maple Mono NF-CN 字体包与稳定配置 | 用户 fontconfig 发现字体；无 service/firewall | window、session 与登录态保持可写 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
-| Clash Verge Rev | Home Manager 管 Linux package | 不启用 service、TUN、system proxy 或额外端口 | profiles、配置与日志保持可写 |
+| Clash Verge Rev | NixOS adapter 是 Linux package 的唯一所有者；Home Manager 只记录状态路径 | Issue #157 通过窄 package seam 固定 2.5.2，声明 root systemd Service Mode 与专用 `clash-verge` socket group；`tunMode = false`、`autoStart = false`，不创建 GUI capability wrapper，也不增加端口或其他网络声明 | profiles、配置与日志保持可写；应用内 TUN、system proxy、DNS 与 route 变化只允许在绑定 exact commit 的人工关卡验证 |
 | Termius | Home Manager 管 Linux package | 无 service/firewall | 登录、连接、key 与 Electron user data 保持可写，secret 不进入 Git |
 
 `nil`/`nixd` 是 Issue #122 增加的声明式 package ownership。本次基于最新 `main`
 刷新的 build/evaluation 证据记录在对应 Draft PR；没有对真实 nixbox activation。
 下文 Phase 6 的历史 generation 与运行态证据不应被解释为 nixbox 已经运行本增量。
+
+Issue [#157](https://github.com/sayoriqwq/nix-config/issues/157) 把 Clash Verge Rev 的待激活
+声明从 Phase 6 历史运行态使用的 2.4.7 收敛到 2.5.2。目标 package expression 来自窄、精确
+锁定的 source seam，并继续使用 Linux release package set 构建；根 `nixpkgs`、Home Manager
+release、macbook Homebrew cask 与 server composition 均不随此应用升级。NixOS adapter 通过
+`programs.clash-verge` 同时承担 package 和 Service Mode 所有权，Home Manager 已退出
+`home.packages`，只保留 `~/.local/share/io.github.clash-verge-rev.clash-verge-rev` 的可变
+状态合同。
+
+该声明启用由 root 运行的 `clash-verge-service`，socket access 收窄到专用
+`clash-verge` group，并只把已确认的 nixbox 交互用户 `sayori` 加入。`tunMode = false` 明确
+禁止额外的 root-owned GUI capability wrapper，避免与 root service 并行的第二条特权路径；
+未来需要的应用内 TUN 将由维护者通过 GUI 使用声明式 service，并在独立关卡中开启、关闭和
+检查残留。`autoStart = false`，不会额外声明 GUI 自动启动。
+
+Issue #157 不增加 firewall、Tailscale、MagicDNS、SSH、DNS、route、network interface、
+system proxy 或 stateVersion 声明，也不采用 GUI 的 DEB/RPM installer sidecar 写入
+`/usr/bin` 或 `/etc/systemd/system`。2.5.2 package、root service、专用 group 与上述边界目前
+都只是仓库声明，尚未在真实 nixbox activation；不得用下文 2026-07-30 的 Phase 6 验收为其
+背书。首次 activation、service/socket/hardening 核验、GUI TUN 开关与无残留检查、Clash
+off/on × Tailscale/SSH/tmux 真人矩阵，以及后续 reboot/persistent generation 验证，都必须
+绑定 Draft PR 的 exact commit、目标机器、当前执行窗口与已确认 rollback generation，
+逐项取得维护者批准。
 
 LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5353 53317 ]`。`22` 和 `5353` 是既有 SSH/Avahi 基线；本阶段唯一新增值是两个协议的 `53317`。
 

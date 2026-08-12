@@ -43,6 +43,23 @@
         "type": "github"
       }
     },
+    "clash-verge-rev-package-source": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784603580,
+        "narHash": "sha256-Rjj4YdWJE/G9WHMJ4u4oI0fq6wkyxpy1FO0U3Zo6p6M=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d9e5fe493950fb219c0e7ccd2c0430a3babd77a6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d9e5fe493950fb219c0e7ccd2c0430a3babd77a6",
+        "type": "github"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1769737823,
@@ -393,6 +410,7 @@
     "root": {
       "inputs": {
         "ax": "ax",
+        "clash-verge-rev-package-source": "clash-verge-rev-package-source",
         "disko": "disko",
         "herdr": "herdr",
         "home-manager": "home-manager",
