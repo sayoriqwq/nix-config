@@ -3,6 +3,10 @@
 本文是 `macbook` 的总体软件恢复入口。它恢复声明和应用来源，不是用户数据备份手册。
 执行前先阅读 [`phase-4-macos-software-ownership.md`](../inventory/phase-4-macos-software-ownership.md)。
 
+`nix-config` 是唯一活动配置与恢复入口。旧 dotfiles GitHub 仓库已经归档，默认 Chezmoi
+source `~/.local/share/chezmoi` 已从活动位置移除；不得为恢复环境而重建该 source、恢复旧
+dotfiles 工作树或执行 `chezmoi apply`。历史实现只通过不可变 GitHub commit 取证，不参与恢复。
+
 ## 1. 恢复目标与禁止事项
 
 恢复目标是让一台兼容 macOS 工作站重新获得：
@@ -304,7 +308,8 @@ Codex 进程继承的 PATH 代替。
 - macOS 中文输入消费锁定 Darwin nixpkgs 的 `pkgs.rime-ice` 2026.06.30，经薄 data view 合入
   本地 overlay 并递归投影静态 leaves；Fcitx5.app、plugin、输入源、可写配置与全部 GUI/runtime
   偏好仍由各自 owner 管理，且已分别记录人工 activation、deploy 与真实输入 smoke；
-- `~/.local/share/chezmoi` 不再 apply，旧 dotfiles 不再参与配置生成；
+- 默认 Chezmoi source `~/.local/share/chezmoi` 保持不存在，不被恢复，也不执行
+  `chezmoi apply`；旧 dotfiles GitHub 归档只供历史取证，不参与配置生成或恢复；
 - OrbStack、编辑器、浏览器、Setapp 数据以及 AI CLI 的状态/凭据没有被 activation
   覆盖；数据库由各消费方自己的恢复流程处理。
 

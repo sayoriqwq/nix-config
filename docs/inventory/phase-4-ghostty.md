@@ -9,7 +9,8 @@
 
 - 采集日期：2026-07-22。
 - 当前应用：`/Applications/Ghostty.app`，Ghostty `1.3.1`，不是 Homebrew 已登记 cask。
-- chezmoi source：`~/.local/share/chezmoi/dot_config/ghostty/`。
+- 当时的 chezmoi source：`~/.local/share/chezmoi/dot_config/ghostty/`。这是 2026-07-22
+  采集到的历史路径，不是当前配置或恢复入口。
 - live 配置：`~/.config/ghostty/config` 与 `~/.config/ghostty/themes/sayoriqwq-obsidian`。
 - macOS 专属目录只发现空文件 `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty`，未发现第二份非空配置或主题覆盖。
 - `ghostty +validate-config` 对迁移前 live 配置返回成功。
@@ -37,9 +38,15 @@ Home Manager 设置 `programs.ghostty.package = null`，因此不会安装第二
 
 ## 3. chezmoi handoff
 
-dotfiles 仓库在独立分支 `codex/phase-4-ghostty-handoff` 的提交 `2186b8e84a680abb1243dd38a826ea27e2a4faaa` 中删除两个 Ghostty source 文件，并同步更新所有权与终端文档。以该仓库为 source 运行 `chezmoi managed`，结果不再包含 Ghostty；过程中没有执行 `chezmoi apply`。
+dotfiles 仓库当时在独立分支 `codex/phase-4-ghostty-handoff` 的
+[提交 `2186b8e84a680abb1243dd38a826ea27e2a4faaa`](https://github.com/sayoriqwq/dotfiles/commit/2186b8e84a680abb1243dd38a826ea27e2a4faaa)
+中删除两个 Ghostty source 文件，并同步更新所有权与终端文档。迁移时以该仓库为 source
+运行 `chezmoi managed`，结果不再包含 Ghostty；过程中没有执行 `chezmoi apply`。该提交是
+不可变历史证据，已归档的 dotfiles 仓库不再是可执行 source。
 
-在该 handoff 合并并同步到本机 chezmoi source 之前，不得对 Ghostty 路径运行 `chezmoi apply`、`re-add` 或 `add`。
+在该 handoff 合并并同步到本机 chezmoi source 之前，当时的约束是不得对 Ghostty 路径运行
+`chezmoi apply`、`re-add` 或 `add`。这项叙述只解释迁移顺序，不授权现在恢复 Chezmoi source
+或重放任何命令。
 
 ## 4. 生成配置比较与离线验证
 
@@ -78,9 +85,11 @@ rg 'quick[_-]terminal|toggle_quick_terminal' <generated-config> <generated-theme
 
 ## 5. 人工 activation 清单
 
-以下步骤必须由维护者审阅两个仓库的 diff 后手动执行：
+以下是 Issue #22 当次迁移的人工清单，仅保留为历史证据，不是当前操作手册，也不得在已归档
+的 dotfiles 仓库上重放：
 
-1. 合并 dotfiles handoff，并只用 Git fast-forward 同步本机 chezmoi source；不要运行全局 `chezmoi apply`。
+1. 当时要求合并 dotfiles handoff，并只用 Git fast-forward 同步本机 chezmoi source；不运行
+   全局 `chezmoi apply`。
 2. 确认 `chezmoi managed | rg -i ghostty` 无输出，且私有备份 hash 仍匹配。
 3. 退出 Ghostty；把现有 live config/theme 移入本次备份的 `displaced/`，避免 Home Manager 与 regular file 冲突。
 4. 把当前非 Homebrew 的 `/Applications/Ghostty.app` 移入备份位置，保留原始 app bundle 作为 cask 安装失败时的回退副本。
@@ -91,8 +100,13 @@ rg 'quick[_-]terminal|toggle_quick_terminal' <generated-config> <generated-theme
 
 ## 6. 回滚
 
+以下回滚设计只适用于 Issue #22 当次 handoff。当前恢复必须以 `nix-config` 的现行 runbook
+为入口，不得恢复默认 Chezmoi source 或对归档仓库执行 `chezmoi apply`：
+
 1. 使用上一代 nix-darwin generation 回滚系统与 Home Manager 配置。
 2. 若 cask 应用需要回退，先卸载本次 Ghostty cask，再从私有备份恢复原始 `Ghostty.app`；Homebrew 应用回滚不由 generation 自动完成。
 3. 从 `/Users/sayori/ghostty-phase4.CQpxrz/live/` 恢复原 config/theme，并用 Ghostty CLI 校验。
-4. 在 dotfiles 仓库 revert handoff 提交并用 Git fast-forward 同步本机 chezmoi source；确认所有权恢复后，才可对精确 Ghostty 目标执行 chezmoi 操作。
+4. 当时的设计是在 dotfiles 仓库 revert handoff 提交并用 Git fast-forward 同步本机 chezmoi
+   source；确认所有权恢复后，才可对精确 Ghostty 目标执行 chezmoi 操作。该历史回滚路径现已
+   退役，不得重放。
 5. 不删除或覆盖 Ghostty history、session、登录态和其他可变数据。

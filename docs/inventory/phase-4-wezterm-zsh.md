@@ -23,7 +23,8 @@ WezTerm 明确保留 `/bin/zsh -l`，不迁移到 Fish。Ghostty + Zsh 与 WezTe
 
 - 采集日期：2026-07-22。
 - 当前应用：Homebrew cask `wezterm`，CLI 版本 `wezterm 20240203-110809-5046fc22`。
-- live WezTerm 配置：`~/.wezterm.lua`；chezmoi source：`dot_wezterm.lua.tmpl`。
+- live WezTerm 配置：`~/.wezterm.lua`；当时的 chezmoi source：`dot_wezterm.lua.tmpl`。后者是
+  2026-07-22 的历史证据，不是当前配置或恢复入口。
 - live Zsh 配置：`~/.zshrc`、`~/.zprofile` 与 `~/.zshenv`。`dot_zshrc` 仍存在于 dotfiles 仓库，但已被 `.chezmoiignore` 排除，不再部署。
 - WezTerm source 通过 chezmoi 模板读取共享 YAML 主题；live 文件是当时的渲染结果。首次迁移直接固化已确认的 live 颜色，不重构共享主题系统。
 - live `.zshrc` 相比被忽略的 source 多出 Antigravity PATH；`.zprofile` 还加载 OrbStack，`.zshenv` 加载 Cargo 环境。Home Manager 目标以 live 行为为证据，并用已有 Home Manager integrations 替代可声明部分。
@@ -56,15 +57,19 @@ Zsh 继续使用可写的 `~/.zhistory`，并保留 Starship、mise、autosugges
 
 ## 4. dotfiles handoff
 
-dotfiles handoff 使用独立分支 `codex/phase-4-wezterm-zsh-handoff`：
+dotfiles handoff 当时使用独立分支 `codex/phase-4-wezterm-zsh-handoff`，最终证据固定在
+[提交 `b830a4634d77489b936886fadaf732a831531e47`](https://github.com/sayoriqwq/dotfiles/commit/b830a4634d77489b936886fadaf732a831531e47)：
 
 - 删除 `dot_wezterm.lua.tmpl`，使 chezmoi 不再拥有 `~/.wezterm.lua`；
 - 删除已被忽略的 `dot_zshrc` 参考副本，避免形成过期的第二真相来源；
 - 更新 README、Chezmoi 指南与终端架构文档；
-- 使用 `chezmoi --source /Users/sayori/Desktop/dotfiles managed` 验证 WezTerm/Zsh 目标均不再出现；
+- 当时使用 `chezmoi --source /Users/sayori/Desktop/dotfiles managed` 验证 WezTerm/Zsh 目标均
+  不再出现；该绝对路径与命令只记录迁移证据，不是当前可执行入口；
 - 未执行 `chezmoi apply`，未修改任何 live 配置。
 
-handoff 合并并以 Git fast-forward 同步到本机 chezmoi source 前，不得对这些目标运行 `chezmoi add`、`re-add` 或 `apply`。
+handoff 合并并以 Git fast-forward 同步到本机 chezmoi source 前，当时的约束是不得对这些
+目标运行 `chezmoi add`、`re-add` 或 `apply`。已归档的 dotfiles 仓库不再是 source；不得恢复
+默认 Chezmoi source 或重放上述命令。
 
 ## 5. 离线验证结果
 
@@ -100,8 +105,11 @@ nix build .#darwinConfigurations.macbook.system --no-link
 
 ## 6. 人工 activation 清单
 
+以下是 Issue #23 当次迁移的人工清单，仅保留为历史证据，不是当前操作手册，也不得在已归档
+的 dotfiles 仓库上重放：
+
 1. 审阅并合并 nix-config 与 dotfiles 两个 Draft PR，记录当次 nix-config commit 和上一代 nix-darwin generation。
-2. 只用 Git fast-forward 同步本机 chezmoi source；不要运行全局 `chezmoi apply`。
+2. 当时要求只用 Git fast-forward 同步本机 chezmoi source；不运行全局 `chezmoi apply`。
 3. 确认 `chezmoi managed | rg 'wezterm|zshrc|zprofile|zshenv'` 无输出，并复核私有备份 hash。
 4. 退出 WezTerm；把现有 `~/.wezterm.lua`、`~/.zshrc`、`~/.zprofile` 与 `~/.zshenv` 移入私有备份的 `displaced/`，避免 Home Manager 与 regular file 冲突。不要移动 `~/.zhistory`。
 5. 在当前 PR/Issue 给出这一次 activation 的明确批准后，由维护者执行：
@@ -118,8 +126,13 @@ nix build .#darwinConfigurations.macbook.system --no-link
 
 ## 7. 回滚
 
+以下回滚设计只适用于 Issue #23 当次 handoff。当前恢复必须以 `nix-config` 的现行 runbook
+为入口，不得恢复默认 Chezmoi source 或对归档仓库执行 `chezmoi apply`：
+
 1. 在仍打开的终端中执行 `sudo -H /run/current-system/sw/bin/darwin-rebuild --rollback`，恢复上一代系统与 Home Manager generation。
 2. 从 `/Users/sayori/wezterm-zsh-phase4.wCdeuL/live/` 恢复四个原始 live 文件，并复核 SHA-256。
-3. 在 dotfiles 仓库 revert handoff，使用 Git fast-forward 同步本机 chezmoi source；确认唯一所有者恢复后，才可对精确目标执行 chezmoi 操作。
+3. 当时的设计是在 dotfiles 仓库 revert handoff，使用 Git fast-forward 同步本机 chezmoi
+   source；确认唯一所有者恢复后，才可对精确目标执行 chezmoi 操作。该历史回滚路径现已
+   退役，不得重放。
 4. Homebrew 应用不会随 generation 自动卸载；本次无需卸载 WezTerm。禁止运行 cleanup 或 zap。
 5. 不删除或覆盖 `.zhistory`、Atuin 数据、窗口状态、登录态或其他可变数据。

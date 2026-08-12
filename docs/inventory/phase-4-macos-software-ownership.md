@@ -24,7 +24,9 @@
    数据边界。
 4. 一个安装目标只有一个所有者。应用 package 与其账号、数据库、容器、profile、
    workspace 等可变状态是不同对象。
-5. 旧 dotfiles 仓库只作为冻结历史；`nix-config` 是唯一继续维护的配置源。
+5. 旧 dotfiles 仓库已归档，只能通过
+   [退役提交 `08874796b76fe4cce15baaef2a2ee33eeced3c44`](https://github.com/sayoriqwq/dotfiles/commit/08874796b76fe4cce15baaef2a2ee33eeced3c44)
+   等不可变 GitHub 证据读取历史；`nix-config` 是唯一活动配置与恢复入口。
 
 ## 2. 最终来源概览
 
@@ -332,8 +334,9 @@ Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动
 
 - Atuin 稳定配置与空 `.hushlogin` 已交给 Home Manager；Atuin key 只声明本机路径，
   key、history、records、session 与数据库内容不入库。
-- Chezmoi 已卸载。`~/.local/share/chezmoi` 与旧 dotfiles Git 仓库只作为冻结历史，
-  不再 apply、不再修改，也不再作为配置事实来源。
+- Chezmoi 已卸载，默认 source `~/.local/share/chezmoi` 已从活动位置移除；不得重建该目录、
+  恢复旧 source 或执行 `chezmoi apply`。旧 dotfiles GitHub 仓库仅保留归档历史，不再修改，
+  也不再作为配置事实或恢复来源；当前入口只有 `nix-config`。
 - cmux、`HOME.md`、rcm、memo、obsidian-cli 和全部旧 Impeccable skills 不迁移。
 - 应用设置如 Raycast、Bartender、CleanShot X、编辑器 live settings 通过各自可写状态
   或定期人工回流维护，不伪装成 Nix 可回滚数据。
@@ -348,7 +351,7 @@ Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时；#124 已卸载并备份旧 Docker Desktop socket/vmnetd helper |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
-| 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置源；旧仓库冻结归档 |
+| 旧 dotfiles/Chezmoi 仍可能被误认为活动配置源 | `nix-config` 是唯一活动配置与恢复入口；旧仓库已归档，默认 Chezmoi source 已移除且不得恢复/apply |
 
 已退役的软件包括 AltTab、Battery Buddy、cmux、Docker Desktop、旧 Google Antigravity GUI、
 Itsycal、SideNotes、The Unarchiver、Typeless、Typora、旧 VS Code、Zed Preview、
