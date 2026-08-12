@@ -14,6 +14,7 @@
     ../../modules/capabilities/clash-verge-rev/nixos.nix
     ../../modules/capabilities/termius/nixos.nix
     ../../modules/capabilities/localsend/nixos.nix
+    ../../modules/capabilities/stable-workstation-access/nixos.nix
     ../../modules/capabilities/secret-deployment/nixos.nix
   ];
 

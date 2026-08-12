@@ -147,6 +147,14 @@
         pkgs = macbookPkgs;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      stableWorkstationAccessPolicy = import ./tests/stable-workstation-access/policy.nix {
+        inherit (darwinPkgs) lib;
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        pkgs = darwinPkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+        source = ./.;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -265,6 +273,7 @@
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
           macbook-rime-data-layout = macbookRimeDataLayout;
+          stable-workstation-access-policy = stableWorkstationAccessPolicy;
         };
         x86_64-linux = {
           server-recovery-network = serverRecoveryNetworkTest;
