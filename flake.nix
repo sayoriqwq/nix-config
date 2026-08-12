@@ -55,6 +55,14 @@
     # explicitly approved workstation capabilities.
     # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
     ax.url = "github:yusukebe/ax";
+
+    # Issue #157: pin the reviewed Nixpkgs leaf that contains the 2.5.2
+    # Clash Verge Rev package expression. It is called with the Linux release
+    # package set below; this source is not imported as another package set.
+    clash-verge-rev-package-source = {
+      url = "github:NixOS/nixpkgs/d9e5fe493950fb219c0e7ccd2c0430a3babd77a6";
+      flake = false;
+    };
   };
 
   outputs =
@@ -76,6 +84,11 @@
         import (if system == "aarch64-darwin" then nixpkgs-darwin else nixpkgs) {
           inherit system;
         };
+      linuxPkgs = packagesFor "x86_64-linux";
+      clashVergeRevPackage = import ./packages/clash-verge-rev {
+        pkgs = linuxPkgs;
+        source = inputs.clash-verge-rev-package-source;
+      };
       serverModules = [
         ./hosts/server
         ./modules/nixos/base.nix
@@ -157,6 +170,16 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
+      clashVergeRevPolicy = import ./tests/clash-verge-rev/policy.nix {
+        inherit username;
+        inherit (nixboxPkgs) lib;
+        macbookConfiguration = self.darwinConfigurations.macbook;
+        nixboxConfiguration = self.nixosConfigurations.nixbox;
+        packageSource = inputs.clash-verge-rev-package-source;
+        pkgs = nixboxPkgs;
+        serverConfiguration = self.nixosConfigurations.server;
+        source = ./.;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -172,7 +195,12 @@
 
       nixosConfigurations.nixbox = nixpkgs.lib.nixosSystem {
         specialArgs = {
-          inherit inputs self username;
+          inherit
+            clashVergeRevPackage
+            inputs
+            self
+            username
+            ;
         };
         modules = [
           ./hosts/nixbox
@@ -189,13 +217,14 @@
         modules = serverModules;
       };
 
-      # Explicit package outputs give CI and future hosts a stable validation
-      # target without importing Zed's internal Flake modules.
+      # Explicit package outputs give CI and future hosts stable validation
+      # targets for the narrow Clash seam and Zed's upstream package output.
       packages = {
         aarch64-darwin = {
           zed-nightly = inputs.zed.packages.aarch64-darwin.default;
         };
         x86_64-linux = {
+          clash-verge-rev = clashVergeRevPackage;
           server-recovery-test = serverRecoveryTestRunner;
           zed-nightly = inputs.zed.packages.x86_64-linux.default;
         };
@@ -278,6 +307,7 @@
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
         };
         x86_64-linux = {
+          clash-verge-rev-policy = clashVergeRevPolicy;
           nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
             inherit inputs username;
             macbookConfiguration = self.darwinConfigurations.macbook;
