@@ -29,7 +29,7 @@
 | 终端文件工作流 | 是 | 是 | 是 | Yazi；server 用于只读浏览与用户可写文件操作，不接管 production 数据。 |
 | Helix | 是 | 是 | 是 | 备用终端编辑器；server 上用于临时记录和获批配置操作，不把生成的 `/etc` 状态当作配置源。 |
 | Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish；共享配置引用 Maple Mono NF-CN，macbook 由 nix-darwin 提供字体，nixbox 由 Ghostty Home Manager capability 与用户 fontconfig 提供，server 不安装。 |
-| Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` language server；live settings 保持可写。 |
+| Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` 与 `nixd` language server；macOS Darwin adapter 让未来启动的 GUI 进程发现 Home Manager profile，live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
