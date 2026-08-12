@@ -143,28 +143,43 @@ Issue #147 Gate A 已用 SHA-256 与签名均验证通过的官方 1.1.2 package
 bundle 的签名完整；原始与 live bundle 的 identity、CDHash、Team ID 及全部共同路径内容一致。
 live 只多出 package postinstall 在 `SharedSupport` 执行 `Squirrel --build` 对应的 `build`、
 `installation.yaml` 与 `user.yaml`；这些是已解释的安装后状态，不得在 bundle 内单独删改或
-重签。该证据只解除 identity blocker，不授权 live backup 或 retirement。
+重签。该证据只解除 identity blocker；Gate B/C 后续分别取得了当前窗口批准。
 
-Gate B 必须先在当前 Issue/PR 独立批准仓库外 backup path、精确命令与执行窗口。backup root
-必须为 `0700`；app archive 与 preference copy 必须为 `0600`。App archive 需保留原 owner、
-mode 与 timestamp 并记录 SHA-256；preference copy 需与源逐字节比较。只有权限、metadata、
-hash 与比较结果全部回读通过，才可请求 Gate C；Gate B 不移动或删除 live target，也不 forget
-receipt。
+2026-08-12 的 Gate B 在仓库外建立
+`~/Library/Application Support/nix-config/rollback/issue-147-squirrel-1.1.2-20260812`。
+backup root 为 `0700`；app archive 与 preference copy 均为 `0600`。App archive 保留原
+numeric owner、mode 与 timestamp，SHA-256 为
+`0ccba1984a065506bd8ae200e1d3d6875eafe50b8110fea68112ab36ca310f45`；preference copy
+与源逐字节一致，SHA-256 均为
+`c8e8ed391c597ae928440f14e4b4d3eaa6e9ffe5f462452f5c397e85f5fdba71`。权限、metadata、
+archive 可读性、hash 与比较结果全部通过后才进入 Gate C；cache 与 receipt 未进入备份。
 
-Gate C 必须另行批准四个 exact targets、精确 mutation、执行窗口与上述 rollback evidence。
-执行前立即对 app、preference 与 cache 三个 filesystem targets 重新 lstat，并把 path、type、
-owner、device、inode 与 ctime 和已批准 token 逐项相等比较；receipt 只通过精确只读
-`pkgutil --pkg-info-plist im.rime.inputmethod.Squirrel` 查询核对 ID、version、volume 与
-install-location。禁止 `pkgutil --files`，也禁止为核对而定位或访问 receipt DB。任一字段漂移、
-新 Squirrel consumer 或 Fcitx baseline 失败都必须停止。全部 gate 通过后才可把 app 移入可恢复
-废纸篓、用 `pkgutil --forget` 忘记 exact receipt、移走 exact preference 并定向删除可重建
-cache。receipt 不得直接修改数据库或从副本写回；恢复只能使用
+Gate C 另行批准了四个 exact targets、精确 mutation、执行窗口与上述 rollback evidence。
+执行前先重新 lstat app、preference 与 cache；每个 filesystem mutation 的紧邻位置又重新
+lstat 对应 source，并把 path、type、owner、device、inode 与 ctime 和已批准 token 逐项相等
+比较；receipt 只通过精确
+只读 `pkgutil --pkg-info-plist im.rime.inputmethod.Squirrel` 核对 ID、version、volume 与
+install-location。未使用 `pkgutil --files`，也未定位或访问 receipt DB。全部 gate 通过后，
+app、preference 与 cache 以原 inode 同卷移动到
+`~/.Trash/Squirrel-retirement-issue-147-20260812` 下的 `Squirrel.app`、
+`im.rime.inputmethod.Squirrel.plist` 与 `im.rime.inputmethod.Squirrel.cache`；receipt
+最后通过 `pkgutil --forget im.rime.inputmethod.Squirrel` 忘记。独立回读确认三个原路径和
+receipt 不存在，Squirrel process 及 enabled/selected source 不存在，Fcitx5 的 zhHans selected
+source、唯一精确进程与签名正常。未修改 input-source registration、kill `cfprefsd` 或调用
+`defaults delete`；preference absence 是本次即时回读事实。执行后已删除未提交 Git 的临时
+helper。
+
+Trash 对象仍存在且 inode 匹配时，filesystem rollback 必须在新的当前窗口批准后按 cache、
+preference、app 的逆序同卷移回原路径；root-owned app 的移动只为该 literal path 使用管理员
+权限，并在每步后重新核验 inode、owner 与 mode。Trash 已不可用时，app 与 preference 只能从
+上述 owner-only backup root 受控恢复并重新验证 identity/metadata；cache 可重建。receipt
+不得直接修改数据库或从副本写回；恢复只能使用
 同版、签名与 digest 均重新验证的官方 installer 作为受控重建入口，但不存在 receipt-only 的
 原状态回滚。installer 会在 `/Library/Input Methods` 重新安装 bundle、注册、启用并选择
 Squirrel，且要求 logout；它可能与从 archive 或废纸篓恢复到 Disabled path 的 bundle 并存。
 因此 receipt 重建必须另开当前窗口 gate，先设计 bundle topology、input-source 回读与额外
-bundle 收口，不能把“installer 成功”称为原现场已恢复。Gate B/C 和真实输入 smoke 完成前，
-不得把 Issue #147 描述为 live retirement 已完成。
+bundle 收口，不能把“installer 成功”称为原现场已恢复。Gate A-C 已证明 live retirement
+完成；Gate D 真人输入 smoke 与人工合并完成前，不得把 Issue #147 整项描述为完成或关闭。
 
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
 INI、用 Store symlink 接管整文件、调用配置 API 或阻塞 activation 审计运行时字段。为保持

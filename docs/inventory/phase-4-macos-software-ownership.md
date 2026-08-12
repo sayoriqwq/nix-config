@@ -8,8 +8,8 @@
   Issue #131 退役该次交接的写入型 helper；2026-08-11，Issue #139 完成中文输入维护边界
   研究，Issue #140 采用静态 data-view 终态并退役 Fcitx runtime provider，Issue #143 完成
   Shift ownership 调整，Issue #145 取代其 fallback 决策，目标是移除用户可见的恢复通道；
-  2026-08-12，Issue #147 启动独立 Squirrel 遗留退役，Gate A 已证明候选 app 身份，live
-  backup、retirement 与真人 smoke 仍等待各自人工关卡
+  2026-08-12，Issue #147 的 Gate A 证明候选 app 身份，Gate B/C 完成 owner-only backup 与
+  四个精确 Squirrel 遗留对象的 live retirement；真人输入 smoke 仍等待 Gate D
 - **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145、#147 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -139,8 +139,24 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
   与 `~/Library/Caches/im.rime.inputmethod.Squirrel` 四个精确对象。Gate A 已用 digest 与签名
   均验证通过的官方 1.1.2 installer 证明候选 app 的签名主体及共同文件与原始 bundle 一致；
   live bundle 仅增加 installer 在 `SharedSupport` 执行 build 产生的 `build`、
-  `installation.yaml` 与 `user.yaml`，不得在 bundle 内单独清理。Gate B/C 完成前四个 live
-  对象仍保持原样；Squirrel 专属 `squirrel.custom.yaml` 不在清理范围；
+  `installation.yaml` 与 `user.yaml`，未在 bundle 内单独清理。2026-08-12 获批的 Gate B
+  在仓库外建立 mode `0700` 的
+  `~/Library/Application Support/nix-config/rollback/issue-147-squirrel-1.1.2-20260812`；
+  mode `0600` 的 app archive SHA-256 为
+  `0ccba1984a065506bd8ae200e1d3d6875eafe50b8110fea68112ab36ca310f45`，preference copy
+  与源逐字节一致，SHA-256 均为
+  `c8e8ed391c597ae928440f14e4b4d3eaa6e9ffe5f462452f5c397e85f5fdba71`；
+- 同一当前窗口获批的 Gate C 在首次 mutation 前重新核验无 Squirrel consumer、input-source
+  与 Fcitx 正向基线，并在每个 filesystem mutation 紧邻前重新核验对应 source token；跨越
+  receipt boundary 前又完整回读三个 destination、consumer、input-source、Fcitx 与 receipt。
+  app、preference 与 cache 随后以原 inode 同卷移动到
+  `~/.Trash/Squirrel-retirement-issue-147-20260812` 下三个精确对象，receipt 最后仅通过
+  `pkgutil --forget im.rime.inputmethod.Squirrel` 忘记。独立回读确认三个原路径不存在、
+  receipt 不存在、Squirrel process 及 enabled/selected source 均不存在，Fcitx5 的 zhHans
+  selected source、唯一精确进程与签名仍正常。未 kill `cfprefsd` 或调用 `defaults delete`，
+  preference absence 是本次回读事实；临时 helper 已删除且未进入 Git。Gate D 真人输入 smoke
+  完成前不得关闭 Issue 或把整项维护称为完成。Squirrel 专属 `squirrel.custom.yaml` 不在
+  清理范围；
 - `~/Library/Rime` 是本次与未来同类 cleanup 的永久 opaque 排除树：不得遍历、列举、读取、
   stat、hash、copy、move 或 delete，也不得用 glob 或猜测路径间接触碰。
 
