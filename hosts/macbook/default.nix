@@ -15,6 +15,7 @@
     ../../modules/capabilities/google-chrome/darwin.nix
     ../../modules/capabilities/clash-verge-rev/darwin.nix
     ../../modules/capabilities/termius/darwin.nix
+    ../../modules/capabilities/zed-editor/darwin.nix
     ../../modules/capabilities/localsend/darwin.nix
     ../../modules/capabilities/secret-deployment/darwin.nix
   ];
@@ -72,7 +73,6 @@
         ../../modules/home/capabilities/macos-development-runtime-extras.nix
         ../../modules/home/capabilities/terminal-file-workflow.nix
         ../../modules/home/capabilities/helix-editor.nix
-        ../../modules/home/capabilities/zed-editor.nix
         ../../modules/home/capabilities/macos-vscode-compatibility.nix
         ../../modules/home/capabilities/ghostty-terminal.nix
         ../../modules/home/capabilities/macos-terminal-compatibility.nix

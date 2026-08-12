@@ -34,12 +34,16 @@ Issue [#128](https://github.com/sayoriqwq/nix-config/issues/128) 的后续声明
 | --- | --- | --- | --- |
 | 常开工作站 | NixOS 管 GDM；Home Manager 管 `sayori` 的 GNOME idle/power 设置 | GDM 不自动 suspend；登录与锁屏会话不因 idle 熄屏或 suspend | 不禁用手动 suspend，不改变合盖或电源键行为 |
 | 可移植 Shell | Home Manager 管 Fish 配置；NixOS 管 package 注册与用户登录 shell | `programs.fish.enable`；`sayori.shell = pkgs.fish` | Fish history 与 universal variables 只声明、不接管 |
-| Zed | Home Manager 管 Nightly package、`z` 快速入口与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
+| Zed | Home Manager 管 Nightly package、`nil`/`nixd` language servers、`z` 快速入口与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
 | Ghostty | Home Manager capability 管 Linux package、Maple Mono NF-CN 字体包与稳定配置 | 用户 fontconfig 发现字体；无 service/firewall | window、session 与登录态保持可写 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
 | Clash Verge Rev | Home Manager 管 Linux package | 不启用 service、TUN、system proxy 或额外端口 | profiles、配置与日志保持可写 |
 | Termius | Home Manager 管 Linux package | 无 service/firewall | 登录、连接、key 与 Electron user data 保持可写，secret 不进入 Git |
+
+`nil`/`nixd` 是 Issue #122 增加的声明式 package ownership。本次基于最新 `main`
+刷新的 build/evaluation 证据记录在对应 Draft PR；没有对真实 nixbox activation。
+下文 Phase 6 的历史 generation 与运行态证据不应被解释为 nixbox 已经运行本增量。
 
 LocalSend 合并后的 NixOS firewall 预期值为 TCP `[ 22 53317 ]`、UDP `[ 5353 53317 ]`。`22` 和 `5353` 是既有 SSH/Avahi 基线；本阶段唯一新增值是两个协议的 `53317`。
 

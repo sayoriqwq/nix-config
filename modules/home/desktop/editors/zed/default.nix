@@ -15,7 +15,10 @@ in
   # flake.lock. The upstream Flake remains a leaf package provider.
   home.packages = [
     inputs.zed.packages.${system}.default
+    # The Nix extension exposes both servers; keep both available so its
+    # default selection does not depend on an undeclared executable.
     pkgs.nil
+    pkgs.nixd
   ];
 
   # Zed is the sole owner of the default editor role. VS Code and Helix remain
