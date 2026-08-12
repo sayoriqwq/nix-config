@@ -114,13 +114,73 @@ semantics 投影，用户目录根节点保持可写。恢复 Fcitx5 时，
 从 [Fcitx5 macOS 官方 installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)
 人工安装 `/Library/Input Methods/Fcitx5.app` 及其 Rime plugin；应用 bundle、plugin payload
 和 macOS 输入源不由 Nix 安装或修改。installer 的精确语义版本若仍无法由 bundle metadata
-证明，应如实记录未知，不用猜测值填补。不要安装、启用、清理或迁移遗留 Squirrel。
+证明，应如实记录未知，不用猜测值填补。data view 中上游随发行提供的 `squirrel.yaml` 是
+Rime 静态兼容内容，必须继续保留；不得为了清理 Squirrel app 删除它。新机恢复不自动安装、
+启用、清理或迁移遗留 Squirrel。
 
 `macbook-rime-data-layout` 中对 `2026.06.30` 的单一静态 policy check 是刻意的
 update-policy gate：Darwin nixpkgs lock 将来提供不同 `pkgs.rime-ice` 版本时，该 check 失败
 表示需要先审阅新版本、package output/data-view、overlay 兼容性与 deploy 需求，不表示 nixpkgs
 channel 本身损坏，也不表示单独的 macbook system build 必然失败。只有在独立获批的依赖更新中
 完成这些审阅后，才同步更新版本 gate；不要为了让 check 继续通过而静默放宽策略。
+
+#### Squirrel 遗留退役与回滚边界
+
+当前 macbook 的 Squirrel 清理只由 Issue #147 承载，并与 Fcitx/Rime 声明、activation 和
+deploy 分离。只允许处理四个精确对象：
+
+- `/Applications/Disabled Input Methods/Squirrel.app`；
+- receipt `im.rime.inputmethod.Squirrel`；
+- `~/Library/Preferences/im.rime.inputmethod.Squirrel.plist`；
+- `~/Library/Caches/im.rime.inputmethod.Squirrel`。
+
+`~/Library/Rime` 是永久 opaque 排除树；preflight、backup、retirement、rollback 与验收都不得
+对它或其后代执行遍历、列举、读取、stat、hash、copy、move 或 delete，也不得扩展到
+`squirrel.custom.yaml`、Fcitx active tree 或其他猜测路径。不得修改 input-source registration；
+只允许 Issue #147 明确列出的 input-source/Fcitx baseline 与 retirement 后只读回读。
+
+Issue #147 Gate A 已用 SHA-256 与签名均验证通过的官方 1.1.2 package 比较候选 app。官方原始
+bundle 的签名完整；原始与 live bundle 的 identity、CDHash、Team ID 及全部共同路径内容一致。
+live 只多出 package postinstall 在 `SharedSupport` 执行 `Squirrel --build` 对应的 `build`、
+`installation.yaml` 与 `user.yaml`；这些是已解释的安装后状态，不得在 bundle 内单独删改或
+重签。该证据只解除 identity blocker；Gate B/C 后续分别取得了当前窗口批准。
+
+2026-08-12 的 Gate B 在仓库外建立
+`~/Library/Application Support/nix-config/rollback/issue-147-squirrel-1.1.2-20260812`。
+backup root 为 `0700`；app archive 与 preference copy 均为 `0600`。App archive 保留原
+numeric owner、mode 与 timestamp，SHA-256 为
+`0ccba1984a065506bd8ae200e1d3d6875eafe50b8110fea68112ab36ca310f45`；preference copy
+与源逐字节一致，SHA-256 均为
+`c8e8ed391c597ae928440f14e4b4d3eaa6e9ffe5f462452f5c397e85f5fdba71`。权限、metadata、
+archive 可读性、hash 与比较结果全部通过后才进入 Gate C；cache 与 receipt 未进入备份。
+
+Gate C 另行批准了四个 exact targets、精确 mutation、执行窗口与上述 rollback evidence。
+执行前先重新 lstat app、preference 与 cache；每个 filesystem mutation 的紧邻位置又重新
+lstat 对应 source，并把 path、type、owner、device、inode 与 ctime 和已批准 token 逐项相等
+比较；receipt 只通过精确
+只读 `pkgutil --pkg-info-plist im.rime.inputmethod.Squirrel` 核对 ID、version、volume 与
+install-location。未使用 `pkgutil --files`，也未定位或访问 receipt DB。全部 gate 通过后，
+app、preference 与 cache 以原 inode 同卷移动到
+`~/.Trash/Squirrel-retirement-issue-147-20260812` 下的 `Squirrel.app`、
+`im.rime.inputmethod.Squirrel.plist` 与 `im.rime.inputmethod.Squirrel.cache`；receipt
+最后通过 `pkgutil --forget im.rime.inputmethod.Squirrel` 忘记。独立回读确认三个原路径和
+receipt 不存在，Squirrel process 及 enabled/selected source 不存在，Fcitx5 的 zhHans selected
+source、唯一精确进程与签名正常。未修改 input-source registration、kill `cfprefsd` 或调用
+`defaults delete`；preference absence 是本次即时回读事实。执行后已删除未提交 Git 的临时
+helper。
+
+Trash 对象仍存在且 inode 匹配时，filesystem rollback 必须在新的当前窗口批准后按 cache、
+preference、app 的逆序同卷移回原路径；root-owned app 的移动只为该 literal path 使用管理员
+权限，并在每步后重新核验 inode、owner 与 mode。Trash 已不可用时，app 与 preference 只能从
+上述 owner-only backup root 受控恢复并重新验证 identity/metadata；cache 可重建。receipt
+不得直接修改数据库或从副本写回；恢复只能使用
+同版、签名与 digest 均重新验证的官方 installer 作为受控重建入口，但不存在 receipt-only 的
+原状态回滚。installer 会在 `/Library/Input Methods` 重新安装 bundle、注册、启用并选择
+Squirrel，且要求 logout；它可能与从 archive 或废纸篓恢复到 Disabled path 的 bundle 并存。
+因此 receipt 重建必须另开当前窗口 gate，先设计 bundle topology、input-source 回读与额外
+bundle 收口，不能把“installer 成功”称为原现场已恢复。Gate A-C 已证明 live retirement
+完成；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。Draft PR 人工合并前，
+Issue #147 保持 open，且不得把仓库维护项描述为完成。
 
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
 INI、用 Store symlink 接管整文件、调用配置 API 或阻塞 activation 审计运行时字段。为保持
@@ -159,7 +219,8 @@ data-view 过滤、overlay 冲突和投影布局，不读取 live Fcitx 偏好�
 Issue，记录目标机器、exact commit、执行窗口和 mutable-state 保护证据，再按当时 live facts
 设计窄交接。`luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
 `~/.config/fcitx5` 按 required 边界保护；`sync` 与 `~/Library/fcitx5` 按 separate-policy 处理；
-Rime `build` 和 Fcitx cache 可重建且排除备份；`~/Library/Rime` 与 Squirrel 全部保持不变。
+Rime `build` 和 Fcitx cache 可重建且排除备份；`~/Library/Rime` 永久保持不变，除 Issue #147
+四个精确对象外的 Squirrel、Fcitx 与 Rime 状态也保持不变。
 
 获批的 activation 只应用 Nix/Home Manager 静态 declaration，不修改 Fcitx 输入源、配置字段，
 不停止或重启 Fcitx5，也不触发 Rime deploy。#143 的 Shift overlay 与真人 smoke 已作为历史
