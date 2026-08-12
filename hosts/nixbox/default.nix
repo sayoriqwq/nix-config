@@ -64,6 +64,7 @@
         ../../modules/home/capabilities/interactive-shell-assistance.nix
         ../../modules/home/capabilities/host-observability.nix
         ../../modules/home/capabilities/development-runtime.nix
+        ../../modules/home/capabilities/linux-ai-assisted-operations.nix
         ../../modules/home/capabilities/terminal-file-workflow.nix
         ../../modules/home/capabilities/helix-editor.nix
         ../../modules/home/capabilities/ghostty-terminal.nix

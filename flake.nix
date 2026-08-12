@@ -51,7 +51,8 @@
     # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
     zed.url = "github:zed-industries/zed";
 
-    # Issue #120: consume ax's published package output for macbook only.
+    # Issues #120 and #152: consume ax's published package output for the
+    # explicitly approved workstation capabilities.
     # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
     ax.url = "github:yusukebe/ax";
   };
@@ -112,6 +113,7 @@
       darwinPkgs = packagesFor "aarch64-darwin";
       macbookPkgs = self.darwinConfigurations.macbook.pkgs;
       macbookHome = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+      nixboxPkgs = self.nixosConfigurations.nixbox.pkgs;
       phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
         adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
         hostRecipients = {
@@ -276,6 +278,14 @@
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
         };
         x86_64-linux = {
+          nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
+            inherit inputs username;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = nixboxPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+            source = ./.;
+          };
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
         };
