@@ -109,6 +109,21 @@ nixbox 上的维护者交互用户仍是实际 Unix 用户 `sayori`。nixbox 另
 
 macbook 使用 maintenance identity 直接登录 `server:sayori`，再经 sudo 边界完成管理与救援；该链路用于查看状态、处理故障以及在 nixbox 不可用时保持控制面可达。它不允许 root SSH，不让 server 获得 GitHub 凭据，也不取代 nixbox 对 server closure 的主要构建与验证职责。
 
+### 工作站稳定访问能力（Stable workstation access capability）
+
+macbook 到 nixbox 的跨网访问采用 Tailscale + MagicDNS 作为 transport，继续由 native
+OpenSSH key-only 与 sshd host key 承担用户和主机认证，并由 tmux 提供真实断线后的工作现场
+恢复。macbook 只声明官方 Standalone Homebrew cask；nixbox 使用锁定 NixOS
+`services.tailscale`、稳定 overlay machine name `nixbox` 与 direct-path UDP 41641；OS hostname
+仍为 `nixos`。UDP 41641 是 NixOS firewall 声明的唯一端口增量；运行中的 `tailscaled` 仍按
+vendor 默认维护其 overlay 所需的 iptables chains，该运行态副作用必须在 activation 与回滚
+关卡核验。server 不加入该 mesh。
+
+Tailnet 登录、device identity、node key、MagicDNS、Grants、key expiry、实际 DNS suffix/IP
+和外部 SSH alias 均为仓库外可变状态。锁定 NixOS unit 的 `/var/lib/tailscale` 只记录为
+vendor-owned mutable state，不由 Git/Nix 管理；macOS vendor state 路径未获证据时不猜测。
+构建不等于 activation 或 enrollment，所有真实网络与控制面变化继续受独立人工关卡约束。
+
 ### Git 基础能力（Git foundation capability）
 
 三台机器共有的版本读取、差异检查与稳定 Git 行为。它不包含 GitHub 登录态、PR/Issue 操作或可写远程仓库凭据。

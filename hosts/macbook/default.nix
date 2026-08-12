@@ -17,6 +17,7 @@
     ../../modules/capabilities/termius/darwin.nix
     ../../modules/capabilities/zed-editor/darwin.nix
     ../../modules/capabilities/localsend/darwin.nix
+    ../../modules/capabilities/stable-workstation-access/darwin.nix
     ../../modules/capabilities/secret-deployment/darwin.nix
   ];
 

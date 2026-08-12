@@ -154,6 +154,16 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 - Phase 12 / #14 继续保持主动延后，不是 blocker，也不是自动下一步；
 - 因此主流程停在“Phase 11 后稳定基线”，直到维护者提出真实业务需求或主动启动 v1 最小收尾。
 
+### Phase 11 后维护项：工作站稳定访问（#148）
+
+Issue #148 以独立维护项引入 macbook→nixbox 的 Tailscale + MagicDNS transport，保留 native
+OpenSSH key-only/host-key 信任并以 tmux 恢复断线现场。能力只由 macbook 与 nixbox 组合，
+server 明确排除；ADR-0010 已按维护者在 Issue 中的当前授权记录为“已接受”。
+
+该维护项不启动 Phase 12。仓库内 build/check 不构成 installation、activation、enrollment、
+MagicDNS/Grants、SSH alias、防火墙运行态、reboot 或 key-expiry 授权；各动作仍需 exact commit
+与当前窗口的独立人工关卡。
+
 ## 5. 控制链路与部署方向
 
 ```text

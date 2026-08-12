@@ -67,6 +67,12 @@ Host 显式 import 一项能力即表示采用。不得再要求 host 同时设�
 
 Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 只声明 sops-nix 和当前 host 的 SSH identity。具体 secret 的 source、运行时 owner/group/mode、服务依赖与 activation 人工关卡属于消费者的独立 Issue，不能用通用 demo 占位。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
 
+工作站稳定访问的跨层 seam 位于 `modules/capabilities/stable-workstation-access/`：Darwin
+adapter 只拥有官方 Standalone cask，NixOS adapter 只拥有 tailscaled service、稳定 overlay
+machine name 与 NixOS firewall 的 UDP 41641 声明增量；运行中的 tailscaled 另按 vendor 默认
+维护 overlay iptables chains。登录、MagicDNS、Grants、SSH alias 和 vendor state 内容不进入
+能力声明，server 不组合该 seam。
+
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
 ## 4. Import 方向
