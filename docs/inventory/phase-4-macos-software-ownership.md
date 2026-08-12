@@ -7,8 +7,10 @@
   迁移残留；2026-08-10，Issue #127 增加并验收 macOS 中文输入能力的首次静态所有权交接，
   Issue #131 退役该次交接的写入型 helper；2026-08-11，Issue #139 完成中文输入维护边界
   研究，Issue #140 采用静态 data-view 终态并退役 Fcitx runtime provider，Issue #143 完成
-  Shift ownership 调整；Issue #145 取代其 fallback 决策，目标是移除用户可见的恢复通道
-- **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145 及 Phase 4 各实施 Issue
+  Shift ownership 调整，Issue #145 取代其 fallback 决策，目标是移除用户可见的恢复通道；
+  2026-08-12，Issue #147 启动独立 Squirrel 遗留退役，Gate A 已证明候选 app 身份，live
+  backup、retirement 与真人 smoke 仍等待各自人工关卡
+- **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145、#147 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
 ## 1. 终态原则
@@ -120,7 +122,9 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
 - macOS 输入源注册与当前选择由 macOS/runtime 和维护者拥有；Home Manager 不修改输入源
   数据库、不 kill 或更新 Fcitx5，也不在 activation 中触发 Rime deploy；
 - `pkgs.rime-ice`、过滤/合并 data view 和本地 overlay 的静态内容由 Home Manager 拥有；
-  能力不再维护上游 leaf allowlist，也不把 raw package output 递归投影到用户目录；
+  能力不再维护上游 leaf allowlist，也不把 raw package output 递归投影到用户目录。data view
+  必须保留 `pkgs.rime-ice` 随发行提供的静态 `squirrel.yaml`；它只是 Rime 静态兼容内容，
+  不安装、启用或接管 Squirrel app；
 - 本地 overlay 通过 `__include: rime_ice_suggestion:/` 接入 nixpkgs 重命名后的上游建议，
   只启用 `rime_ice`，并显式把左右 Shift 都声明为 Rime 内部中文/ASCII 切换键；它不改变
   简繁、标点或用户数据；
@@ -130,8 +134,15 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
   item 为 `rime`、`DefaultIM=rime`、`Default Layout=us`，以及 Fcitx `TriggerKeys` 与
   `AltTriggerKeys` 均为空，是维护者通过 Fcitx GUI/官方 API 维护的推荐体验，不是 Nix
   Desired/Keep；普通左右 Shift 属于 Rime，不保留完整 Fcitx trigger 或菜单 fallback；
-- 遗留 `/Applications/Disabled Input Methods/Squirrel.app`、`~/Library/Rime`、receipt、
-  preferences、cache 与 Squirrel 专属 `squirrel.custom.yaml` 均保持原样，不纳入该能力。
+- Issue #147 只允许退役 `/Applications/Disabled Input Methods/Squirrel.app`、receipt
+  `im.rime.inputmethod.Squirrel`、`~/Library/Preferences/im.rime.inputmethod.Squirrel.plist`
+  与 `~/Library/Caches/im.rime.inputmethod.Squirrel` 四个精确对象。Gate A 已用 digest 与签名
+  均验证通过的官方 1.1.2 installer 证明候选 app 的签名主体及共同文件与原始 bundle 一致；
+  live bundle 仅增加 installer 在 `SharedSupport` 执行 build 产生的 `build`、
+  `installation.yaml` 与 `user.yaml`，不得在 bundle 内单独清理。Gate B/C 完成前四个 live
+  对象仍保持原样；Squirrel 专属 `squirrel.custom.yaml` 不在清理范围；
+- `~/Library/Rime` 是本次与未来同类 cleanup 的永久 opaque 排除树：不得遍历、列举、读取、
+  stat、hash、copy、move 或 delete，也不得用 glob 或猜测路径间接触碰。
 
 2026-08-11 已确认的故障链路是：macOS frontend 的 Terminal `AppDefaultIM` 主动选择
 `keyboard-us`，随后全局 `ShareInputState=All` 把 inactive 状态传播到其他 input context。

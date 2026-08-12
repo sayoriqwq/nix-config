@@ -177,8 +177,10 @@ Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 unmanaged regular leaves，必须另开 Issue 按届时事实重新建立窄交接入口，不能复用历史工具。
 声明和构建成功仍不表示未来 activation、Rime 重新部署或输入验收已获授权，这些动作始终受
 exact commit 的人工批准约束。data view 中的 `squirrel.yaml` 只是 `pkgs.rime-ice` 静态发行
-内容，不代表启用或接管 Squirrel；遗留 Squirrel bundle、receipt、preferences、cache、
-`squirrel.custom.yaml` 与 `~/Library/Rime` 保持不变。
+内容，不代表启用或接管 Squirrel。Squirrel app、receipt、preference 与 cache 不进入中文输入
+capability；其中 Issue #147 列出的四个精确遗留对象只可由该独立维护项按分离人工关卡退役。
+`squirrel.custom.yaml` 保持外部，`~/Library/Rime` 是永久 opaque 排除树，任何操作都不得
+遍历、列举、读取、stat、hash、copy、move 或 delete 其内容。
 
 ### 主编辑器角色（Primary editor role）
 
