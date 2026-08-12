@@ -1,7 +1,9 @@
 # macOS 中文输入维护边界与拆分研究
 
-- **状态：** 研究结论已采纳，Issue #140 实施中；不构成真实机器操作授权
-- **关联 Issue：** [#139](https://github.com/sayoriqwq/nix-config/issues/139)
+- **状态：** 研究结论已采纳；Issue #140 已通过 PR #142 合并，并完成获批的 activation、
+  Rime deploy 与运行态回读；不构成未来真实机器操作授权
+- **关联 Issue：** [#139](https://github.com/sayoriqwq/nix-config/issues/139)、
+  [#140](https://github.com/sayoriqwq/nix-config/issues/140)
 - **日期：** 2026-08-11
 - **范围：** Fcitx5 macOS、Rime、rime-ice、nixpkgs、Home Manager 的所有权与模块边界
 

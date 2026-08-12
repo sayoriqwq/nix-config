@@ -10,7 +10,8 @@
   Shift ownership 调整，Issue #145 取代其 fallback 决策，目标是移除用户可见的恢复通道；
   2026-08-12，Issue #147 的 Gate A 证明候选 app 身份，Gate B/C 完成 owner-only backup 与
   四个精确 Squirrel 遗留对象的 live retirement；维护者随后按已明确清单报告 Gate D 真人输入
-  smoke 整体 PASS，仓库维护项仅等待 Draft PR 人工审阅与合并
+  smoke 整体 PASS；PR #150 已以 squash 方式合并为
+  `273986bcd3d3867200c4b593a55ac5f7618a45ae`，Issue #147 已按 `completed` 关闭
 - **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145、#147 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -157,7 +158,8 @@ output/data-view 边界、overlay 兼容性以及是否需要独立 Rime deploy�
   selected source、唯一精确进程与签名仍正常。未 kill `cfprefsd` 或调用 `defaults delete`，
   preference absence 是本次回读事实；临时 helper 已删除且未进入 Git。维护者随后按已明确
   清单报告 Gate D 真人输入 smoke 整体 PASS；该报告是整体判断，不虚构逐应用日志或截图。
-  Draft PR 人工合并前不得关闭 Issue 或把仓库维护项称为完成。Squirrel 专属
+  PR #150 随后以 squash 方式合并为 `273986bcd3d3867200c4b593a55ac5f7618a45ae`，
+  Issue #147 已按 `completed` 关闭。Squirrel 专属
   `squirrel.custom.yaml` 不在清理范围；
 - `~/Library/Rime` 是本次与未来同类 cleanup 的永久 opaque 排除树：不得遍历、列举、读取、
   stat、hash、copy、move 或 delete，也不得用 glob 或猜测路径间接触碰。

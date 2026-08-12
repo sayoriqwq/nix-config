@@ -197,8 +197,9 @@ capability；Issue #147 已在 2026-08-12 按分离人工关卡完成四个精�
 retirement：app、preference 与 cache 的原路径即时回读均不存在，receipt 已通过
 `pkgutil --forget` 忘记，owner-only app/preference rollback evidence 与可恢复 Trash 对象
 均保留在仓库外。Squirrel process/input source 仍不存在，Fcitx5 selected source、进程与签名
-回读通过；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。Issue 完成仅等待
-Draft PR 人工审阅与合并。
+回读通过；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。PR #150 已于
+2026-08-12 以 squash 方式合并为
+`273986bcd3d3867200c4b593a55ac5f7618a45ae`，Issue #147 已按 `completed` 关闭。
 `squirrel.custom.yaml` 保持外部，`~/Library/Rime` 是永久 opaque 排除树，任何操作都不得
 遍历、列举、读取、stat、hash、copy、move 或 delete 其内容。
 
