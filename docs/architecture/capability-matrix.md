@@ -35,7 +35,7 @@
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
 | Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
-| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：消费锁定 Darwin nixpkgs 的 `pkgs.rime-ice` 2026.06.30，经排除 `build`、拒绝可变名称并合入本地 `default.custom.yaml` 的薄 data view，以 recursive leaf semantics 投影静态 Rime 数据。`Fcitx5.app`、Rime plugin payload、macOS 输入源、可写配置与全部 GUI/runtime 偏好保持外部所有；推荐值仅供人工复核。Squirrel 不接管、不清理。activation、Rime deploy 与真实输入 smoke 仍是分离的人工关卡。 |
+| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：消费锁定 Darwin nixpkgs 的 `pkgs.rime-ice` 2026.06.30，经排除 `build`、拒绝可变名称并合入本地 `default.custom.yaml` 的薄 data view，以 recursive leaf semantics 投影静态 Rime 数据。`Fcitx5.app`、Rime plugin payload、macOS 输入源、可写配置与全部 GUI/runtime 偏好保持外部所有；推荐值仅供人工复核。该 capability 不接管或执行 Squirrel 清理；历史 live 遗留已由独立的 Issue #147 人工维护流程退役。未来 activation、Rime deploy 与真实输入 smoke 仍是分离的人工关卡。 |
 | macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
@@ -57,10 +57,14 @@
 ## 当前状态
 
 - macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
-- macbook 的中文输入是纯 Home Manager 能力。Issue #140 正在把历史的 65-leaf source 与
-  Fcitx 行为事务层收敛为 `pkgs.rime-ice` 2026.06.30、薄 data view、本地 overlay 和 recursive
-  leaf projection；Fcitx 全部偏好改为 external reference。该变更尚未 activation 或 deploy，
-  不能把 build/evaluation 结果描述为机器运行态。
+- macbook 的中文输入是纯 Home Manager 能力。Issue #140 已通过 PR #142 合并为
+  `3bbd8d4a29b096653b36ec755af662931be11b4c`，把历史的 65-leaf source 与 Fcitx 行为事务层
+  收敛为 `pkgs.rime-ice` 2026.06.30、薄 data view、本地 overlay 和 recursive leaf
+  projection，并把 Fcitx 全部偏好改为 external reference。维护者已在获批窗口完成
+  `system-46-link` activation 与一次 Fcitx5 Rime deploy；回读确认 Rime 根目录可写、静态叶子
+  指向 Store、可变状态保持 Store 外，Fcitx5 与 macOS selected input source 正常。后续 #143、
+  #145 与 #147 的独立维护流程又完成 Shift/fallback 所有权调整及 Squirrel 遗留退役；#147
+  Gate D 最终记录了维护者的整体真人输入 smoke PASS。
 - 更早的 #127 首次 65-leaf 所有权交接已在配置提交
   `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成实机验收：generation 42→43、65/65
   Store symlink、9/9 可写且非 Store 的 mutable boundaries、Rime 重新部署与真实输入均为

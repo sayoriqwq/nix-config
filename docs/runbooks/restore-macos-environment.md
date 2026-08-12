@@ -179,8 +179,10 @@ preference、app 的逆序同卷移回原路径；root-owned app 的移动只为
 Squirrel，且要求 logout；它可能与从 archive 或废纸篓恢复到 Disabled path 的 bundle 并存。
 因此 receipt 重建必须另开当前窗口 gate，先设计 bundle topology、input-source 回读与额外
 bundle 收口，不能把“installer 成功”称为原现场已恢复。Gate A-C 已证明 live retirement
-完成；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。Draft PR 人工合并前，
-Issue #147 保持 open，且不得把仓库维护项描述为完成。
+完成；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。PR #150 已以 squash
+方式合并为 `273986bcd3d3867200c4b593a55ac5f7618a45ae`，Issue #147 已按 `completed` 关闭。
+这一闭环不构成未来 receipt 重建、Squirrel 恢复或其他 live mutation 的授权；这些动作仍须
+在新的当前窗口重新建立 exact target、身份、回滚与人工批准。
 
 `~/.config/fcitx5` 和其中配置文件始终是 Fcitx-owned、可写的外部状态。能力不得 raw patch
 INI、用 Store symlink 接管整文件、调用配置 API 或阻塞 activation 审计运行时字段。为保持
