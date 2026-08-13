@@ -51,7 +51,7 @@ in
           "${hyper}-down" = "focus down";
           "${hyper}-up" = "focus up";
           "${hyper}-right" = "focus right";
-          "${hyper}-f" = "layout floating tiling";
+          "${hyper}-v" = "layout floating tiling";
           "${hyper}-esc" = "enable off";
         }
         // workspaceBindings;
@@ -83,7 +83,7 @@ in
     }
     {
       scope = "AeroSpace（Caps Lock → Hyper）";
-      keys = "Hyper+F";
+      keys = "Hyper+V";
       action = "切换当前窗口的浮动/平铺布局";
       owner = "aerospace-window-management";
       order = 203;

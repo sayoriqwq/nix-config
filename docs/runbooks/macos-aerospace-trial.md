@@ -33,7 +33,7 @@ Raycast 继续唯一拥有 Caps Lock → Hyper 的转换。维护者已在 Rayca
 | `Hyper + 0` | 切换到 AeroSpace workspace 10 |
 | `Hyper + Shift + 1…9` | 移动当前窗口到 workspace 1…9，不跟随过去 |
 | `Hyper + Shift + 0` | 移动当前窗口到 workspace 10，不跟随过去 |
-| `Hyper + F` | 在 floating / tiling 间切换当前窗口 |
+| `Hyper + V` | 在 floating / tiling 间切换当前窗口 |
 | `Hyper + Esc` | 执行 `enable off`，恢复隐藏 workspace 的窗口并停止 AeroSpace 快捷键 |
 
 `Hyper + Esc` 是非对称逃生键：AeroSpace disable 后不再接收自己的快捷键，不能靠另一个
@@ -59,6 +59,10 @@ sudo /run/current-system/sw/bin/darwin-rebuild --list-generations
 在 Finder 或 Activity Monitor 中确认 AeroSpace 当前未运行。不要预先启动应用或修改
 Accessibility。还应从 System Settings 只读确认当前原生 Spaces 数量、Mission Control 行为、
 “Displays have separate Spaces”和显示器排列；只记录事实，不改变任何值。
+
+Raycast live 快捷键正在由维护者仓库外重组，当前仓库盘点不作为占用事实。activation 前必须由
+维护者确认 Raycast 已释放 `Hyper + V`；Ghostty、VS Code、Finder、Zed 等应用入口如何分配不由
+本试验声明，待维护者之后同步新盘点。
 
 ## 4. 经批准的 Activation
 
@@ -128,7 +132,7 @@ AeroSpace 需要 macOS Accessibility 才能读取、聚焦和移动其他应用�
    普通数字键仍正常输入。
 5. 在 workspace 1 聚焦一个窗口，按 `Hyper + Shift + 2`；确认窗口移动到 workspace 2，而当前
    视图仍停留在 workspace 1。切到 workspace 2 找回该窗口，再用相同方式移回。
-6. 对普通窗口按两次 `Hyper + F`，确认第一次切到 floating、第二次回到 tiling；记录窗口几何是否
+6. 对普通窗口按两次 `Hyper + V`，确认第一次切到 floating、第二次回到 tiling；记录窗口几何是否
    可接受，但不要把几何差异误判为 generation 失败。
 7. 打开 Mission Control，确认原生总览仍可调用并记录模拟 workspace 窗口的实际呈现。再验证一个
    原生 fullscreen 窗口和既有原生 Space 切换入口；只观察交互，不改变系统设置。

@@ -80,7 +80,7 @@ cmd-alt-ctrl-shift-8 = 'move-node-to-workspace 8'
 cmd-alt-ctrl-shift-9 = 'move-node-to-workspace 9'
 cmd-alt-ctrl-shift-0 = 'move-node-to-workspace 10'
 
-cmd-alt-ctrl-f = 'layout floating tiling'
+cmd-alt-ctrl-v = 'layout floating tiling'
 cmd-alt-ctrl-esc = 'enable off'
 ```
 
@@ -182,7 +182,9 @@ AeroSpace 官方明确指出 Raycast、Karabiner-Elements 或其他全局 hotkey
 
 本方案让 Raycast 继续拥有 Caps Lock → `cmd-alt-ctrl` Hyper 的转换，AeroSpace 只注册 Hyper
 后的组合。该设置已由维护者在 Raycast UI 完成，是外部可变前置事实；仓库既不生成也不修改
-Raycast settings。真人验收仍需检查：Hyper+四方向、Hyper+数字、Hyper+Shift+数字、Hyper+F、
+Raycast settings。维护者正在仓库外重组 live 快捷键，当前仓库盘点不作为本试验的键位占用事实；
+activation 前必须确认 Raycast 已释放 Hyper+V。真人验收仍需检查：Hyper+四方向、Hyper+数字、
+Hyper+Shift+数字、Hyper+V、
 Hyper+Esc 是否与 Raycast 其他全局 command 冲突。
 
 ## 6. 构建、人工验收与回滚关卡
@@ -209,7 +211,7 @@ Accessibility 授权和运行态 callback 都属于另行批准的人工关卡�
 
 1. 确认 Raycast launcher、既有 Script Commands 和原生菜单栏仍工作；
 2. 授予 AeroSpace Accessibility 权限，并确认 SIP 未改变；
-3. 逐项验证 Hyper+方向、Hyper+1/0、Hyper+Shift+1/0 与 Hyper+F；
+3. 逐项验证 Hyper+方向、Hyper+1/0、Hyper+Shift+1/0 与 Hyper+V；
 4. 验证移动窗口后仍留在当前 workspace，且普通裸数字与 Esc 没有被 AeroSpace 捕获；
 5. 单屏与现有多屏状态分别观察焦点、隐藏边缘、Mission Control 与原生 fullscreen；
 6. 最后验证 `Hyper+Esc`：全部窗口恢复可见、快捷键停止，再从菜单栏 **Enable** 恢复到 main；

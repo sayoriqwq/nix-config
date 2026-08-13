@@ -42,7 +42,7 @@ let
     cmd-alt-ctrl-shift-8 = "move-node-to-workspace 8";
     cmd-alt-ctrl-shift-9 = "move-node-to-workspace 9";
     cmd-alt-ctrl-shift-0 = "move-node-to-workspace 10";
-    cmd-alt-ctrl-f = "layout floating tiling";
+    cmd-alt-ctrl-v = "layout floating tiling";
     cmd-alt-ctrl-esc = "enable off";
   };
 
@@ -111,7 +111,7 @@ pkgs.runCommand "macbook-aerospace-policy-check"
     grep -Fqx 'cmd-alt-ctrl-left = "focus left"' "${configFile}"
     grep -Fqx 'cmd-alt-ctrl-0 = "workspace 10"' "${configFile}"
     grep -Fqx 'cmd-alt-ctrl-shift-0 = "move-node-to-workspace 10"' "${configFile}"
-    grep -Fqx 'cmd-alt-ctrl-f = "layout floating tiling"' "${configFile}"
+    grep -Fqx 'cmd-alt-ctrl-v = "layout floating tiling"' "${configFile}"
 
     if grep -Eiq '^\[mode\.move|workspace-to-monitor-force-assignment|exec-on-workspace-change|sketchybar' "${configFile}"; then
       echo 'AeroSpace config contains the retired move mode or a forbidden callback' >&2

@@ -25,7 +25,7 @@
 | AeroSpace（Caps Lock → Hyper） | `Hyper+方向键` | 按方向聚焦窗口 | aerospace-window-management |
 | AeroSpace（Caps Lock → Hyper） | `Hyper+1…0` | 切换到工作区 1…10 | aerospace-window-management |
 | AeroSpace（Caps Lock → Hyper） | `Hyper+Shift+1…0` | 移动当前窗口到工作区 1…10 | aerospace-window-management |
-| AeroSpace（Caps Lock → Hyper） | `Hyper+F` | 切换当前窗口的浮动/平铺布局 | aerospace-window-management |
+| AeroSpace（Caps Lock → Hyper） | `Hyper+V` | 切换当前窗口的浮动/平铺布局 | aerospace-window-management |
 | AeroSpace（Caps Lock → Hyper） | `Hyper+Esc` | 关闭 AeroSpace 接管并恢复隐藏工作区窗口可见 | aerospace-window-management |
 
 `Cmd+Backquote` 未被 nix-config 绑定；Ghostty Quick Terminal 不在当前支持范围内。
