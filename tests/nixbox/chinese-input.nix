@@ -279,7 +279,7 @@ pkgs.runCommand "nixbox-chinese-input-policy-check"
     ! test -e ${inputPackage}/etc/xdg/autostart/ibus-daemon.desktop
     test -x ${inputPackage}/bin/fcitx5
     test -x ${inputPackage}/bin/fcitx5-config-qt
-    test -f ${inputPackage}/lib/fcitx5/rime.so
+    test -f ${inputPackage}/lib/fcitx5/librime.so
 
     test -f ${rimeDataRoot}/rime_ice_suggestion.yaml
     test -f ${rimeDataRoot}/default.custom.yaml

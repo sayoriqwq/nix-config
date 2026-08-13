@@ -69,7 +69,7 @@ pkgs.runCommand "${lib.getName rimeDataPackage}-data"
     ${pkgs.coreutils}/bin/cp --recursive --symbolic-link "$source_root/." "$data_root/"
     ${pkgs.findutils}/bin/find "$data_root" -type d -exec chmod u+w {} +
     ${pkgs.coreutils}/bin/rm --recursive --force "$data_root/build"
-    install -m 0644 ${lib.escapeShellArg overlay} "$data_root/default.custom.yaml"
+    install -m 0644 ${overlay} "$data_root/default.custom.yaml"
 
     if [ -e "$data_root/build" ] || [ -L "$data_root/build" ]; then
       echo "rime-data-package: build directory escaped the filter" >&2
