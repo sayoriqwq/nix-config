@@ -87,6 +87,9 @@ let
       "yambar"
     ]
   ) home.home.packages;
+  hyprlandAdapter = import ../../modules/capabilities/hyprland-desktop/nixos.nix {
+    inherit pkgs username;
+  };
 in
 assert lib.assertMsg (
   !config.services.desktopManager.gnome.enable
@@ -123,10 +126,13 @@ assert lib.assertMsg (
 assert lib.assertMsg config.security.polkit.enable
   "nixbox Hyprland desktop must retain the NixOS polkit service";
 assert lib.assertMsg config.programs.dconf.enable
-  "nixbox Hyprland desktop must retain dconf required by IBus";
+  "nixbox Hyprland desktop must retain dconf for its remaining desktop clients";
 assert lib.assertMsg (
-  config.i18n.inputMethod.enable && config.i18n.inputMethod.type == "ibus"
-) "nixbox Hyprland desktop must explicitly retain IBus ownership";
+  config.i18n.inputMethod.enable && config.i18n.inputMethod.type == "fcitx5"
+) "nixbox composition must delegate Chinese input ownership to the dedicated Fcitx5 capability";
+assert lib.assertMsg (
+  !(hyprlandAdapter ? i18n)
+) "the Hyprland capability itself must not choose an input framework";
 assert lib.assertMsg config.services.gnome.gnome-keyring.enable
   "nixbox Hyprland desktop must explicitly retain GNOME Keyring as the secret-service owner";
 assert lib.assertMsg config.services.gnome.gcr-ssh-agent.enable

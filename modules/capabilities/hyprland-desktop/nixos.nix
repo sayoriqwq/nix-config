@@ -34,12 +34,6 @@
   # Keep the controller service without adding device-specific settings.
   hardware.bluetooth.enable = true;
 
-  # Keep the existing input-method owner explicit while changing sessions.
-  i18n.inputMethod = {
-    enable = true;
-    type = "ibus";
-  };
-
   # The Home Manager Hyprlock package needs a system PAM policy to unlock.
   security.pam.services.hyprlock = { };
 

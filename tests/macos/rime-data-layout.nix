@@ -12,9 +12,10 @@ let
   username = "sayori";
   target = "fcitx5/rime";
   targetRoot = ".local/share/${target}";
-  overlay = ../../modules/home/capabilities/macos-chinese-input/default.custom.yaml;
-  makeDataView = import ../../modules/home/capabilities/macos-chinese-input/rime-data-view.nix;
-  productionView = makeDataView { inherit lib pkgs; };
+  overlay = ../../modules/capabilities/chinese-input/default.custom.yaml;
+  makeDataPackage = import ../../modules/capabilities/chinese-input/rime-data-package.nix;
+  productionPackage = makeDataPackage { inherit lib pkgs; };
+  productionRoot = "${productionPackage}/share/rime-data";
   semanticSharedDefault = pkgs.writeText "default.yaml" ''
     config_version: "fixture"
     schema_list:
@@ -41,10 +42,11 @@ let
       translators: []
       filters: []
   '';
-  capabilityResult = import ../../modules/home/capabilities/macos-chinese-input/default.nix {
+  sharedHomeResult = import ../../modules/capabilities/chinese-input/home.nix {
     config.home.homeDirectory = "/fixture";
     inherit lib pkgs;
   };
+  sharedHomeTopLevel = lib.sort lib.lessThan (builtins.attrNames sharedHomeResult);
 
   homeFor = configuration: configuration.config.home-manager.users.${username};
   macbook = macbookConfiguration.config;
@@ -68,7 +70,7 @@ let
         mkdir -p "$out/share/rime-data"
         ${command}
       '';
-  safePackage = fixturePackage "rime-data-safe-fixture" ''
+  safeSourcePackage = fixturePackage "rime-data-safe-fixture" ''
     mkdir -p "$out/share/rime-data/build" "$out/share/rime-data/nested"
     touch "$out/share/rime-data/build/.gitkeep"
     printf '%s\n' opaque > "$out/share/rime-data/build/user.yaml"
@@ -76,10 +78,11 @@ let
     printf '%s\n' static > "$out/share/rime-data/nested/static.yaml"
     printf '%s\n' suggestion > "$out/share/rime-data/rime_ice_suggestion.yaml"
   '';
-  safeView = makeDataView {
+  safeDataPackage = makeDataPackage {
     inherit lib overlay pkgs;
-    rimeDataPackage = safePackage;
+    rimeDataPackage = safeSourcePackage;
   };
+  safeRoot = "${safeDataPackage}/share/rime-data";
 
   forbiddenFixturePaths = [
     {
@@ -208,24 +211,25 @@ assert lib.assertMsg (
 ) "rime-ice must not remain an independent Flake input";
 assert lib.assertMsg
   (
-    !(capabilityResult ? home)
-    && !(capabilityResult ? services)
-    && !(capabilityResult ? launchd)
-    && !(capabilityResult ? networking)
+    sharedHomeTopLevel == [
+      "imports"
+      "sayori"
+      "xdg"
+    ]
   )
   "macOS Chinese input must not declare packages, activation, services, launchd jobs, or networking";
 assert lib.assertMsg (
   macbookRimeDeclaration.recursive
   && !macbookRimeDeclaration.force
   && macbookRimeDeclaration.target == targetRoot
-  && toString macbookRimeDeclaration.source == toString productionView
+  && toString macbookRimeDeclaration.source == productionRoot
 ) "macbook must recursively project one data view without replacing the writable target root";
 assert lib.assertMsg (
   managedRimeTargets macbookHome == [ target ]
 ) "macbook must manage one recursive Rime data-view target rather than an upstream leaf manifest";
 assert lib.assertMsg (
-  managedRimeTargets nixboxHome == [ ] && managedRimeTargets serverHome == [ ]
-) "nixbox and server must not select the macOS Chinese input capability";
+  managedRimeTargets nixboxHome == [ target ] && managedRimeTargets serverHome == [ ]
+) "both workstation frontends must select the shared Rime data while server remains excluded";
 assert lib.assertMsg (
   !(macbookHome.home.activation ? reconcileFcitx5Behavior)
 ) "macOS Chinese input must not retain an activation-time Fcitx behavior provider";
@@ -263,11 +267,11 @@ pkgs.runCommand "macbook-rime-data-layout"
   ''
     set -euo pipefail
 
-    test -f ${productionView}/rime_ice_suggestion.yaml
-    test -f ${productionView}/default.custom.yaml
-    ! test -e ${productionView}/build
+    test -f ${productionRoot}/rime_ice_suggestion.yaml
+    test -f ${productionRoot}/default.custom.yaml
+    ! test -e ${productionRoot}/build
 
-    ${pkgs.yq-go}/bin/yq eval -o=json ${productionView}/default.custom.yaml \
+    ${pkgs.yq-go}/bin/yq eval -o=json ${productionRoot}/default.custom.yaml \
       | ${pkgs.jq}/bin/jq -e \
         '.patch.__include == "rime_ice_suggestion:/"
          and .patch.schema_list == [{"schema": "rime_ice"}]
@@ -293,15 +297,15 @@ pkgs.runCommand "macbook-rime-data-layout"
          and .ascii_composer.switch_key.Shift_L == "commit_code"
          and .ascii_composer.switch_key.Shift_R == "commit_code"' >/dev/null
 
-    test -f ${safeView}/nested/static.yaml
-    test -f ${safeView}/default.custom.yaml
-    ! test -e ${safeView}/build
+    test -f ${safeRoot}/nested/static.yaml
+    test -f ${safeRoot}/default.custom.yaml
+    ! test -e ${safeRoot}/build
 
     expect_validation_failure() {
       local root="$1"
       local expected_error="$2"
       local error_log="$TMPDIR/validator-error-$RANDOM"
-      if ${lib.getExe productionView.validator} "$root" 2>"$error_log"; then
+      if ${lib.getExe productionPackage.validator} "$root" 2>"$error_log"; then
         echo "Rime data validator accepted a forbidden fixture" >&2
         exit 1
       fi
@@ -316,7 +320,7 @@ pkgs.runCommand "macbook-rime-data-layout"
     new_generation="$TMPDIR/new-generation"
     generation_target="$new_generation/home-files/${targetRoot}"
     mkdir -p "$generation_target"
-    ${pkgs.lndir}/bin/lndir -silent ${recursiveLndirFlags} ${safeView} "$generation_target"
+    ${pkgs.lndir}/bin/lndir -silent ${recursiveLndirFlags} ${safeRoot} "$generation_target"
 
     collision_home="$TMPDIR/collision-home"
     collision_target="$collision_home/${targetRoot}/nested/static.yaml"
@@ -357,7 +361,7 @@ pkgs.runCommand "macbook-rime-data-layout"
       HOME_MANAGER_BACKUP_OVERWRITE= \
       newGenPath="$new_generation" \
       ${checkLinkTargetsScript}
-    ${pkgs.lndir}/bin/lndir -silent ${recursiveLndirFlags} ${safeView} "$target_root"
+    ${pkgs.lndir}/bin/lndir -silent ${recursiveLndirFlags} ${safeRoot} "$target_root"
 
     test -d "$target_root"
     ! test -L "$target_root"

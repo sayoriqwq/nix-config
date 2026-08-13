@@ -8,7 +8,7 @@ activation、注销、重启、GC，也不启动 Phase 12。
 
 结论是：锁定来源可以无冲突地组成首轮候选。采用 Hyprland 0.55.4、GDM、UWSM、
 Hyprland + GTK portals、Mako、Fuzzel、Waybar、hyprpolkitagent、Hyprlock/Hypridle，继续复用
-Ghostty、PipeWire/WirePlumber、IBus、GNOME Keyring 与现有字体。GNOME desktop session 必须关闭；
+Ghostty、PipeWire/WirePlumber、独立中文输入能力、GNOME Keyring 与现有字体。GNOME desktop session 必须关闭；
 GDM 为运行 greeter 仍带入 `gnome-shell`/`gnome-session` 闭包，这是 display-manager 实现副作用，
 不代表 GNOME session 仍可选择。
 
@@ -154,8 +154,8 @@ AccountsService、UDisks2、UPower、power-profiles-daemon 等。关闭 GNOME �
 | --- | --- | --- |
 | Bluetooth | 保留：`hardware.bluetooth.enable = true` | Phase 5 实机盘点已把 Bluetooth 记录为当前启用且须保留的能力；锁定 GNOME module 目前仅以 `mkDefault true` 隐式提供它，关闭 GNOME 后若不显式接管就会回退为 false。锁定 [Bluetooth module](https://github.com/NixOS/nixpkgs/blob/fd1462031fdee08f65fd0b4c6b64e22239a77870/nixos/modules/services/hardware/bluetooth.nix) 会安装 BlueZ、生成系统配置并注册 udev、D-Bus、systemd 服务；本次只保持既有 enable 行为，不修改 firewall/network policy，不声明、配对或操作任何设备 |
 | Avahi/mDNS | 保留：`services.avahi.enable = true` | 锁定 GNOME module 目前以 `mkDefault true` 隐式提供 Avahi；关闭 GNOME 后若不显式接管，既有 mDNS 与 UDP 5353 会消失，并违反现有 stable-workstation-access 策略要求的 UDP `[5353, 41641, 53317]` 合同。锁定 [Avahi module](https://github.com/NixOS/nixpkgs/blob/fd1462031fdee08f65fd0b4c6b64e22239a77870/nixos/modules/services/networking/avahi-daemon.nix) 的 `openFirewall` 默认为 true，精确加入 UDP 5353；本次只保持既有 daemon/mDNS/firewall 行为，不增加 publish 设置、service files、reflector、wide-area、NSS integration 或其他端口 |
-| IBus | 保留：`i18n.inputMethod.enable = true; type = "ibus"` | Issue 要求不切 Fcitx；锁定 [IBus module](https://github.com/NixOS/nixpkgs/blob/fd1462031fdee08f65fd0b4c6b64e22239a77870/nixos/modules/i18n/input-method/ibus.nix) 同时要求 dconf、D-Bus、XDG autostart、输入法环境与 portal integration |
-| dconf | 保留：`programs.dconf.enable = true` | IBus 明确依赖；只删除 GNOME session 专属键，不删除 dconf service |
+| IBus | #167 首轮保留决定已由 Issue #169 取代 | 中文输入从 Hyprland capability 拆出；当前目标 composition 由独立 `chinese-input` NixOS adapter 单一拥有 Fcitx 5 / Rime Ice。原 IBus package、D-Bus、portal、autostart 和 session environment 随 NixOS input-method owner 切换退出，但用户 dconf/IBus 状态不清理、不迁移 |
+| dconf | 保留：`programs.dconf.enable = true` | 仍有其他 desktop clients 使用；不再把它描述为 IBus 专属依赖，也不删除用户 database |
 | secret service/keyring | 保留：`services.gnome.gnome-keyring.enable = true` | 锁定 [keyring module](https://github.com/NixOS/nixpkgs/blob/fd1462031fdee08f65fd0b4c6b64e22239a77870/nixos/modules/services/desktops/gnome/gnome-keyring.nix) 安装 package/D-Bus/portal，设置 CAP_IPC_LOCK wrapper，并令 login PAM `enableGnomeKeyring = true`；不能只装 package |
 | polkit | 保留：NixOS Hyprland module owner；agent 由 HM hyprpolkitagent owner | 避免把 system daemon 与 prompt agent 混为一项，也避免两个 agent |
 | AccountsService | 保留为 GDM 隐式 owner，不重复声明 | 锁定 GDM module 为选取用户启用它；只要 GDM 保留就不是 orphan |
@@ -173,7 +173,7 @@ AccountsService、UDisks2、UPower、power-profiles-daemon 等。关闭 GNOME �
 | `~/.config/uwsm/env`、`~/.config/uwsm/env-hyprland` | 官方 UWSM 环境入口；本 Issue 不加入 GPU/toolkit 猜测。若以后采用，须由声明单一拥有，不能保留手写漂移。见 [Environment variables](https://wiki.hypr.land/0.55.0/Configuring/Advanced-and-Cool/Environment-variables/) |
 | `$XDG_RUNTIME_DIR/hypr`、Wayland socket、systemd user session 与 portal/PipeWire sockets | 登录 session 的易失运行态；不备份、不提交、不由 Git 恢复 |
 | `~/.local/share/keyrings` 与登录解锁状态 | GNOME Keyring/用户拥有的敏感可变状态；绝不链接进 Store、复制进 Git 或由 generation rollback 覆盖 |
-| dconf user database、IBus runtime/preferences | 用户/IBus 可变状态；保留 owner，不把 GNOME session 键继续声明。输入体验须在获批实机试用中验证 |
+| dconf user database、遗留 IBus runtime/preferences | 用户/旧 framework 可变状态；保留原样，不把 GNOME session 键继续声明，也不因切换 owner 清理。新 Fcitx/Rime 状态边界见 [专用来源映射](nixbox-fcitx5-rime-source-mapping.md) |
 | GDM session choice/account state | GDM/AccountsService 可变状态；构建不会改变真实登录选择，generation rollback 也不保证恢复用户选择 |
 | 应用状态 | Ghostty、Firefox、Chrome、Zed、Obsidian、LocalSend 等既有 profile/cache/session 继续各自拥有；本 Issue 不迁移、不删除、不备份 |
 
@@ -198,8 +198,9 @@ GNOME generation、GC root 或 boot entry。
 ### 仍需实机验证、不得猜测
 
 - 显示输出名、分辨率、刷新率、缩放、VRR/HDR、GPU vendor 与任何 GPU workaround。
-- IBus 在 UWSM/Hyprland 下的实际输入、keyring 是否随 GDM login 正确解锁、portal 文件选择与
-  screen sharing、notification D-Bus activation、polkit prompt、Qt5/Qt6 Wayland app。
+- Fcitx/Rime 的完整输入矩阵已移交 [专用首次试用手册](../runbooks/nixbox-fcitx5-rime-trial.md)；
+  本文仍要求实机验证 keyring 是否随 GDM login 正确解锁、portal 文件选择与 screen sharing、
+  notification D-Bus activation、polkit prompt 和 Qt5/Qt6 Wayland app。
 - Waybar 针对真实输出可用的模块；首轮不因猜测硬件而启用 battery/backlight/temperature。
 - `nixbox` 是否未来需要 UDisks2、UPower 或 power profile UI；当前明确不继承 GNOME 默认。
 - Hyprlock 解锁与手动 lock、外部 sleep 前 lock/唤醒后 DPMS；always-on 必须确认没有 idle suspend。
@@ -214,7 +215,9 @@ Hyprland systemd 被重新启用、GNOME session 仍注册、Hyprlock 无 PAM、
 - activation、注销、重启、GC、merge、auto-merge、把 Draft PR 标 ready；
 - GNOME desktop session、Plasma、第二个 display manager；
 - GPU 厂商设置、boot/filesystem/network/DNS/firewall/SSH/Tailscale/secret 变更；
-- Hyprland plugins、主题/rice、壁纸、截图工作流、clipboard history、输入重映射、Fcitx；
+- Hyprland plugins、主题/rice、壁纸、截图工作流、clipboard history、输入重映射；Fcitx 只可由
+  后续 Issue #169 的独立能力拥有，不能重新塞回 Hyprland capability；
 - Kitty、Rofi、Wofi、SwayNC、Dunst、Hyprlauncher 或其他重复 owner；
 - Flatpak、额外 portal、GNOME Files/UDisks UI、电源 profile UI；
-- 把任何 keyring、dconf、IBus、浏览器、应用 profile 或 session 数据纳入 Git/Nix Store。
+- 把任何 keyring、dconf、IBus、Fcitx/Rime 用户状态、浏览器、应用 profile 或 session 数据纳入
+  Git/Nix Store。

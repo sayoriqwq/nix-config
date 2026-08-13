@@ -102,6 +102,12 @@ server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的
 
 能力内部的 Home Manager 实现不配置 bootloader、磁盘或未公开的系统副作用。
 
+中文输入是第二个真实的双平台 adapter seam：共享的 Rime data-package implementation 固定
+`$out/share/rime-data` 与 overlay/过滤合同；Darwin adapter 保留外部 Fcitx5.app frontend，
+NixOS adapter 则使用锁定的原生 `i18n.inputMethod` 模块拥有 Fcitx package、Rime addon、默认组、
+会话环境与 XDG autostart。Home Manager 在两端只投影静态 leaves 和记录可写状态，不成为第二个
+输入法或 daemon owner。
+
 ### 3.5 Dotfiles 层
 
 优先顺序：
