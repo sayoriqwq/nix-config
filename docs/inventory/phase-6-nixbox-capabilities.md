@@ -135,3 +135,20 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 维护者再次单独批准重启后，`/run/current-system`、`/run/booted-system` 与 `/nix/var/nix/profiles/system` 全部解析到 `/nix/store/lribk269i2n29vxd964n7rf2i2vdfh4l-nixos-system-nixos-26.05.20260719.fd14620`，systemd-boot 当前条目为 `nixos-generation-6.conf`。系统状态为 `running`、failed unit 为 0，Home Manager 在本次 boot 成功激活。
 
 Phase 5 的三个用户目录快捷入口已在单独批准后精确删除；正式 `system-5-link` 仍保留并指向 Phase 5 closure，作为系统级回滚路径。该修复与清理均未删除应用可变数据。
+
+## 8. Phase 11 后维护增量：Fcitx 5 / Rime Ice 候选（#169）
+
+Issue #169 在历史 Phase 6 generation 之后新增一个**尚未 activation** 的候选 closure；本节不
+追溯改写 GNOME generation 6 或后续 Hyprland 候选的实机事实。目标 composition 从
+`hyprland-desktop` 中移除临时 IBus owner，改由独立 `chinese-input` adapter 单一声明 Fcitx
+5.1.19、`fcitx5-rime` 5.1.13、Rime Ice 2026.06.30、system defaults、toolkit environment 与
+package XDG autostart。Home Manager 不启用第二套 input-method package/service，只投影共享静态
+Rime leaves 并记录状态边界。
+
+Linux 新增的可变边界为 `~/.config/fcitx5` 与
+`~/.local/share/fcitx5/rime/{build,luna_pinyin.userdb,rime_ice.userdb,sync,installation.yaml,user.yaml}`。
+遗留 IBus/dconf 状态保留原样；NixOS generation rollback 既不删除这些路径，也不恢复试用写入。
+来源、验证和 STOP 条件见
+[Fcitx/Rime 来源映射](../plans/nixbox-fcitx5-rime-source-mapping.md)，未来实机动作见
+[首次试用手册](../runbooks/nixbox-fcitx5-rime-trial.md)。声明或构建成功都不代表真实 nixbox 已
+切换输入框架、完成 Rime deploy、logout/relogin、reboot 或真人输入验收。

@@ -186,19 +186,12 @@ end
 [Hypridle](https://wiki.hypr.land/0.55.0/Hypr-Ecosystem/hypridle/) 所述的 sleep 前锁屏与唤醒后
 DPMS 恢复仍应生效。本 Issue 不授权为测试而主动 sleep/wake。
 
-### 5.3 IBus 与 GNOME Keyring
+### 5.3 中文输入与 GNOME Keyring
 
-确认 IBus daemon 与当前 engine 可用：
-
-```fish
-ibus engine
-pgrep -a ibus-daemon
-```
-
-⌨️ 验证沿用的 IBus owner 存活；不要切换到 Fcitx 或新增输入重映射。
-
-在 Ghostty 与 Firefox 的普通文本框分别输入英文、数字、标点和常用快捷键，确认 `kb_layout=us`
-行为正常。该 smoke 只验证既有 IBus 路径，不改变输入框架。
+Issue #169 已用独立能力取代本手册最初保留的 IBus owner。Fcitx daemon、Rime engine、左右 Shift、
+Wayland/XWayland、GTK/Qt、密码安全与 userdb 持久性必须完整执行
+[nixbox Fcitx 5 / Rime Ice 首次试用手册](nixbox-fcitx5-rime-trial.md)，不能用旧的 `ibus engine`
+smoke，也不能把本节当作 activation、logout/relogin 或 deploy 授权。
 
 用不存在的属性做只读 Secret Service 查询，并确认服务可达；不创建测试 secret，不读取或输出已有
 secret。GDM 登录后不应再次要求单独解锁 keyring：
@@ -342,8 +335,10 @@ NixOS/Home Manager generation 能恢复声明式 system 与 Home Manager 配置�
 
 - `$XDG_RUNTIME_DIR/hypr`、Wayland socket、systemd user session、portal/PipeWire socket：易失运行态，
   注销/重启后重建，不备份。
-- dconf user database、IBus preferences/runtime：用户与 IBus 可变状态；generation rollback 不还原
-  试用期间的写入。
+- dconf user database 与遗留 IBus preferences/runtime：用户/旧 framework 可变状态；切换到 Fcitx
+  不清理，generation rollback 也不还原试用期间的写入。
+- `~/.config/fcitx5` 与 `~/.local/share/fcitx5/rime` 下的 build、userdb、sync、installation/user
+  state：Fcitx/Rime 可变状态；generation rollback 不恢复，处理边界见专用 Fcitx 手册。
 - XDG portal permission store 与 GDM 的 session choice/account state：由各自服务拥有；不会随 system
   generation 自动还原。
 - `~/.local/share/keyrings` 与登录解锁状态：敏感可变状态；禁止放入 Git/Nix Store，恢复依赖独立备份。

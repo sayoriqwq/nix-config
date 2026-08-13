@@ -52,23 +52,27 @@ let
     '';
   };
 in
-pkgs.runCommand "${lib.getName rimeDataPackage}-data-view"
+pkgs.runCommand "${lib.getName rimeDataPackage}-data"
   {
-    passthru = { inherit validator; };
+    passthru = {
+      inherit validator;
+      sourcePackage = rimeDataPackage;
+    };
   }
   ''
     source_root=${lib.escapeShellArg "${rimeDataPackage}/share/rime-data"}
+    data_root="$out/share/rime-data"
 
     ${lib.getExe validator} "$source_root"
 
-    mkdir -p "$out"
-    ${pkgs.coreutils}/bin/cp --recursive --symbolic-link "$source_root/." "$out/"
-    ${pkgs.findutils}/bin/find "$out" -type d -exec chmod u+w {} +
-    ${pkgs.coreutils}/bin/rm --recursive --force "$out/build"
-    install -m 0644 ${lib.escapeShellArg overlay} "$out/default.custom.yaml"
+    mkdir -p "$data_root"
+    ${pkgs.coreutils}/bin/cp --recursive --symbolic-link "$source_root/." "$data_root/"
+    ${pkgs.findutils}/bin/find "$data_root" -type d -exec chmod u+w {} +
+    ${pkgs.coreutils}/bin/rm --recursive --force "$data_root/build"
+    install -m 0644 ${overlay} "$data_root/default.custom.yaml"
 
-    if [ -e "$out/build" ] || [ -L "$out/build" ]; then
-      echo "rime-data-view: build directory escaped the filter" >&2
+    if [ -e "$data_root/build" ] || [ -L "$data_root/build" ]; then
+      echo "rime-data-package: build directory escaped the filter" >&2
       exit 1
     fi
   ''

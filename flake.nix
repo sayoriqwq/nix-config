@@ -309,6 +309,15 @@
             nixboxConfiguration = self.nixosConfigurations.nixbox;
             pkgs = nixboxPkgs;
           };
+          nixbox-chinese-input = import ./tests/nixbox/chinese-input.nix {
+            inherit username;
+            lib = nixboxPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = nixboxPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+            source = ./.;
+          };
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
           terminal-theme-policy = terminalThemePolicyFor nixboxPkgs;

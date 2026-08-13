@@ -19,6 +19,7 @@
     ../../modules/capabilities/localsend/darwin.nix
     ../../modules/capabilities/stable-workstation-access/darwin.nix
     ../../modules/capabilities/secret-deployment/darwin.nix
+    ../../modules/capabilities/chinese-input/darwin.nix
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -80,7 +81,6 @@
         ../../modules/home/capabilities/obsidian/darwin.nix
         ../../modules/home/capabilities/macos-user-applications.nix
         ../../modules/home/capabilities/macos-integrations.nix
-        ../../modules/home/capabilities/macos-chinese-input
         ../../modules/home/capabilities/ai-assisted-operations.nix
         ../../modules/home/capabilities/cloud-storage.nix
         ../../modules/home/capabilities/shortcut-reference.nix

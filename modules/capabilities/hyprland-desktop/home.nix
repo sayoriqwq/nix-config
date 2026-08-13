@@ -234,9 +234,9 @@ in
       }
       {
         path = "${config.home.homeDirectory}/.config/dconf/user";
-        owner = "dconf and IBus";
+        owner = "dconf clients";
         backup = "optional";
-        description = "Mutable user preferences retained for IBus and other dconf clients; system generation rollback does not restore this database.";
+        description = "Mutable preferences, including retained IBus history, remain user-owned; system generation rollback does not restore this database.";
       }
     ];
   };

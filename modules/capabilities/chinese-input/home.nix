@@ -6,16 +6,16 @@
 }:
 
 let
-  rimeDataView = import ./rime-data-view.nix { inherit lib pkgs; };
+  rimeDataPackage = import ./rime-data-package.nix { inherit lib pkgs; };
   homePath = relativePath: "${config.home.homeDirectory}/${relativePath}";
 in
 {
-  imports = [ ../../common/state-paths.nix ];
+  imports = [ ../../home/common/state-paths.nix ];
 
-  # Home Manager recursively links the view's leaves, so the Rime user-data
-  # root remains a real writable directory for deployment output and user data.
+  # Keep the Rime user-data root writable. Home Manager links only immutable
+  # leaves from the shared package into it on both supported frontends.
   xdg.dataFile."fcitx5/rime" = {
-    source = rimeDataView;
+    source = "${rimeDataPackage}/share/rime-data";
     recursive = true;
   };
 
@@ -60,19 +60,7 @@ in
       path = homePath ".config/fcitx5";
       owner = "Fcitx5";
       backup = "required";
-      description = "Fcitx5 owns its writable configuration and preferences; nix-config does not reconcile them.";
-    }
-    {
-      path = homePath "Library/fcitx5";
-      owner = "Fcitx5 macOS installer/updater";
-      backup = "separate-policy";
-      description = "Fcitx5 plugin payload, shared resources, and plugin-manager state remain externally owned.";
-    }
-    {
-      path = homePath "Library/Caches/org.fcitx.inputmethod.Fcitx5";
-      owner = "Fcitx5";
-      backup = "excluded";
-      description = "Rebuildable Fcitx5 macOS cache remains writable and outside the Nix store.";
+      description = "Fcitx5 owns its writable user configuration and preferences; nix-config never replaces the user root.";
     }
   ];
 }
