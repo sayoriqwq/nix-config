@@ -290,6 +290,13 @@
             scriptCommands =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
+          macbook-aerospace-policy = import ./tests/macos/aerospace-policy.nix {
+            casks = self.darwinConfigurations.macbook.config.homebrew.casks;
+            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = self.darwinConfigurations.macbook.pkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
           macbook-rime-data-layout = macbookRimeDataLayout;
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
           terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
