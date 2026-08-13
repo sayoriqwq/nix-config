@@ -81,6 +81,7 @@
         ../../modules/home/capabilities/obsidian/darwin.nix
         ../../modules/home/capabilities/macos-user-applications.nix
         ../../modules/home/capabilities/macos-integrations.nix
+        ../../modules/home/capabilities/aerospace-window-management.nix
         ../../modules/home/capabilities/ai-assisted-operations.nix
         ../../modules/home/capabilities/cloud-storage.nix
         ../../modules/home/capabilities/shortcut-reference.nix
