@@ -33,6 +33,7 @@ in
       after-login-command = [ ];
       auto-reload-config = false;
 
+      accordion-padding = 0;
       default-root-container-layout = "tiles";
       default-root-container-orientation = "auto";
       enable-normalization-flatten-containers = true;

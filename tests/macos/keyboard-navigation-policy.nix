@@ -205,6 +205,9 @@ assert lib.assertMsg (
   settings."default-root-container-layout" == "tiles"
 ) "AeroSpace must default to automatic tiling";
 assert lib.assertMsg (
+  settings."accordion-padding" == 0
+) "AeroSpace must not inherit upstream accordion padding";
+assert lib.assertMsg (
   settings.mode.main.binding == expectedMainBindings
 ) "AeroSpace main-mode bindings must exactly match the approved bare-Control map";
 assert lib.assertMsg (
@@ -238,6 +241,7 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
 
     grep -Fqx 'after-login-command = []' "${configFile}"
     grep -Fqx 'start-at-login = false' "${configFile}"
+    grep -Fqx 'accordion-padding = 0' "${configFile}"
     grep -Fqx '[mode.main.binding]' "${configFile}"
     grep -Fqx 'ctrl-esc = "enable off"' "${configFile}"
     grep -Fqx 'ctrl-left = "focus left"' "${configFile}"
