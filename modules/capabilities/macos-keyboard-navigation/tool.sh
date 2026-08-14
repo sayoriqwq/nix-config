@@ -205,7 +205,7 @@ extract_leaf() {
 
 leaf_exists() {
   local id="$1"
-  /usr/bin/plutil -extract "$(leaf_key "$id")" json -o - "$SYMBOLIC_PLIST" >/dev/null 2>&1
+  /usr/bin/plutil -type "$(leaf_key "$id")" "$SYMBOLIC_PLIST" >/dev/null 2>&1
 }
 
 leaf_json() {
@@ -262,44 +262,45 @@ make_disabled_leaf() {
 }
 
 raycast_audit() {
-  local actual expected
+  local actual_launcher actual_hyper_enabled actual_hyper_include_shift actual_hyper_key_code
+  local expected expected_launcher expected_hyper_enabled expected_hyper_include_shift expected_hyper_key_code
   local launcher_matches hyper_matches
 
-  actual="$(/usr/bin/plutil -convert json -o - "$RAYCAST_PLIST" 2>/dev/null | jq -cS .)" || {
-    message "Raycast UI-owned gate: plist is unreadable"
-    return 1
-  }
-  expected="$(jq -cS '.raycast' "$POLICY_FILE")" || return 1
-
-  if ! jq -e '
-    type == "object"
-    and (.raycastGlobalHotkey | type) == "string"
-    and (.raycast_hyperKey_state | type) == "object"
-    and (.raycast_hyperKey_state.enabled | type) == "boolean"
-    and (.raycast_hyperKey_state.includeShiftKey | type) == "boolean"
-    and (.raycast_hyperKey_state.keyCode | type) == "number"
-    and (.raycast_hyperKey_state.keyCode | floor) == .raycast_hyperKey_state.keyCode
-  ' <<<"$actual" >/dev/null; then
-    message "Raycast UI-owned gate: approved fields have unknown types or structure"
+  if ! actual_launcher="$(/usr/bin/plutil -extract raycastGlobalHotkey raw -expect string -n -o - "$RAYCAST_PLIST" 2>/dev/null)" ||
+    ! actual_hyper_enabled="$(/usr/bin/plutil -extract raycast_hyperKey_state.enabled raw -expect bool -n -o - "$RAYCAST_PLIST" 2>/dev/null)" ||
+    ! actual_hyper_include_shift="$(/usr/bin/plutil -extract raycast_hyperKey_state.includeShiftKey raw -expect bool -n -o - "$RAYCAST_PLIST" 2>/dev/null)" ||
+    ! actual_hyper_key_code="$(/usr/bin/plutil -extract raycast_hyperKey_state.keyCode raw -expect integer -n -o - "$RAYCAST_PLIST" 2>/dev/null)"; then
+    message "Raycast UI-owned gate: approved fields are missing, unreadable, or have unknown types"
     return 1
   fi
+  expected="$(jq -cS '.raycast' "$POLICY_FILE")" || return 1
+
   if ! jq -e '
     (.raycastGlobalHotkey | type) == "string"
     and (.raycast_hyperKey_state.enabled | type) == "boolean"
     and (.raycast_hyperKey_state.includeShiftKey | type) == "boolean"
     and (.raycast_hyperKey_state.keyCode | type) == "number"
+    and (.raycast_hyperKey_state.keyCode | floor) == .raycast_hyperKey_state.keyCode
   ' <<<"$expected" >/dev/null; then
     message "immutable Raycast policy has invalid approved-field types"
     return 1
   fi
 
-  launcher_matches="$(jq -nr --argjson actual "$actual" --argjson expected "$expected" \
-    '$actual.raycastGlobalHotkey == $expected.raycastGlobalHotkey')"
-  hyper_matches="$(jq -nr --argjson actual "$actual" --argjson expected "$expected" '
-    $actual.raycast_hyperKey_state.enabled == $expected.raycast_hyperKey_state.enabled
-    and $actual.raycast_hyperKey_state.includeShiftKey == $expected.raycast_hyperKey_state.includeShiftKey
-    and $actual.raycast_hyperKey_state.keyCode == $expected.raycast_hyperKey_state.keyCode
-  ')"
+  expected_launcher="$(jq -r '.raycastGlobalHotkey' <<<"$expected")"
+  expected_hyper_enabled="$(jq -r '.raycast_hyperKey_state.enabled' <<<"$expected")"
+  expected_hyper_include_shift="$(jq -r '.raycast_hyperKey_state.includeShiftKey' <<<"$expected")"
+  expected_hyper_key_code="$(jq -r '.raycast_hyperKey_state.keyCode' <<<"$expected")"
+
+  launcher_matches=false
+  hyper_matches=false
+  if [[ "$actual_launcher" == "$expected_launcher" ]]; then
+    launcher_matches=true
+  fi
+  if [[ "$actual_hyper_enabled" == "$expected_hyper_enabled" &&
+    "$actual_hyper_include_shift" == "$expected_hyper_include_shift" &&
+    "$actual_hyper_key_code" == "$expected_hyper_key_code" ]]; then
+    hyper_matches=true
+  fi
 
   if [[ "$launcher_matches" != "true" ]]; then
     message "Raycast UI-owned gate drift: launcher must be changed in Raycast Settings"

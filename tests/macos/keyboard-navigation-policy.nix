@@ -388,7 +388,7 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
       fi
     done
 
-    test "$(/usr/bin/plutil -convert json -o - "$raycastPlist" | jq -S -c .)" = "$(/usr/bin/plutil -convert json -o - "$TMPDIR/raycast-before.plist" | jq -S -c .)"
+    cmp -s "$raycastPlist" "$TMPDIR/raycast-before.plist"
 
     /usr/bin/plutil -extract AppleSymbolicHotKeys.32 xml1 -o "$TMPDIR/id-32-after.plist" "$symbolicPlist"
     cp "$TMPDIR/id-32-after.plist" "$TMPDIR/id-32-third-state.plist"
@@ -438,6 +438,27 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
     test "$unknownStatus" -eq 1
     test ! -e "$unknownState/active.json"
     test "$(/usr/bin/plutil -convert json -o - "$unknownPlist" | jq -S -c .)" = "$unknownBefore"
+
+    opaqueOptionalDomain="$TMPDIR/com.apple.symbolichotkeys-opaque-optional"
+    opaqueOptionalPlist="$opaqueOptionalDomain.plist"
+    opaqueOptionalState="$TMPDIR/navigation-state-opaque-optional"
+    cp "${./fixtures/keyboard-navigation-symbolic.plist}" "$opaqueOptionalPlist"
+    chmod u+w "$opaqueOptionalPlist"
+    /usr/bin/plutil -insert AppleSymbolicHotKeys.120.unmanagedData -data AQ== "$opaqueOptionalPlist"
+    cp "$opaqueOptionalPlist" "$TMPDIR/opaque-optional-before.plist"
+
+    export MACOS_KEYBOARD_NAVIGATION_SYMBOLIC_DOMAIN="$opaqueOptionalDomain"
+    export MACOS_KEYBOARD_NAVIGATION_SYMBOLIC_PLIST="$opaqueOptionalPlist"
+    export MACOS_KEYBOARD_NAVIGATION_RAYCAST_PLIST="$raycastPlist"
+    export MACOS_KEYBOARD_NAVIGATION_STATE_DIR="$opaqueOptionalState"
+
+    set +e
+    "$navigationTool" audit > "$TMPDIR/audit-opaque-optional.txt" 2>&1
+    opaqueOptionalStatus=$?
+    set -e
+    test "$opaqueOptionalStatus" -eq 1
+    test ! -e "$opaqueOptionalState/active.json"
+    cmp -s "$opaqueOptionalPlist" "$TMPDIR/opaque-optional-before.plist"
 
     faultDomain="$TMPDIR/com.apple.symbolichotkeys-partial-failure"
     faultPlist="$faultDomain.plist"

@@ -13,6 +13,10 @@
 		<key>keyCode</key>
 		<integer>57</integer>
 	</dict>
+	<key>unmanagedData</key>
+	<data>AQ==</data>
+	<key>unmanagedDate</key>
+	<date>2026-08-14T00:00:00Z</date>
 	<key>sentinel</key>
 	<string>Raycast remains application-owned</string>
 </dict>
