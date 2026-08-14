@@ -20,7 +20,7 @@ RECEIPT_TEMP=""
 LOCK_HELD=0
 
 usage() {
-  echo "usage: macos-keyboard-navigation audit|reconcile|rollback|policy" >&2
+  echo "usage: macos-keyboard-navigation audit|reconcile [--expect-changed ID[,ID...]]|rollback|policy" >&2
   exit 64
 }
 
@@ -525,10 +525,73 @@ verify_changed_side() {
   done
 }
 
+parse_expected_changed_ids() {
+  local raw="$1"
+  local id existing
+
+  if [[ ! "$raw" =~ ^(0|[1-9][0-9]*)(,(0|[1-9][0-9]*))*$ ]]; then
+    message "expected changed IDs must be a comma-separated list of canonical integers"
+    return 1
+  fi
+  IFS=',' read -r -a EXPECTED_CHANGED_IDS <<<"$raw"
+  for id in "${EXPECTED_CHANGED_IDS[@]}"; do
+    if ! jq -e --argjson id "$id" '
+      ([27] + .symbolicHotkeys.requiredDisable + .symbolicHotkeys.disableIfPresent)
+      | index($id) != null
+    ' "$POLICY_FILE" >/dev/null; then
+      message "expected changed ID $id is outside the exact managed set"
+      return 1
+    fi
+    for existing in "${VALIDATED_EXPECTED_CHANGED_IDS[@]}"; do
+      if [[ "$existing" == "$id" ]]; then
+        message "expected changed IDs must not contain duplicates: $id"
+        return 1
+      fi
+    done
+    VALIDATED_EXPECTED_CHANGED_IDS+=("$id")
+  done
+}
+
+format_id_set() {
+  local joined
+  local IFS=,
+  joined="$*"
+  printf '[%s]' "$joined"
+}
+
+assert_expected_changed_ids() {
+  local expected actual found
+
+  if [[ "${#CHANGED_IDS[@]}" -ne "${#VALIDATED_EXPECTED_CHANGED_IDS[@]}" ]]; then
+    message "expected changed ID set $(format_id_set "${VALIDATED_EXPECTED_CHANGED_IDS[@]}") does not match observed $(format_id_set "${CHANGED_IDS[@]}"); nothing was written"
+    return 1
+  fi
+  for expected in "${VALIDATED_EXPECTED_CHANGED_IDS[@]}"; do
+    found=0
+    for actual in "${CHANGED_IDS[@]}"; do
+      if [[ "$actual" == "$expected" ]]; then
+        found=1
+        break
+      fi
+    done
+    if [[ "$found" -ne 1 ]]; then
+      message "expected changed ID set $(format_id_set "${VALIDATED_EXPECTED_CHANGED_IDS[@]}") does not match observed $(format_id_set "${CHANGED_IDS[@]}"); nothing was written"
+      return 1
+    fi
+  done
+}
+
 reconcile() {
+  local enforce_expected_changed="${1:-0}"
+  local expected_changed_raw="${2-}"
   local scan_status=0
   validate_target_mode || return 1
   require_darwin_tools || return 1
+  EXPECTED_CHANGED_IDS=()
+  VALIDATED_EXPECTED_CHANGED_IDS=()
+  if [[ "$enforce_expected_changed" -eq 1 ]]; then
+    parse_expected_changed_ids "$expected_changed_raw" || return 1
+  fi
   check_process_precondition || return 1
   raycast_audit || return $?
   ensure_state_dir || return 1
@@ -542,6 +605,9 @@ reconcile() {
   scan_symbolic_policy quiet || scan_status=$?
   if [[ "$scan_status" -eq 1 ]]; then
     return 1
+  fi
+  if [[ "$enforce_expected_changed" -eq 1 ]]; then
+    assert_expected_changed_ids || return 1
   fi
   if [[ "${#CHANGED_IDS[@]}" -eq 0 ]]; then
     message "managed symbolic hotkeys and the Raycast UI-owned gate are already compliant"
@@ -741,21 +807,33 @@ policy() {
   jq . "$POLICY_FILE"
 }
 
-if [[ "$#" -ne 1 ]]; then
+if [[ "$#" -lt 1 ]]; then
   usage
 fi
 
-case "$1" in
+command="$1"
+shift
+
+case "$command" in
   audit)
+    [[ "$#" -eq 0 ]] || usage
     audit
     ;;
   reconcile)
-    reconcile
+    if [[ "$#" -eq 0 ]]; then
+      reconcile 0
+    elif [[ "$#" -eq 2 && "$1" == "--expect-changed" ]]; then
+      reconcile 1 "$2"
+    else
+      usage
+    fi
     ;;
   rollback)
+    [[ "$#" -eq 0 ]] || usage
     rollback
     ;;
   policy)
+    [[ "$#" -eq 0 ]] || usage
     policy
     ;;
   *)

@@ -332,6 +332,23 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
     set -e
     test "$auditBeforeStatus" -eq 2
 
+    expectedSetBefore="$(/usr/bin/plutil -convert json -o - "$symbolicPlist" | jq -S -c .)"
+    set +e
+    "$navigationTool" reconcile --expect-changed "" > "$TMPDIR/reconcile-empty-expected-set.txt" 2>&1
+    emptyExpectedSetStatus=$?
+    set -e
+    test "$emptyExpectedSetStatus" -eq 1
+    test ! -e "$stateDir/active.json"
+    test "$(/usr/bin/plutil -convert json -o - "$symbolicPlist" | jq -S -c .)" = "$expectedSetBefore"
+
+    set +e
+    "$navigationTool" reconcile --expect-changed 27 > "$TMPDIR/reconcile-unexpected-set.txt" 2>&1
+    unexpectedSetStatus=$?
+    set -e
+    test "$unexpectedSetStatus" -eq 1
+    test ! -e "$stateDir/active.json"
+    test "$(/usr/bin/plutil -convert json -o - "$symbolicPlist" | jq -S -c .)" = "$expectedSetBefore"
+
     mkdir -p "$stateDir"
     printf '%s\n' receipt-temp-sentinel > "$TMPDIR/receipt-temp-victim"
     ln -s "$TMPDIR/receipt-temp-victim" "$stateDir/.active.json.tmp"
@@ -418,6 +435,31 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
     auditRollbackStatus=$?
     set -e
     test "$auditRollbackStatus" -eq 2
+
+    exactDomain="$TMPDIR/com.apple.symbolichotkeys-exact-set"
+    exactPlist="$exactDomain.plist"
+    exactState="$TMPDIR/navigation-state-exact-set"
+    cp "${./fixtures/keyboard-navigation-symbolic.plist}" "$exactPlist"
+    chmod u+w "$exactPlist"
+    for id in 32 79 118 120; do
+      /usr/bin/plutil -replace "AppleSymbolicHotKeys.$id.enabled" -bool false "$exactPlist"
+    done
+    cp "$exactPlist" "$TMPDIR/exact-set-before.plist"
+
+    export MACOS_KEYBOARD_NAVIGATION_SYMBOLIC_DOMAIN="$exactDomain"
+    export MACOS_KEYBOARD_NAVIGATION_SYMBOLIC_PLIST="$exactPlist"
+    export MACOS_KEYBOARD_NAVIGATION_RAYCAST_PLIST="$raycastPlist"
+    export MACOS_KEYBOARD_NAVIGATION_STATE_DIR="$exactState"
+
+    "$navigationTool" reconcile --expect-changed 27
+    jq -e '(.leaves | map(.id)) == [27]' "$exactState/active.json"
+    /usr/bin/plutil -extract AppleSymbolicHotKeys.27 json -o "$TMPDIR/exact-id-27.json" "$exactPlist"
+    jq -e '.enabled == true and .value.type == "standard" and .value.parameters == [32, 49, 1835008]' "$TMPDIR/exact-id-27.json"
+    test "$(/usr/bin/plutil -convert json -o - "$exactPlist" | jq -cS '.AppleSymbolicHotKeys | del(."27")')" = \
+      "$(/usr/bin/plutil -convert json -o - "$TMPDIR/exact-set-before.plist" | jq -cS '.AppleSymbolicHotKeys | del(."27")')"
+    "$navigationTool" rollback
+    test "$(/usr/bin/plutil -convert json -o - "$exactPlist" | jq -S -c .)" = \
+      "$(/usr/bin/plutil -convert json -o - "$TMPDIR/exact-set-before.plist" | jq -S -c .)"
 
     unknownDomain="$TMPDIR/com.apple.symbolichotkeys-unknown"
     unknownPlist="$unknownDomain.plist"

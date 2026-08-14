@@ -106,6 +106,16 @@ macos-keyboard-navigation audit
 
 🎛️ 逐叶写入已批准的 system hotkeys，保存 exact rollback receipt，并立即回读。
 
+若当次 action card 已把允许变化进一步收窄为 exact ID 集合，必须把它作为写前事务前置条件。例如只
+允许 ID 27 时使用：
+
+```fish
+macos-keyboard-navigation reconcile --expect-changed 27
+macos-keyboard-navigation audit
+```
+
+🔒 实际扫描出的变化集合与获批集合不完全相同时，在 receipt 与 preference 写入前停止。
+
 工具在
 `~/.local/state/nix-config/macos-keyboard-navigation/active.json` 保存本次实际改动 leaves 的
 exact before/after typed XML、目标 identity 与 ID 清单。目录和文件是 owner-only；receipt 存在时再次
