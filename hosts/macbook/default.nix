@@ -10,7 +10,7 @@
     ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
     ../../modules/darwin/shell.nix
-    ../../modules/capabilities/raycast/darwin.nix
+    ../../modules/capabilities/macos-keyboard-navigation/darwin.nix
     ../../modules/capabilities/macos-legacy-applications/darwin.nix
     ../../modules/capabilities/google-chrome/darwin.nix
     ../../modules/capabilities/clash-verge-rev/darwin.nix
@@ -81,7 +81,6 @@
         ../../modules/home/capabilities/obsidian/darwin.nix
         ../../modules/home/capabilities/macos-user-applications.nix
         ../../modules/home/capabilities/macos-integrations.nix
-        ../../modules/home/capabilities/aerospace-window-management.nix
         ../../modules/home/capabilities/ai-assisted-operations.nix
         ../../modules/home/capabilities/cloud-storage.nix
         ../../modules/home/capabilities/shortcut-reference.nix

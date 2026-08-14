@@ -1,5 +1,10 @@
 # macOS AeroSpace 平铺窗口管理试验研究
 
+> **历史方案：** Issue #173 已把本文的 `cmd-alt-ctrl` 合并 Hyper 方案改为裸 `Ctrl`，并将
+> AeroSpace、Raycast 与 macOS symbolic hotkeys 收入同一纵向能力。本文只保留 #171 当时的
+> 研究证据；当前合同与操作步骤见
+> [macOS 键盘导航手册](../runbooks/macos-keyboard-navigation.md)。
+
 ## 1. 范围与结论
 
 本文为 Issue [#171](https://github.com/sayoriqwq/nix-config/issues/171) 的实现前研究，目标是只在

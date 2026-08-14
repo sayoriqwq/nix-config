@@ -48,6 +48,10 @@
 
 能力模块对主机公开的完整 interface，包括提供的行为、软件与配置所有权、状态路径、系统服务或网络影响，以及必要的人工关卡。安全影响必须明确可见，不能因纵向封装而隐藏。
 
+### 副作用偏移（Side-effect Drift）
+
+能力合同中的期望与应用或系统的外部运行态事实不一致；处理这种偏移必须明确 owner、readback，以及 control 或 human gate。这个术语不表示所有外部状态都应由 Nix 自动 reconcile。
+
 ### AI 辅助运维能力（AI-assisted operations capability）
 
 为本地 coding agent 提供命令输出压缩、内容检查、不依赖项目环境的基础 Python

@@ -34,10 +34,9 @@
 | 工作站稳定访问 | 是 | 是 | 否 | Tailscale + MagicDNS 只承担 macbook→nixbox transport；native OpenSSH key-only/host key 继续认证，tmux 恢复断线现场。macbook 只用 Standalone cask；nixbox 使用锁定 NixOS service、machine name `nixbox`，NixOS firewall 只新增 UDP 41641，tailscaled 另按 vendor 默认维护 overlay iptables chains；server 排除。登录态、MagicDNS、Grants、key expiry 和 SSH alias 均在外部人工关卡。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Clash、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
-| Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
+| macOS 键盘导航 | 是（待实机激活与 reconcile） | 否 | 否 | 一个 Darwin capability 统一拥有 Raycast cask、锁定源码中的 7 个 Script Commands、裸 `Ctrl` AeroSpace bindings 与相关 macOS symbolic-hotkey policy。Raycast Settings、数据库和 TCC 继续外置；命令只审计 Raycast 的 exact launcher/Hyper 事实。AeroSpace 不自动启动，system leaves 只允许在单独批准后逐叶 reconcile，并保留 exact CAS rollback receipt；generation rollback 不替代外部偏好 rollback。 |
 | 中文输入 | 是 | 是 | 否 | 两个工作站按各自锁定 package set 构建同一个参数化 Rime Ice 2026.06.30 静态 data package，排除 `build`/可变名称、只启用 `rime_ice`、左右 Shift 只切 Rime 内部 mode，并以 recursive leaves 保持用户根可写。macOS frontend 继续由官方 Fcitx5.app/installer 与人工偏好拥有；nixbox 由 NixOS 单一拥有 Fcitx 5.1.19、`fcitx5-rime` 5.1.13、system defaults、toolkit environment 与 XDG autostart，HM 输入法 module/daemon 保持关闭。server 排除。两个平台的 activation、deploy 与真人输入仍是独立人工关卡。 |
-| AeroSpace 平铺工作区试验 | 是（待实机激活） | 否 | 否 | 纯 Home Manager 能力拥有锁定 AeroSpace package 与 `~/.aerospace.toml`；消费 Raycast 生成、不含 Shift 的 Caps Lock Hyper，但不接管 Raycast Settings。首轮只声明平铺、方向聚焦、数字工作区、独立 Shift 移窗层、浮动切换与关闭接管，禁用 launchd/登录启动，不声明应用例外、显示器绑定、外部回调或 SketchyBar；Accessibility、首次启动、实机验证与回滚均保留人工关卡。 |
-| macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
+| macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已进入 macOS 键盘导航 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |

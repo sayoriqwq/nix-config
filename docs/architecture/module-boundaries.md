@@ -80,6 +80,13 @@ macOS installer/cache 状态边界，不安装 frontend；NixOS adapter 单一�
 Rime addon、system defaults、session environment 与 package XDG autostart。Host 只能 import
 对应 adapter，不直接 import data-package 或 home primitive；server 不组合该 seam。
 
+macOS 键盘导航的纵向 seam 位于 `modules/capabilities/macos-keyboard-navigation/`：macbook
+只 import Darwin adapter 一次，内部同时组合 Raycast cask/源码部署、AeroSpace 用户配置与
+macOS symbolic-hotkey 副作用合同。Raycast 私有设置只读审计，AeroSpace 不自动启动；系统
+快捷键不得进入通用 `modules/darwin/defaults.nix`，也不得在 activation 中写入。获批的人工
+reconcile 只逐叶合并 Issue #173 列出的 ID，并以 exact baseline 与 CAS 提供独立 rollback；
+generation rollback 不恢复这些外部运行态 leaves。
+
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
 ## 4. Import 方向
