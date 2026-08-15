@@ -90,6 +90,7 @@ let
     ctrl-down = "focus down";
     ctrl-up = "focus up";
     ctrl-right = "focus right";
+    ctrl-tab = "layout accordion tiles";
     ctrl-1 = "workspace 1";
     ctrl-2 = "workspace 2";
     ctrl-3 = "workspace 3";
@@ -247,6 +248,7 @@ pkgs.runCommand "macbook-keyboard-navigation-policy-check"
     grep -Fqx 'ctrl-left = "focus left"' "${configFile}"
     grep -Fqx 'ctrl-0 = "workspace 10"' "${configFile}"
     grep -Fqx 'ctrl-shift-0 = "move-node-to-workspace 10"' "${configFile}"
+    grep -Fqx 'ctrl-tab = "layout accordion tiles"' "${configFile}"
     grep -Fqx 'ctrl-v = "layout floating tiling"' "${configFile}"
 
     if grep -Eiq 'cmd-alt-ctrl|^\[mode\.move|workspace-to-monitor-force-assignment|exec-on-workspace-change|sketchybar' "${configFile}"; then

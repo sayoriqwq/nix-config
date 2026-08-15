@@ -48,6 +48,7 @@ in
           "${modifier}-down" = "focus down";
           "${modifier}-up" = "focus up";
           "${modifier}-right" = "focus right";
+          "${modifier}-tab" = "layout accordion tiles";
           "${modifier}-v" = "layout floating tiling";
           "${modifier}-esc" = "enable off";
         }

@@ -22,6 +22,7 @@ system preference reconcile、首次启动、Accessibility 和真人 smoke 是�
 | 聚焦 AeroSpace 窗口 | `Ctrl+方向键` | AeroSpace 配置；冲突的 macOS leaves 逐叶让位 |
 | 切换 AeroSpace workspace | `Ctrl+1…0` | AeroSpace 配置；冲突的 macOS leaves 逐叶让位 |
 | 移动窗口 | `Ctrl+Shift+1…0` | AeroSpace 配置 |
+| 切换平铺 / accordion | `Ctrl+Tab` | AeroSpace 配置；进入 accordion 后用 `Ctrl+方向键` 切换当前窗口 |
 | 切换 floating / tiling | `Ctrl+V` | AeroSpace 配置 |
 | 停止 AeroSpace 接管 | `Ctrl+Esc` | AeroSpace 配置；恢复只能走菜单栏或 CLI |
 
