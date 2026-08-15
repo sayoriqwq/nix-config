@@ -1,4 +1,4 @@
-# Raycast 当前配置盘点
+# Raycast 配置盘点（2026-08-03 快照）
 
 - **盘点日期：** 2026-08-03
 - **目标应用：** Raycast `1.104.24`
@@ -9,6 +9,13 @@
   Raycast Settings 中所有已修改内容的权威边界；DB Tunnel 与 `autossh` 已废弃，Yume command
   已停用，三项相关源码文件均已删除
 - **关联研究：** [Raycast 声明式配置研究](../plans/raycast-declarative-configuration-research.md)
+
+> **后续偏移：** 本快照中的 Hyper 盘点已被 2026-08-14 的 exact plist readback 推翻：当前
+> `raycast_hyperKey_state` 为 `enabled = true`、`keyCode = 57`、`includeShiftKey = false`，即
+> Caps Lock 产生不含 Shift 的 `Control+Option+Command`。当前意图、system leaves、调控与回滚
+> 以 [macOS 键盘导航手册](../runbooks/macos-keyboard-navigation.md) 和
+> [副作用偏移讨论记录](../plans/macos-side-effect-drift-coordination.md) 为准。下文保留为当时快照，
+> 不得再作为 live shortcut 前置事实或操作指令。
 
 ## 1. 摘要
 
