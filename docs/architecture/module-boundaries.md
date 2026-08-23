@@ -84,6 +84,7 @@ Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports
 | `operations/server-recovery/` | test-only NixOS graph、隔离 VM runner、disko/nixos-anywhere 与 `runNixOSTest` wiring | production target 参数、真实网络/SSH/disk action、被 production host import |
 | `checks/server-recovery/` | 从 production/Operation 公开配置观察 policy 与 runner 边界 | grep 源码、复制旧 test implementation、production 配置所有权 |
 | `checks/terminal-work/` | 获批的 `fzf.configure` public contribution 行为 | `IntentState` shape、pipeline order、目录/import 数量 |
+| `checks/code-development/` | 获批的 `zed.addTask` public contribution 行为 | `IntentState` shape、pipeline order、Intent 内部列表 |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
 | `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
@@ -135,7 +136,7 @@ flake output
 - Validation graph 可以 import production declarations；production host 不得反向 import `checks/`、`operations/` 或 test-only module。
 - 一个 adapter 表示假设，两个真实变化才证明 seam；但已经批准、将在下一 Phase 组合的第二平台 adapter 可以先在合同文档中记录，不能提前启用其副作用。
 
-`terminal-work` 是首个真实 Intent：三台 Host 都在两个原生 import 位置消费同一 realized result。后续 Wave 3 task 可提交自己的窄 host integration hunk，但不得修改 `intents/lib.nix`、现有 Intent caller 约定或其他 task 的 Software owner；共享 import-list 冲突由 Lead 合并。
+`terminal-work` 是首个真实 Intent：三台 Host 都在两个原生 import 位置消费同一 realized result。`code-development` 随后让两个工作站显式选择 Zed、Git 与 LazyGit，并通过 `zed.addTask` 贡献 LazyGit task；Software 不反向依赖 Intent。后续 Wave 3 task 可提交自己的窄 host integration hunk，但不得修改 `intents/lib.nix`、现有 Intent caller 约定或其他 task 的 Software owner；共享 import-list 冲突由 Lead 合并。
 
 ## 5. 状态、参数与共享值
 
@@ -215,7 +216,7 @@ Server 已从 Ubuntu 直接替换为最小 NixOS，系统基线与业务能力�
 
 合法：
 
-- macbook 在 Home Manager composition 中显式 import `git-foundation.nix` 与 `github-collaboration.nix`，server 只选择前者。
+- macbook 与 nixbox 通过 `code-development` Intent 选择 `git.version-control`，server 则直接选择同一个 Software Capability；GitHub collaboration 保持工作站专属。
 - LocalSend Darwin adapter 附加用户 package 与状态路径；Phase 6 的 NixOS adapter 还公开 TCP/UDP 53317 firewall 规则。
 - Phase 5.5 重构 macbook 能力 interface，同时保持 nixbox Phase 5 output 不变。
 

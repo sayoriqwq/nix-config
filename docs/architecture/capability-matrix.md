@@ -26,6 +26,7 @@
 | Server 深度诊断 | 否 | 否 | 是 | 系统级提供 `lsof`、`dig`、`mtr`、`tcpdump` 与 `strace`；不启用服务、不增加 listener 或 firewall 规则，抓包和跨进程追踪按需经 sudo。 |
 | 工作站开发运行时 | 是 | 是 | 否 | mise 管 Node/Bun/pnpm，uv 管 Python，direnv 进入项目环境。 |
 | macOS 开发运行时试点 | 是 | 否 | 否 | 保留 macbook 现有 Erlang/Elixir mise defaults，不随工作站能力迁移。 |
+| Pinshift 开发入口 | 是 | 否 | 否 | 仅提供全局 `pinshift` 转发命令；checkout 缺失时明确失败。源码、项目依赖、构建、签名、Keychain、Controller 与设备操作保持仓库外，activation 不执行这些动作。 |
 | 终端文件工作流 | 是 | 是 | 是 | Yazi；server 用于只读浏览与用户可写文件操作，不接管 production 数据。 |
 | Helix | 是 | 是 | 是 | 备用终端编辑器；server 上用于临时记录和获批配置操作，不把生成的 `/etc` 状态当作配置源。 |
 | Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish；共享配置引用 Maple Mono NF-CN，macbook 由 nix-darwin 提供字体，nixbox 由 Ghostty Home Manager capability 与用户 fontconfig 提供，server 不安装。 |
@@ -58,7 +59,7 @@
 
 ## 当前状态
 
-- 三台 Host 已通过 realized `terminal-work` Intent 组合终端 Software Capabilities；其余工作站能力仍按后续 V3 Issue 从现有显式 imports 逐批迁移。
+- 三台 Host 已通过 realized `terminal-work` Intent 组合终端 Software Capabilities；两个工作站另通过 `code-development` 与各自的 `ai-coding` 组合选择代码/AI Software，server 直接选择 `git.version-control`，Pinshift 只由 macbook 直接选择。其余工作站能力仍按后续 V3 Issue 从现有显式 imports 逐批迁移。
 - macbook 的共享 Rime 静态声明源自已合并的 #140/PR #142；维护者已在获批窗口完成
   `system-46-link` activation、一次 Rime deploy 与静态/可变边界回读，后续 #143/#145/#147
   又完成 Shift/fallback 所有权调整及 Squirrel 遗留退役，#147 Gate D 记录真人输入整体 PASS。

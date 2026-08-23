@@ -6,7 +6,10 @@
 }:
 
 let
+  aiCoding = import ../../intents/ai-coding { inherit lib; };
+  codeDevelopment = import ../../intents/code-development { inherit lib; };
   terminalWork = import ../../intents/terminal-work { inherit lib; };
+  workstationHomeModules = codeDevelopment.homeModules ++ aiCoding.nixbox.homeModules;
 in
 {
   # Nix chooses substituters by their explicit priority, not list position.
@@ -23,7 +26,6 @@ in
     ../../modules/capabilities/hyprland-desktop/nixos.nix
     ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
-    ../../modules/capabilities/zed-editor/nixos.nix
     ../../modules/capabilities/google-chrome/nixos.nix
     ../../modules/capabilities/clash-verge-rev/nixos.nix
     ../../modules/capabilities/termius/nixos.nix
@@ -68,24 +70,24 @@ in
     useUserPackages = true;
 
     users.${username} = {
-      imports = terminalWork.homeModules ++ [
-        ../../software/fish/capabilities/interactive-shell/home.nix
-        ../../modules/home/capabilities/herdr.nix
-        ../../software/atuin/capabilities/shell-history/home.nix
-        ../../modules/home/capabilities/git-foundation.nix
-        ../../modules/home/capabilities/github-collaboration.nix
-        ../../software/nh/capabilities/nix-operations/home.nix
-        ../../software/pay-respects/capabilities/command-correction/home.nix
-        ../../software/btop/capabilities/system-monitor/home.nix
-        ../../software/fastfetch/capabilities/system-overview/home.nix
-        ../../modules/home/capabilities/development-runtime.nix
-        ../../modules/home/capabilities/linux-ai-assisted-operations.nix
-        ../../software/yazi/capabilities/terminal-file-manager/home.nix
-        ../../software/helix/capabilities/terminal-editor/home.nix
-        ../../modules/home/capabilities/ghostty-terminal.nix
-        ../../modules/home/capabilities/obsidian/linux.nix
-        ../../modules/home/capabilities/shortcut-reference.nix
-      ];
+      imports =
+        terminalWork.homeModules
+        ++ workstationHomeModules
+        ++ [
+          ../../software/fish/capabilities/interactive-shell/home.nix
+          ../../software/atuin/capabilities/shell-history/home.nix
+          ../../modules/home/capabilities/github-collaboration.nix
+          ../../software/nh/capabilities/nix-operations/home.nix
+          ../../software/pay-respects/capabilities/command-correction/home.nix
+          ../../software/btop/capabilities/system-monitor/home.nix
+          ../../software/fastfetch/capabilities/system-overview/home.nix
+          ../../modules/home/capabilities/development-runtime.nix
+          ../../software/yazi/capabilities/terminal-file-manager/home.nix
+          ../../software/helix/capabilities/terminal-editor/home.nix
+          ../../modules/home/capabilities/ghostty-terminal.nix
+          ../../modules/home/capabilities/obsidian/linux.nix
+          ../../modules/home/capabilities/shortcut-reference.nix
+        ];
 
       home = {
         inherit username;

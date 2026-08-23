@@ -47,7 +47,7 @@ WezTerm 明确保留 `/bin/zsh -l`，不迁移到 Fish。Ghostty + Zsh 与 WezTe
 | WezTerm macOS 应用 | nix-darwin Homebrew cask | `modules/darwin/homebrew.nix` |
 | `~/.wezterm.lua` | Home Manager | `modules/home/darwin/wezterm/` |
 | `~/.zshrc`、`~/.zprofile`、`~/.zshenv` | Home Manager | `modules/home/darwin/shells/zsh.nix` |
-| Fish 与 Zsh 的 `v`、`z` | Home Manager | `modules/home/capabilities/macos-vscode-compatibility.nix`、`modules/home/capabilities/zed-editor.nix` |
+| Fish 与 Zsh 的 `v`、`z` | Home Manager | `modules/home/capabilities/macos-vscode-compatibility.nix`、`software/zed/capabilities/gui-editor/home.nix` |
 | `~/.zhistory` 与其他 mutable state | 本机可写数据 | 不进入 Nix Store |
 
 `modules/home/darwin.nix` 只组合模块。WezTerm 的基础设置、按键与主题分别保存在 `settings.nix`、`keybindings.nix` 与 `theme.nix`，由 Nix 生成完整 Lua；没有启用会无条件安装 Nixpkgs WezTerm 的 `programs.wezterm`。Home Manager 的 Zsh 模块会把 Nix Zsh 放入用户 profile 以提供模块依赖，但 WezTerm 的 `default_prog` 仍精确执行 macOS `/bin/zsh -l`。

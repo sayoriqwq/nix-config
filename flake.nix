@@ -147,6 +147,12 @@
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
+      zedAddTaskCheck = import ./checks/code-development/zed-add-task.nix {
+        homeManager = home-manager-darwin;
+        inherit intentLib;
+        inherit (darwinPkgs) lib;
+        pkgs = darwinPkgs;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -221,6 +227,7 @@
         aarch64-darwin = {
           fzf-configure = fzfConfigureCheck;
           macbook-system = self.darwinConfigurations.macbook.system;
+          zed-add-task = zedAddTaskCheck;
         };
         x86_64-linux = {
           nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;

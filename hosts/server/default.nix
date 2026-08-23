@@ -6,6 +6,9 @@
 }:
 
 let
+  intentLib = import ../../intents/lib.nix;
+  git = import ../../software/git { inherit intentLib; };
+  gitFoundation = intentLib.realize (git.versionControl intentLib.empty);
   terminalWork = import ../../intents/terminal-work { inherit lib; };
 in
 {
@@ -46,17 +49,19 @@ in
     useUserPackages = true;
 
     users.${username} = {
-      imports = terminalWork.homeModules ++ [
-        ../../software/fish/capabilities/interactive-shell/home.nix
-        ../../software/atuin/capabilities/shell-history/home.nix
-        ../../modules/home/capabilities/git-foundation.nix
-        ../../software/nh/capabilities/nix-operations/home.nix
-        ../../software/pay-respects/capabilities/command-correction/home.nix
-        ../../software/btop/capabilities/system-monitor/home.nix
-        ../../software/fastfetch/capabilities/system-overview/home.nix
-        ../../software/yazi/capabilities/terminal-file-manager/home.nix
-        ../../software/helix/capabilities/terminal-editor/home.nix
-      ];
+      imports =
+        terminalWork.homeModules
+        ++ gitFoundation.homeModules
+        ++ [
+          ../../software/fish/capabilities/interactive-shell/home.nix
+          ../../software/atuin/capabilities/shell-history/home.nix
+          ../../software/nh/capabilities/nix-operations/home.nix
+          ../../software/pay-respects/capabilities/command-correction/home.nix
+          ../../software/btop/capabilities/system-monitor/home.nix
+          ../../software/fastfetch/capabilities/system-overview/home.nix
+          ../../software/yazi/capabilities/terminal-file-manager/home.nix
+          ../../software/helix/capabilities/terminal-editor/home.nix
+        ];
 
       home = {
         inherit username;
