@@ -84,7 +84,7 @@ Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports
 | `operations/server-recovery/` | test-only NixOS graph、隔离 VM runner、disko/nixos-anywhere 与 `runNixOSTest` wiring | production target 参数、真实网络/SSH/disk action、被 production host import |
 | `checks/server-recovery/` | 从 production/Operation 公开配置观察 policy 与 runner 边界 | grep 源码、复制旧 test implementation、production 配置所有权 |
 | `checks/terminal-work/` | 获批的 `fzf.configure` public contribution 行为 | `IntentState` shape、pipeline order、目录/import 数量 |
-| `checks/code-development/` | 获批的 `zed.addTask` public contribution 行为 | `IntentState` shape、pipeline order、Intent 内部列表 |
+| `checks/code-development/` | 获批的 `zed.addTask` public contribution 行为，以及 Pinshift 的 host selection、参数转发与缺失 checkout 失败语义 | `IntentState` shape、pipeline order、Intent 内部列表、真实 checkout/build/sign/Controller/device action |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
 | `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 

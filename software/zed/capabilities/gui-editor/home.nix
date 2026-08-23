@@ -27,11 +27,7 @@ in
   config = {
     # ADR-0006: both workstations use the same exact official Nightly release.
     # The package adapts upstream prebuilt artifacts and has no Rust build path.
-    home.packages = [
-      zedNightly
-      pkgs.nil
-      pkgs.nixd
-    ];
+    home.packages = [ zedNightly ];
 
     # Zed is the sole owner of the default editor role. VS Code and Helix remain
     # available as explicit fallback editors.

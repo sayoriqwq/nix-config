@@ -13,7 +13,7 @@ let
     rtk = import ../../software/rtk { inherit intentLib; };
     tmux = import ../../software/tmux { inherit intentLib; };
   };
-  workstation = lib.pipe intentLib.empty [
+  coreCodingEnvironment = lib.pipe intentLib.empty [
     software.herdr.codingSession
     # Herdr is the preferred session path; tmux remains only as the existing
     # compatibility dependency for tools that still require a multiplexer.
@@ -25,10 +25,10 @@ let
   ];
 in
 {
-  nixbox = intentLib.realize workstation;
+  coreCodingEnvironment = intentLib.realize coreCodingEnvironment;
 
-  macbook = intentLib.realize (
-    lib.pipe workstation [
+  multiClientCodingEnvironment = intentLib.realize (
+    lib.pipe coreCodingEnvironment [
       software.claudeCode.codingAgent
       software.antigravity.codingAgent
       software.ohMyPi.codingAgent

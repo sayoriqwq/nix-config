@@ -9,7 +9,7 @@ let
   aiCoding = import ../../intents/ai-coding { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
   terminalWork = import ../../intents/terminal-work { inherit lib; };
-  workstationHomeModules = codeDevelopment.homeModules ++ aiCoding.nixbox.homeModules;
+  workstationHomeModules = codeDevelopment.homeModules ++ aiCoding.coreCodingEnvironment.homeModules;
 in
 {
   # Nix chooses substituters by their explicit priority, not list position.

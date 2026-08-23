@@ -13,7 +13,9 @@ let
   pinshiftDevelopment = intentLib.realize (pinshift.developmentCli intentLib.empty);
   terminalWork = import ../../intents/terminal-work { inherit lib; };
   workstationHomeModules =
-    codeDevelopment.homeModules ++ aiCoding.macbook.homeModules ++ pinshiftDevelopment.homeModules;
+    codeDevelopment.homeModules
+    ++ aiCoding.multiClientCodingEnvironment.homeModules
+    ++ pinshiftDevelopment.homeModules;
 in
 {
   imports =
