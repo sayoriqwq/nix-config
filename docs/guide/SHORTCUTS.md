@@ -22,12 +22,5 @@
 | Ghostty / WezTerm | `Shift+Cmd+P` | 打开命令面板 | terminal |
 | Ghostty / WezTerm | `Cmd+↑ / Cmd+↓` | 在 OSC 133 语义提示区域之间滚动 | terminal |
 | Ghostty | `Ctrl+Cmd+=` | 均分所有 pane | terminal |
-| Raycast | `Cmd+Space` | 打开 Raycast launcher | macos-keyboard-navigation |
-| macOS 窗口切换（Caps Lock → Hyper） | `Hyper+Space` | 聚焦下一个窗口 | macos-keyboard-navigation |
-| AeroSpace（macOS 键盘导航） | `Ctrl+方向键` | 按方向聚焦窗口 | macos-keyboard-navigation |
-| AeroSpace（macOS 键盘导航） | `Ctrl+1…0` | 切换到工作区 1…10 | macos-keyboard-navigation |
-| AeroSpace（macOS 键盘导航） | `Ctrl+Shift+1…0` | 移动当前窗口到工作区 1…10 | macos-keyboard-navigation |
-| AeroSpace（macOS 键盘导航） | `Ctrl+V` | 切换当前窗口的浮动/平铺布局 | macos-keyboard-navigation |
-| AeroSpace（macOS 键盘导航） | `Ctrl+Esc` | 关闭 AeroSpace 接管并恢复隐藏工作区窗口可见 | macos-keyboard-navigation |
 
 `Cmd+Backquote` 未被 nix-config 绑定；Ghostty Quick Terminal 不在当前支持范围内。
