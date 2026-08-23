@@ -5,6 +5,9 @@
   ...
 }:
 
+let
+  terminalWork = import ../../intents/terminal-work { inherit lib; };
+in
 {
   # Production reliability takes precedence over mirror proximity. Keep USTC
   # only as a lower-priority fallback for paths absent from the official cache.
@@ -13,7 +16,7 @@
     "https://mirrors.ustc.edu.cn/nix-channels/store?priority=50"
   ];
 
-  imports = [
+  imports = terminalWork.nixosModules ++ [
     ./disko.nix
     ./networking.nix
     ../../modules/capabilities/portable-shell/nixos.nix
@@ -43,8 +46,7 @@
     useUserPackages = true;
 
     users.${username} = {
-      imports = [
-        ../../modules/home/capabilities/terminal-toolkit.nix
+      imports = terminalWork.homeModules ++ [
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/git-foundation.nix
         ../../modules/home/capabilities/nix-operations.nix

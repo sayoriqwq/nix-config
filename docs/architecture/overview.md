@@ -2,7 +2,7 @@
 
 ## 1. 架构目标
 
-本仓库采用“**一个 Flake、多个主机输出、按能力组合**”的结构。目标不是让三台机器拥有完全相同的软件，而是让同一项真实能力只有一个定义，并由各主机按角色显式选择。
+本仓库采用“**一个 Flake、多个主机输出、Intent 横向组合 Software Capability**”的结构。目标不是让三台机器拥有完全相同的软件，而是让软件原子行为只有一个 owner，让经批准的用户结果只在 Intent 中组合，并由各主机按角色显式选择。
 
 Phase 1 已确认的 output 与平台边界如下：
 
@@ -16,25 +16,22 @@ Phase 1 已确认的 output 与平台边界如下：
 flake.nix + flake.lock
 │
 ├── darwinConfigurations.<mac-host>
-│   ├── hosts/<mac-host>
-│   ├── modules/darwin/*
-│   ├── modules/capabilities/*/darwin.nix
-│   └── Home Manager: 显式 capability imports
+│   └── hosts/<mac-host>
+│       ├── Intent realized darwinModules
+│       ├── Intent realized homeModules
+│       └── 尚未迁移的显式 system/capability imports
 │
 ├── nixosConfigurations.<workstation-host>
-│   ├── hosts/<workstation-host>
-│   ├── modules/nixos/base.nix
-│   ├── modules/capabilities/<desktop>/nixos.nix
-│   │   └── internal modules/nixos/graphical-workstation.nix primitive
-│   ├── modules/capabilities/*/nixos.nix
-│   └── Home Manager: 已批准的 capability subset
+│   └── hosts/<workstation-host>
+│       ├── Intent realized nixosModules
+│       ├── Intent realized homeModules
+│       └── 尚未迁移的显式 system/capability imports
 │
-└── nixosConfigurations.<server-host>               # 最终状态
-    ├── hosts/<server-host>
-    ├── modules/nixos/base.nix
-    ├── modules/nixos/server.nix
-    ├── modules/capabilities/*/nixos.nix
-    └── Home Manager: headless capability subset
+└── nixosConfigurations.<server-host>
+    └── hosts/<server-host>
+        ├── Intent realized nixosModules
+        ├── Intent realized homeModules
+        └── 最小 production system modules
 ```
 
 server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的正式替换进入上述基线；旧 Ubuntu 层不恢复。
@@ -95,16 +92,17 @@ Operation output 只能从 validation graph 引用 production declarations。Pro
 
 系统模块应按角色复用，不得依赖某一台机器的磁盘名、网卡名或硬件事实。
 
-### 3.4 能力模块与基础配置
+### 3.4 Intent 与 Software Capability
 
-- `modules/home/capabilities/` 保存 host 可直接选择的纯用户能力，例如可移植 Shell、终端历史、Git 基础或编辑器；
-- `modules/home/common/`、`modules/home/desktop/` 与 `modules/home/darwin/` 中的细粒度文件是基础配置实现，不再通过大 `default.nix` 作为 host bundle；
-- `modules/capabilities/<name>/` 保存真实跨层能力，内部可同时提供 `home.nix` 与平台 adapter；
-- host 显式 import 即表示采用能力，不再设置第二套 `capabilities.*.enable` 注册值。
+- `software/<software>/` 是纵轴 owner：公开最小、可选择的 Software Capability，以及确有组合逻辑的窄 contribution interface；
+- `intents/<intent>/default.nix` 是横轴需求图：使用 `lib.pipe` 显式选择 Software Capability 并调用 contribution；
+- `intents/lib.nix` 只提供 `empty`、`addModules` 与 `realize`，累计并公开 Darwin、NixOS、Home Manager 三个原生 module lists；
+- Host 是 composition root，在 system `imports` 与 Home Manager `imports` 两个原生位置消费 realized lists；无需横向组合的 Software Capability 仍可被 Host 直接选择；
+- `modules/**` 中尚未迁移的能力按后续唯一 owner Issue 逐批退出，不形成第二套新 registry 或 bundle。
 
-能力 module 的 interface 必须公开其软件与稳定配置所有权、可变状态路径、系统服务或网络影响及人工关卡。只有两个真实平台行为确实不同，才形成 adapter seam。LocalSend 是当前示例：Home Manager 拥有 package；Darwin adapter 记录可写容器状态；Phase 6 的 NixOS adapter 还必须公开 TCP/UDP 53317 firewall 合同。纯用户能力不为了形式统一创建空 system adapter。
+Software Capability 不知道具体 Intent。Intent pipeline 本身就是需求选择与组合的唯一事实源；不得再维护 capability registry、自动扫描、独立 contract、Workflow、Relation 或自定义冲突协议。若两个 Capability 争夺同一不可合并原子，应修正 owner 边界，而不是用 `mkForce`、`//` 或隐式优先级选择 winner。
 
-能力内部的 Home Manager 实现不配置 bootloader、磁盘或未公开的系统副作用。
+跨层 Software Capability 必须公开 package ownership、managed configuration、mutable-state paths、services、network effects 与 human approval gates。只有真实平台行为不同才形成 adapter seam；纯用户行为不创建空 Darwin/NixOS 文件。
 
 中文输入是第二个真实的双平台 adapter seam：共享的 Rime data-package implementation 固定
 `$out/share/rime-data` 与 overlay/过滤合同；Darwin adapter 保留外部 Fcitx5.app frontend，
@@ -123,12 +121,12 @@ NixOS adapter 则使用锁定的原生 `i18n.inputMethod` 模块拥有 Fcitx pac
 
 会被程序持续写入的数据库、缓存、session 和 profile 目录不能整体链接到只读 Nix Store。
 
-终端主题在外部设计源与本仓库运行时 adapter 之间建立一个数据 seam：`yume-design` 的
-锁定非 Flake input 只拥有颜色、语义 Token、appearance 与消费合同；跨平台 Home Manager
-provider 一次读取并校验 JSON，通过一个 `terminalTheme` interface 向 Ghostty、WezTerm、
+终端主题在外部设计源与本仓库运行时 adapter 之间建立一个 owner-local data seam：
+`software/yume-design/capabilities/terminal-theme/home.nix` 一次读取并校验锁定非 Flake input
+中的颜色、语义 Token 与 appearance，再通过 `_module.args.terminalTheme` 向 Ghostty、WezTerm、
 Fish 与 Starship adapter 提供数据。本仓库继续拥有字体、透明度、窗口、Shell/prompt 行为
-及部署声明。Capability 必须显式 import provider；adapter 不复制 HEX，也不从 ANSI 槽位
-反推语义 Token。
+及部署声明。消费者显式选择同一个具名 provider module；不复制 HEX，也不维护全局 metadata
+或从 ANSI 槽位反推语义 Token。
 
 ### 3.6 机密层
 

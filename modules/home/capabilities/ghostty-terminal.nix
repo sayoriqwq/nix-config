@@ -5,7 +5,7 @@ let
 in
 {
   imports = [
-    ../common/terminal-theme.nix
+    ../../../software/yume-design/capabilities/terminal-theme/home.nix
     ../common/shortcut-reference.nix
     ../desktop/terminal/adapters/ghostty.nix
   ];

@@ -5,8 +5,11 @@
   ...
 }:
 
+let
+  terminalWork = import ../../intents/terminal-work { inherit lib; };
+in
 {
-  imports = [
+  imports = terminalWork.darwinModules ++ [
     ../../modules/darwin/defaults.nix
     ../../modules/darwin/fonts.nix
     ../../modules/darwin/shell.nix
@@ -59,9 +62,8 @@
     useUserPackages = true;
 
     users.sayori = {
-      imports = [
+      imports = terminalWork.homeModules ++ [
         ../../modules/home/capabilities/portable-shell.nix
-        ../../modules/home/capabilities/terminal-toolkit.nix
         ../../modules/home/capabilities/herdr.nix
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/workstation-history-sync.nix

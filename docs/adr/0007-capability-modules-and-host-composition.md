@@ -1,7 +1,9 @@
 # ADR-0007：主机按能力模块显式组合
 
-- **状态：** 已接受
+- **状态：** V3 修订后保留核心约束
 - **日期：** 2026-07-29
+
+> 2026-08-24 修订：Issue #179 批准、Issue #196 首次实现的 V3 模型把“纵向能力模块”拆为 Software Capability 纵轴与 Executable Intent 横轴。本文关于显式 imports、无 registry、无平台 bundle、真实变化才建立 adapter 的约束继续有效；`modules/home/capabilities/` 作为终态 host interface 的路径结论已由 [`module-boundaries.md`](../architecture/module-boundaries.md) 取代。
 
 ## 背景
 
