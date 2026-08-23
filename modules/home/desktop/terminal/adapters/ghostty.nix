@@ -2,12 +2,13 @@
   config,
   lib,
   pkgs,
+  terminalTheme,
   ...
 }:
 
 let
   appearance = import ../appearance.nix;
-  theme = import ../themes/sayoriqwq-obsidian.nix;
+  theme = terminalTheme.terminal;
   palette = lib.imap0 (index: color: "${toString index}=${color}") (theme.ansi ++ theme.brights);
 in
 {
@@ -21,7 +22,7 @@ in
     enableZshIntegration = false;
 
     settings = {
-      theme = theme.name;
+      theme = terminalTheme.id;
       command = "direct:${lib.getExe config.programs.fish.package} -l";
       "font-family" = appearance.fontFamily;
       "font-size" = appearance.fontSize;
@@ -36,7 +37,7 @@ in
       "macos-window-buttons" = "hidden";
     };
 
-    themes.${theme.name} = {
+    themes.${terminalTheme.id} = {
       inherit palette;
       inherit (theme) background foreground;
       "cursor-color" = theme.cursor;

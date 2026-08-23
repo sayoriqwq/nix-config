@@ -3,16 +3,9 @@
   users.users.sayori.extraGroups = [ "networkmanager" ];
 
   services = {
-    xserver = {
-      enable = true;
-      xkb = {
-        layout = "us";
-        variant = "";
-      };
-    };
-
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
+    # GNOME previously supplied the existing mDNS owner implicitly. Preserve
+    # the established UDP 5353 firewall baseline while changing sessions.
+    avahi.enable = true;
 
     printing.enable = true;
     pulseaudio.enable = false;

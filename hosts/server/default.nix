@@ -1,10 +1,18 @@
 {
   inputs,
+  lib,
   username,
   ...
 }:
 
 {
+  # Production reliability takes precedence over mirror proximity. Keep USTC
+  # only as a lower-priority fallback for paths absent from the official cache.
+  nix.settings.substituters = lib.mkForce [
+    "https://cache.nixos.org?priority=40"
+    "https://mirrors.ustc.edu.cn/nix-channels/store?priority=50"
+  ];
+
   imports = [
     ./disko.nix
     ./networking.nix

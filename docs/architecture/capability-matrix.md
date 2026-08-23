@@ -36,7 +36,7 @@
 | Chrome、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
 | Clash Verge Rev | 是 | 是 | 否 | macbook 保持 Homebrew cask；nixbox 由 NixOS adapter 独占 Linux package 所有权，并通过窄、精确锁定的 package source seam 提供 2.5.2。nixbox 声明 root systemd Service Mode、专用 `clash-verge` socket group（仅加入 `sayori`），保持 `tunMode = false`、`autoStart = false`，不创建 GUI capability wrapper；应用内 TUN 只在绑定 exact commit 的人工关卡中通过声明式 service 验证。该能力不声明 firewall、Tailscale、SSH、DNS、route 或 system proxy；server 排除。 |
 | Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
-| macOS 中文输入 | 是 | 否 | 否 | 纯 Home Manager 用户能力：消费锁定 Darwin nixpkgs 的 `pkgs.rime-ice` 2026.06.30，经排除 `build`、拒绝可变名称并合入本地 `default.custom.yaml` 的薄 data view，以 recursive leaf semantics 投影静态 Rime 数据。`Fcitx5.app`、Rime plugin payload、macOS 输入源、可写配置与全部 GUI/runtime 偏好保持外部所有；推荐值仅供人工复核。Squirrel 不接管、不清理。activation、Rime deploy 与真实输入 smoke 仍是分离的人工关卡。 |
+| 中文输入 | 是 | 是 | 否 | 两个工作站按各自锁定 package set 构建同一个参数化 Rime Ice 2026.06.30 静态 data package，排除 `build`/可变名称、只启用 `rime_ice`、左右 Shift 只切 Rime 内部 mode，并以 recursive leaves 保持用户根可写。macOS frontend 继续由官方 Fcitx5.app/installer 与人工偏好拥有；nixbox 由 NixOS 单一拥有 Fcitx 5.1.19、`fcitx5-rime` 5.1.13、system defaults、toolkit environment 与 XDG autostart，HM 输入法 module/daemon 保持关闭。server 排除。两个平台的 activation、deploy 与真人输入仍是独立人工关卡。 |
 | macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
@@ -59,10 +59,12 @@
 ## 当前状态
 
 - macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
-- macbook 的中文输入是纯 Home Manager 能力。Issue #140 正在把历史的 65-leaf source 与
-  Fcitx 行为事务层收敛为 `pkgs.rime-ice` 2026.06.30、薄 data view、本地 overlay 和 recursive
-  leaf projection；Fcitx 全部偏好改为 external reference。该变更尚未 activation 或 deploy，
-  不能把 build/evaluation 结果描述为机器运行态。
+- macbook 的共享 Rime 静态声明源自已合并的 #140/PR #142；维护者已在获批窗口完成
+  `system-46-link` activation、一次 Rime deploy 与静态/可变边界回读，后续 #143/#145/#147
+  又完成 Shift/fallback 所有权调整及 Squirrel 遗留退役，#147 Gate D 记录真人输入整体 PASS。
+  当前 macbook 与 nixbox 通过同一个 `chinese-input` 能力的不同 adapter 复用静态语义；macOS
+  frontend/偏好仍保持外部，Linux frontend 由 NixOS 声明。Issue #169 的 nixbox 候选尚未
+  activation、deploy 或真人验收，不能把其 build/evaluation 结果描述为机器运行态。
 - 更早的 #127 首次 65-leaf 所有权交接已在配置提交
   `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成实机验收：generation 42→43、65/65
   Store symlink、9/9 可写且非 Store 的 mutable boundaries、Rime 重新部署与真实输入均为

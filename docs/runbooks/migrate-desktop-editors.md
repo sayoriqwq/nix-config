@@ -37,22 +37,21 @@
 4. 确认当前 generation 和上一代回滚入口；
 5. 只对 PR 中已构建并审阅的精确 commit 执行 activation。
 
-## 首次 Cachix 引导
+## 当前 binary-only 构建关卡
 
-当前 nix-daemon 在首次 activation 前还没有读取 Zed Cachix 配置。直接构建可能
-退回本地编译大量依赖；这不是应当等待完成的正常路径。维护者批准 activation 后，
-第一次切换使用与 ADR-0006 完全相同的 URL 和公钥：
+历史首次迁移曾通过 Zed Cachix 引导 source Flake package；Issue #215 已用官方
+精确版本预构建产物取代该合同。当前声明不再包含 Zed Cachix URL/公钥，也没有
+Cargo/Rust/Crane 源码回退。维护者批准 activation 前，先针对已审阅的完整提交构建：
 
 ```fish
-sudo darwin-rebuild switch \
-  --flake 'github:sayoriqwq/nix-config/<approved-revision>#macbook' \
-  --option extra-substituters 'https://zed.cachix.org' \
-  --option extra-trusted-public-keys 'zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU='
+nix build --no-link \
+  'github:sayoriqwq/nix-config/<approved-revision>#darwinConfigurations.macbook.system'
 ```
 
-`<approved-revision>` 必须替换为已审阅并批准的完整提交 SHA。临时参数不增加新
-信任边界，只为首次构建提前提供仓库已经声明的缓存配置。切换成功后 daemon 会从
-正式配置读取这两项，后续普通 activation 不再需要临时参数。
+`<approved-revision>` 必须替换为已审阅并批准的完整提交 SHA。该命令只 build，
+不 activation。Zed 官方 DMG 不存在、hash 不符或解包失败时应立即停止；不得追加
+旧 Cachix 参数、改用 source Flake 或等待 Rust 编译。build 与 diff 审阅通过后，
+真实 activation 仍需单独批准。
 
 ## 双安装验收
 

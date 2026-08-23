@@ -1,12 +1,23 @@
 {
   inputs,
+  lib,
   username,
   ...
 }:
 
 {
+  # Nix chooses substituters by their explicit priority, not list position.
+  # Prefer the nearby USTC mirror on this interactive workstation, then fall
+  # back to the official cache. Capability-specific caches remain additive.
+  nix.settings.substituters = lib.mkForce [
+    "https://mirrors.ustc.edu.cn/nix-channels/store?priority=30"
+    "https://cache.nixos.org?priority=40"
+  ];
+
   imports = [
     ./hardware-configuration.nix
+    ../../modules/capabilities/chinese-input/nixos.nix
+    ../../modules/capabilities/hyprland-desktop/nixos.nix
     ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
     ../../modules/capabilities/zed-editor/nixos.nix

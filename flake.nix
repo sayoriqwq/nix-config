@@ -35,6 +35,13 @@
       flake = false;
     };
 
+    # Issue #155: consume the reviewed terminal design contract as data. The
+    # runtime adapters remain owned by this repository, so this is not a Flake.
+    yume-design = {
+      url = "github:sayoriqwq/yume-design/047c1f44518ed353b8f5d821fc1f3f347ded9206";
+      flake = false;
+    };
+
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -46,10 +53,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixos-stable.follows = "nixpkgs";
     };
-
-    # ADR-0006: consume only the upstream Nightly package output. Zed keeps
-    # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
-    zed.url = "github:zed-industries/zed";
 
     # Issues #120 and #152: consume ax's published package output for the
     # explicitly approved workstation capabilities.
@@ -89,6 +92,23 @@
         pkgs = linuxPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
+      zedNightlyFor = system: (packagesFor system).callPackage ./packages/zed-nightly { };
+      zedNightlyUpdaterFor =
+        system:
+        let
+          pkgs = packagesFor system;
+        in
+        pkgs.writeShellApplication {
+          name = "sync-zed-nightly";
+          runtimeInputs = [
+            pkgs.curl
+            pkgs.git
+            pkgs.jq
+            pkgs.nix
+            pkgs.python3
+          ];
+          text = builtins.readFile ./packages/zed-nightly/update.sh;
+        };
       serverModules = [
         ./hosts/server
         ./modules/nixos/base.nix
@@ -146,6 +166,18 @@
         pkgs = darwinPkgs;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      zedBinaryPackagePolicyFor =
+        pkgs:
+        import ./tests/zed-editor/binary-package-policy.nix {
+          flakeInputs = inputs;
+          flakeOutputs = self;
+          inherit pkgs;
+          inherit (pkgs) lib;
+          macbookConfiguration = self.darwinConfigurations.macbook;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
       macosRollingInputsPolicy = import ./tests/macos/rolling-inputs.nix {
         macbookConfiguration = self.darwinConfigurations.macbook;
         nixboxConfiguration = self.nixosConfigurations.nixbox;
@@ -180,6 +212,25 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
+      nixCachePolicyFor =
+        pkgs:
+        import ./tests/nix-cache-policy.nix {
+          inherit pkgs;
+          inherit (pkgs) lib;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
+      terminalThemePolicyFor =
+        pkgs:
+        import ./tests/terminal-theme/policy.nix {
+          inherit inputs pkgs username;
+          inherit (pkgs) lib;
+          macbookConfiguration = self.darwinConfigurations.macbook;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -205,7 +256,6 @@
         modules = [
           ./hosts/nixbox
           ./modules/nixos/base.nix
-          ./modules/nixos/desktop.nix
           home-manager.nixosModules.home-manager
         ];
       };
@@ -218,28 +268,41 @@
       };
 
       # Explicit package outputs give CI and future hosts stable validation
-      # targets for the narrow Clash seam and Zed's upstream package output.
+      # targets for the narrow Clash seam and Zed's owner-local binary package.
       packages = {
         aarch64-darwin = {
-          zed-nightly = inputs.zed.packages.aarch64-darwin.default;
+          sync-zed-nightly = zedNightlyUpdaterFor "aarch64-darwin";
+          zed-nightly = zedNightlyFor "aarch64-darwin";
         };
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
           server-recovery-test = serverRecoveryTestRunner;
-          zed-nightly = inputs.zed.packages.x86_64-linux.default;
+          sync-zed-nightly = zedNightlyUpdaterFor "x86_64-linux";
+          zed-nightly = zedNightlyFor "x86_64-linux";
         };
       };
 
-      apps.x86_64-linux = {
-        server-recovery-test = {
+      apps = {
+        aarch64-darwin.sync-zed-nightly = {
           type = "app";
-          program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+          program = "${zedNightlyUpdaterFor "aarch64-darwin"}/bin/sync-zed-nightly";
+        };
+        x86_64-linux = {
+          server-recovery-test = {
+            type = "app";
+            program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+          };
+          sync-zed-nightly = {
+            type = "app";
+            program = "${zedNightlyUpdaterFor "x86_64-linux"}/bin/sync-zed-nightly";
+          };
         };
       };
 
       checks = {
         aarch64-darwin = {
           sops-age-policy = phase11SopsPolicy;
+          zed-binary-package-policy = zedBinaryPackagePolicyFor darwinPkgs;
           zed-nix-lsp-policy = zedNixLspPolicy;
           macos-rolling-inputs = macosRollingInputsPolicy;
           macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
@@ -297,17 +360,20 @@
             serverConfiguration = self.nixosConfigurations.server;
           };
           macbook-raycast-source = import ./tests/macos/raycast-source.nix {
-            inherit (self.darwinConfigurations.macbook.pkgs) lib;
             casks = self.darwinConfigurations.macbook.config.homebrew.casks;
+            inherit (self.darwinConfigurations.macbook.pkgs) lib;
             pkgs = self.darwinConfigurations.macbook.pkgs;
             scriptCommands =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
           };
           macbook-rime-data-layout = macbookRimeDataLayout;
+          nix-cache-policy = nixCachePolicyFor darwinPkgs;
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
+          terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
         };
         x86_64-linux = {
           clash-verge-rev-policy = clashVergeRevPolicy;
+          zed-binary-package-policy = zedBinaryPackagePolicyFor nixboxPkgs;
           nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
             inherit inputs username;
             macbookConfiguration = self.darwinConfigurations.macbook;
@@ -316,8 +382,25 @@
             serverConfiguration = self.nixosConfigurations.server;
             source = ./.;
           };
+          nixbox-hyprland-desktop = import ./tests/nixbox/hyprland-desktop.nix {
+            inherit username;
+            lib = nixboxPkgs.lib;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = nixboxPkgs;
+          };
+          nixbox-chinese-input = import ./tests/nixbox/chinese-input.nix {
+            inherit username;
+            lib = nixboxPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = nixboxPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+            source = ./.;
+          };
+          nix-cache-policy = nixCachePolicyFor nixboxPkgs;
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
+          terminal-theme-policy = terminalThemePolicyFor nixboxPkgs;
         };
       };
 

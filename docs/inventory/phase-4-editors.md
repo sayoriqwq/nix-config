@@ -11,8 +11,9 @@
 | --- | --- |
 | Zed Preview | `1.13.0`，bundle ID `dev.zed.Zed-Preview`，位于 `/Applications/Zed Preview.app` |
 | Zed Nightly | 已于 2026-07-26 激活；官方 Flake revision `a3ac036eb6b73e0a50af4a44c96a43f1abf1b989`，version `1.14.0-nightly+a3ac036`，位于 `~/Applications/Home Manager Apps/Zed Nightly.app` |
+| Zed package 候选 | Issue #215 改用 Zed 官方精确 Nightly 二进制；macOS 与 Linux 固定同一 release identity，声明不再包含 source Flake、Crane/Rust 构建图或源码回退；尚未 activation |
 | Zed CLI 契约 | 全新登录环境中 `/etc/profiles/per-user/sayori/bin/zed` 解析为 Nightly，`EDITOR` / `VISUAL` 均为 `zed --wait`；激活前已运行的会话需重启后刷新环境 |
-| Zed Cachix | daemon 的 substituters 与 trusted public keys 已包含 `https://zed.cachix.org` 及 ADR-0006 接受的公钥 |
+| Zed Cachix | 2026-07-26 activation 后的历史 daemon 状态包含该 cache 与公钥；Issue #215 的候选声明删除这项信任，因为官方发行包按固定 URL/hash 获取；移除尚未 activation |
 | Zed settings | `~/.config/zed/settings.json`，普通可写文件，SHA-256 `b12ccea2dcbc2838fb7d5379bddfa37f50587e796885a1972f9fed8edcfc1636` |
 | Zed keymap | `~/.config/zed/keymap.json`，普通可写文件，SHA-256 `28fbca1a467473e1b697f82e777db32bef5713340127e71b66ef6025d9cc4867` |
 | Zed tasks | `~/.config/zed/tasks.json`，普通可写文件，SHA-256 `faef4ea8541195b7c6a8cd6a6b828e1b37c21e1cbf4b19862b3a4cfeb46d8657` |

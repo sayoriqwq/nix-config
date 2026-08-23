@@ -84,6 +84,13 @@ firewall、Tailscale、SSH、DNS、route、network interface 或 system proxy，
 不得恢复 GUI 的 DEB/RPM installer sidecar、写入 mutable `/usr/bin` 或
 `/etc/systemd/system`，也不得用 activation script 绕过 NixOS module。
 
+工作站中文输入的跨层 seam 位于 `modules/capabilities/chinese-input/`：内部
+`rime-data-package.nix` 只发布经过可变名称过滤并合入 overlay 的 `$out/share/rime-data`；
+`home.nix` 只投影静态 leaves 并声明 Fcitx/Rime 可写状态。Darwin adapter 只附加该用户实现与
+macOS installer/cache 状态边界，不安装 frontend；NixOS adapter 单一拥有 Fcitx framework、
+Rime addon、system defaults、session environment 与 package XDG autostart。Host 只能 import
+对应 adapter，不直接 import data-package 或 home primitive；server 不组合该 seam。
+
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
 
 ## 4. Import 方向

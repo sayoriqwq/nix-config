@@ -34,7 +34,7 @@ Issue [#128](https://github.com/sayoriqwq/nix-config/issues/128) 的后续声明
 | --- | --- | --- | --- |
 | 常开工作站 | NixOS 管 GDM；Home Manager 管 `sayori` 的 GNOME idle/power 设置 | GDM 不自动 suspend；登录与锁屏会话不因 idle 熄屏或 suspend | 不禁用手动 suspend，不改变合盖或电源键行为 |
 | 可移植 Shell | Home Manager 管 Fish 配置；NixOS 管 package 注册与用户登录 shell | `programs.fish.enable`；`sayori.shell = pkgs.fish` | Fish history 与 universal variables 只声明、不接管 |
-| Zed | Home Manager 管 Nightly package、`nil`/`nixd` language servers、`z` 快速入口与 seed-only 配置；NixOS 适配器声明 ADR-0006 限定的官方 Cachix 与签名公钥 | 不增加 service/firewall；缓存未命中时才允许源码回退 | live settings、extensions 与 session 保持可写 |
+| Zed | Home Manager 管官方精确 Nightly 二进制、`nil`/`nixd` language servers、`z` 快速入口与 seed-only 配置；macbook/nixbox 固定同一 release identity | 不增加 service/firewall；artifact 缺失时失败，不允许源码回退 | live settings、extensions 与 session 保持可写 |
 | Ghostty | Home Manager capability 管 Linux package、Maple Mono NF-CN 字体包与稳定配置 | 用户 fontconfig 发现字体；无 service/firewall | window、session 与登录态保持可写 |
 | LocalSend | Home Manager 是 package 唯一所有者 | 仅增加 TCP/UDP `53317` | Linux preferences/application support 与接收文件都保持可写 |
 | Google Chrome | Home Manager 管 Linux package | 无 service/firewall | profile 与 cache 不进入 Nix Store |
@@ -133,13 +133,19 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 
 首次 Home Manager activation 前没有发现已批准能力的同名文件冲突。激活与首启后，各应用按预期创建了自己的可写状态；这些内容仍不由 Nix 接管。Phase 5 已记录的空 `~/.nix-profile` symlink 也不会被据此推断或删除。
 
-### 6.3 原生 build 与 Zed 缓存 bootstrap
+### 6.3 历史原生 build 与 Zed 缓存 bootstrap
 
 2026-07-29 在真实 `x86_64-linux` nixbox 上完成原生整机 build；不可变 commit 对应的最终 output path 记录在 PR #69 的验证结果中，避免把会随仓库内容变化的临时 dirty-tree store path 固化为配置事实。
 
 首次 build 暴露出 Zed 能力的跨层缺口：macOS 已声明 ADR-0006 批准的 Zed Cachix，但 nixbox 只导入 Home Manager 配置，没有同时声明 NixOS daemon 的 substituter 与签名公钥，因此 Nix 按上游 Flake 的合法 fallback 开始源码编译 LiveKit/WebRTC。精确 store path 随后确认在 `https://zed.cachix.org` 命中、在 `cache.nixos.org` 不命中。
 
 修正后，`zed-editor/nixos.nix` 一次 import 同时选择 Home Manager Zed 配置及限定的官方缓存信任。首次 switch 前的 bootstrap 通过维护者运行的短入口临时 helper 完成签名成品导入；最终配置的整机 build 只剩 18 个 Home Manager/NixOS 集成 derivation，没有继续源码编译 Zed 或 LiveKit。当前 generation 已激活该 daemon 设置，`nix show-config` 可见 `https://zed.cachix.org`。
+
+以上内容是 Phase 6 当时采用 source Flake package 的真实历史，不能再作为新 build
+合同。Issue #215 的候选声明改用双平台官方精确版本预构建产物，并删除
+`zed.cachix.org` 与 source-build fallback；该候选尚未在真实 nixbox activation。
+未来 Linux build 只允许官方 tarball 解包、ELF/RPATH 适配与 host integration，
+不得重新编译 Zed、LiveKit 或其他 Rust dependency。
 
 2026-07-30，真实 nixbox 针对修正 commit `2b1b0c3e8b62b3197efb98d9adc6f818b472f4fe` 再次完成原生整机 build，输出 `/nix/store/lribk269i2n29vxd964n7rf2i2vdfh4l-nixos-system-nixos-26.05.20260719.fd14620`。该轮只构建 9 个 Atuin、Home Manager 与系统集成 derivation，没有重新编译 Zed。
 
@@ -158,3 +164,20 @@ LocalSend 自动发现未通过，但双端本机多播正常、nixbox 发包计
 维护者再次单独批准重启后，`/run/current-system`、`/run/booted-system` 与 `/nix/var/nix/profiles/system` 全部解析到 `/nix/store/lribk269i2n29vxd964n7rf2i2vdfh4l-nixos-system-nixos-26.05.20260719.fd14620`，systemd-boot 当前条目为 `nixos-generation-6.conf`。系统状态为 `running`、failed unit 为 0，Home Manager 在本次 boot 成功激活。
 
 Phase 5 的三个用户目录快捷入口已在单独批准后精确删除；正式 `system-5-link` 仍保留并指向 Phase 5 closure，作为系统级回滚路径。该修复与清理均未删除应用可变数据。
+
+## 8. Phase 11 后维护增量：Fcitx 5 / Rime Ice 候选（#169）
+
+Issue #169 在历史 Phase 6 generation 之后新增一个**尚未 activation** 的候选 closure；本节不
+追溯改写 GNOME generation 6 或后续 Hyprland 候选的实机事实。目标 composition 从
+`hyprland-desktop` 中移除临时 IBus owner，改由独立 `chinese-input` adapter 单一声明 Fcitx
+5.1.19、`fcitx5-rime` 5.1.13、Rime Ice 2026.06.30、system defaults、toolkit environment 与
+package XDG autostart。Home Manager 不启用第二套 input-method package/service，只投影共享静态
+Rime leaves 并记录状态边界。
+
+Linux 新增的可变边界为 `~/.config/fcitx5` 与
+`~/.local/share/fcitx5/rime/{build,luna_pinyin.userdb,rime_ice.userdb,sync,installation.yaml,user.yaml}`。
+遗留 IBus/dconf 状态保留原样；NixOS generation rollback 既不删除这些路径，也不恢复试用写入。
+来源、验证和 STOP 条件见
+[Fcitx/Rime 来源映射](../plans/nixbox-fcitx5-rime-source-mapping.md)，未来实机动作见
+[首次试用手册](../runbooks/nixbox-fcitx5-rime-trial.md)。声明或构建成功都不代表真实 nixbox 已
+切换输入框架、完成 Rime deploy、logout/relogin、reboot 或真人输入验收。

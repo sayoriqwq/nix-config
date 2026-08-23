@@ -1,5 +1,6 @@
 {
   imports = [
+    ../common/terminal-theme.nix
     ../common/shortcut-reference.nix
     ../common/cli/bat.nix
     ../common/cli/eza.nix

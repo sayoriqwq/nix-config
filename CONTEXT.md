@@ -48,6 +48,10 @@
 
 能力模块对主机公开的完整 interface，包括提供的行为、软件与配置所有权、状态路径、系统服务或网络影响，以及必要的人工关卡。安全影响必须明确可见，不能因纵向封装而隐藏。
 
+### 副作用偏移（Side-effect Drift）
+
+能力合同中的期望与应用或系统的外部运行态事实不一致；处理这种偏移必须明确 owner、readback，以及 control 或 human gate。这个术语不表示所有外部状态都应由 Nix 自动 reconcile。
+
 ### AI 辅助运维能力（AI-assisted operations capability）
 
 为本地 coding agent 提供命令输出压缩、内容检查、不依赖项目环境的基础 Python
@@ -156,20 +160,26 @@ Flake 为一台具体机器提供的构建入口，例如 `darwinConfigurations.
 
 桌面用户能力中的终端体验，以 Ghostty + Fish 为两台工作站的主路径。WezTerm + Zsh 只作为 macOS 兼容能力保留。
 
-### macOS 中文输入能力（macOS Chinese input capability）
+### 工作站中文输入能力（Workstation Chinese input capability）
 
-只由 `macbook` 选择的纯 Home Manager 用户能力。Home Manager 消费当前 Darwin nixpkgs
-锁定的 `pkgs.rime-ice` 2026.06.30，从 `$out/share/rime-data` 构造一个薄 data view：排除整个
-`build` 子树并拒绝 userdb、sync、installation/user state 等可变名称，再合入只启用
-`rime_ice`、并把左右 Shift 都声明为 Rime 内部中文/ASCII 切换键的本地
-`default.custom.yaml` overlay。合并结果以 recursive leaf semantics 投影到
-`~/.local/share/fcitx5/rime`，但不接管用户目录根节点或任何可写状态。
+由 `macbook` 与 `nixbox` 各自通过平台 adapter 显式选择的跨层能力。共享实现从当前平台锁定的
+`pkgs.rime-ice` 2026.06.30 构造 `$out/share/rime-data`：排除整个 `build` 子树并拒绝 userdb、
+sync、installation/user state 等可变名称，再合入只启用 `rime_ice`、并把左右 Shift 都声明为
+Rime 内部中文/ASCII 切换键的 `default.custom.yaml` overlay。Home Manager 在两个工作站都以
+recursive leaf semantics 投影这棵静态数据，但不接管 `~/.local/share/fcitx5/rime` 根节点或
+任何可写状态；两个平台分别从自己的锁定 package set 构建，绝不跨平台引用 Store artifact。
+
+`nixbox` 的 NixOS adapter 是 Linux frontend 的唯一 package、session、system-default 与 XDG
+autostart owner：只组合 `fcitx5-rime` 5.1.13 和共享 data package，`Default` group 只含
+`rime`，`DefaultIM=rime`、`Default Layout=us`，framework trigger 为空，输入状态在窗口间共享。
+Home Manager 的输入法模块保持关闭，Hyprland 不启动第二个 daemon。该候选取代 Issue #167
+曾保留的 IBus owner，但 Issue #169 的声明、求值或构建都不表示真实 nixbox 已 activation。
 
 `Fcitx5.app`、Rime plugin payload、macOS 输入源注册、`~/.config/fcitx5` 与全部 GUI/runtime
 偏好均由官方 installer/updater、macOS、Fcitx 和维护者外部拥有。Nix 不再自动收敛或审计
 `ShareInputState`、`AppDefaultIM`、`StatusBar`、`TriggerKeys`、`AltTriggerKeys`、`InputState` 等
 字段，也不提供行为 journal、CAS rollback helper 或阻塞 activation 的 runtime preflight。
-Issue #145 的外部偏好目标是：`Default` group 只含 `rime`，同时保持 `DefaultIM=rime` 与
+macOS 上 Issue #145 的外部偏好目标是：`Default` group 只含 `rime`，同时保持 `DefaultIM=rime` 与
 `Default Layout=us`；`TriggerKeys`、`AltTriggerKeys` 均为空，普通左右 Shift 只交给 Rime
 切换中文/ASCII。该偏好仍由维护者通过 Fcitx GUI/官方 API 设置和 smoke test，不是 Nix
 Desired/Keep；文档合入不表示 live profile 已修改或真人验收已完成。
@@ -181,13 +191,18 @@ Desired/Keep；文档合入不表示 live profile 已修改或真人验收已完
 `keyboard-us`；配置无效时 core 也可能重建默认 group。这些是组件安全或自愈机制，不是用户
 可选择的恢复通道。
 
-Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
+两个工作站的 Rime `build` 和 Fcitx cache 是可重建、备份排除的状态；
 `luna_pinyin.userdb`、`rime_ice.userdb`、`installation.yaml`、`user.yaml` 与
-`~/.config/fcitx5` 必须保护；`sync` 与 `~/Library/fcitx5` 使用独立备份策略。#127 的首次
+`~/.config/fcitx5` 必须保护；`sync` 使用独立备份策略，macOS 的 `~/Library/fcitx5` 另由官方
+installer/updater 外部拥有。#127 的首次
 静态所有权交接已在配置提交
 `87d801c85bc3f6f1b5334a00aefccfbe3ecefe73` 完成：system generation 从 42 切换到 43，
 65/65 个静态叶子均成为有效 Store symlink，9/9 个可变状态边界保持可写且不在 Store，Rime
-重新部署与真实输入验收均为 PASS；这是历史证据，不是新 data view 已 activation 的声明。
+重新部署与真实输入验收均为 PASS；这是历史所有权交接证据。后续 Issue #140 已通过 PR #142
+合并为 `3bbd8d4a29b096653b36ec755af662931be11b4c`，维护者已在获批窗口完成
+`system-46-link` activation 与一次 Fcitx5 Rime deploy；回读确认新 data package 投影的静态
+leaves 指向 Store、用户根及可变状态保持可写且在 Store 外。这一 macOS 运行态不构成 nixbox
+Issue #169 候选的 activation 证据。
 仅服务该次交接的写入型 helper 已按 #131 退役。未来新机器若再次出现
 unmanaged regular leaves，必须另开 Issue 按届时事实重新建立窄交接入口，不能复用历史工具。
 声明和构建成功仍不表示未来 activation、Rime 重新部署或输入验收已获授权，这些动作始终受
@@ -197,8 +212,9 @@ capability；Issue #147 已在 2026-08-12 按分离人工关卡完成四个精�
 retirement：app、preference 与 cache 的原路径即时回读均不存在，receipt 已通过
 `pkgutil --forget` 忘记，owner-only app/preference rollback evidence 与可恢复 Trash 对象
 均保留在仓库外。Squirrel process/input source 仍不存在，Fcitx5 selected source、进程与签名
-回读通过；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。Issue 完成仅等待
-Draft PR 人工审阅与合并。
+回读通过；维护者随后按已明确清单报告 Gate D 真人输入 smoke 整体 PASS。PR #150 已于
+2026-08-12 以 squash 方式合并为
+`273986bcd3d3867200c4b593a55ac5f7618a45ae`，Issue #147 已按 `completed` 关闭。
 `squirrel.custom.yaml` 保持外部，`~/Library/Rime` 是永久 opaque 排除树，任何操作都不得
 遍历、列举、读取、stat、hash、copy、move 或 delete 其内容。
 

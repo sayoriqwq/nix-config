@@ -164,6 +164,15 @@ server 明确排除；ADR-0010 已按维护者在 Issue 中的当前授权记录
 MagicDNS/Grants、SSH alias、防火墙运行态、reboot 或 key-expiry 授权；各动作仍需 exact commit
 与当前窗口的独立人工关卡。
 
+### Phase 11 后维护项：nixbox Fcitx 5 / Rime Ice（#169）
+
+Issue #169 把既有 macOS Rime Ice 静态声明抽为双工作站共享的 data-package seam，并用独立
+NixOS adapter 取代 nixbox Hyprland 候选中临时保留的 IBus owner。该维护项不更新 lock file，
+不启动 Phase 12，不改变 server、网络、boot、SSH 或防火墙。
+
+仓库内 check/build 只形成候选 closure；nixbox activation、Rime deploy、logout/relogin、reboot、
+真人 Wayland/XWayland/GTK/Qt 输入矩阵和用户状态处理仍需 exact commit 与当前窗口的独立批准。
+
 ## 5. 控制链路与部署方向
 
 ```text
