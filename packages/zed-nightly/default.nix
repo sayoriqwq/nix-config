@@ -7,6 +7,7 @@
   lib,
   makeWrapper ? null,
   nodejs_22 ? null,
+  stdenv,
   stdenvNoCC,
 }:
 
@@ -82,7 +83,10 @@ else if stdenvNoCC.hostPlatform.isLinux then
         autoPatchelfHook
         makeWrapper
       ];
-      buildInputs = [ alsa-lib ];
+      buildInputs = [
+        alsa-lib
+        stdenv.cc.cc.lib
+      ];
       dontConfigure = true;
       dontBuild = true;
 
