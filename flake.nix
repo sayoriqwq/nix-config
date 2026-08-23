@@ -115,32 +115,28 @@
         ./modules/nixos/server.nix
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
-        ./tests/server-recovery/install-test.nix
       ];
       serverRecoveryPkgs = import nixpkgs {
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
-      serverRecoveryPreflight = import ./tests/server-recovery/preflight.nix {
+      serverRecoveryNetworkTest = serverRecoveryOperation.networkTest;
+      serverRecoveryPolicyCheck = import ./checks/server-recovery/policy.nix {
+        installConfiguration = serverRecoveryOperation.installConfiguration;
         pkgs = serverRecoveryPkgs;
-      };
-      serverRecoveryNetworkTest = import ./tests/server-recovery/network-test.nix {
-        inherit
-          inputs
-          serverModules
-          serverRecoveryPreflight
-          username
-          ;
-        pkgs = serverRecoveryPkgs;
-      };
-      serverRecoveryPolicyCheck = import ./tests/server-recovery/policy-check.nix {
+        productionConfiguration = self.nixosConfigurations.server;
+        runner = serverRecoveryOperation.runner;
         inherit username;
-        pkgs = serverRecoveryPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
       };
       nixosAnywherePackage = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
-      serverRecoveryTestRunner = import ./tests/server-recovery/runner.nix {
-        inherit nixosAnywherePackage;
+      serverRecoveryOperation = import ./operations/server-recovery {
+        inherit
+          inputs
+          nixosAnywherePackage
+          self
+          serverModules
+          username
+          ;
         pkgs = serverRecoveryPkgs;
       };
       darwinPkgs = packagesFor "aarch64-darwin";
@@ -267,6 +263,8 @@
         modules = serverModules;
       };
 
+      nixosConfigurations.server-recovery-install = serverRecoveryOperation.installConfiguration;
+
       # Explicit package outputs give CI and future hosts stable validation
       # targets for the narrow Clash seam and Zed's owner-local binary package.
       packages = {
@@ -276,7 +274,7 @@
         };
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
-          server-recovery-test = serverRecoveryTestRunner;
+          server-recovery-test = serverRecoveryOperation.runner;
           sync-zed-nightly = zedNightlyUpdaterFor "x86_64-linux";
           zed-nightly = zedNightlyFor "x86_64-linux";
         };
@@ -290,7 +288,7 @@
         x86_64-linux = {
           server-recovery-test = {
             type = "app";
-            program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+            program = "${serverRecoveryOperation.runner}/bin/server-recovery-test";
           };
           sync-zed-nightly = {
             type = "app";
