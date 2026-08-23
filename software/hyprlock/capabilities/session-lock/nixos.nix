@@ -1,5 +1,7 @@
 {
-  # Hyprlock needs a system PAM policy to unlock the current user session.
-  # Authentication behavior must be exercised only in the machine-local gate.
+  # Capability contract (NixOS attachment): package = none beyond the Home
+  # owner; managed configuration = Hyprlock PAM policy; mutable-state paths =
+  # none; services = PAM integration only; network effects = none; human gate =
+  # target-machine lock/unlock and password-safety smoke.
   security.pam.services.hyprlock = { };
 }

@@ -1,6 +1,8 @@
 {
-  # Hypridle remains the lock/sleep coordinator, but the always-on requirement
-  # deliberately provides no timers that lock, blank displays or suspend.
+  # Capability contract (Home Manager): package = Hypridle from the Home
+  # Manager service; managed configuration = lock/sleep hooks with no listeners;
+  # mutable-state paths = none; services = hypridle user service; network effects
+  # = none; human gate = activation must verify lock and always-on behavior.
   services.hypridle = {
     enable = true;
     settings = {

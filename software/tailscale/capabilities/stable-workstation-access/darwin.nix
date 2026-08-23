@@ -1,9 +1,12 @@
 { config, ... }:
 
 {
-  # The Standalone app owns the macOS package and vendor network extension.
-  # Login, device identity, routes, MagicDNS, Grants and vendor state remain
-  # external mutable control-plane state under ADR-0010's human gates.
+  # Capability contract (Darwin): package = Standalone tailscale-app cask;
+  # managed configuration = cask presence plus the no-second-service assertion;
+  # mutable-state paths = none declared because the vendor path is unproven;
+  # services = external app/network extension; network effects = vendor overlay,
+  # DNS/routes per external state; human gate = ADR-0010 activation/enrollment,
+  # connectivity and rollback readback.
   homebrew = {
     enable = true;
     casks = [ "tailscale-app" ];

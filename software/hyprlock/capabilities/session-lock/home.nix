@@ -1,4 +1,8 @@
 {
+  # Capability contract (Home Manager): package = Hyprlock from the Home Manager
+  # module; managed configuration = lock UI settings; mutable-state paths = none;
+  # services = none (started on demand); network effects = none; human gate =
+  # local lock/unlock and password-safety smoke after activation.
   programs.hyprlock = {
     enable = true;
     settings = {

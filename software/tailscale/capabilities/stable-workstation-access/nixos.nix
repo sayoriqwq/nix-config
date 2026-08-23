@@ -1,8 +1,9 @@
 {
-  # Tailscale owns the nixbox service, /var/lib/tailscale vendor state, stable
-  # overlay name and UDP 41641 direct-path firewall opening. It does not own
-  # native SSH policy, general DNS/routes or the tailnet control plane. Any
-  # activation/enrollment requires the complete ADR-0010 readback gate.
+  # Capability contract (NixOS): package = Tailscale from the NixOS module;
+  # managed configuration = daemon, port and stable overlay name below;
+  # mutable-state path = /var/lib/tailscale, vendor-owned; services = tailscaled;
+  # network effects = UDP 41641 plus vendor overlay chains, with no native SSH
+  # ownership; human gate = ADR-0010 activation/enrollment and full readback.
   services.tailscale = {
     enable = true;
     port = 41641;

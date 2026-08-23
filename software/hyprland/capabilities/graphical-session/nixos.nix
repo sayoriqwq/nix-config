@@ -1,8 +1,9 @@
 {
-  # The pinned NixOS module owns the compositor package/config and UWSM system
-  # session. Runtime sockets and session state remain ephemeral; this owner
-  # opens no network port. Display/login and portal behavior are verified only
-  # through the exact-commit machine-local activation gate.
+  # Capability contract (NixOS): package = Hyprland from the NixOS module;
+  # managed configuration = UWSM and XWayland enablement; mutable-state paths =
+  # none (runtime sockets/session are ephemeral); services = UWSM graphical
+  # session; network effects = none; human gate = exact-commit login, display
+  # and portal smoke on the target machine.
   programs.hyprland = {
     enable = true;
     withUWSM = true;

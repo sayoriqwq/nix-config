@@ -10,6 +10,11 @@ let
   homePath = relativePath: "${config.home.homeDirectory}/${relativePath}";
 in
 {
+  # Shared Home attachment contract: package = the platform-local filtered Rime
+  # Ice data package; managed configuration = recursive immutable data leaves;
+  # mutable-state paths = build, userdb, sync and identity files listed below;
+  # services = none; network effects = none; human gate = activation/deploy and
+  # real input remain separate actions.
   imports = [ ../../../../modules/home/common/state-paths.nix ];
 
   xdg.dataFile."fcitx5/rime" = {

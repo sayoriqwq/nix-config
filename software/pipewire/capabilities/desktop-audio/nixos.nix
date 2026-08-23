@@ -1,8 +1,9 @@
 {
-  # PipeWire owns its packages/services, the workstation audio graph and
-  # PulseAudio compatibility. Device selection, routing, volumes and user
-  # sockets remain mutable runtime state; no network port is opened. Activation
-  # requires microphone, speaker and session-service readback.
+  # Capability contract (NixOS): package = PipeWire/WirePlumber from the NixOS
+  # module; managed configuration = ALSA, 32-bit ALSA and Pulse compatibility;
+  # mutable-state paths = none declared (routing, volume and sockets are runtime
+  # state); services = PipeWire/WirePlumber user services; network effects =
+  # none; human gate = microphone, speaker and session-service readback.
   services = {
     pulseaudio.enable = false;
     pipewire = {

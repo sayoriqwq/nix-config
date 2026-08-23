@@ -5,6 +5,10 @@
   overlay ? ./default.custom.yaml,
 }:
 
+# Owner-local package primitive contract: package = filtered Rime Ice data;
+# managed configuration = overlay validation only; mutable-state paths = none;
+# services = none; network effects = none; human gate = no live deploy here,
+# while each platform adapter owns its deployment and mutable-state gate.
 let
   validator = pkgs.writeShellApplication {
     name = "validate-rime-data-root";

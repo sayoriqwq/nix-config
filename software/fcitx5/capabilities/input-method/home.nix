@@ -1,6 +1,9 @@
 { config, ... }:
 
 {
+  # Shared Home attachment contract: package = none; managed configuration =
+  # none; mutable-state path = ~/.config/fcitx5 below; services = none; network
+  # effects = none; human gate = preference changes and cleanup remain manual.
   imports = [ ../../../../modules/home/common/state-paths.nix ];
 
   sayori.statePaths = [

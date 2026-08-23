@@ -1,8 +1,9 @@
 {
-  # Avahi owns its package/daemon and mDNS configuration. It has no declared
-  # persistent data, but does own the NixOS UDP 5353 firewall opening.
-  # Activation must read back both avahi-daemon and that unchanged exposure;
-  # this module does not own general network configuration.
+  # Capability contract (NixOS): package = Avahi from the NixOS service module;
+  # managed configuration = mDNS enabled with its explicit firewall option;
+  # mutable-state paths = none declared (runtime discovery cache is ephemeral);
+  # services = avahi-daemon; network effects = UDP 5353; human gate = activation
+  # must read back both the daemon and unchanged firewall exposure.
   services.avahi = {
     enable = true;
     openFirewall = true;

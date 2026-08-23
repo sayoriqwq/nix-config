@@ -1,6 +1,8 @@
 {
-  # BlueZ owns its package and Bluetooth controller service. Pairings, device
-  # trust and /var/lib/bluetooth stay mutable; no firewall port is opened.
-  # Controller and paired-device smoke tests remain a machine-local gate.
+  # Capability contract (NixOS): package = BlueZ from the NixOS Bluetooth
+  # module; managed configuration = controller support enabled; mutable-state
+  # path = /var/lib/bluetooth, externally owned; services = bluetooth.service;
+  # network effects = none in the IP firewall; human gate = controller and
+  # paired-device smoke tests on the target machine.
   hardware.bluetooth.enable = true;
 }
