@@ -298,7 +298,7 @@ NixOS 上还需要 glibc compatibility layer；源码构建的 Nixpkgs package �
 - 保留上游独立 Nixpkgs、Rust、Crane 与 `flake-parts` 依赖图；
 - 仅把上游 `flake-parts` 作为叶子 input 的内部实现，不改造本仓库顶层架构；
 - 显式信任限定的 Zed Cachix URL 与公钥，不上传、不关闭签名校验，也不全局接受任意 Flake 配置；
-- 通过每日 Draft PR 检查 Nightly 更新，不自动合并或激活。
+- 由维护者按需要手动更新并审阅 Nightly 的 lock diff，不自动合并或激活。
 
 不推荐把 macOS `zed@preview` cask 与 NixOS 自定义 Preview package 拼成长期
 终态：它会重新产生两个安装/更新所有者，版本也不再由同一 Flake 统一。
@@ -574,7 +574,7 @@ hosts/<host>/                    # 只选择主编辑器或主机例外，不复
 5. 两种编辑器都采用 seed-only writable baseline：只在 live 配置不存在时初始化，后续通过人工配置回流维护，不在 activation 时覆盖声明键。
 6. 引入锁定的官方 Zed Nightly package 与限定 Cachix，只做离线求值和 build；验证 Nightly identity、CLI、macOS bundle 和不覆盖边界。
 7. 对官方 `x86_64-linux` Nightly package 至少完成求值或可行性验证；NixOS GPU、FHS、Wayland/X11、扩展和 language server 的真实集成留到 Phase 5/6。
-8. 每日更新只创建 Draft PR，不自动合并或激活。真实迁移、旧应用卸载和默认编辑器切换分别保留人工 approval gate。
+8. 按需要手动更新 Zed lock，不自动合并或激活。真实迁移、旧应用卸载和默认编辑器切换分别保留人工 approval gate。
 
 ## 13. 最终判断
 

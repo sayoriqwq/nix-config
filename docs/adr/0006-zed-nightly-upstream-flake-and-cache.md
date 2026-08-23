@@ -5,6 +5,7 @@
 - **决策范围：** 桌面编辑器、Flake input、二进制缓存与更新流程
 - **关联 Issue：** [#25](https://github.com/sayoriqwq/nix-config/issues/25)
 - **批准记录：** 维护者于 2026-07-24 审阅草稿后明确接受本 ADR
+- **后续修订：** 维护者于 2026-08-20 决定移除定期更新 workflow；Nightly sync 改由维护者手动触发和审阅
 
 ## 背景
 
@@ -25,8 +26,7 @@ Rust overlay，并建议使用 Zed 官方 Cachix。直接采用这些能力可�
 - Home Manager 管理可复用的桌面用户层；
 - Git/Nix 管理声明，不接管编辑器的登录态、History、workspace/session、
   缓存和扩展运行状态；
-- 自动更新 PR 原本属于 v1 之后的候选能力，若在 Phase 4 提前引入，必须作为
-  范围明确的窄例外。
+- Zed Nightly 的定期 sync 由维护者手动触发和审阅，不为此引入仓库级自动化 action。
 
 ## 决策
 
@@ -40,8 +40,8 @@ Rust overlay，并建议使用 Zed 官方 Cachix。直接采用这些能力可�
 - 不使用 Homebrew、DMG 或 Zed 自更新作为终态版本所有者；
 - `flake.lock` 固定 Zed 的精确 Git revision 和完整上游 input graph。
 
-“使用最新 Nightly”定义为：更新 PR 最近一次锁定并通过验证的 Zed `main`
-revision，而不是每台机器在 build 时绕过锁文件获取不同的最新提交。
+“使用最新 Nightly”定义为：最近一次手动更新并通过验证的 Zed `main` revision，
+而不是每台机器在 build 时绕过锁文件获取不同的最新提交。
 
 ### 2. 把上游 `flake-parts` 限制在叶子 input 内
 
@@ -95,19 +95,19 @@ trusted public key:
 签名可以防止普通传输篡改，但不能消除 Zed 构建流水线或签名密钥被攻破的供应链
 风险。
 
-### 5. Nightly 更新使用锁文件 PR
+### 5. Nightly 更新由维护者手动执行
 
-在 #25 范围内允许为 Zed input 建立每日一次的更新检查，作为 Phase 4 的窄例外：
+不设计定期 sync 的 GitHub Action。维护者按需要在专用分支手动更新 `zed` input：
 
-1. 只更新 Zed 命名 input 及其必要的传递 lock nodes；
-2. 生成可审阅的锁文件 diff 和 Nightly revision/version 摘要；
-3. 运行可用的 formatter、Flake check 和受影响 package/host build；
-4. 仅创建或更新 Draft PR，不自动批准、合并或激活真实机器；
-5. 构建失败时保留当前已锁定版本，并让失败保持可见；
-6. 允许维护者暂停定时检查，避免持续失败或上游事故产生噪声。
+1. 从最新 `main` 创建专用分支，运行 `nix flake update zed`；
+2. 确认工作区只改动 `flake.lock`，审阅 Zed revision/version 与必要的传递 lock nodes；
+3. 运行 formatter、Flake check 和受影响的 Nightly package/host build；
+4. 通过普通可审阅 PR 提交变更，不自动批准、合并或激活真实机器；
+5. 构建失败时不合并该分支，继续使用当前已锁定版本；
+6. 需要回滚时，回滚对应的锁文件提交，并按既有 activation 回滚关卡处理真实机器。
 
-Zed 应用自身的自动更新必须关闭。Git PR、`flake.lock` 与 Nix generation 是
-唯一版本推进和回滚路径。
+Zed 应用自身的自动更新必须关闭。手动审阅的 Git PR、`flake.lock` 与 Nix
+generation 是唯一版本推进和回滚路径。
 
 ### 6. 编辑器共用语义，不共用原生配置
 
@@ -128,7 +128,7 @@ Zed 与 VS Code 在同一个 #25 中推进，因为它们共享默认编辑器�
 
 - 使用 Zed 上游维护的 Nightly 构建逻辑，减少自制 package 的持续维护；
 - macOS 与未来 NixOS 可以锁定同一 Zed revision，同时构建各自平台输出；
-- Cachix 命中时显著降低每日 Nightly 更新的本地编译成本；
+- Cachix 命中时显著降低 Nightly 更新的本地编译成本；
 - 更新、失败和回滚都有 Git 与锁文件记录；
 - 上游 `flake-parts` 被限制在叶子依赖内，不改变本仓库顶层架构；
 - VS Code 与 Zed 的共用关系被显式建模，而不是靠复制或自动同步维持。
@@ -138,7 +138,7 @@ Zed 与 VS Code 在同一个 #25 中推进，因为它们共享默认编辑器�
 - `flake.lock` 增加 Zed 独立 Nixpkgs、Rust overlay、Crane 和 `flake-parts`
   等传递节点；
 - Nightly 未经过 Preview/Stable 同等级测试，可能崩溃、回归或改变配置格式；
-- 每日更新会增加 PR、构建资源和维护噪声；
+- 手动更新仍需要维护者承担版本审阅和构建资源成本；
 - 缓存未命中时仍可能触发耗时的本地源码构建；
 - 信任 Zed Cachix 意味着接受其构建流水线和签名密钥的供应链风险；
 - Zed 的 live settings、扩展和 workspace 状态不随 Nix generation 自动回滚；
@@ -172,7 +172,7 @@ Darwin bundle、Linux desktop integration 和 remote server。
 
 ### 不使用二进制缓存
 
-供应链信任面更小，但每日 Nightly 和双平台验证可能频繁触发大型源码构建，
+供应链信任面更小，但手动 Nightly 和双平台验证仍可能触发大型源码构建，
 不符合预期更新频率。
 
 ### 应用自行更新
@@ -191,7 +191,7 @@ Darwin bundle、Linux desktop integration 和 remote server。
 - 在可行范围内求值或构建 `x86_64-linux` Nightly package；
 - 验证缓存命中与缓存未命中回退不会改变 derivation identity；
 - 记录 Preview → Nightly 的私有备份、双安装验收和回滚步骤；
-- 记录每日更新失败、暂停和恢复流程。
+- 记录手动更新失败、放弃和回滚流程。
 
 ADR 接受和离线 build 不授权 activation。第一次切换到 Nightly、改变默认编辑器、
 卸载 Zed Preview、信任配置实际生效、合并或将 Draft PR 标记 Ready，仍需 Issue
@@ -207,5 +207,5 @@ ADR 接受和离线 build 不授权 activation。第一次切换到 Nightly、�
 - 缓存长期缺少 `aarch64-darwin` 或 `x86_64-linux` 输出；
 - Nightly 持续不稳定，维护者决定回到 Preview 或 Stable；
 - Zed 官方提供更简单、稳定且跨平台的 Nix channel interface；
-- 每日更新 PR 的噪声或资源消耗高于其收益；
+- 手动更新的审阅、构建或资源成本高于其收益；
 - 本仓库另行决定采用 `flake-parts` 作为顶层组织框架。
