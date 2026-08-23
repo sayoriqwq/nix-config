@@ -19,7 +19,8 @@ nix-darwin 只声明已由维护者批准的恢复入口：
 
 以上 28 个 cask 是 Issue #46 的原始实施与验收基线。Issue #74 在 2026-07-31 曾恢复
 全球版 `lark` 声明，Issue #81 随后把当前渠道更正为中国区 `feishu`；Issue #67 又把
-`claude-code` 从 Homebrew 迁移到 Nix/Home Manager，因此当前目标为 28 个 cask。
+`claude-code` 从 Homebrew 迁移到 Nix/Home Manager；Issue #199 再按已批准语义仅删除
+Steam declaration，因此当前目标为 27 个 cask。
 原始 build/activation 记录继续按当时 28 个条目解释，后续修订见第 10–12 节。
 
 应用账号、许可证、登录态、偏好、缓存、数据库、容器、虚拟机、项目和其他可变状态
@@ -281,7 +282,7 @@ Homebrew 或 Nix 接管；完整四 CLI 所有权与清理记录见
 - 精确删除六个指向已退役 Docker、WARP 与 Zed Preview 应用的 root-owned
   `/usr/local/bin` 悬空链接；OrbStack 和 Nix Zed 的现行入口复验通过。
 
-当前声明仍为 1 tap、28 cask、9 MAS app、0 formula；真实 Homebrew formula 外部状态为
+Issue #93 完成时声明仍为 1 tap、28 cask、9 MAS app、0 formula；真实 Homebrew formula 外部状态为
 14 个。`feishu 7.72.8,715e64ed` 的 receipt 与 `/Applications/Feishu.app` 存在；实际
 bundle ID 为 `com.electron.lark`、Team ID 为 `XY6NLV7YTS`，深度签名和 Gatekeeper
 notarization 验证均通过。#74/#81 的 Lark 恢复步骤继续作为历史证据，不再描述当前
@@ -289,3 +290,17 @@ notarization 验证均通过。#74/#81 的 Lark 恢复步骤继续作为历史�
 
 2026-08-06，#60 在新的独立批准下卸载 PostgreSQL 16，并接受 Homebrew 对当时无消费者
 依赖的自动回收；这不改变 #93 的历史执行边界。
+
+## 14. Issue #199：V3 application presence ownership
+
+Issue #199 把当前 27 个 Homebrew cask 与 9 个 MAS application presence 分别迁移到
+`software/<software>/capabilities/<primary-capability>/darwin.nix`。macbook 逐项显式选择这些
+Primary Capabilities；仓库不再存在 `macos-legacy-applications` bundle，也没有 cask/MAS
+registry、自动扫描或按应用生成的测试矩阵。Homebrew 自身的 capability 单独保留
+`autoUpdate = false`、`upgrade = false` 与 `cleanup = "none"` 的非破坏策略。
+完整当前 Brewfile 另包含工作站稳定访问 capability 拥有的 `tailscale-app`，因此总 cask 数为
+28；该 frozen owner 不属于 Issue #199 的迁移或修改范围。
+
+Steam 是唯一退出的现有 declaration。该删除只改变下一代候选配置，不卸载 live App，
+不读取或修改 Steam account、library、game、save 或其他数据；Alice in Cradle 继续在仓库外。
+其余 cask、MAS receipt 与 application external state 的历史验证和恢复边界保持不变。

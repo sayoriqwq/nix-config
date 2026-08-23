@@ -12,6 +12,8 @@ let
   pinshift = import ../../software/pinshift { inherit intentLib; };
   pinshiftDevelopment = intentLib.realize (pinshift.developmentCli intentLib.empty);
   terminalWork = import ../../intents/terminal-work { inherit lib; };
+  terminalCompatibility = import ../../intents/terminal-compatibility { inherit lib; };
+  terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
   workstationHomeModules =
     codeDevelopment.homeModules
     ++ aiCoding.multiClientCodingEnvironment.homeModules
@@ -25,12 +27,44 @@ in
       ../../modules/darwin/defaults.nix
       ../../modules/darwin/fonts.nix
       ../../modules/darwin/shell.nix
-      ../../modules/capabilities/raycast/darwin.nix
-      ../../modules/capabilities/macos-legacy-applications/darwin.nix
-      ../../modules/capabilities/google-chrome/darwin.nix
-      ../../modules/capabilities/clash-verge-rev/darwin.nix
-      ../../modules/capabilities/termius/darwin.nix
-      ../../modules/capabilities/localsend/darwin.nix
+      ../../software/homebrew/capabilities/non-destructive-application-management/darwin.nix
+      ../../software/amphetamine/capabilities/sleep-control/darwin.nix
+      ../../software/baidu-netdisk/capabilities/cloud-storage-client/darwin.nix
+      ../../software/balena-etcher/capabilities/disk-image-writer/darwin.nix
+      ../../software/chatgpt/capabilities/desktop-ai-client/darwin.nix
+      ../../software/clash-verge-rev/capabilities/proxy-client/darwin.nix
+      ../../software/easyfind/capabilities/file-search/darwin.nix
+      ../../software/feishu/capabilities/team-collaboration/darwin.nix
+      ../../software/figma/capabilities/interface-design/darwin.nix
+      ../../software/fuse-t/capabilities/filesystem-bridge/darwin.nix
+      ../../software/garageband/capabilities/music-creation/darwin.nix
+      ../../software/google-chrome/capabilities/web-browser/darwin.nix
+      ../../software/hazeover/capabilities/focus-overlay/darwin.nix
+      ../../software/izip/capabilities/archive-manager/darwin.nix
+      ../../software/keynote/capabilities/presentation-editing/darwin.nix
+      ../../software/keyscreen/capabilities/keystroke-visualization/darwin.nix
+      ../../software/linear/capabilities/issue-tracking/darwin.nix
+      ../../software/mega/capabilities/cloud-storage-client/darwin.nix
+      ../../software/netease-cloud-music/capabilities/music-player/darwin.nix
+      ../../software/numbers/capabilities/spreadsheet-editing/darwin.nix
+      ../../software/obs-studio/capabilities/screen-recording/darwin.nix
+      ../../software/one-thing/capabilities/menu-bar-reminder/darwin.nix
+      ../../software/orbstack/capabilities/container-runtime/darwin.nix
+      ../../software/pages/capabilities/document-editing/darwin.nix
+      ../../software/paseo/capabilities/application-presence/darwin.nix
+      ../../software/pearcleaner/capabilities/app-maintenance/darwin.nix
+      ../../software/qq/capabilities/messaging/darwin.nix
+      ../../software/raycast/capabilities/application-launcher/darwin.nix
+      ../../software/scratch/capabilities/markdown-editor/darwin.nix
+      ../../software/telegram/capabilities/messaging/darwin.nix
+      ../../software/tencent-meeting/capabilities/video-conferencing/darwin.nix
+      ../../software/termius/capabilities/remote-access-client/darwin.nix
+      ../../software/topnotch/capabilities/display-customization/darwin.nix
+      ../../software/transmission/capabilities/bittorrent-client/darwin.nix
+      ../../software/vorssaint/capabilities/application-presence/darwin.nix
+      ../../software/wechat/capabilities/messaging/darwin.nix
+      ../../software/windows-app/capabilities/windows-remote-access/darwin.nix
+      ../../software/localsend/capabilities/local-file-sharing/darwin.nix
       ../../modules/capabilities/stable-workstation-access/darwin.nix
       ../../modules/capabilities/secret-deployment/darwin.nix
       ../../modules/capabilities/chinese-input/darwin.nix
@@ -74,7 +108,7 @@ in
 
     users.sayori = {
       imports =
-        terminalWork.homeModules
+        terminalHomeModules
         ++ workstationHomeModules
         ++ [
           ../../software/fish/capabilities/interactive-shell/home.nix
@@ -88,13 +122,16 @@ in
           ../../modules/home/capabilities/macos-development-runtime-extras.nix
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
-          ../../modules/home/capabilities/macos-vscode-compatibility.nix
-          ../../modules/home/capabilities/ghostty-terminal.nix
-          ../../modules/home/capabilities/macos-terminal-compatibility.nix
-          ../../modules/home/capabilities/obsidian/darwin.nix
-          ../../modules/home/capabilities/macos-user-applications.nix
-          ../../modules/home/capabilities/macos-integrations.nix
-          ../../modules/home/capabilities/cloud-storage.nix
+          ../../software/vscode/capabilities/editor-compatibility/home.nix
+          ../../software/ghostty/capabilities/terminal-emulator/home.nix
+          ../../software/obsidian/capabilities/knowledge-base/darwin-home.nix
+          ../../software/discord/capabilities/messaging/home.nix
+          ../../software/iina/capabilities/media-player/home.nix
+          ../../software/monitorcontrol/capabilities/display-control/home.nix
+          ../../software/mos/capabilities/mouse-utility/home.nix
+          ../../software/upscayl/capabilities/image-upscaling/home.nix
+          ../../software/xbar/capabilities/menu-bar-plugins/home.nix
+          ../../software/rclone/capabilities/cloud-storage/home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
           ../../modules/home/capabilities/secret-administration.nix
         ];

@@ -23,7 +23,7 @@
 | WezTerm | Home Manager/Nixpkgs | 颜色与语义 Token：锁定的 `yume-design` input；运行时 adapter：`modules/home/desktop/terminal/` | 窗口、mux 与运行时状态保持可写 |
 | Fish/Zsh | Home Manager；macOS 登录 Fish 由 nix-darwin 声明 | 语义颜色：锁定的 `yume-design` input；Shell 行为与 adapter：`modules/home/common/shell/` | history 与 universal variables 保持可写 |
 | Node/Bun/pnpm | mise | Nix 管理 mise 本体、默认值和 Shell integration | mise runtime/cache/state 保持可写 |
-| Maple Mono NF-CN | macOS 由 nix-darwin 安装；选择 Ghostty 的 Linux 工作站由 Home Manager 安装 | macOS：`modules/darwin/fonts.nix`；Linux：`modules/home/capabilities/ghostty-terminal.nix` | 无用户数据；headless server 不安装字体 |
+| Maple Mono NF-CN | macOS 由 nix-darwin 安装；选择 Ghostty 的 Linux 工作站由 Home Manager 安装 | macOS：`modules/darwin/fonts.nix`；Linux：`software/ghostty/capabilities/terminal-emulator/home.nix` | 无用户数据；headless server 不安装字体 |
 
 Ghostty 与 WezTerm 的应用本体不再由 Homebrew 声明。`homebrew.onActivation.cleanup` 继续为 `none`；真实机器先验证 Nix 应用，再经当次批准定向卸载两个 cask。
 

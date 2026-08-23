@@ -10,7 +10,7 @@ rollback bundle 清理均已完成；Issue #59 的文档 PR 合并并记录人�
 | --- | --- | --- |
 | 将软件分为 Nixpkgs、Homebrew、MAS 与手工保留 | 完成 | [`phase-4-macos-software-ownership.md`](phase-4-macos-software-ownership.md) |
 | CLI 优先使用 Nix，并记录例外 | 完成 | #41、#43、#55；[`phase-4-cli-static.md`](phase-4-cli-static.md)、[`mise-runtime-ownership.md`](mise-runtime-ownership.md)、[`uv-python-ownership.md`](uv-python-ownership.md) |
-| 声明 Homebrew/tap/cask/formula 边界 | 完成 | #46、#55、#56；当前 `modules/capabilities/macos-legacy-applications/darwin.nix` 与总体 inventory |
+| 声明 Homebrew/tap/cask/formula 边界 | 完成 | #46、#55、#56、#199；当前 `software/*/capabilities/*/darwin.nix` 的 owner-local presence declarations 与总体 inventory |
 | 逐项声明 defaults 并记录当前值、目标值和回滚 | 完成 | #37 / PR #40；[`phase-4-macos-defaults.md`](phase-4-macos-defaults.md) |
 | 检查应用数据目录与登录态 | 完成 | 总体 inventory 的每类可变状态边界与各迁移记录 |
 | 生成 activation 前后差异 | 完成 | 总体 inventory 第 9 节 |

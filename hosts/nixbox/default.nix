@@ -26,10 +26,10 @@ in
     ../../modules/capabilities/hyprland-desktop/nixos.nix
     ../../modules/capabilities/always-on-workstation/nixos.nix
     ../../modules/capabilities/portable-shell/nixos.nix
-    ../../modules/capabilities/google-chrome/nixos.nix
-    ../../modules/capabilities/clash-verge-rev/nixos.nix
-    ../../modules/capabilities/termius/nixos.nix
-    ../../modules/capabilities/localsend/nixos.nix
+    ../../software/google-chrome/capabilities/web-browser/nixos.nix
+    ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
+    ../../software/termius/capabilities/remote-access-client/nixos.nix
+    ../../software/localsend/capabilities/local-file-sharing/nixos.nix
     ../../modules/capabilities/stable-workstation-access/nixos.nix
     ../../modules/capabilities/secret-deployment/nixos.nix
   ];
@@ -84,8 +84,8 @@ in
           ../../modules/home/capabilities/development-runtime.nix
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
-          ../../modules/home/capabilities/ghostty-terminal.nix
-          ../../modules/home/capabilities/obsidian/linux.nix
+          ../../software/ghostty/capabilities/terminal-emulator/home.nix
+          ../../software/obsidian/capabilities/knowledge-base/linux-home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
         ];
 

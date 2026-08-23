@@ -38,7 +38,7 @@
 | Clash Verge Rev | 是 | 是 | 否 | macbook 保持 Homebrew cask；nixbox 由 NixOS adapter 独占 Linux package 所有权，并通过窄、精确锁定的 package source seam 提供 2.5.2。nixbox 声明 root systemd Service Mode、专用 `clash-verge` socket group（仅加入 `sayori`），保持 `tunMode = false`、`autoStart = false`，不创建 GUI capability wrapper；应用内 TUN 只在绑定 exact commit 的人工关卡中通过声明式 service 验证。该能力不声明 firewall、Tailscale、SSH、DNS、route 或 system proxy；server 排除。 |
 | Raycast 工作流 | 是 | 否 | 否 | Darwin adapter 单独拥有现有 Homebrew cask；Home Manager 从固定源码 revision 按 manifest 白名单把 7 个 navigation Script Commands 部署到 `~/.local/share/raycast/script-commands`。Settings、数据库、快捷键和 extension 运行态仍归 Raycast；已删除的 DB tunnel 与 Yume command/config 不得恢复，Script Directory 切换保留人工关卡。 |
 | 中文输入 | 是 | 是 | 否 | 两个工作站按各自锁定 package set 构建同一个参数化 Rime Ice 2026.06.30 静态 data package，排除 `build`/可变名称、只启用 `rime_ice`、左右 Shift 只切 Rime 内部 mode，并以 recursive leaves 保持用户根可写。macOS frontend 继续由官方 Fcitx5.app/installer 与人工偏好拥有；nixbox 由 NixOS 单一拥有 Fcitx 5.1.19、`fcitx5-rime` 5.1.13、system defaults、toolkit environment 与 XDG autostart，HM 输入法 module/daemon 保持关闭。server 排除。两个平台的 activation、deploy 与真人输入仍是独立人工关卡。 |
-| macOS 遗留应用集合 | 是 | 否 | 否 | 保留尚未逐项能力化的 Homebrew/MAS 现状；Raycast 已拆为独立 capability，其他应用后续按真实需求拆出，不作为其他主机的继承源。 |
+| macOS application presence | 是 | 否 | 否 | 每个受管 Homebrew、MAS 与 Home Manager App 都由自己的 Software Primary Capability 拥有，并由 macbook 直接选择；不存在 legacy app bundle。账号、偏好、内容、数据库、缓存与许可证保持外部，Steam 已退出声明。 |
 | macOS Shell 兼容 | 是 | 否 | 否 | WezTerm + Zsh 只保留在主工作站，不是迁移阶段。 |
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
@@ -59,7 +59,7 @@
 
 ## 当前状态
 
-- 三台 Host 已通过 realized `terminal-work` Intent 组合终端 Software Capabilities；两个工作站另通过 `code-development` 与各自的 `ai-coding` 组合选择代码/AI Software，server 直接选择 `git.version-control`，Pinshift 只由 macbook 直接选择。其余工作站能力仍按后续 V3 Issue 从现有显式 imports 逐批迁移。
+- 三台 Host 已通过 realized `terminal-work` Intent 组合终端 Software Capabilities；两个工作站另通过 `code-development` 与各自的 `ai-coding` 组合选择代码/AI Software，server 直接选择 `git.version-control`，Pinshift 只由 macbook 直接选择。macbook 的 WezTerm + Zsh 兼容环境通过 `terminal-compatibility` Intent 显式组合，其他受管 App presence 由 host 直接选择各自 Software Capability；其余工作站能力仍按后续 V3 Issue 从现有显式 imports 逐批迁移。
 - macbook 的共享 Rime 静态声明源自已合并的 #140/PR #142；维护者已在获批窗口完成
   `system-46-link` activation、一次 Rime deploy 与静态/可变边界回读，后续 #143/#145/#147
   又完成 Shift/fallback 所有权调整及 Squirrel 遗留退役，#147 Gate D 记录真人输入整体 PASS。

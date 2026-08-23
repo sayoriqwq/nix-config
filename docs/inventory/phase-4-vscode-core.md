@@ -133,7 +133,7 @@ SecretStorage。
 
    ```fish
    diff -u \
-     modules/home/desktop/editors/vscode/settings.jsonc \
+     software/vscode/capabilities/editor-compatibility/settings.jsonc \
      "$HOME/Library/Application Support/Code/User/settings.json"
    ```
 
