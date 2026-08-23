@@ -5,18 +5,10 @@
 }:
 
 {
-  nix = {
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      substituters = [
-        "https://mirrors.ustc.edu.cn/nix-channels/store"
-        "https://cache.nixos.org"
-      ];
-    };
-  };
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   nixpkgs.config.allowUnfree = true;
 
