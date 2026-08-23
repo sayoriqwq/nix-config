@@ -39,6 +39,8 @@ flake.nix + flake.lock
 
 server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的正式替换进入上述基线；旧 Ubuntu 层不恢复。
 
+Server recovery 是独立 Operation：`operations/server-recovery/` 可以组合 production server declarations 与 test-only VM module，并通过 `checks`、`packages` 和 `apps` 暴露黑盒验证；`nixosConfigurations.server` 不得反向 import Operation、check 或 test-only implementation。
+
 ## 2. 配置事实来源
 
 - Git 提交记录说明“配置为什么变化”。
@@ -61,6 +63,8 @@ server 已通过只读盘点、最小 NixOS、隔离 VM 测试和人工批准的
 - 组合各主机模块；
 - 暴露明确、稳定的主机 output；
 - 提供 checks、formatter 或开发工具入口。
+
+Operation output 只能从 validation graph 引用 production declarations。Production host output 不得依赖 `checks/` 或 `operations/`；server recovery 的隔离安装 configuration 只服务锁定的 nixos-anywhere `--vm-test`，不接受 production target。
 
 不承担大量具体配置。避免把整套系统逻辑都塞进 `flake.nix`。
 
@@ -173,7 +177,7 @@ Phase 11 建立了 SOPS + sops-nix + age 基础：
 | `nh` | 友好的构建命令与 diff 展示 | 基础用户工具阶段 |
 | sops-nix + age | 机密部署 | 两台本地机器稳定后 |
 | disko | 服务器磁盘声明 | 服务器 NixOS 设计阶段 |
-| nixos-anywhere | 服务器恢复演练的内部安装测试依赖 | `server-recovery-test`，不暴露生产 target 参数 |
+| nixos-anywhere | `operations/server-recovery` 的隔离安装测试 engine | `server-recovery-test`，不暴露 production target 参数 |
 
 ### 延后工具
 

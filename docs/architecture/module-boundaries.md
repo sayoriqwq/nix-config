@@ -22,6 +22,10 @@
 │   │   └── <cross-layer>/         # home.nix + 已证明的平台 adapter
 │   ├── darwin/                    # 可复用 nix-darwin 系统模块
 │   └── nixos/                     # 可复用 NixOS 系统模块
+├── operations/
+│   └── server-recovery/           # 隔离 VM Operation；可消费 production declarations
+├── checks/
+│   └── server-recovery/           # Operation 公开 policy seam
 ├── dotfiles/
 ├── secrets/
 └── docs/
@@ -62,6 +66,8 @@ Host 显式 import 一项能力即表示采用。不得再要求 host 同时设�
 | `modules/capabilities/<name>/nixos.nix` | 已证明的 NixOS adapter、HM attachment与公开安全副作用 | 未经 Issue 批准的 firewall/SSH/服务变化 |
 | `modules/darwin/` | macOS defaults、系统设置、Shell 注册与通用 Darwin 服务 | 按应用需求选择的 Homebrew cask、NixOS 选项、主机硬件事实 |
 | `modules/nixos/` | NixOS 基础、桌面或 server 系统能力 | 主机磁盘/GPU/网卡事实、生产数据 |
+| `operations/server-recovery/` | test-only NixOS graph、隔离 VM runner、disko/nixos-anywhere 与 `runNixOSTest` wiring | production target 参数、真实网络/SSH/disk action、被 production host import |
+| `checks/server-recovery/` | 从 production/Operation 公开配置观察 policy 与 runner 边界 | grep 源码、复制旧 test implementation、production 配置所有权 |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
 | `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
@@ -110,6 +116,7 @@ flake output
 - Home Manager primitive 不 import nix-darwin/NixOS system module。
 - Darwin 与 NixOS adapter 不互相 import。
 - import 必须显式列出，不使用递归扫描。
+- Validation graph 可以 import production declarations；production host 不得反向 import `checks/`、`operations/` 或 test-only module。
 - 一个 adapter 表示假设，两个真实变化才证明 seam；但已经批准、将在下一 Phase 组合的第二平台 adapter 可以先在合同文档中记录，不能提前启用其副作用。
 
 ## 5. 状态、参数与共享值
