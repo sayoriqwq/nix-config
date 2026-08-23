@@ -109,7 +109,6 @@ modules/
   darwin/
   nixos/
 dotfiles/
-secrets/
 docs/
 ```
 
