@@ -47,7 +47,6 @@ in
       ../../software/usbutils/capabilities/hardware-inspection/nixos.nix
       ../../software/vim/capabilities/system-editor/nixos.nix
       ../../software/wget/capabilities/network-download/nixos.nix
-      ../../modules/capabilities/secret-deployment/nixos.nix
     ];
 
   boot.loader = {

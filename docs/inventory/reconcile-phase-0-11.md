@@ -2,7 +2,7 @@
 
 > 范围：Issue #103，基线为 `main@4178a8ee3ad4e0c858aae85e136f2bbc7fb0887f`。本文记录 2026-08-04 的全仓、GitHub、主机只读状态与维护者批准的清理结果；不授权 activation、Nix GC、generation 删除、PostgreSQL 变更或其他生产修改。
 >
-> **后续决策：** 第 7 节记录的 2026-08-05 root 直连选择已于 2026-08-10 被取代；当前目标见第 8 节。历史运行态证据保持原文。
+> **后续决策：** 第 7 节记录的 2026-08-05 root 直连选择已于 2026-08-10 被取代；当前目标见第 8 节。Issue #205 又在无真实 consumer 的前提下退役了本记录保留的 SOPS readiness。历史运行态证据保持原文。
 
 ## 1. 当前阶段结论
 
@@ -13,10 +13,10 @@
 ## 2. 仓库收口
 
 - 删除 Phase 10 正式迁移专用的 preflight、bootstrap、install/resume helpers 与对应 tests；历史执行证据保留在 Phase 10 inventory。
-- 删除 Phase 11 管理员 identity 初始化 helper、验收 demo 声明和三份 SOPS 密文；Secret adapter 只保留 sops-nix 与 host SSH identity 基础。
+- 删除 Phase 11 管理员 identity 初始化 helper、验收 demo 声明和三份 SOPS 密文；当时曾保留 sops-nix 与 host SSH identity 基础，该空 readiness 后由 Issue #205 退役。
 - Phase 9 的无 target 隔离演练改名为长期 `server-recovery-test`，继续拒绝参数、production target、dirty checkout、无 KVM 与低空间环境。
 - 删除已经失去可执行入口的 server 替换 runbook；Phase 8–10 的历史事实继续由 inventory 与 ADR 保存。
-- README、Context、架构、路线图、ADR、Secret runbook 与英文/中文 Agent 协议同步为当前事实。
+- README、Context、架构、路线图、ADR、Secret runbook 与英文/中文 Agent 协议同步为当时事实；后续现行合同以 Issue #205 与 ADR-0003 的 supersession 为准。
 
 删除 secret 声明不会自行修改真实机器。三台主机上的历史 `/run/secrets/phase11-demo` 只有在各自主机未来取得单独批准并激活本变更后才会移除。
 

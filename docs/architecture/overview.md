@@ -135,17 +135,9 @@ Fish 与 Starship adapter 提供数据。本仓库继续拥有字体、透明度
 
 ### 3.6 机密层
 
-Phase 11 建立了 SOPS + sops-nix + age 基础：
+Phase 11 曾验证 SOPS + sops-nix + age 的非生产部署路径；Issue #205 在确认仓库没有真实 consumer 后退役了这套空 readiness。当前 Flake、Host 与用户 profile 均不选择 secret framework 或管理工具。
 
-- Git 只保存按真实消费者批准的加密文件；当前没有 production secret；
-- 解密在 activation 时发生；
-- 服务通过文件路径读取机密；
-- 明文不得作为普通 Nix 字符串进入 Store；
-- 每台机器使用现有 Ed25519 SSH host identity 派生的独立 age recipient；
-- 每个 host 文件只授予管理员恢复 recipient 和该 host recipient；
-- 管理员 identity 和编辑工具只留在 macbook；恢复副本由维护者在仓库外自行管理，nixbox 与 server 不获得编辑能力。
-
-机密部署 adapter 只声明身份与解密基础；具体 secret 的 source、path、owner、mode 与服务合同由后续独立 Issue 的消费者声明。
+长期安全边界保持不变：明文不得进入 Git、Nix Store、Issue、PR 或日志，外部 identity 与 credential 不归仓库管理。未来真实 consumer 必须通过独立 Issue 从需求出发选择实现，并明确 source、目标 host、运行时 path/owner/group/mode、服务 reload/restart、轮换、恢复与 activation 人工关卡；不得复用历史 demo 或预建空 adapter。
 
 ### 3.7 控制身份与机器关系
 
@@ -178,7 +170,6 @@ Phase 11 建立了 SOPS + sops-nix + age 基础：
 | Home Manager | 能力模块中的用户配置实现 | macOS 用户能力与后续主机组合 |
 | nix-homebrew / nix-darwin Homebrew options | 迁移期遗留 Homebrew 声明；终态逐项退出 | Mac 基础稳定后 |
 | `nh` | 友好的构建命令与 diff 展示 | 基础用户工具阶段 |
-| sops-nix + age | 机密部署 | 两台本地机器稳定后 |
 | disko | 服务器磁盘声明 | 服务器 NixOS 设计阶段 |
 | nixos-anywhere | `operations/server-recovery` 的隔离安装测试 engine | `server-recovery-test`，不暴露 production target 参数 |
 

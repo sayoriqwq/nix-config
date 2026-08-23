@@ -7,7 +7,7 @@
 
 当前 server 运行 Ubuntu，但 Ubuntu 只是待替换的机器事实，不是长期架构角色。取消 standalone Home Manager 过渡配置，迁移顺序调整为：迁移前置盘点；最小 NixOS 与 disko 声明；隔离 VM 安装验证；经人工批准直接替换为只保证启动、网络、SSH、sudo 与救援能力的最小 NixOS；系统稳定后建立 sops-nix/age Secret 能力；最后按新需求从空白状态引入业务并建立相应运维能力，不恢复当前 Ubuntu 的业务与数据。
 
-实施状态：Phase 10 已于 2026-08-03 完成正式替换，Phase 11 已于 2026-08-04 完成 Secret 基础验收；上述“当前 Ubuntu”是本 ADR 作出时的历史前提，不是现状。Phase 12 已明确延后。
+实施状态：Phase 10 已于 2026-08-03 完成正式替换，Phase 11 已于 2026-08-04 完成 Secret 基础验收；上述“当前 Ubuntu”是本 ADR 作出时的历史前提，不是现状。由于始终没有真实 consumer，Issue #205 后续退役了空的 SOPS readiness，但保留 ADR-0003 的通用机密安全原则。Phase 12 已明确延后。
 
 维护者于 2026-08-05 曾确定单管理员 root public-key-only 直连模型，因此关闭 root SSH 的 Issue #99 / PR #109 当时以未计划实施关闭，且从未 activation。该段只记录决策演变，不再表示当前目标。
 

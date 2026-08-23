@@ -257,15 +257,7 @@ retirement：app、preference 与 cache 的原路径即时回读均不存在，r
 
 ### 机密（Secret）
 
-密码、token、私钥、恢复码、私有环境变量等敏感材料。加密后的机密文件可以按策略提交；明文机密不得进入 Git 或 Nix Store。
-
-### 机密部署能力（Secret deployment capability）
-
-由 sops-nix 在 activation/boot 阶段使用当前主机自己的 age 解密身份，把已加密声明转换成受 owner、group、mode 控制的运行时文件。它不授予主机编辑其他主机机密的权限，也不把管理员恢复 identity 或 GitHub 凭据下发到目标机。
-
-### 机密管理能力（Secret administration capability）
-
-只由 macbook 选择的 SOPS、age 与 SSH-to-age 编辑/recipient 管理工具。管理员 identity 与恢复副本都由维护者在仓库外自行管理，Agent 不读取或验证其内容；nixbox 与 server 都不组合该能力，也不持有管理员 identity。
+密码、token、私钥、恢复码、私有环境变量等敏感材料。明文机密不得进入 Git、Nix Store、Issue、PR 或日志。当前仓库没有机密 consumer，也不预置部署或管理框架；未来需求必须由独立 Issue 从具体 consumer、目标主机、运行时权限、轮换、恢复和服务依赖重新建立合同。外部 identity、credential 与运行时 secret 始终位于仓库所有权之外。
 
 ### 激活（Activation）
 
@@ -290,7 +282,7 @@ Issue 或 PR 中明确记录、针对当前具体动作的维护者批准。以�
 3. 主机以能力模块为组合单位；基础配置不得直接泄漏为主机必须理解的接口。
 4. 系统配置与用户配置分层，平台特有内容不得泄漏到可移植能力。
 5. Agent 不猜测主机事实，不自主执行激活或破坏性动作。
-6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS，并已建立 Secret 部署基础；macbook maintenance identity 与 nixbox deploy identity 都只登录远端 `sayori`，经 sudo 边界提权，root SSH 关闭；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
+6. Server 已从 Ubuntu 直接替换为最小可 SSH 的 NixOS；macbook maintenance identity 与 nixbox deploy identity 都只登录远端 `sayori`，经 sudo 边界提权，root SSH 关闭；旧 Ubuntu 业务与数据不恢复，后续只按新需求从空白状态引入独立能力。
 7. 每项重大工具或架构变化必须通过 Issue 与 ADR 解释，而不是顺手引入。
 
 ## 5. 不属于本仓库的职责

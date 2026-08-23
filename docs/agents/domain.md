@@ -55,7 +55,7 @@ Issue、PR、代码和文档应使用 `CONTEXT.md` 定义的词汇，例如：
 
 - 单一 Flake 与多主机输出；
 - 主机按能力模块显式组合；
-- sops-nix 机密管理；
+- 机密与外部 identity 的安全边界；
 - Server 从 Ubuntu 直接替换为 NixOS；
 - macOS 使用的 Nix 实现与 bootstrap 边界。
 

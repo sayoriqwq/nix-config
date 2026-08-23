@@ -51,7 +51,7 @@
 
 - [ ] 未提交明文 secret、私钥、token、恢复码或私有 `.env`
 - [ ] 未把可变业务数据、数据库 dump 或容器 volume 提交到配置仓库
-- [ ] 如涉及 sops-nix，只提交了加密内容与 public recipient
+- [ ] 如涉及 secret，只提交了获批的安全声明和公开 metadata；未提交明文或 private identity
 
 ## Agent 自检
 

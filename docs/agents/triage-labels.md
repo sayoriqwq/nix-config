@@ -33,7 +33,7 @@
 | `area:home` | Home Manager 与用户配置 |
 | `area:nixos` | NixOS 工作站或通用 NixOS 模块 |
 | `area:server` | Ubuntu→NixOS 前置盘点、直接替换与服务恢复 |
-| `area:secrets` | sops-nix、age 与 secret 权限模型 |
+| `area:secrets` | secret consumer、部署机制与权限边界 |
 | `area:storage` | disko、分区、文件系统和挂载 |
 
 一个 Issue 可以有多个范围标签，但应保持最小集合。

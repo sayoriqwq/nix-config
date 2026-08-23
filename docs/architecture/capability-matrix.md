@@ -44,8 +44,6 @@
 | VS Code 兼容 | 是 | 否 | 否 | 配置继续保留在仓库，但 nixbox 不安装。 |
 | 云端/OSS 文件工作流 | 是 | 否 | 否 | rclone 与现有 macOS 工作流；不泛化到其他主机。 |
 | AI 辅助运维 | 是 | 是 | 否 | macbook 保留现有 Codex、Claude、Antigravity、Oh My Pi、ax、RTK 与裸 Python 3.14 集合；nixbox 只组合锁定 Linux package 中的 Codex、ax、RTK、裸 Python 3.14 与 Linux 专属全局 `AGENTS.md`，不继承其他客户端。两台工作站的 `RTK.md` 都由 RTK init 生命周期拥有，auth、session、history、plugins、skills、hooks、cache 和数据库保持外部可写；server 不组合该能力。macbook 细节见 [macOS AI CLI 所有权](../inventory/macos-ai-cli-ownership.md)。 |
-| 机密部署 | 是 | 是 | 是 | sops-nix 使用每机独立 SSH host identity 解密本机文件；运行时路径和 mode 受声明控制，不分发管理员 identity。 |
-| 机密管理 | 是 | 否 | 否 | 只有 macbook 提供 SOPS、age 与 SSH-to-age；管理员 identity 与维护者自管恢复副本保持仓库外，nixbox/server 不获得编辑或恢复能力。 |
 
 ## 明确排除或延后
 
@@ -54,7 +52,7 @@
 - nixbox 当前明确排除 Discord、Upscayl、OBS、Telegram、QQ、WeChat、腾讯会议、Transmission、balenaEtcher、网易云音乐、Scratch、原生 Figma/Linear/ChatGPT；Steam、MEGAsync 与百度网盘延后决定。
 - 桌面环境实验放在 NixOS 基线与核心迁移之后，不作为 nix-config 当前第一性目标。
 - server 不保存 GitHub 协作凭据，不使用工作站可变运行时管理 production workload；运行时来自 Nix closure、容器或服务声明。
-- server 只持有自己的既有 SSH host identity，并只能解密明确授予 server recipient 的文件；管理员恢复 identity 和其他主机 identity 都不进入 server。
+- 当前三台 Host 均不组合 secret framework 或管理工具；未来真实 consumer 必须另立 Issue，外部 identity、credential 与运行时 secret 不进入仓库所有权。
 - 工作站稳定访问不启用 FRP、Tailscale SSH、routes/exit node、Serve/Funnel、公开 22、DDNS 或 mDNS 主路径；OpenSSH 只通过 Tailscale owner 的 `nc` transport 绕过系统 DNS，不修改 Clash Verge，仍须分别完成 Clash off/on 真人验证。Termius/Zed 等不读取 OpenSSH config 的客户端不在该修复合同内。
 - Clash Verge Rev 2.5.2 与 Service Mode 当前只是 Issue #157 的待激活声明；构建不表示真实 daemon、GUI TUN、DNS/route/system proxy 或与 Tailscale/SSH/tmux 的共存矩阵已经验证。真实动作必须绑定 Draft PR 的 exact commit 并另获批准。
 
