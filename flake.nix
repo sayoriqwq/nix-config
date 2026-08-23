@@ -239,6 +239,13 @@
             profilePackages =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
           };
+          macbook-pinshift-development = import ./tests/macos/pinshift-development.nix {
+            lib = darwinPkgs.lib;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = darwinPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
           macbook-agent-python = import ./tests/macos/agent-python.nix {
             pkgs = self.darwinConfigurations.macbook.pkgs;
             profilePackages =

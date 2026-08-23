@@ -72,6 +72,7 @@
         ../../modules/home/capabilities/interactive-shell-assistance.nix
         ../../modules/home/capabilities/host-observability.nix
         ../../modules/home/capabilities/development-runtime.nix
+        ../../modules/home/capabilities/pinshift-development.nix
         ../../modules/home/capabilities/macos-development-runtime-extras.nix
         ../../modules/home/capabilities/terminal-file-workflow.nix
         ../../modules/home/capabilities/helix-editor.nix
