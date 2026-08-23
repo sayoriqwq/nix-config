@@ -92,7 +92,7 @@
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
-      zedNightlyFor = system: (packagesFor system).callPackage ./packages/zed-nightly { };
+      zedNightlyFor = system: (packagesFor system).callPackage ./software/zed/package.nix { };
       zedNightlyUpdaterFor =
         system:
         let
@@ -107,7 +107,7 @@
             pkgs.nix
             pkgs.python3
           ];
-          text = builtins.readFile ./packages/zed-nightly/update.sh;
+          text = builtins.readFile ./software/zed/update.sh;
         };
       serverModules = [
         ./hosts/server
@@ -147,6 +147,22 @@
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
+      zedAddTaskCheck = import ./checks/code-development/zed-add-task.nix {
+        homeManager = home-manager-darwin;
+        inherit intentLib;
+        inherit (darwinPkgs) lib;
+        pkgs = darwinPkgs;
+      };
+      macbookPinshiftDevelopmentCheck =
+        import ./checks/code-development/macbook-pinshift-development.nix
+          {
+            inherit (darwinPkgs) lib;
+            inherit username;
+            macbookConfiguration = self.darwinConfigurations.macbook;
+            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            pkgs = darwinPkgs;
+            serverConfiguration = self.nixosConfigurations.server;
+          };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -220,7 +236,9 @@
       checks = {
         aarch64-darwin = {
           fzf-configure = fzfConfigureCheck;
+          macbook-pinshift-development = macbookPinshiftDevelopmentCheck;
           macbook-system = self.darwinConfigurations.macbook.system;
+          zed-add-task = zedAddTaskCheck;
         };
         x86_64-linux = {
           nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;

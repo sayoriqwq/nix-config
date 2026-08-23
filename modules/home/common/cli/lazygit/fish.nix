@@ -1,3 +1,0 @@
-{
-  programs.lazygit.enableFishIntegration = true;
-}

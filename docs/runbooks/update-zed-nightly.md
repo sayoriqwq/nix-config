@@ -1,6 +1,6 @@
 # Zed Nightly 手动更新与回滚
 
-Zed Nightly 的版本事实来自 `packages/zed-nightly/default.nix` 中固定的官方 release
+Zed Nightly 的版本事实来自 `software/zed/package.nix` 中固定的官方 release
 identity 与双平台 hash。应用自更新关闭；仓库不运行定期 sync Action，也不再有
 可执行 `nix flake update zed` 的 Zed Flake input。
 
@@ -21,7 +21,7 @@ nix run .#sync-zed-nightly
 1. 通过官方 `latest` redirect 取得包含 run number 与完整 commit SHA 的 release identity；
 2. 确认 macOS aarch64 DMG 与 Linux x86_64 tarball 都存在；
 3. 用 Nix 预取两个官方产物并计算对应 hash；
-4. 只替换 `packages/zed-nightly/default.nix` 的 release 与两个 hash；
+4. 只替换 `software/zed/package.nix` 的 release 与两个 hash；
 5. 格式化该文件并展示 diff。
 
 需要重做某个已知官方版本时，可让 helper 使用精确 release：
@@ -41,7 +41,7 @@ source Flake、Cargo/Rust 或 production server builder。
 
 ```fish
 git diff --name-only
-git diff -- packages/zed-nightly/default.nix
+git diff -- software/zed/package.nix
 ```
 
 🔍 确认只有 owner-local Zed package pin 发生变化。

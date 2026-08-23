@@ -25,7 +25,7 @@ x86_64 tarball。因此本仓库不需要把“使用 Nightly”与“自行编�
 
 ### 1. 只消费官方精确版本的 Nightly 二进制
 
-macbook 与 nixbox 使用 owner-local `packages/zed-nightly` derivation。每次固定：
+macbook 与 nixbox 使用 owner-local `software/zed/package.nix` derivation。每次固定：
 
 - 完整官方 release identity，包含版本、Nightly run number 与 40 位 commit SHA；
 - `cloud.zed.dev/releases/nightly/<exact-release>/download` 的双平台 URL；
