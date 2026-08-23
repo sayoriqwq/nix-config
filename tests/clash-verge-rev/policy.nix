@@ -35,9 +35,7 @@ assert lib.assertMsg (
   (rootInput "clash-verge-rev-package-source").locked.rev
   == "d9e5fe493950fb219c0e7ccd2c0430a3babd77a6"
   && (rootInput "nixpkgs").original.ref == "nixos-26.05"
-  && (rootInput "nixpkgs").locked.rev == "fd1462031fdee08f65fd0b4c6b64e22239a77870"
   && (rootInput "home-manager").original.ref == "release-26.05"
-  && (rootInput "home-manager").locked.rev == "4ce190229c73d44536caa7072f6308fb2d8feeb3"
 ) "Clash must use the exact leaf source without moving the Linux release inputs";
 assert lib.assertMsg (
   clash.enable

@@ -87,9 +87,9 @@
         import (if system == "aarch64-darwin" then nixpkgs-darwin else nixpkgs) {
           inherit system;
         };
-      linuxPkgs = packagesFor "x86_64-linux";
+      clashVergeRevPkgs = packagesFor "x86_64-linux";
       clashVergeRevPackage = import ./packages/clash-verge-rev {
-        pkgs = linuxPkgs;
+        pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
       zedNightlyFor = system: (packagesFor system).callPackage ./packages/zed-nightly { };
