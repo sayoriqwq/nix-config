@@ -11,8 +11,6 @@
     [[ -f "$HOME/.orbstack/shell/init.zsh" ]] && source "$HOME/.orbstack/shell/init.zsh"
   '';
 
-  programs.man.generateCaches = false;
-
   sayori.statePaths = [
     {
       path = "${config.home.homeDirectory}/.orbstack";

@@ -127,6 +127,7 @@ in
           ../../software/obsidian/capabilities/knowledge-base/darwin-home.nix
           ../../software/discord/capabilities/messaging/home.nix
           ../../software/iina/capabilities/media-player/home.nix
+          ../../software/man/capabilities/manual-pages/home.nix
           ../../software/monitorcontrol/capabilities/display-control/home.nix
           ../../software/mos/capabilities/mouse-utility/home.nix
           ../../software/upscayl/capabilities/image-upscaling/home.nix
