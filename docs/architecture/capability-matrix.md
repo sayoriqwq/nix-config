@@ -32,6 +32,7 @@
 | Ghostty | 是 | 是 | 否 | 两台工作站的主终端，启动 Fish；共享配置引用 Maple Mono NF-CN，macbook 由 nix-darwin 提供字体，nixbox 由 Ghostty Home Manager capability 与用户 fontconfig 提供，server 不安装。 |
 | Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` 与 `nixd` language server；macOS Darwin adapter 让未来启动的 GUI 进程发现 Home Manager profile，live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
+| Hyprland 工作站 | 否 | 是 | 否 | Intent 显式组合 Hyprland/GDM/Xorg/Qt Wayland、NetworkManager、PipeWire/rtkit 与桌面用户组件；Avahi 和 BlueZ 由 nixbox 直接选择。旧 graphical bundle、Firefox 与 printing 声明已退出；activation、登录、网络、音频、蓝牙和输入验收仍是人工关卡。 |
 | 工作站稳定访问 | 是 | 是 | 否 | Tailscale + MagicDNS 只承担 macbook→nixbox transport；native OpenSSH key-only/host key 继续认证，tmux 恢复断线现场。macbook 只用 Standalone cask；nixbox 使用锁定 NixOS service、machine name `nixbox`，NixOS firewall 只新增 UDP 41641，tailscaled 另按 vendor 默认维护 overlay iptables chains；server 排除。登录态、MagicDNS、Grants、key expiry 和 SSH alias 均在外部人工关卡。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |

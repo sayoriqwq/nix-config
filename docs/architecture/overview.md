@@ -104,11 +104,16 @@ Software Capability 不知道具体 Intent。Intent pipeline 本身就是需求�
 
 跨层 Software Capability 必须公开 package ownership、managed configuration、mutable-state paths、services、network effects 与 human approval gates。只有真实平台行为不同才形成 adapter seam；纯用户行为不创建空 Darwin/NixOS 文件。
 
-中文输入是第二个真实的双平台 adapter seam：共享的 Rime data-package implementation 固定
-`$out/share/rime-data` 与 overlay/过滤合同；Darwin adapter 保留外部 Fcitx5.app frontend，
-NixOS adapter 则使用锁定的原生 `i18n.inputMethod` 模块拥有 Fcitx package、Rime addon、默认组、
-会话环境与 XDG autostart。Home Manager 在两端只投影静态 leaves 和记录可写状态，不成为第二个
-输入法或 daemon owner。
+中文输入是真实的双平台 Intent：`software/fcitx5/` 拥有 frontend/framework，
+`software/rime-ice/` 拥有 schema/addon/data package，`intents/chinese-input/` 只组合两者。
+Darwin adapter 保留外部 Fcitx5.app frontend；NixOS adapter 使用锁定的原生
+`i18n.inputMethod` 模块拥有唯一 package、daemon、session environment 与 XDG autostart。
+Home Manager 只投影静态 leaves 并记录可写状态，不成为第二个 input-method owner。
+
+nixbox 桌面由 `intents/hyprland-workstation/` 显式选择 Hyprland 会话、display manager、
+network/audio/realtime scheduling 及用户桌面组件；常在行为由独立
+`intents/always-on-workstation/` 组合。Avahi、BlueZ 与 Tailscale 是 Host 直接选择的原子
+Software Capability，不存在 graphical/common bundle。
 
 ### 3.5 Dotfiles 层
 
