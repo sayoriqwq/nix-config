@@ -21,7 +21,7 @@
 | `modules/nixos/administrator-user.nix` | 普通用户与 wheel system declaration |
 | `software/{nix,nixpkgs,openssh,fish}/capabilities/` | Flakes、unfree package policy、key-only SSH 与登录 Shell |
 | `software/{vim,wget,curl,pciutils,usbutils}/capabilities/` | Phase 5 现机 adoption 保留的基础命令与硬件盘点工具 |
-| #203 的 workstation system owners | NetworkManager、桌面、XKB、打印、PipeWire、rtkit 与 Bluetooth |
+| #203 的 workstation system owners | NetworkManager、desktop/XKB、PipeWire/rtkit、Avahi 与 Bluetooth；printing 已退休 |
 
 首次实现先以单一 host 模块复刻现机，再机械拆分。拆分前后求值得到相同的 system derivation，证明模块边界没有改变最终闭包。
 
