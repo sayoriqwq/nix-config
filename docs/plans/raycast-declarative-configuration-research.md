@@ -177,13 +177,13 @@ Raycast 同时涉及 Homebrew app、macOS shortcut/defaults、用户脚本、扩
 已经证明存在跨层 seam，适合建立：
 
 ```text
-modules/capabilities/raycast/
+software/raycast/capabilities/application-launcher/
 ├── darwin.nix       # app owner、经批准的 macOS/Raycast defaults、HM attachment
 └── home.nix         # Script Commands、构建/导入 helper、statePaths、shortcuts
 ```
 
-Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
-`macos-legacy-applications` 单独选择 `raycast`。
+Host 只 import `software/raycast/capabilities/application-launcher/darwin.nix` 一次；Issue #199
+已删除原 `macos-legacy-applications` bundle。
 
 建议的能力合同：
 
@@ -213,7 +213,7 @@ Host 只 import `modules/capabilities/raycast/darwin.nix` 一次，不再从
 
 ### Issue A — Raycast capability contract 与安全基线
 
-- 从 `macos-legacy-applications` 拆出 Raycast cask；
+- 把 Raycast cask 迁移到其 owner-local Software Capability（Issue #199 已完成声明迁移）；
 - 建立跨层 capability 和 `sayori.statePaths`；
 - 声明已验证的 `⌘Space` / compact / system appearance 子集，并处理 Spotlight shortcut
   ownership；

@@ -5,11 +5,12 @@
 | 范围 | 快捷键或入口 | 行为 | 所有者 |
 | --- | --- | --- | --- |
 | Fish | `↑ / ↓` | 按当前输入前缀浏览 Fish 原生历史 | fish |
+| Zsh | `↑ / ↓` | 按当前输入前缀浏览原生 Shell 历史 | zsh |
 | Fish / Zsh | `Ctrl+R` | 打开 Atuin 增强历史搜索 | atuin |
 | Fish / Zsh | `Ctrl+T` | 用 fzf 选择文件并插入命令行 | fzf |
 | Fish / Zsh | `Alt+C` | 用 fzf 选择目录并进入 | fzf |
 | Fish / Zsh | `f` | 让 pay-respects 修正上一条失败命令 | pay-respects |
-| Fish / Zsh | `v` | 无参数打开当前目录；有参数传给 VS Code | macos-vscode-compatibility |
+| Fish / Zsh | `v` | 无参数打开当前目录；有参数传给 VS Code | vscode |
 | Fish / Zsh | `z` | 无参数打开当前目录；有参数传给 Zed | zed-editor |
 | Fish / Zsh | `lg` | 启动 lazygit；正常退出后同步工作目录 | lazygit |
 | lazygit | `Shift+Q` | 退出且不把 lazygit 工作目录同步回 Shell | lazygit |

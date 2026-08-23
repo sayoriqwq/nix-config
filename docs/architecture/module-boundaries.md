@@ -96,7 +96,7 @@ machine name 与 NixOS firewall 的 UDP 41641 声明增量；运行中的 tailsc
 维护 overlay iptables chains。登录、MagicDNS、Grants、SSH alias 和 vendor state 内容不进入
 能力声明，server 不组合该 seam。
 
-Clash Verge Rev 的跨层 seam 位于 `modules/capabilities/clash-verge-rev/`。Darwin adapter
+Clash Verge Rev 的跨层 seam 位于 `software/clash-verge-rev/capabilities/proxy-client/`。Darwin adapter
 继续只拥有既有 Homebrew cask；NixOS adapter 是 Linux package 与 systemd Service Mode 的
 唯一所有者，通过窄、精确锁定的 package source seam 提供 2.5.2，而不改变 Linux 根
 `nixpkgs` cadence。Home Manager attachment 只记录可写 profile/state path，不重复安装
@@ -114,7 +114,7 @@ macOS installer/cache 状态边界，不安装 frontend；NixOS adapter 单一�
 Rime addon、system defaults、session environment 与 package XDG autostart。Host 只能 import
 对应 adapter，不直接 import data-package 或 home primitive；server 不组合该 seam。
 
-旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。Issue #196 又删除 `terminal-toolkit` 与其 terminal primitives；其余 V2 owner 只能由后续唯一 owner Issue 迁移，不能作为新 V3 bundle 复活。
+旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。Issue #196 又删除 `terminal-toolkit` 与其 terminal primitives；Issue #199 删除 `macos-legacy-applications` 与 `macos-user-applications`，让每个受管 App presence 由对应 `software/<software>/` owner 公开。其余 V2 owner 只能由后续唯一 owner Issue 迁移，不能作为新 V3 bundle 复活。
 
 ## 4. Import 方向
 

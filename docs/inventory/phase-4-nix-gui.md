@@ -14,8 +14,9 @@
 本批次最初把九个可靠的 GUI package 分别放在
 `modules/home/desktop/applications.nix` 与 `modules/home/darwin/applications.nix`，交给
 Home Manager 的 `home.packages` 与 `copyApps`，没有新增自定义复制或 activation 脚本。
-Phase 5.5 后，当前所有权已按能力移入 `modules/home/capabilities/` 与
-`modules/capabilities/`；本文件保留当时的迁移证据，不再把旧聚合路径描述为当前接口。
+Phase 5.5 后，所有权先按能力拆分；Issue #199 又把当前 application presence 移入
+`software/<software>/capabilities/` 的 owner-local interface。本文件保留当时的迁移证据，
+不再把旧聚合路径描述为当前接口。
 
 Nix 只拥有应用本体和版本。账号、许可证、vault、插件、历史、缓存、设备状态、
 接收目录、模型、输出、workspace 与数据库继续由应用或用户拥有。仓库不创建、链接、

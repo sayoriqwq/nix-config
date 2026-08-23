@@ -290,8 +290,10 @@ Codex 进程继承的 PATH 代替。
 
 - Nix 应用只来自 Home Manager Apps，不存在旧 VS Code、Zed Preview 或 #61 所列七个
   `/Applications` rollback bundle；
-- Homebrew Bundle 恰好声明 1 个 tap、28 个 cask、9 个 MAS app、0 个 formula；不再声明
-  `claude-code`，正常环境也不存在旧 `/opt/homebrew` Claude；
+- Homebrew Bundle 恰好声明 1 个 tap、28 个 cask（27 个 application presence 加 stable-access
+  owner 的 `tailscale-app`）、9 个 MAS app、0 个 formula；不再声明 `claude-code` 或 Steam，
+  正常环境也不存在旧 `/opt/homebrew` Claude；Steam live App、account、library、game 与 save
+  不属于恢复或清理目标；
 - 干净 Fish 中 `codex`、`claude`、`agy`、`omp` 的首个 PATH 来源均为 Home Manager
   profile，版本分别为 0.146.0、2.1.220、1.1.9、17.2.4；
 - 通信应用声明为中国区 `feishu`，不再声明全球版 `lark`；

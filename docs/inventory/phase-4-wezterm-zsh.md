@@ -4,7 +4,7 @@
 > 本文保存 commit `0c6a81a` 的迁移证据与旧交付快照，不再代表最终目标。后续实施以 [Phase 4 终端与 Shell 最终目标基线](../plans/phase-4-terminal-shell-target.md) 为准；其中 WezTerm 来源、Zsh 路径、mise 所有权和模块边界已经改变。
 
 > [!NOTE]
-> 本文的旧交付文字记录了 `v`/`z` 的预期行为和一次未能在合并源码中复现的验证结果。维护 Issue #118 以当前实现为准：`v` 由 `macos-vscode-compatibility.nix` 提供，`z` 由 `zed-editor.nix` 提供；下方旧 hash 仍属于历史快照，不代表当前生成文件。
+> 本文的旧交付文字记录了 `v`/`z` 的预期行为和一次未能在合并源码中复现的验证结果。维护 Issue #118 以当前实现为准；Issue #199 后 `v` 由 `software/vscode` 提供，`z` 仍由 Zed owner 提供，下方旧 hash 仍属于历史快照，不代表当前生成文件。
 
 本文记录 Issue [#23](https://github.com/sayoriqwq/nix-config/issues/23) 的决策、迁移前证据、所有权交接、离线验证、人工 activation 清单与回滚步骤。本文不授权 activation、Homebrew cleanup 或删除可变数据。
 
@@ -47,7 +47,7 @@ WezTerm 明确保留 `/bin/zsh -l`，不迁移到 Fish。Ghostty + Zsh 与 WezTe
 | WezTerm macOS 应用 | nix-darwin Homebrew cask | `modules/darwin/homebrew.nix` |
 | `~/.wezterm.lua` | Home Manager | `modules/home/darwin/wezterm/` |
 | `~/.zshrc`、`~/.zprofile`、`~/.zshenv` | Home Manager | `modules/home/darwin/shells/zsh.nix` |
-| Fish 与 Zsh 的 `v`、`z` | Home Manager | `modules/home/capabilities/macos-vscode-compatibility.nix`、`software/zed/capabilities/gui-editor/home.nix` |
+| Fish 与 Zsh 的 `v`、`z` | Home Manager | 当前分别由 `software/vscode/capabilities/editor-compatibility/home.nix` 与 `software/zed/capabilities/gui-editor/home.nix` 提供；本表原始交付路径已退役 |
 | `~/.zhistory` 与其他 mutable state | 本机可写数据 | 不进入 Nix Store |
 
 `modules/home/darwin.nix` 只组合模块。WezTerm 的基础设置、按键与主题分别保存在 `settings.nix`、`keybindings.nix` 与 `theme.nix`，由 Nix 生成完整 Lua；没有启用会无条件安装 Nixpkgs WezTerm 的 `programs.wezterm`。Home Manager 的 Zsh 模块会把 Nix Zsh 放入用户 profile 以提供模块依赖，但 WezTerm 的 `default_prog` 仍精确执行 macOS `/bin/zsh -l`。

@@ -79,7 +79,7 @@ Bartender 应用及其数据保持不变；维护者在家和公司主要使用�
 
 ## 3. Nix Mos 登录启动合同
 
-`modules/home/capabilities/macos-user-applications.nix` 同时拥有 Mos package 和唯一登录启动
+`software/mos/capabilities/mouse-utility/home.nix` 同时拥有 Mos package 和唯一登录启动
 声明。本次构建解析到的 Nix package 为 `mos-4.2.1`；Home Manager LaunchAgent 的合同为：
 
 - label：`org.nix-community.home.mos`；

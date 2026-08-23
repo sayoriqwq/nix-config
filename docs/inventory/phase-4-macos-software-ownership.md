@@ -11,6 +11,9 @@
   2026-08-12，Issue #147 的 Gate A 证明候选 app 身份，Gate B/C 完成 owner-only backup 与
   四个精确 Squirrel 遗留对象的 live retirement；维护者随后按已明确清单报告 Gate D 真人输入
   smoke 整体 PASS，仓库维护项仅等待 Draft PR 人工审阅与合并
+- **V3 ownership 修订：** 2026-08-24，Issue #199 把受管 application presence 迁移到
+  `software/<software>/capabilities/<primary-capability>/` 的唯一 owner，删除 legacy/app bundle；
+  Steam 只退出 declaration，真实应用、账号、library、game 与 save 均未触碰
 - **决策来源：** Issue #6、#36、#127、#131、#139、#140、#143、#145、#147 及 Phase 4 各实施 Issue
 - **边界：** 仓库声明可复现配置，并记录外部恢复入口；账号、机密、数据库、容器、历史、缓存和备份不进入 Git
 
@@ -30,9 +33,9 @@
 
 | 来源 | 最终职责 | 声明/恢复入口 |
 | --- | --- | --- |
-| Nix / Home Manager | 通用 CLI、Shell、终端、编辑器及可靠 GUI | 顶层 Flake 与 `modules/home/` |
-| nix-darwin Homebrew | 28 个 cask、1 个限定 tap；无声明 formula | `modules/capabilities/macos-legacy-applications/darwin.nix` 及独立应用 capability |
-| Mac App Store | 9 个可独立恢复的 Apple/第三方应用 | `homebrew.masApps` |
+| Nix / Home Manager | 通用 CLI、Shell、终端、编辑器及可靠 GUI | 顶层 Flake 与 owner-local `software/**` capabilities |
+| nix-darwin Homebrew | 本票 application presence 为 27 个 cask、1 个限定 tap；另有 stable-access owner 的 `tailscale-app`；无声明 formula | 各 Software owner 的 Darwin capability |
+| Mac App Store | 9 个可独立恢复的 Apple/第三方应用 | 各 Software owner 的 `homebrew.masApps` declaration |
 | Setapp | 14 个订阅应用与 Setapp 客户端 | Setapp 官方客户端、人工登录 |
 | macOS / Apple | 核心系统应用、Command Line Tools | 系统更新或 Apple 官方安装流程 |
 | Fcitx5 官方 installer/updater | `Fcitx5.app`、Rime plugin payload 与应用更新 | [Fcitx5 macOS installer](https://github.com/fcitx-contrib/fcitx5-macos-installer)、人工输入源注册 |
@@ -220,16 +223,18 @@ journal 与 rollback helper；Issue #143 完成 Nix-owned Rime Shift overlay 与
 ### 4.1 nix-darwin 声明
 
 唯一允许的第三方 tap 是 `erictli/tap`，只为 Markdown 应用 Scratch 提供
-`erictli/tap/scratch`。声明的 28 个 cask 为：
+`erictli/tap/scratch`。声明的 27 个 cask 为：
 
 | 分类 | cask |
 | --- | --- |
 | 网络与通信 | `baidunetdisk`、`clash-verge-rev`、`feishu`、`megasync`、`qq`、`telegram`、`tencent-meeting`、`termius`、`transmission`、`wechat` |
 | 创作与媒体 | `balenaetcher`、`figma`、`neteasemusic`、`homebrew/cask/obs` |
 | 开发与 AI | `chatgpt`、`linear`、`orbstack`、`paseo`、`erictli/tap/scratch` |
-| 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`steam`、`topnotch`、`vorssaint` |
+| 系统与效率 | `easyfind`、`fuse-t`、`google-chrome`、`izip`、`pearcleaner`、`raycast`、`topnotch`、`vorssaint` |
 
-`autoUpdate = false`、`upgrade = false`、`cleanup = "none"`。普通 activation 只校验/恢复
+以上 27 个 cask 分别由自己的 Software Primary Capability 声明；不存在 cask registry 或
+legacy bundle。`autoUpdate = false`、`upgrade = false`、`cleanup = "none"` 由 Homebrew
+自身的非破坏 application-management capability 单一拥有。普通 activation 只校验/恢复
 已声明应用，不批量升级或卸载未声明软件。
 
 特殊身份：
@@ -284,6 +289,9 @@ Phase 4 已定向删除 35 个旧 formula，并接受 Homebrew 对无消费者�
 App Store 登录、购买记录、许可证、文档和应用数据不进入仓库。`mas` 只由 nix-darwin
 在 activation 中临时使用，不加入全局用户 PATH。
 
+KeyScreen 的 Primary Capability 保持“录屏时显示键盘输入”，Windows App 保持“远程访问
+Windows”。两者都只有单一 Software 参与，由 macbook 直接选择，不为名称创建空 Intent。
+
 ### 5.2 macOS 内建与 Swift 工具链
 
 `/System/Applications`、`/System/Applications/Utilities` 和 Safari 由 macOS 自身拥有，
@@ -324,6 +332,11 @@ Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动
 | Syncless | 应用内源码/updater 身份 `langgenius/echo`，bundle `com.langgenius.echo.client`，Team ID `9U6WW5A528` | 保留；公开 releases URL 在收口时返回 404，新机须从厂商渠道取得并核验签名；账号、项目和运行态外部 |
 | 夸克网盘 | [官网下载](https://quarkapp.cn/download.html)，bundle `com.alibaba.quark.clouddrive`，Team ID `ZQTE7CLYL9` | 保留；官网在部分网络环境不可达，下载时人工核验签名；账号、同步与下载数据外部 |
 
+Paseo 与 Vorssaint 只保留各自既有 Homebrew presence declaration；AdsPower Global、
+Collaborator、iLoader、LiteEdit、Mole、Multica 与 Syncless 只保留上表既有的外部恢复入口。
+这些条目不推断新的用户用途，也不把账号、workspace、profile、数据库、缓存、许可证或内容
+纳入 nix-config。Alice in Cradle 继续完全位于仓库声明之外。
+
 用户级 helper 不单独声明：Claude Code URL Handler 由 Claude Code 生成，Excalidraw
 由 Chrome/PWA profile 拥有，VTube Studio wrapper 由 Steam app ID 1325860 与本地游戏库
 拥有。
@@ -344,7 +357,7 @@ Issue #124 按维护者要求移除了 AlDente Pro 与 Bartender 的登录启动
 | --- | --- |
 | Nix、Homebrew、Chezmoi、手工文件对 CLI/Shell 存在重复所有权 | Nix/Home Manager 是 CLI、Shell 与静态用户配置主所有者；项目依赖进入 dev shell |
 | VS Code、Zed、Ghostty、WezTerm 等存在 Homebrew/手工/Nix 重复副本 | Nix 是唯一声明与安装所有者；旧 cask和七个 GUI rollback bundle 已由 #56/#61 清理 |
-| GUI 来源散落且缺少统一恢复说明 | 28 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner；四个 AI CLI 另由 Nix/Home Manager 唯一提供 |
+| GUI 来源散落且缺少统一恢复说明 | 27 cask、9 MAS、14 Setapp、Nix GUI、系统内建和厂商应用均有明确 owner；四个 AI CLI 另由 Nix/Home Manager 唯一提供 |
 | Docker Desktop 与 OrbStack helper 冲突 | OrbStack 是唯一容器运行时；#124 已卸载并备份旧 Docker Desktop socket/vmnetd helper |
 | 大量旧 formula、cask、tap 与退役应用残留 | #55–#57 已精确定向清理；未运行全局 cleanup 或 zap |
 | macOS defaults 多数依赖现场手调 | 只声明维护者逐项体验批准的 Dock、Finder、输入、手势、窗口、时钟和电池行为 |
