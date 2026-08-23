@@ -73,5 +73,9 @@ assert lib.assertMsg (
   && lib.hasInfix "arch=x86_64&os=linux" updaterSource
 ) "the maintainer-run sync must verify and hash both official workstation artifacts";
 pkgs.runCommand "zed-binary-package-policy" { } ''
+  ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+    test -x ${linuxOutput}/bin/zed
+    test -L ${linuxOutput}/bin/zeditor
+  ''}
   touch "$out"
 ''
