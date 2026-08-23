@@ -13,7 +13,7 @@
   ];
 
   home.packages = [
-    inputs.ax.packages.${pkgs.system}.ax
+    inputs.ax.packages.${pkgs.stdenv.hostPlatform.system}.ax
     (pkgs.callPackage ../../../packages/codex-cli { })
     pkgs.claude-code
     (pkgs.callPackage ../../../packages/antigravity-cli { })
