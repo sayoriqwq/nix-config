@@ -164,6 +164,15 @@
         serverConfiguration = self.nixosConfigurations.server;
         source = ./.;
       };
+      nixCachePolicyFor =
+        pkgs:
+        import ./tests/nix-cache-policy.nix {
+          inherit pkgs;
+          inherit (pkgs) lib;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
       terminalThemePolicyFor =
         pkgs:
         import ./tests/terminal-theme/policy.nix {
@@ -296,6 +305,7 @@
             serverConfiguration = self.nixosConfigurations.server;
           };
           macbook-rime-data-layout = macbookRimeDataLayout;
+          nix-cache-policy = nixCachePolicyFor darwinPkgs;
           stable-workstation-access-policy = stableWorkstationAccessPolicy;
           terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
         };
@@ -323,6 +333,7 @@
             serverConfiguration = self.nixosConfigurations.server;
             source = ./.;
           };
+          nix-cache-policy = nixCachePolicyFor nixboxPkgs;
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
           terminal-theme-policy = terminalThemePolicyFor nixboxPkgs;
