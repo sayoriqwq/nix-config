@@ -4,7 +4,7 @@
 
 | 范围 | 快捷键或入口 | 行为 | 所有者 |
 | --- | --- | --- | --- |
-| Fish / Zsh | `↑ / ↓` | 按当前输入前缀浏览原生 Shell 历史 | fish |
+| Fish | `↑ / ↓` | 按当前输入前缀浏览 Fish 原生历史 | fish |
 | Fish / Zsh | `Ctrl+R` | 打开 Atuin 增强历史搜索 | atuin |
 | Fish / Zsh | `Ctrl+T` | 用 fzf 选择文件并插入命令行 | fzf |
 | Fish / Zsh | `Alt+C` | 用 fzf 选择目录并进入 | fzf |

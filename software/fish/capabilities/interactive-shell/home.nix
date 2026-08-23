@@ -11,11 +11,11 @@ let
 in
 {
   imports = [
-    ../../../yume-design/capabilities/terminal-theme/home.nix
     ../../../../modules/home/common/shortcut-reference.nix
     ../../../../modules/home/common/state-paths.nix
   ];
 
+  # This is the three-host login-environment owner, not incidental Fish-only PATH configuration.
   home.sessionPath = [
     "${config.home.profileDirectory}/bin"
     "${config.home.homeDirectory}/.local/bin"
@@ -65,9 +65,9 @@ in
 
   sayori.shortcuts = [
     {
-      scope = "Fish / Zsh";
+      scope = "Fish";
       keys = "↑ / ↓";
-      action = "按当前输入前缀浏览原生 Shell 历史";
+      action = "按当前输入前缀浏览 Fish 原生历史";
       owner = "fish";
       order = 10;
     }
