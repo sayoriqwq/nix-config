@@ -7,9 +7,8 @@
     enable = true;
     package = pkgs.lix;
 
-    # This repository uses Flakes as its only Nix input mechanism. Keeping
-    # nix-darwin's mutable channel compatibility enabled would add a missing
-    # root channels directory to NIX_PATH on every shell invocation.
+    # Flakes are the only repository input mechanism. Mutable channel
+    # compatibility would add a missing root channels path to NIX_PATH.
     channel.enable = false;
 
     settings.experimental-features = [

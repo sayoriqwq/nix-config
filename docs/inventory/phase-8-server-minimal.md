@@ -29,10 +29,14 @@
 ## 2. 组合边界
 
 - `hosts/server/default.nix` 只组合 server host facts、disko、network 与已批准 capability；
-- `modules/nixos/server.nix` 只承载 server 的 firewall、sudo 与 SSH root policy；
-- `modules/nixos/server-diagnostics.nix` 只提供已批准的系统级诊断 CLI，不启用 service、listener 或 firewall rule；
-- `modules/nixos/base.nix` 改为接收 host composition 传入的 `username`，不再夹带 nixbox 的 authorized key 或 root policy；
-- `hosts/nixbox/default.nix` 显式保留原 authorized key 与 `PermitRootLogin = "no"`，从而保持既有 nixbox 行为；
+- `modules/nixos/administrator-user.nix` 只声明普通管理员用户与 `wheel` membership；
+- OpenSSH owner 的 `ssh-only-firewall` Extension 只保留 server 的 TCP 22 firewall policy；sudo
+  由自己的 Software owner 声明，root/password/keyboard-interactive policy 不变；
+- `bind`、`lsof`、`mtr`、`tcpdump` 与 `strace` 分别拥有自己的系统级诊断 package，server 在
+  host composition 中直接选择，不形成 `server-diagnostics` bundle；
+- 旧 `modules/nixos/base.nix` 不再把 nixbox adoption tools 或 system Git 隐式带入 server；
+- `hosts/nixbox/default.nix` 显式保留原 authorized key；OpenSSH owner 统一保持
+  `PermitRootLogin = "no"`，从而维持既有 nixbox 行为；
 - server 不声明 production service、旧容器、数据、secret、GitHub credential 或自行 checkout/build 的机制。
 
 未来 production secret 只记录为 Phase 11 的运行时缺口。Phase 8 不放占位 secret、不把敏感值送入 Nix Store，也不为了未来服务提前引入 sops-nix。

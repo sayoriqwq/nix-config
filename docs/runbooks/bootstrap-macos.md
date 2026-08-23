@@ -115,7 +115,7 @@ nix build '/Users/sayori/Desktop/nix-config#darwinConfigurations.macbook.system'
 ```bash
 cd /Users/sayori/Desktop/nix-config
 
-nix fmt -- --check flake.nix hosts/macbook/default.nix modules/darwin/base.nix
+nix fmt -- --check flake.nix hosts/macbook/default.nix software/lix/capabilities/nix-daemon/darwin.nix
 nix flake check --all-systems
 nix build .#darwinConfigurations.macbook.system --no-link
 ```

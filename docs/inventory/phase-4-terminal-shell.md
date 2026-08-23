@@ -30,7 +30,7 @@ Ghostty + Zsh 与 WezTerm + Fish 不属于验收矩阵。VS Code/Zed launcher �
 | 终端配置、主题与共享键位 | 颜色与语义 Token：锁定的 `yume-design` input；运行时 adapter：Ghostty/WezTerm Software owner；共享键位 primitive：`modules/home/desktop/terminal/` | Ghostty 为视觉与默认键位基准；Issue #155 起 adapter 不再保存 HEX 副本 |
 | Fish/Zsh 原生配置 | Fish 所有权不由 Issue #199 改变；Zsh 兼容配置由 `software/zsh` 管理 | WezTerm + Zsh 由 `terminal-compatibility` Intent 显式组合，不把其他 Software 的 integration 原子归给 Zsh |
 | CLI 软件与 Shell hook | `modules/home/common/cli/` | 每个能力拥有自己的包、配置与 integration |
-| Maple Mono NF-CN | nix-darwin | `modules/darwin/fonts.nix` |
+| Maple Mono NF-CN | Maple Mono Software owner | macOS 由 `software/maple-mono/capabilities/workstation-font/darwin.nix` 声明 |
 | Nix Fish 登录路径 | nix-darwin + macOS 账户事实 | nix-darwin 注册 `/run/current-system/sw/bin/fish`；管理员账户不加入 `users.knownUsers`，由单独批准的 `chsh` 选择 |
 | Node/Bun/pnpm | mise | Nix 只安装 mise 并声明默认 `latest` |
 | GH CLI | Nix package-only | `config.yml` 与 `hosts.yml` 由 GH 保持本机可写，仓库只声明 Git credential helper |
