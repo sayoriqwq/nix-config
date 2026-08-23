@@ -54,10 +54,6 @@
       inputs.nixos-stable.follows = "nixpkgs";
     };
 
-    # ADR-0006: consume only the upstream Nightly package output. Zed keeps
-    # its own pinned Nixpkgs/Rust/Crane graph inside this leaf input.
-    zed.url = "github:zed-industries/zed";
-
     # Issues #120 and #152: consume ax's published package output for the
     # explicitly approved workstation capabilities.
     # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
@@ -82,6 +78,23 @@
         system:
         import (if system == "aarch64-darwin" then nixpkgs-darwin else nixpkgs) {
           inherit system;
+        };
+      zedNightlyFor = system: (packagesFor system).callPackage ./packages/zed-nightly { };
+      zedNightlyUpdaterFor =
+        system:
+        let
+          pkgs = packagesFor system;
+        in
+        pkgs.writeShellApplication {
+          name = "sync-zed-nightly";
+          runtimeInputs = [
+            pkgs.curl
+            pkgs.git
+            pkgs.jq
+            pkgs.nix
+            pkgs.python3
+          ];
+          text = builtins.readFile ./packages/zed-nightly/update.sh;
         };
       serverModules = [
         ./hosts/server
@@ -140,6 +153,18 @@
         pkgs = darwinPkgs;
         serverConfiguration = self.nixosConfigurations.server;
       };
+      zedBinaryPackagePolicyFor =
+        pkgs:
+        import ./tests/zed-editor/binary-package-policy.nix {
+          flakeInputs = inputs;
+          flakeOutputs = self;
+          inherit pkgs;
+          inherit (pkgs) lib;
+          macbookConfiguration = self.darwinConfigurations.macbook;
+          nixboxConfiguration = self.nixosConfigurations.nixbox;
+          serverConfiguration = self.nixosConfigurations.server;
+          source = ./.;
+        };
       macosRollingInputsPolicy = import ./tests/macos/rolling-inputs.nix {
         macbookConfiguration = self.darwinConfigurations.macbook;
         nixboxConfiguration = self.nixosConfigurations.nixbox;
@@ -218,24 +243,37 @@
       # target without importing Zed's internal Flake modules.
       packages = {
         aarch64-darwin = {
-          zed-nightly = inputs.zed.packages.aarch64-darwin.default;
+          sync-zed-nightly = zedNightlyUpdaterFor "aarch64-darwin";
+          zed-nightly = zedNightlyFor "aarch64-darwin";
         };
         x86_64-linux = {
           server-recovery-test = serverRecoveryTestRunner;
-          zed-nightly = inputs.zed.packages.x86_64-linux.default;
+          sync-zed-nightly = zedNightlyUpdaterFor "x86_64-linux";
+          zed-nightly = zedNightlyFor "x86_64-linux";
         };
       };
 
-      apps.x86_64-linux = {
-        server-recovery-test = {
+      apps = {
+        aarch64-darwin.sync-zed-nightly = {
           type = "app";
-          program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+          program = "${zedNightlyUpdaterFor "aarch64-darwin"}/bin/sync-zed-nightly";
+        };
+        x86_64-linux = {
+          server-recovery-test = {
+            type = "app";
+            program = "${serverRecoveryTestRunner}/bin/server-recovery-test";
+          };
+          sync-zed-nightly = {
+            type = "app";
+            program = "${zedNightlyUpdaterFor "x86_64-linux"}/bin/sync-zed-nightly";
+          };
         };
       };
 
       checks = {
         aarch64-darwin = {
           sops-age-policy = phase11SopsPolicy;
+          zed-binary-package-policy = zedBinaryPackagePolicyFor darwinPkgs;
           zed-nix-lsp-policy = zedNixLspPolicy;
           macos-rolling-inputs = macosRollingInputsPolicy;
           macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
@@ -310,6 +348,7 @@
           terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
         };
         x86_64-linux = {
+          zed-binary-package-policy = zedBinaryPackagePolicyFor nixboxPkgs;
           nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
             inherit inputs username;
             macbookConfiguration = self.darwinConfigurations.macbook;

@@ -44,8 +44,8 @@ assert lib.assertMsg (
   serverExtraSubstituters == [ ]
 ) "server must not inherit capability-specific extra substituters";
 assert lib.assertMsg (
-  nixboxExtraSubstituters == [ "https://zed.cachix.org" ]
-) "this cache-only issue must preserve the existing nixbox Zed Cachix seam";
+  nixboxExtraSubstituters == [ ]
+) "the official Zed binary package must not retain a capability-specific Cachix";
 assert lib.assertMsg (
   !(lib.hasInfix "mirrors.ustc.edu.cn" sharedBase) && !(lib.hasInfix "cache.nixos.org" sharedBase)
 ) "the shared NixOS base must not own per-host cache policy";
