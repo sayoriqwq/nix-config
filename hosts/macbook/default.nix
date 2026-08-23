@@ -63,20 +63,19 @@ in
 
     users.sayori = {
       imports = terminalWork.homeModules ++ [
-        ../../modules/home/capabilities/portable-shell.nix
+        ../../software/fish/capabilities/interactive-shell/home.nix
         ../../modules/home/capabilities/herdr.nix
-        ../../modules/home/capabilities/terminal-history.nix
-        ../../modules/home/capabilities/workstation-history-sync.nix
-        ../../modules/home/capabilities/macos-atuin-desktop.nix
+        ../../software/atuin/capabilities/shell-history/home.nix
         ../../modules/home/capabilities/git-foundation.nix
         ../../modules/home/capabilities/github-collaboration.nix
-        ../../modules/home/capabilities/nix-operations.nix
-        ../../modules/home/capabilities/interactive-shell-assistance.nix
-        ../../modules/home/capabilities/host-observability.nix
+        ../../software/nh/capabilities/nix-operations/home.nix
+        ../../software/pay-respects/capabilities/command-correction/home.nix
+        ../../software/btop/capabilities/system-monitor/home.nix
+        ../../software/fastfetch/capabilities/system-overview/home.nix
         ../../modules/home/capabilities/development-runtime.nix
         ../../modules/home/capabilities/macos-development-runtime-extras.nix
-        ../../modules/home/capabilities/terminal-file-workflow.nix
-        ../../modules/home/capabilities/helix-editor.nix
+        ../../software/yazi/capabilities/terminal-file-manager/home.nix
+        ../../software/helix/capabilities/terminal-editor/home.nix
         ../../modules/home/capabilities/macos-vscode-compatibility.nix
         ../../modules/home/capabilities/ghostty-terminal.nix
         ../../modules/home/capabilities/macos-terminal-compatibility.nix
