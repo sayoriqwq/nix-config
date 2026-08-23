@@ -330,17 +330,12 @@
             pkgs = darwinPkgs;
             serverConfiguration = self.nixosConfigurations.server;
           };
-          macbook-keyboard-navigation-policy = import ./tests/macos/keyboard-navigation-policy.nix {
+          macbook-raycast-source = import ./tests/macos/raycast-source.nix {
             casks = self.darwinConfigurations.macbook.config.homebrew.casks;
-            customUserPreferences =
-              self.darwinConfigurations.macbook.config.system.defaults.CustomUserPreferences;
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            lib = self.darwinConfigurations.macbook.pkgs.lib;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
+            inherit (self.darwinConfigurations.macbook.pkgs) lib;
             pkgs = self.darwinConfigurations.macbook.pkgs;
             scriptCommands =
               self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
-            serverConfiguration = self.nixosConfigurations.server;
           };
           macbook-rime-data-layout = macbookRimeDataLayout;
           nix-cache-policy = nixCachePolicyFor darwinPkgs;

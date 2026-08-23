@@ -44,6 +44,8 @@ let
   );
 in
 {
+  imports = [ ../../home/common/state-paths.nix ];
+
   assertions = [
     {
       assertion = manifest.schemaVersion == 1;
@@ -109,7 +111,7 @@ in
       path = "${config.home.homeDirectory}/Library/Preferences/com.raycast.macos.plist";
       owner = "Raycast";
       backup = "optional";
-      description = "Mixed preferences remain writable; keyboard-navigation only audits exact hotkey leaves and never writes this plist.";
+      description = "Mixed stable preferences and runtime metadata are not linked to the Nix store.";
     }
   ];
 }

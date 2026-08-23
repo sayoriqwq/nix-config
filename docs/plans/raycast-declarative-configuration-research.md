@@ -1,10 +1,5 @@
 # Raycast 声明式配置研究
 
-> **后续架构：** Issue #173 已把 Raycast Darwin adapter 并入
-> `modules/capabilities/macos-keyboard-navigation/`，以便和 macOS symbolic hotkeys、AeroSpace
-> 一起处理副作用偏移。本文保留 2026-08-03 的 Raycast source/data 边界研究；当前 shortcut
-> 合同与人工调控边界见 [macOS 键盘导航手册](../runbooks/macos-keyboard-navigation.md)。
-
 - **日期：** 2026-08-03
 - **目标机器：** `macbook`
 - **范围：** Raycast 应用、稳定偏好、Script Commands、Store Extensions、本地扩展、

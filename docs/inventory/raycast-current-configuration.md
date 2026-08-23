@@ -10,12 +10,11 @@
   已停用，三项相关源码文件均已删除
 - **关联研究：** [Raycast 声明式配置研究](../plans/raycast-declarative-configuration-research.md)
 
-> **后续偏移：** 本快照中的 Hyper 盘点已被 2026-08-14 的 exact plist readback 推翻：当前
+> **当前补充：** 本快照中的 Hyper 盘点已被 2026-08-14 的 exact plist readback 推翻：当前
 > `raycast_hyperKey_state` 为 `enabled = true`、`keyCode = 57`、`includeShiftKey = false`，即
-> Caps Lock 产生不含 Shift 的 `Control+Option+Command`。当前意图、system leaves、调控与回滚
-> 以 [macOS 键盘导航手册](../runbooks/macos-keyboard-navigation.md) 和
-> [副作用偏移讨论记录](../plans/macos-side-effect-drift-coordination.md) 为准。下文保留为当时快照，
-> 不得再作为 live shortcut 前置事实或操作指令。
+> Caps Lock 产生不含 Shift 的 `Control+Option+Command`。这是 Raycast 自身拥有的可变设置；
+> nix-config 不声明、不写入 Raycast preferences，也不把它转换为 macOS system hotkey 合同。
+> 下文保留为当时快照，不得再作为 live shortcut 前置事实或操作指令。
 
 ## 1. 摘要
 
