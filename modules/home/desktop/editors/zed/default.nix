@@ -1,20 +1,19 @@
 {
   config,
-  inputs,
   pkgs,
   ...
 }:
 
 let
-  system = pkgs.stdenv.hostPlatform.system;
   configDirectory = "${config.home.homeDirectory}/.config/zed";
   baselineDirectory = ./.;
+  zedNightly = pkgs.callPackage ../../../../../packages/zed-nightly { };
 in
 {
-  # ADR-0006: this is Zed's official Nightly package, pinned by the root
-  # flake.lock. The upstream Flake remains a leaf package provider.
+  # ADR-0006: both workstations use the same exact official Nightly release.
+  # The package adapts upstream prebuilt artifacts and has no Rust build path.
   home.packages = [
-    inputs.zed.packages.${system}.default
+    zedNightly
     # The Nix extension exposes both servers; keep both available so its
     # default selection does not depend on an undeclared executable.
     pkgs.nil

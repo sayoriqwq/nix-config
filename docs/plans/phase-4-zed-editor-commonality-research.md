@@ -3,7 +3,7 @@
 - **调研日期：** 2026-07-24
 - **调研范围：** Zed 官方文档、Zed 官方源码、Nixpkgs 与 Home Manager 上游源码
 - **约束：** 本文只形成设计输入，不修改 Nix 实现，不读取或改写本机 Zed 可变状态，不授权 activation、应用迁移或卸载
-- **决策更新：** 维护者随后明确选择 Zed Nightly，并于 2026-07-24 接受 ADR-0006；本文关于 Stable / Preview / Nightly 的早期比较保留为决策证据，实施结论以 ADR-0006 与 Issue #25 为准
+- **决策更新：** 维护者随后明确选择 Zed Nightly，并于 2026-07-24 接受 ADR-0006；2026-08-23 又因真实冷求值与 cache miss 证据，通过 Issue #215 把 package owner 改为官方精确版本预构建产物并禁止源码回退。本文关于 Stable / Preview / source Flake 的早期比较保留为历史决策证据，当前实施结论以修订后的 ADR-0006 为准
 
 ## 1. 结论
 
@@ -293,12 +293,11 @@ NixOS 上还需要 glibc compatibility layer；源码构建的 Nixpkgs package �
 上述架构和供应链关卡。因此，**Stable 优先是已经被取代的调研阶段建议，不是
 当前实施结论**。当前接受的选择是：
 
-- 消费 Zed 官方 Flake 的默认 Nightly package；
-- 由本仓库 `flake.lock` 固定精确 Zed revision；
-- 保留上游独立 Nixpkgs、Rust、Crane 与 `flake-parts` 依赖图；
-- 仅把上游 `flake-parts` 作为叶子 input 的内部实现，不改造本仓库顶层架构；
-- 显式信任限定的 Zed Cachix URL 与公钥，不上传、不关闭签名校验，也不全局接受任意 Flake 配置；
-- 由维护者按需要手动更新并审阅 Nightly 的 lock diff，不自动合并或激活。
+- macOS 与 Linux 消费同一 official Nightly release identity 的官方预构建产物；
+- 由 owner-local package 固定完整 release、commit SHA 与双平台 hash；
+- 根 lock 不再保留 Zed source Flake、独立 Nixpkgs、Rust、Crane 或 `flake-parts` 图；
+- 删除 Zed Cachix 信任；artifact 缺失时失败，不回退源码构建；
+- 只由维护者按需运行 `nix run .#sync-zed-nightly`，不定期触发、不自动合并或激活。
 
 不推荐把 macOS `zed@preview` cask 与 NixOS 自定义 Preview package 拼成长期
 终态：它会重新产生两个安装/更新所有者，版本也不再由同一 Flake 统一。
@@ -572,13 +571,13 @@ hosts/<host>/                    # 只选择主编辑器或主机例外，不复
 3. 由维护者按真实用途确认扩展的保留、排除和 shared / Darwin / Linux / local 分类，不把历史扩展清单整体声明到 Nix。
 4. 让 Zed 成为唯一的主编辑器角色；VS Code 与 Helix 可以保留，但不得竞争 `EDITOR` / `VISUAL`。
 5. 两种编辑器都采用 seed-only writable baseline：只在 live 配置不存在时初始化，后续通过人工配置回流维护，不在 activation 时覆盖声明键。
-6. 引入锁定的官方 Zed Nightly package 与限定 Cachix，只做离线求值和 build；验证 Nightly identity、CLI、macOS bundle 和不覆盖边界。
-7. 对官方 `x86_64-linux` Nightly package 至少完成求值或可行性验证；NixOS GPU、FHS、Wayland/X11、扩展和 language server 的真实集成留到 Phase 5/6。
-8. 按需要手动更新 Zed lock，不自动合并或激活。真实迁移、旧应用卸载和默认编辑器切换分别保留人工 approval gate。
+6. 引入锁定的官方精确版本 Nightly binary package；验证 release identity、双平台 hash、CLI、macOS bundle 和不覆盖边界。
+7. 对官方 `x86_64-linux` bundle 完成求值与原生 build；NixOS GPU、FHS、Wayland/X11、扩展和 language server 的真实集成留到 Phase 5/6。
+8. 更新只由维护者按需手动触发并创建 Draft PR，不自动合并或激活。真实迁移、旧应用卸载和默认编辑器切换分别保留人工 approval gate。
 
 ## 13. 最终判断
 
-Zed 官方 Flake 的 Nightly package 可以成为 macOS 与未来 NixOS 的共同主编辑器来源。但最好的“通用性”不是把 VS Code 与 Zed 压成一套配置，而是：
+Zed 官方同一精确 Nightly release 的双平台预构建产物可以成为 macOS 与 NixOS 的共同主编辑器来源。但最好的“通用性”不是把 VS Code 与 Zed 压成一套配置，而是：
 
 - 共享工具链、项目规则和默认编辑器契约；
 - 分离每个编辑器的声明和 live state；

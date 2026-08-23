@@ -12,18 +12,9 @@
     # root channels directory to NIX_PATH on every shell invocation.
     channel.enable = false;
 
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-
-      # ADR-0006: extend the existing cache set with Zed's signed public
-      # cache. This grants no upload capability and keeps signature checks on.
-      extra-substituters = [ "https://zed.cachix.org" ];
-      extra-trusted-public-keys = [
-        "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
-      ];
-    };
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
   };
 }
