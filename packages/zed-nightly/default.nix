@@ -74,6 +74,7 @@ else if stdenvNoCC.hostPlatform.isLinux then
         name = "zed-linux-x86_64";
         url = "${releaseUrl}?asset=zed&arch=x86_64&os=linux&source=nix-config";
         hash = "sha256-muZQctsqCFvTymkdW9K23dFur6HKzCVYOPyp8RH3e0o=";
+        extension = "tar.gz";
         stripRoot = false;
       };
 
