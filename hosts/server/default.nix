@@ -47,13 +47,15 @@ in
 
     users.${username} = {
       imports = terminalWork.homeModules ++ [
-        ../../modules/home/capabilities/terminal-history.nix
+        ../../software/fish/capabilities/interactive-shell/home.nix
+        ../../software/atuin/capabilities/shell-history/home.nix
         ../../modules/home/capabilities/git-foundation.nix
-        ../../modules/home/capabilities/nix-operations.nix
-        ../../modules/home/capabilities/interactive-shell-assistance.nix
-        ../../modules/home/capabilities/host-observability.nix
-        ../../modules/home/capabilities/terminal-file-workflow.nix
-        ../../modules/home/capabilities/helix-editor.nix
+        ../../software/nh/capabilities/nix-operations/home.nix
+        ../../software/pay-respects/capabilities/command-correction/home.nix
+        ../../software/btop/capabilities/system-monitor/home.nix
+        ../../software/fastfetch/capabilities/system-overview/home.nix
+        ../../software/yazi/capabilities/terminal-file-manager/home.nix
+        ../../software/helix/capabilities/terminal-editor/home.nix
       ];
 
       home = {

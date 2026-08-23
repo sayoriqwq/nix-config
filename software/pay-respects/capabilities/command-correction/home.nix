@@ -1,7 +1,7 @@
 { lib, ... }:
 
 {
-  imports = [ ../common/shortcut-reference.nix ];
+  imports = [ ../../../../modules/home/common/shortcut-reference.nix ];
 
   programs.pay-respects = {
     enable = true;
