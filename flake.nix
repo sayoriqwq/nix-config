@@ -140,93 +140,13 @@
         pkgs = serverRecoveryPkgs;
       };
       darwinPkgs = packagesFor "aarch64-darwin";
-      macbookPkgs = self.darwinConfigurations.macbook.pkgs;
-      macbookHome = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-      nixboxPkgs = self.nixosConfigurations.nixbox.pkgs;
-      phase11SopsPolicy = import ./tests/phase-11/policy-check.nix {
-        adminRecipient = "age1lece5fgs54jycjjhclgtwvugrxuzajacd0mdsxna8v3sunj9tdsqfwdyyn";
-        hostRecipients = {
-          macbook = "age1a49p4p9k0xwkwkh9e0t3zw88hwsuafs4t37nvfw3vtcq3kux0f0qavyd8r";
-          nixbox = "age1xnjsz6n9uzsmj3w5umdwv9scltt035rc8wne0u2hsh2zuafcdu2qhu5knn";
-          server = "age1zsv4uz44lkr0emz6u49jtwgg3svevm02e5xwgcp9fqwtw56vfv8qf60g8c";
-        };
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        pkgs = darwinPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-        source = ./.;
-      };
-      zedNixLspPolicy = import ./tests/zed-editor/nix-lsp-policy.nix {
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        pkgs = darwinPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-      };
-      zedBinaryPackagePolicyFor =
-        pkgs:
-        import ./tests/zed-editor/binary-package-policy.nix {
-          flakeInputs = inputs;
-          flakeOutputs = self;
-          inherit pkgs;
-          inherit (pkgs) lib;
-          macbookConfiguration = self.darwinConfigurations.macbook;
-          nixboxConfiguration = self.nixosConfigurations.nixbox;
-          serverConfiguration = self.nixosConfigurations.server;
-          source = ./.;
-        };
-      macosRollingInputsPolicy = import ./tests/macos/rolling-inputs.nix {
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        pkgs = darwinPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-        source = ./.;
-      };
-      macbookRimeDataLayout = import ./tests/macos/rime-data-layout.nix {
-        flakeInputs = inputs;
-        flakeOutputs = self;
-        lib = macbookPkgs.lib;
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        pkgs = macbookPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-      };
-      stableWorkstationAccessPolicy = import ./tests/stable-workstation-access/policy.nix {
+      intentLib = import ./intents/lib.nix;
+      fzfConfigureCheck = import ./checks/terminal-work/fzf-configure.nix {
+        homeManager = home-manager-darwin;
+        inherit intentLib;
         inherit (darwinPkgs) lib;
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
         pkgs = darwinPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-        source = ./.;
       };
-      clashVergeRevPolicy = import ./tests/clash-verge-rev/policy.nix {
-        inherit username;
-        inherit (nixboxPkgs) lib;
-        macbookConfiguration = self.darwinConfigurations.macbook;
-        nixboxConfiguration = self.nixosConfigurations.nixbox;
-        packageSource = inputs.clash-verge-rev-package-source;
-        pkgs = nixboxPkgs;
-        serverConfiguration = self.nixosConfigurations.server;
-        source = ./.;
-      };
-      nixCachePolicyFor =
-        pkgs:
-        import ./tests/nix-cache-policy.nix {
-          inherit pkgs;
-          inherit (pkgs) lib;
-          nixboxConfiguration = self.nixosConfigurations.nixbox;
-          serverConfiguration = self.nixosConfigurations.server;
-          source = ./.;
-        };
-      terminalThemePolicyFor =
-        pkgs:
-        import ./tests/terminal-theme/policy.nix {
-          inherit inputs pkgs username;
-          inherit (pkgs) lib;
-          macbookConfiguration = self.darwinConfigurations.macbook;
-          nixboxConfiguration = self.nixosConfigurations.nixbox;
-          serverConfiguration = self.nixosConfigurations.server;
-          source = ./.;
-        };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -299,106 +219,14 @@
 
       checks = {
         aarch64-darwin = {
-          sops-age-policy = phase11SopsPolicy;
-          zed-binary-package-policy = zedBinaryPackagePolicyFor darwinPkgs;
-          zed-nix-lsp-policy = zedNixLspPolicy;
-          macos-rolling-inputs = macosRollingInputsPolicy;
-          macbook-codex-agent-policy = import ./tests/macos/codex-agent-policy.nix {
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-          };
-          macbook-rtk-integration = import ./tests/macos/rtk-integration.nix {
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-            profilePackages =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
-          };
-          macbook-agent-python = import ./tests/macos/agent-python.nix {
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-            profilePackages =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
-          };
-          macbook-postgresql-retirement = import ./tests/macos/postgresql-retirement.nix {
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-          };
-          macbook-mos-login = import ./tests/macos/mos-login.nix {
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-          };
-          macbook-ai-clients = import ./tests/macos/ai-clients.nix {
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-            profilePackages =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
-          };
-          macbook-ax = import ./tests/macos/ax.nix {
-            homeConfiguration = self.darwinConfigurations.macbook.config.home-manager.users.${username};
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-            profilePackages =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.packages;
-          };
-          macbook-zsh-zoxide = import ./tests/macos/zsh-zoxide.nix {
-            pkgs = packagesFor "aarch64-darwin";
-            zshrc =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.home.file."./.zshrc".source;
-          };
-          editor-capability-launchers = import ./tests/macos/editor-launchers.nix {
-            lib = darwinPkgs.lib;
-            macbookConfiguration = self.darwinConfigurations.macbook;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = darwinPkgs;
-            serverConfiguration = self.nixosConfigurations.server;
-          };
-          ghostty-terminal-font-policy = import ./tests/ghostty-terminal/font-policy.nix {
-            inherit username;
-            lib = darwinPkgs.lib;
-            macbookConfiguration = self.darwinConfigurations.macbook;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = darwinPkgs;
-            serverConfiguration = self.nixosConfigurations.server;
-          };
-          macbook-raycast-source = import ./tests/macos/raycast-source.nix {
-            casks = self.darwinConfigurations.macbook.config.homebrew.casks;
-            inherit (self.darwinConfigurations.macbook.pkgs) lib;
-            pkgs = self.darwinConfigurations.macbook.pkgs;
-            scriptCommands =
-              self.darwinConfigurations.macbook.config.home-manager.users.${username}.xdg.dataFile."raycast/script-commands".source;
-          };
-          macbook-rime-data-layout = macbookRimeDataLayout;
-          nix-cache-policy = nixCachePolicyFor darwinPkgs;
-          stable-workstation-access-policy = stableWorkstationAccessPolicy;
-          terminal-theme-policy = terminalThemePolicyFor darwinPkgs;
+          fzf-configure = fzfConfigureCheck;
+          macbook-system = self.darwinConfigurations.macbook.system;
         };
         x86_64-linux = {
-          clash-verge-rev-policy = clashVergeRevPolicy;
-          zed-binary-package-policy = zedBinaryPackagePolicyFor nixboxPkgs;
-          nixbox-ai-assisted-operations = import ./tests/nixbox/ai-assisted-operations.nix {
-            inherit inputs username;
-            macbookConfiguration = self.darwinConfigurations.macbook;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = nixboxPkgs;
-            serverConfiguration = self.nixosConfigurations.server;
-            source = ./.;
-          };
-          nixbox-hyprland-desktop = import ./tests/nixbox/hyprland-desktop.nix {
-            inherit username;
-            lib = nixboxPkgs.lib;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = nixboxPkgs;
-          };
-          nixbox-chinese-input = import ./tests/nixbox/chinese-input.nix {
-            inherit username;
-            lib = nixboxPkgs.lib;
-            macbookConfiguration = self.darwinConfigurations.macbook;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = nixboxPkgs;
-            serverConfiguration = self.nixosConfigurations.server;
-            source = ./.;
-          };
-          nix-cache-policy = nixCachePolicyFor nixboxPkgs;
+          nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;
+          server-system = self.nixosConfigurations.server.config.system.build.toplevel;
           server-recovery-network = serverRecoveryNetworkTest;
           server-recovery-policy = serverRecoveryPolicyCheck;
-          terminal-theme-policy = terminalThemePolicyFor nixboxPkgs;
         };
       };
 

@@ -1,6 +1,6 @@
 # 模块与目录边界
 
-本文定义能力化基线的路径职责。Agent 必须优先遵守当前 Issue 的允许范围；Issue 未说明时，以本文件为默认规则。
+本文定义 V3 Intent/Software 基线的路径职责。Agent 必须优先遵守当前 Issue 的允许范围；Issue 未说明时，以本文件为默认规则。
 
 ## 1. 目标目录结构
 
@@ -11,53 +11,68 @@
 ├── hosts/
 │   ├── macbook/
 │   ├── nixbox/
-│   └── server/                    # 只在对应 server Phase 建立
+│   └── server/
+├── software/
+│   └── <software>/
+│       ├── default.nix            # owner 的显式公开函数 interface
+│       └── capabilities/
+│           └── <capability>/
+│               ├── home.nix       # 只创建真实需要的平台文件
+│               ├── darwin.nix
+│               └── nixos.nix
+├── intents/
+│   ├── lib.nix                    # empty/addModules/realize
+│   └── <intent>/default.nix       # lib.pipe 需求图
 ├── modules/
-│   ├── home/
-│   │   ├── capabilities/          # host 可直接 import 的用户能力
-│   │   ├── common/                # 跨平台基础配置，不是 host bundle
-│   │   ├── desktop/               # GUI 基础配置，不是 host bundle
-│   │   └── darwin/                # Darwin 用户基础配置，不是 host bundle
-│   ├── capabilities/
-│   │   └── <cross-layer>/         # home.nix + 已证明的平台 adapter
+│   ├── home/                       # 尚未迁移的 V2 owners；按后续 Issue 退出
+│   ├── capabilities/               # 尚未迁移的跨层 owners
 │   ├── darwin/                    # 可复用 nix-darwin 系统模块
 │   └── nixos/                     # 可复用 NixOS 系统模块
 ├── operations/
 │   └── server-recovery/           # 隔离 VM Operation；可消费 production declarations
 ├── checks/
+│   ├── terminal-work/             # 获批的窄 contribution seam
 │   └── server-recovery/           # Operation 公开 policy seam
 ├── dotfiles/
 ├── secrets/
 └── docs/
 ```
 
-只有真实需求出现时才创建路径。不得为未来假设预建 `linux.nix`、`server.nix`、空 adapter 或 capability registry。
+只有真实需求出现时才创建路径。不得为未来假设预建 `internal/`、`linux.nix`、`server.nix`、空 adapter、capability registry 或自动扫描入口。根目录不再存在 `tests/`；V2 tests 不迁移、不翻译。
 
-## 2. 两级组合模型
+## 2. 两轴组合模型
 
-### 基础配置
+### Software Capability（纵轴）
 
-基础配置只实现一项窄责任，例如安装 `gh`、配置 Git、声明 Fish integration、提供 Zed seed helper 或安装一个 GUI package。它可以放在现有 `home/common/`、`home/desktop/`、`home/darwin/` 内部目录，但不成为 host interface。
+一个 Software、CLI、daemon 或 data provider 拥有自己的 package、基础配置、状态边界与平台差异。`software/<software>/capabilities/<capability>/` 公开最小原子行为；同一 owner 内只有真实可独立选择的增量才形成 Extension Capability。
 
-### 能力模块
+### Executable Intent（横轴）
 
-能力模块是 host 的选择单位。它可以组合多个基础配置，并公开完整能力合同：
+`intents/<intent>/default.nix` 用 `lib.pipe` 表达经批准的用户结果。Intent 可以选择多个 Software Capabilities，并调用 Software 提供的窄 contribution interface；例如 `terminal-work` 同时选择 `bat.content-viewer`、`fd.file-finder`、`fzf.fuzzy-selector`，再调用 `fzf.configure` 组合默认 source 与 preview。
 
-- 提供的用户行为；
-- package 与稳定配置所有权；
-- `sayori.statePaths` 中仅声明、不接管的可变状态；
-- system service、network/firewall、login shell 等跨层影响；
-- activation 或破坏性动作的人工关卡。
+Intent pipeline 是需求选择和组合的唯一事实源，不另建 Workflow、Relation、contract schema、registry 或 manifest 清单。
 
-Host 显式 import 一项能力即表示采用。不得再要求 host 同时设置 `capabilities.<name>.enable = true`，也不得让 host 直接拼能力内部 primitives。
+### Host caller 与冻结 helper
+
+`intents/lib.nix` 的冻结 public interface 只有：
+
+- `empty`：三个原生 module list 的初始 state；
+- `addModules`：返回同型 `IntentState -> IntentState` transform；
+- `realize`：只公开 `darwinModules`、`nixosModules`、`homeModules`。
+
+Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports` 中消费 `homeModules`。显式 list 与 Intent pipeline 就是选择机制；不得叠加 `capabilities.*.enable` 或把 `IntentState` 再交给第二套 Module System。
 
 ## 3. 路径职责矩阵
 
 | 路径 | 允许内容 | 禁止内容 |
 | --- | --- | --- |
 | `flake.nix` | inputs、outputs、少量组合 helper、formatter/checks | 大量程序配置、主机硬件细节、明文机密 |
-| `hosts/<host>/` | 主机事实、系统角色与显式 capability imports | 可被多主机复用的能力实现 |
-| `modules/home/capabilities/` | 纯用户能力 interface 与内部 primitive imports | boot、磁盘、隐蔽 firewall 或系统 daemon |
+| `hosts/<host>/` | 主机事实、Intent realized lists 与尚未迁移的显式 imports | 可被多主机复用的实现、registry 或自动扫描 |
+| `intents/lib.nix` | `empty`、`addModules`、`realize` 三个窄 helper | schema、conflict protocol、registry、最终 Nix config merge |
+| `intents/<intent>/` | `lib.pipe` 需求图与跨 Software 组合决定 | package/platform 实现、重复 contract、host facts |
+| `software/<software>/default.nix` | owner-local public transforms/contributions | 全局 software registry、具体 Intent 或 host 依赖 |
+| `software/<software>/capabilities/` | 原子 package/config/state/platform owner modules | 第二个 bundle、其他 Software 的隐式 ownership |
+| `modules/home/capabilities/` | 尚未迁移的 V2 user owners | 新 V3 Software/Intent 实现、boot、磁盘、隐蔽系统副作用 |
 | `modules/home/common/` | 跨平台 CLI、Shell 与用户配置 primitives | GUI、Homebrew、systemd、launchd、host bundle |
 | `modules/home/desktop/` | GUI 应用、终端与编辑器 primitives | Server bundle、boot、GPU、系统桌面服务 |
 | `modules/home/darwin/` | Darwin 用户配置 primitives 与现有 integration | nix-darwin system defaults、Linux 配置 |
@@ -68,6 +83,7 @@ Host 显式 import 一项能力即表示采用。不得再要求 host 同时设�
 | `modules/nixos/` | NixOS 基础、桌面或 server 系统能力 | 主机磁盘/GPU/网卡事实、生产数据 |
 | `operations/server-recovery/` | test-only NixOS graph、隔离 VM runner、disko/nixos-anywhere 与 `runNixOSTest` wiring | production target 参数、真实网络/SSH/disk action、被 production host import |
 | `checks/server-recovery/` | 从 production/Operation 公开配置观察 policy 与 runner 边界 | grep 源码、复制旧 test implementation、production 配置所有权 |
+| `checks/terminal-work/` | 获批的 `fzf.configure` public contribution 行为 | `IntentState` shape、pipeline order、目录/import 数量 |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
 | `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
@@ -97,27 +113,29 @@ macOS installer/cache 状态边界，不安装 frontend；NixOS adapter 单一�
 Rime addon、system defaults、session environment 与 package XDG autostart。Host 只能 import
 对应 adapter，不直接 import data-package 或 home primitive；server 不组合该 seam。
 
-旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。基础配置文件继续保留，但目录本身不再提供可被 host 误选的 bundle interface。
+旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。Issue #196 又删除 `terminal-toolkit` 与其 terminal primitives；其余 V2 owner 只能由后续唯一 owner Issue 迁移，不能作为新 V3 bundle 复活。
 
 ## 4. Import 方向
 
 ```text
 flake output
   └── hosts/<host>
-       ├── system modules
-       ├── cross-layer capability adapters
-       │    └── capability home implementation
-       └── Home Manager capability imports
-            └── configuration primitives
+       ├── Intent realized darwinModules / nixosModules
+       │    └── Software Capability platform modules
+       ├── Intent realized homeModules
+       │    └── Software Capability Home Manager modules
+       └── 尚未迁移的显式 modules
 ```
 
-- Host 只选择 system module、cross-layer adapter 或用户 capability；不选择 primitive。
-- 能力实现不得反向 import host。
+- Host 选择 Intent 或无需横向组合的独立 Software Capability；不直接拼 owner 私有 primitive。
+- Software Capability 不得 import Intent 或 host；Intent 不得 import host。
 - Home Manager primitive 不 import nix-darwin/NixOS system module。
 - Darwin 与 NixOS adapter 不互相 import。
 - import 必须显式列出，不使用递归扫描。
 - Validation graph 可以 import production declarations；production host 不得反向 import `checks/`、`operations/` 或 test-only module。
 - 一个 adapter 表示假设，两个真实变化才证明 seam；但已经批准、将在下一 Phase 组合的第二平台 adapter 可以先在合同文档中记录，不能提前启用其副作用。
+
+`terminal-work` 是首个真实 Intent：三台 Host 都在两个原生 import 位置消费同一 realized result。后续 Wave 3 task 可提交自己的窄 host integration hunk，但不得修改 `intents/lib.nix`、现有 Intent caller 约定或其他 task 的 Software owner；共享 import-list 冲突由 Lead 合并。
 
 ## 5. 状态、参数与共享值
 
@@ -129,9 +147,9 @@ flake output
 ## 6. 软件归属判断
 
 1. 项目开发依赖进入项目 dev shell。
-2. 只有 package 或单项稳定配置时，先建立细粒度 primitive。
-3. Host 真正要选择的用户行为，由 `modules/home/capabilities/` 组合。
-4. 同一能力同时需要用户与系统声明时，建立 `modules/capabilities/<name>/`。
+2. 只有 package 或单项稳定配置时，在 Software owner 内建立 Primary Capability。
+3. 需要跨 Software 共同选择或 contribution 时建立 Intent；不要建立第二个 bundle。
+4. 同一 Software Capability 同时需要用户与系统声明时，在 owner 目录中增加已证明的平台文件。
 5. 只有真实平台行为不同才增加 adapter；平台名称本身不是需求。
 6. 硬件、boot、磁盘、网卡和 provider 事实进入 `hosts/<host>/`。
 7. 可变数据与 secret 不作为普通配置提交，分别使用数据与机密流程。

@@ -2,10 +2,10 @@
 
 {
   imports = [
-    ../common/terminal-theme.nix
+    ../../../software/yume-design/capabilities/terminal-theme/home.nix
     ../common/state-paths.nix
     ../common/shell/zsh.nix
-    ../common/cli/zoxide/zsh.nix
+    ../../../software/zoxide/capabilities/directory-jumper/zsh.nix
     ../darwin/hushlogin.nix
     ../desktop/terminal/adapters/wezterm.nix
   ];

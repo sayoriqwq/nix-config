@@ -16,7 +16,7 @@
 | --- | --- | --- | --- | --- |
 | Nix 运维 | 是 | 是 | 是 | `nh` 与 Nix generation/build/check 操作界面。 |
 | 可移植 Shell | 是 | 是 | 是 | Fish 主路径；登录 Shell 的系统事实由各平台 adapter 负责。 |
-| 终端工具箱 | 是 | 是 | 是 | `bat`、`eza`、`fd`、`fzf`、`jq`、`ripgrep`、`starship`、`tmux`、`tree`、`zoxide`。 |
+| `terminal-work` Intent | 是 | 是 | 是 | 显式选择 `bat`、`eza`、`fd`、`fzf`、`jq`、`ripgrep`、`starship`、`tmux`、`tree`、`zoxide` 的原子 Software Capabilities；`fzf.configure` 使用 `fd` 作为默认 source、`bat --color=always {}` 作为 preview。 |
 | 终端历史 | 是 | 是 | 是 | Atuin 本地历史；数据库、key 与 daemon state 保持可写。 |
 | 跨设备历史同步 | 是 | 否 | 否 | macbook 保留既有 Atuin 同步行为；nixbox 与 server 只保留各自本地历史。Atuin Desktop 只留在 macbook。 |
 | Git 基础 | 是 | 是 | 是 | Git 行为与私有 identity include；不含 GitHub 登录态。 |
@@ -58,7 +58,7 @@
 
 ## 当前状态
 
-- macbook 与 nixbox 已通过显式 capability imports 组合各自获批的工作站能力。
+- 三台 Host 已通过 realized `terminal-work` Intent 组合终端 Software Capabilities；其余工作站能力仍按后续 V3 Issue 从现有显式 imports 逐批迁移。
 - macbook 的共享 Rime 静态声明源自已合并的 #140/PR #142；维护者已在获批窗口完成
   `system-46-link` activation、一次 Rime deploy 与静态/可变边界回读，后续 #143/#145/#147
   又完成 Shift/fallback 所有权调整及 Squirrel 遗留退役，#147 Gate D 记录真人输入整体 PASS。

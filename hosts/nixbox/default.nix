@@ -5,6 +5,9 @@
   ...
 }:
 
+let
+  terminalWork = import ../../intents/terminal-work { inherit lib; };
+in
 {
   # Nix chooses substituters by their explicit priority, not list position.
   # Prefer the nearby USTC mirror on this interactive workstation, then fall
@@ -14,7 +17,7 @@
     "https://cache.nixos.org?priority=40"
   ];
 
-  imports = [
+  imports = terminalWork.nixosModules ++ [
     ./hardware-configuration.nix
     ../../modules/capabilities/chinese-input/nixos.nix
     ../../modules/capabilities/hyprland-desktop/nixos.nix
@@ -65,8 +68,7 @@
     useUserPackages = true;
 
     users.${username} = {
-      imports = [
-        ../../modules/home/capabilities/terminal-toolkit.nix
+      imports = terminalWork.homeModules ++ [
         ../../modules/home/capabilities/herdr.nix
         ../../modules/home/capabilities/terminal-history.nix
         ../../modules/home/capabilities/git-foundation.nix
