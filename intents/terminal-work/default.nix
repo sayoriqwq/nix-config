@@ -6,6 +6,7 @@ let
     bat = import ../../software/bat { inherit intentLib; };
     eza = import ../../software/eza { inherit intentLib; };
     fd = import ../../software/fd { inherit intentLib; };
+    fish = import ../../software/fish { inherit intentLib; };
     fzf = import ../../software/fzf { inherit intentLib lib; };
     jq = import ../../software/jq { inherit intentLib; };
     ripgrep = import ../../software/ripgrep { inherit intentLib; };
@@ -19,6 +20,7 @@ in
 intentLib.realize (
   lib.pipe intentLib.empty [
     software.yumeDesign.terminalTheme
+    software.fish.interactiveShell
     software.bat.contentViewer
     software.eza.directoryListing
     software.fd.fileFinder

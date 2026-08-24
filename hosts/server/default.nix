@@ -24,7 +24,6 @@ in
     ./networking.nix
     ../../modules/nixos/administrator-user.nix
     ../../software/bind/capabilities/dns-diagnostics/nixos.nix
-    ../../software/fish/capabilities/interactive-shell/nixos.nix
     ../../software/lsof/capabilities/open-file-diagnostics/nixos.nix
     ../../software/mtr/capabilities/network-path-diagnostics/nixos.nix
     ../../software/nix/capabilities/flake-interface/nixos.nix
@@ -61,7 +60,6 @@ in
         terminalWork.homeModules
         ++ gitFoundation.homeModules
         ++ [
-          ../../software/fish/capabilities/interactive-shell/home.nix
           ../../software/atuin/capabilities/shell-history/home.nix
           ../../software/nh/capabilities/nix-operations/home.nix
           ../../software/pay-respects/capabilities/command-correction/home.nix

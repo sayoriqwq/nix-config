@@ -14,7 +14,6 @@ let
 in
 {
   imports = [
-    ../../../yume-design/capabilities/terminal-theme/home.nix
     ../../../../modules/home/common/shortcut-reference.nix
   ];
 

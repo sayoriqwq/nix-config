@@ -10,6 +10,7 @@ let
   chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime { inherit lib; };
+  graphicalTerminal = import ../../intents/graphical-terminal { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
   intentLib = import ../../intents/lib.nix;
   mise = import ../../software/mise { inherit intentLib; };
@@ -32,11 +33,11 @@ in
 {
   imports =
     terminalWork.darwinModules
+    ++ graphicalTerminal.darwinModules
     ++ codeDevelopment.darwinModules
     ++ chineseInput.darwinModules
     ++ [
       ../../modules/darwin/workstation-defaults.nix
-      ../../software/fish/capabilities/interactive-shell/darwin.nix
       ../../software/lix/capabilities/nix-daemon/darwin.nix
       ../../software/maple-mono/capabilities/workstation-font/darwin.nix
       ../../software/homebrew/capabilities/non-destructive-application-management/darwin.nix
@@ -121,7 +122,6 @@ in
         terminalHomeModules
         ++ workstationHomeModules
         ++ [
-          ../../software/fish/capabilities/interactive-shell/home.nix
           ../../software/atuin/capabilities/shell-history/home.nix
         ]
         ++ githubCollaboration.homeModules
@@ -137,7 +137,9 @@ in
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
           ../../software/vscode/capabilities/editor-compatibility/home.nix
-          ../../software/ghostty/capabilities/terminal-emulator/home.nix
+        ]
+        ++ graphicalTerminal.homeModules
+        ++ [
           ../../software/obsidian/capabilities/knowledge-base/home.nix
           ../../software/discord/capabilities/messaging/home.nix
           ../../software/iina/capabilities/media-player/home.nix
