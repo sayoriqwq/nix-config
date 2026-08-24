@@ -20,7 +20,5 @@ let
       pkgs.obsidian;
 in
 {
-  imports = [ ../../../../modules/home/common/state-paths.nix ];
-
   home.packages = [ obsidian ];
 }

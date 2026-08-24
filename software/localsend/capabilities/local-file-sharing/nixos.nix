@@ -1,7 +1,7 @@
 { username, ... }:
 
 {
-  home-manager.users.${username}.imports = [ ./linux-home.nix ];
+  home-manager.users.${username}.imports = [ ./home.nix ];
 
   networking.firewall = {
     allowedTCPPorts = [ 53317 ];

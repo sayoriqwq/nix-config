@@ -1,10 +1,10 @@
 { lib, ... }:
 
 {
-  imports = [ ./home.nix ];
-
   # zoxide itself initializes at order 851. Install the wrapper afterwards,
   # but before zsh-syntax-highlighting, which must remain last.
+  programs.zoxide.enableZshIntegration = true;
+
   programs.zsh.initContent = lib.mkOrder 1200 ''
     function __sayori_cd_notice() {
       print -P "%F{8}zoxide -> %F{12}$1%f"

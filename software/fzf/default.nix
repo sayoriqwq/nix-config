@@ -5,6 +5,10 @@
     homeModules = [ ./capabilities/fuzzy-selector/home.nix ];
   };
 
+  zshIntegration = intentLib.addModules {
+    homeModules = [ ./capabilities/fuzzy-selector/zsh.nix ];
+  };
+
   configure =
     {
       defaultCommand,

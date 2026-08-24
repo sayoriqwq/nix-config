@@ -9,7 +9,11 @@ let
   aiCoding = import ../../intents/ai-coding { inherit lib; };
   chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
+  developmentRuntime = import ../../intents/development-runtime { inherit lib; };
+  githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
   intentLib = import ../../intents/lib.nix;
+  mise = import ../../software/mise { inherit intentLib; };
+  macosRuntimeDefaults = intentLib.realize (mise.macosRuntimeDefaults intentLib.empty);
   pinshift = import ../../software/pinshift { inherit intentLib; };
   pinshiftDevelopment = intentLib.realize (pinshift.developmentCli intentLib.empty);
   terminalWork = import ../../intents/terminal-work { inherit lib; };
@@ -114,18 +118,22 @@ in
         ++ [
           ../../software/fish/capabilities/interactive-shell/home.nix
           ../../software/atuin/capabilities/shell-history/home.nix
-          ../../modules/home/capabilities/github-collaboration.nix
+        ]
+        ++ githubCollaboration.homeModules
+        ++ [
           ../../software/nh/capabilities/nix-operations/home.nix
           ../../software/pay-respects/capabilities/command-correction/home.nix
           ../../software/btop/capabilities/system-monitor/home.nix
           ../../software/fastfetch/capabilities/system-overview/home.nix
-          ../../modules/home/capabilities/development-runtime.nix
-          ../../modules/home/capabilities/macos-development-runtime-extras.nix
+        ]
+        ++ developmentRuntime.homeModules
+        ++ macosRuntimeDefaults.homeModules
+        ++ [
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
           ../../software/vscode/capabilities/editor-compatibility/home.nix
           ../../software/ghostty/capabilities/terminal-emulator/home.nix
-          ../../software/obsidian/capabilities/knowledge-base/darwin-home.nix
+          ../../software/obsidian/capabilities/knowledge-base/home.nix
           ../../software/discord/capabilities/messaging/home.nix
           ../../software/iina/capabilities/media-player/home.nix
           ../../software/man/capabilities/manual-pages/home.nix

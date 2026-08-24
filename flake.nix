@@ -83,7 +83,7 @@
           inherit system;
         };
       clashVergeRevPkgs = packagesFor "x86_64-linux";
-      clashVergeRevPackage = import ./packages/clash-verge-rev {
+      clashVergeRevPackage = import ./software/clash-verge-rev/package.nix {
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };

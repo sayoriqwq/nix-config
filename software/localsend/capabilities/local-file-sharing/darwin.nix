@@ -1,5 +1,5 @@
 { username, ... }:
 
 {
-  home-manager.users.${username}.imports = [ ./darwin-home.nix ];
+  home-manager.users.${username}.imports = [ ./home.nix ];
 }

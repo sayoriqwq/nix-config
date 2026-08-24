@@ -1,5 +1,4 @@
 {
-  config,
   inputs,
   lib,
   pkgs,
@@ -44,8 +43,6 @@ let
   );
 in
 {
-  imports = [ ../../../../modules/home/common/state-paths.nix ];
-
   assertions = [
     {
       assertion = manifest.schemaVersion == 1;
@@ -94,24 +91,4 @@ in
     recursive = true;
   };
 
-  sayori.statePaths = [
-    {
-      path = "${config.home.homeDirectory}/.config/raycast";
-      owner = "Raycast";
-      backup = "separate-policy";
-      description = "Writable extension bundles, preferences, local data, and token-bearing config remain outside Nix.";
-    }
-    {
-      path = "${config.home.homeDirectory}/Library/Application Support/com.raycast.macos";
-      owner = "Raycast";
-      backup = "separate-policy";
-      description = "Raycast-owned encrypted databases, activity data, caches, and history remain mutable.";
-    }
-    {
-      path = "${config.home.homeDirectory}/Library/Preferences/com.raycast.macos.plist";
-      owner = "Raycast";
-      backup = "optional";
-      description = "Mixed stable preferences and runtime metadata are not linked to the Nix store.";
-    }
-  ];
 }
