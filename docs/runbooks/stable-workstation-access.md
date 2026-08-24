@@ -150,11 +150,24 @@ DNS suffix 或 key。
 交叉确认。endpoint 改为 MagicDNS 不应改变 sshd host key；任何 mismatch 必须停止并保持
 fail closed。
 
-维护者只编辑外部 `~/.ssh/config` 的既有 `Host nixbox` block：把 `HostName` 换成实际完整
-MagicDNS 名；保留 `User sayori`、既有 `IdentityFile` 与 `StrictHostKeyChecking yes`；增加
+维护者继续在外部 `~/.ssh/config` 的既有 `Host nixbox` block 中持有实际完整 MagicDNS
+`HostName`；保留 `User sayori`、既有 `IdentityFile` 与 `StrictHostKeyChecking yes`；增加
 `IdentitiesOnly yes`、`UpdateHostKeys yes`、`ServerAliveInterval 15` 与
 `ServerAliveCountMax 3`。不全局启用 ControlMaster/ControlPersist，不删除 known_hosts 后盲目
 接受，也不把 `ssh-keyscan` 当作信任来源。
+
+macbook activation 后，先确认 Home Manager 已生成非 secret fragment；再在外部主配置开头
+一次性增加通用 Include。不要复制 fragment 内容，不要让 Nix 接管整份主配置：
+
+```fish
+test -L ~/.ssh/config.d/nixbox-tailscale.conf
+string match -rq '^Include ~/.ssh/config.d/\*\.conf$' < ~/.ssh/config
+```
+
+🧩 确认受管 fragment 已落地，并读回外部主配置是否已经接入该目录。
+
+若第二条未通过，先停在当前窗口取得对单行 `Include ~/.ssh/config.d/*.conf` 的精确批准，再用
+文本编辑器把它放在第一个 `Host`/`Match` block 之前；不得让 activation script 修改外部文件。
 
 新 MagicDNS hostname 是新的 known_hosts 索引；旧 DHCP IP 下的信任不会自动迁移，
 `UpdateHostKeys` 也不能完成首次 trust bootstrap。编辑后先从解析后的 SSH 配置取得实际新名称，
@@ -172,13 +185,25 @@ LAN 通道读回且 fingerprint 已匹配的公钥，定向绑定到该 MagicDNS
 扩展与当前窗口批准。不得用 `ssh-keyscan`、`accept-new`、临时关闭严格检查或盲目确认绕过；
 在可信记录存在之前，下面的 SSH smoke 不得运行。
 
-编辑后只输出脱敏字段，确认 endpoint 不再是实施前 DHCP 地址且认证边界未漂移：
+编辑后只输出脱敏字段，确认 endpoint 不再是实施前 DHCP 地址、受管 ProxyCommand 已生效且
+认证边界未漂移：
 
 ```fish
-ssh -G nixbox | string match -r '^(hostname|user|identityfile|identitiesonly|stricthostkeychecking|updatehostkeys|serveraliveinterval|serveralivecountmax) '
+ssh -G nixbox | string match -r '^(hostname|user|identityfile|identitiesonly|stricthostkeychecking|updatehostkeys|serveraliveinterval|serveralivecountmax|proxycommand) '
 ```
 
-🔍 脱敏复核仅 `Host nixbox` 的 endpoint 与连接策略发生获批变化。
+🔍 脱敏复核 endpoint/identity 仍由外部 block 持有，只有 ProxyCommand 来自受管 fragment。
+
+如果 `ssh` 报告某个已经删除的旧 shell 路径，先比较当前进程环境与 macOS account 记录：
+
+```fish
+printf 'process SHELL=%s\n' "$SHELL"
+dscl . -read /Users/sayori UserShell
+test -x "$SHELL"
+```
+
+🐚 若 account UserShell 正确而当前 `$SHELL` 已不存在，重启发起 SSH 的 Terminal/Codex 等应用
+或重新登录 macOS，再重试；不要把旧 Homebrew/Nix store shell 路径写进 SSH fragment。
 
 随后执行普通 OpenSSH 与文件传输 smoke；测试文件使用临时目录，不接触 production 数据：
 
@@ -227,8 +252,10 @@ ssh -t nixbox 'tmux new -A -s work'
 
 🧵 验证 SSH 断线后可以用同一 alias 恢复既有 tmux 工作现场。
 
-Clash 关闭和开启必须分别通过。任一状态出现 DNS、route 或 SSH 冲突即暂停，不修改 Clash、
-不启用 userspace networking，也不自行加入 split-tunnel workaround；另开 Issue 由维护者裁决。
+Clash 关闭和开启必须分别通过。OpenSSH 应在两种状态都读到同一个受管 ProxyCommand；Termius
+与 Zed 若仍受 fake-IP 影响，只记录为不读取 OpenSSH config 的独立事实，不扩大本票去修改
+Clash。任一 route 或 SSH transport 冲突都暂停，不修改 Clash、不启用 `tailscaled` userspace
+networking mode，也不自行加入 split-tunnel workaround；另开 Issue 由维护者裁决。
 
 验收口径是“地址漂移后无需改配置、跨网仍能同名连接、断线后工作可恢复”，不是“一条
 TCP/SSH session 在换网、睡眠或 VPN 重启时永不掉线”。

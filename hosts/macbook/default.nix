@@ -134,6 +134,7 @@ in
           ../../software/upscayl/capabilities/image-upscaling/home.nix
           ../../software/xbar/capabilities/menu-bar-plugins/home.nix
           ../../software/rclone/capabilities/cloud-storage/home.nix
+          ../../software/tailscale/capabilities/stable-workstation-access/darwin-home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
           ../../modules/home/capabilities/secret-administration.nix
         ];
