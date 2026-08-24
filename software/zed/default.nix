@@ -6,6 +6,14 @@
     homeModules = [ ./capabilities/gui-editor/home.nix ];
   };
 
+  fishQuickCommand = intentLib.addModules {
+    homeModules = [ ./capabilities/gui-editor/fish.nix ];
+  };
+
+  zshQuickCommand = intentLib.addModules {
+    homeModules = [ ./capabilities/gui-editor/zsh.nix ];
+  };
+
   addTask =
     { name, command }:
     intentLib.addModules {
