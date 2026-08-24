@@ -20,8 +20,8 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # Issue #76: consume Herdr's stable Nix package through Home Manager.
-    herdr.url = "github:herdrdev/herdr/v0.7.5";
+    # Issues #76 and #233: consume Herdr's stable Nix package through Home Manager.
+    herdr.url = "github:herdrdev/herdr/v0.8.2";
 
     # Issue #90: consume only the reviewed source contract. Raycast's own
     # extension tooling remains in the leaf repository, so this is not a Flake.
