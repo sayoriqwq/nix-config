@@ -61,7 +61,7 @@ nix run .#server-recovery-test
 - [nixbox 稳定访问](docs/runbooks/stable-workstation-access.md)
 - [Server recovery](docs/runbooks/server-recovery.md)
 - [Server 终端排障](docs/runbooks/server-terminal-troubleshooting.md)
-- [Zed Nightly 手动更新](docs/runbooks/update-zed-nightly.md)
+- [Zed Preview / Stable 手动更新](docs/runbooks/update-zed-preview.md)
 - [快捷键参考](docs/guide/SHORTCUTS.md)
 
 ## 变更流程
