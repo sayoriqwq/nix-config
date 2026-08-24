@@ -8,7 +8,11 @@
 let
   configDirectory = "${config.home.homeDirectory}/.config/zed";
   tasksBaseline = pkgs.writeText "zed-tasks.json" (builtins.toJSON config.sayori.zed.tasks);
-  zedNightly = pkgs.callPackage ../../package.nix { };
+  zedPackage =
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      pkgs.callPackage ../../package.nix { }
+    else
+      pkgs.zed-editor;
 in
 {
   imports = [
@@ -23,9 +27,9 @@ in
   };
 
   config = {
-    # ADR-0006: both workstations use the same exact official Nightly release.
-    # The package adapts upstream prebuilt artifacts and has no Rust build path.
-    home.packages = [ zedNightly ];
+    # ADR-0006: macOS pins an official Preview binary; Linux follows the stable
+    # zed-editor from its release Nixpkgs package set and binary caches.
+    home.packages = [ zedPackage ];
 
     # Zed is the sole owner of the default editor role. VS Code and Helix remain
     # available as explicit fallback editors.

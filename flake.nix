@@ -87,23 +87,18 @@
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
-      zedNightlyFor = system: (packagesFor system).callPackage ./software/zed/package.nix { };
-      zedNightlyUpdaterFor =
-        system:
-        let
-          pkgs = packagesFor system;
-        in
-        pkgs.writeShellApplication {
-          name = "sync-zed-nightly";
-          runtimeInputs = [
-            pkgs.curl
-            pkgs.git
-            pkgs.jq
-            pkgs.nix
-            pkgs.python3
-          ];
-          text = builtins.readFile ./software/zed/update.sh;
-        };
+      zedPreview = darwinPkgs.callPackage ./software/zed/package.nix { };
+      zedPreviewUpdater = darwinPkgs.writeShellApplication {
+        name = "sync-zed-preview";
+        runtimeInputs = [
+          darwinPkgs.curl
+          darwinPkgs.git
+          darwinPkgs.jq
+          darwinPkgs.nix
+          darwinPkgs.python3
+        ];
+        text = builtins.readFile ./software/zed/update.sh;
+      };
       serverModules = [
         ./hosts/server
         disko.nixosModules.disko
@@ -145,6 +140,13 @@
         inherit intentLib;
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
+      };
+      zedPackageSelectionCheck = import ./checks/code-development/zed-package-selection.nix {
+        inherit darwinPkgs intentLib username;
+        darwinHomeManager = home-manager-darwin;
+        linuxHomeManager = home-manager;
+        linuxPkgs = packagesFor "x86_64-linux";
+        serverConfiguration = self.nixosConfigurations.server;
       };
       macbookPinshiftDevelopmentCheck =
         import ./checks/code-development/macbook-pinshift-development.nix
@@ -198,33 +200,28 @@
       nixosConfigurations.server-recovery-install = serverRecoveryOperation.installConfiguration;
 
       # Explicit package outputs give CI and future hosts stable validation
-      # targets for the narrow Clash seam and Zed's owner-local binary package.
+      # targets for the narrow Clash seam and Zed's platform-specific channels.
       packages = {
         aarch64-darwin = {
-          sync-zed-nightly = zedNightlyUpdaterFor "aarch64-darwin";
-          zed-nightly = zedNightlyFor "aarch64-darwin";
+          sync-zed-preview = zedPreviewUpdater;
+          zed-preview = zedPreview;
         };
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
           server-recovery-test = serverRecoveryOperation.runner;
-          sync-zed-nightly = zedNightlyUpdaterFor "x86_64-linux";
-          zed-nightly = zedNightlyFor "x86_64-linux";
+          zed-stable = (packagesFor "x86_64-linux").zed-editor;
         };
       };
 
       apps = {
-        aarch64-darwin.sync-zed-nightly = {
+        aarch64-darwin.sync-zed-preview = {
           type = "app";
-          program = "${zedNightlyUpdaterFor "aarch64-darwin"}/bin/sync-zed-nightly";
+          program = "${zedPreviewUpdater}/bin/sync-zed-preview";
         };
         x86_64-linux = {
           server-recovery-test = {
             type = "app";
             program = "${serverRecoveryOperation.runner}/bin/server-recovery-test";
-          };
-          sync-zed-nightly = {
-            type = "app";
-            program = "${zedNightlyUpdaterFor "x86_64-linux"}/bin/sync-zed-nightly";
           };
         };
       };
@@ -236,6 +233,7 @@
           macbook-system = self.darwinConfigurations.macbook.system;
           tailscale-ssh-proxy = tailscaleSshProxyCheck;
           zed-add-task = zedAddTaskCheck;
+          zed-package-selection = zedPackageSelectionCheck;
         };
         x86_64-linux = {
           nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;
