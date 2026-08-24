@@ -34,6 +34,7 @@ in
   imports =
     terminalWork.darwinModules
     ++ graphicalTerminal.darwinModules
+    ++ terminalCompatibility.darwinModules
     ++ codeDevelopment.darwinModules
     ++ chineseInput.darwinModules
     ++ [
@@ -62,7 +63,6 @@ in
       ../../software/numbers/capabilities/spreadsheet-editing/darwin.nix
       ../../software/obs-studio/capabilities/screen-recording/darwin.nix
       ../../software/one-thing/capabilities/menu-bar-reminder/darwin.nix
-      ../../software/orbstack/capabilities/container-runtime/darwin.nix
       ../../software/pages/capabilities/document-editing/darwin.nix
       ../../software/paseo/capabilities/application-presence/darwin.nix
       ../../software/pearcleaner/capabilities/app-maintenance/darwin.nix
@@ -136,7 +136,6 @@ in
         ++ [
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
-          ../../software/vscode/capabilities/editor-compatibility/home.nix
         ]
         ++ graphicalTerminal.homeModules
         ++ [

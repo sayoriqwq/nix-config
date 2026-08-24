@@ -7,6 +7,7 @@ let
     ax = import ../../software/ax { inherit intentLib; };
     claudeCode = import ../../software/claude-code { inherit intentLib; };
     codex = import ../../software/codex { inherit intentLib; };
+    git = import ../../software/git { inherit intentLib; };
     herdr = import ../../software/herdr { inherit intentLib; };
     ohMyPi = import ../../software/oh-my-pi { inherit intentLib; };
     python = import ../../software/python { inherit intentLib; };
@@ -29,6 +30,7 @@ in
 
   multiClientCodingEnvironment = intentLib.realize (
     lib.pipe coreCodingEnvironment [
+      software.git.versionControl
       software.claudeCode.codingAgent
       software.antigravity.codingAgent
       software.ohMyPi.codingAgent

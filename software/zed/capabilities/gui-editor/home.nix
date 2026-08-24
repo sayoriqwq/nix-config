@@ -12,7 +12,6 @@ let
 in
 {
   imports = [
-    ../../../../modules/home/common/shortcut-reference.nix
     ../../../../modules/home/desktop/editors/seed-files.nix
   ];
 
@@ -52,36 +51,5 @@ in
       }
     ];
 
-    # `z` is part of the Zed capability. zoxide uses `--cmd cd`, so the name is
-    # unambiguous on both workstations.
-    programs.fish.functions.z = ''
-      if test (count $argv) -eq 0
-          command zed .
-      else
-          command zed $argv
-      end
-    '';
-
-    programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
-      lib.mkOrder 1251 ''
-        function z() {
-          if (( $# == 0 )); then
-            command zed .
-          else
-            command zed "$@"
-          fi
-        }
-      ''
-    );
-
-    sayori.shortcuts = [
-      {
-        scope = "Fish / Zsh";
-        keys = "z";
-        action = "无参数打开当前目录；有参数传给 Zed";
-        owner = "zed-editor";
-        order = 46;
-      }
-    ];
   };
 }
