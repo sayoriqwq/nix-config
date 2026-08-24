@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   ...
 }:
@@ -7,7 +6,6 @@
 {
   imports = [
     ../../../../modules/home/common/shortcut-reference.nix
-    ../../../../modules/home/common/state-paths.nix
   ];
 
   programs.atuin = {
@@ -33,15 +31,6 @@
       action = "打开 Atuin 增强历史搜索";
       owner = "atuin";
       order = 20;
-    }
-  ];
-
-  sayori.statePaths = [
-    {
-      path = "${config.home.homeDirectory}/.local/share/atuin";
-      owner = "Atuin";
-      backup = "required";
-      description = "Local history database, encryption key and daemon state.";
     }
   ];
 

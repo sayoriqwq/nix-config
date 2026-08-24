@@ -12,7 +12,6 @@ in
 {
   imports = [
     ../../../../modules/home/common/shortcut-reference.nix
-    ../../../../modules/home/common/state-paths.nix
   ];
 
   # This is the three-host login-environment owner, not incidental Fish-only PATH configuration.
@@ -73,18 +72,4 @@ in
     }
   ];
 
-  sayori.statePaths = [
-    {
-      path = "${config.home.homeDirectory}/.local/share/fish/fish_history";
-      owner = "Fish";
-      backup = "required";
-      description = "Writable native Fish command history.";
-    }
-    {
-      path = "${config.home.homeDirectory}/.config/fish/fish_variables";
-      owner = "Fish";
-      backup = "optional";
-      description = "Writable Fish universal variables; stable shell declarations remain Nix-owned.";
-    }
-  ];
 }

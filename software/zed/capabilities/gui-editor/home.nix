@@ -13,7 +13,6 @@ in
 {
   imports = [
     ../../../../modules/home/common/shortcut-reference.nix
-    ../../../../modules/home/common/state-paths.nix
     ../../../../modules/home/desktop/editors/seed-files.nix
   ];
 
@@ -50,15 +49,6 @@ in
       {
         target = "${configDirectory}/tasks.json";
         baseline = tasksBaseline;
-      }
-    ];
-
-    sayori.statePaths = [
-      {
-        path = configDirectory;
-        owner = "Zed";
-        backup = "optional";
-        description = "Writable live settings, keymap, tasks, extensions and session state; Nix only seeds missing baselines.";
       }
     ];
 

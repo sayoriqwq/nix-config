@@ -5,8 +5,6 @@
 }:
 
 {
-  home-manager.users.${username}.imports = [ ./linux-home.nix ];
-
   programs.clash-verge = {
     enable = true;
     package = clashVergeRevPackage;

@@ -1,8 +1,7 @@
-{ config, lib, ... }:
+{ lib, ... }:
 
 {
   imports = [
-    ../../../../modules/home/common/state-paths.nix
     ../../../../modules/home/darwin/hushlogin.nix
   ];
 
@@ -40,12 +39,4 @@
     }
   ];
 
-  sayori.statePaths = [
-    {
-      path = "${config.home.homeDirectory}/.zhistory";
-      owner = "Zsh";
-      backup = "required";
-      description = "Writable compatibility-shell history; Fish remains the primary shell.";
-    }
-  ];
 }

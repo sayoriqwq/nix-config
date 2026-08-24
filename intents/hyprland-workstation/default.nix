@@ -3,7 +3,6 @@
 let
   intentLib = import ../lib.nix;
   software = {
-    dconf = import ../../software/dconf { inherit intentLib; };
     fuzzel = import ../../software/fuzzel { inherit intentLib; };
     gdm = import ../../software/gdm { inherit intentLib; };
     gnomeKeyring = import ../../software/gnome-keyring { inherit intentLib; };
@@ -26,7 +25,6 @@ intentLib.realize (
     software.xorgServer.compatibilityServer
     software.qtWayland.platformPlugins
     software.gnomeKeyring.secretService
-    software.dconf.userSettings
     software.hyprlock.sessionLock
     software.fuzzel.applicationLauncher
     software.waybar.desktopStatus
