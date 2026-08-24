@@ -1,162 +1,156 @@
-# ADR-0006：使用 Zed 官方精确 Nightly 二进制
+# ADR-0006：Zed 按平台选择 Preview 与 Stable
 
 - **状态：** 已接受
 - **日期：** 2026-07-24
 - **决策范围：** 桌面编辑器、软件包所有权、二进制供应链与更新流程
-- **关联 Issue：** [#25](https://github.com/sayoriqwq/nix-config/issues/25)、[#215](https://github.com/sayoriqwq/nix-config/issues/215)
-- **批准记录：** 维护者于 2026-07-24 接受 Nightly 通道；2026-08-23 明确要求禁止 Zed 源码构建回退
-- **后续修订：** 维护者于 2026-08-20 决定移除定期更新 workflow；2026-08-23 改用官方精确版本预构建产物
+- **关联 Issue：** [#25](https://github.com/sayoriqwq/nix-config/issues/25)、[#215](https://github.com/sayoriqwq/nix-config/issues/215)、[#241](https://github.com/sayoriqwq/nix-config/issues/241)
+- **批准记录：** 维护者于 2026-08-24 决定 macbook 使用 Preview、nixbox 使用 Stable，继续禁止把 Zed 源码构建作为正常回退
+- **历史修订：** 2026-08-20 移除定期更新 workflow；2026-08-23 从 source Flake 改为官方精确 Nightly 二进制；2026-08-24 以当前平台分流取代 Nightly 双平台方案
 
 ## 背景
 
-维护者选择 Zed Nightly 作为 macOS 与 NixOS 工作站的主编辑器。仓库最初把
-Zed 官方源码 Flake 作为 package owner，并信任其 Cachix，希望避免本地编译。
+仓库先后尝试过 Zed source Flake 和 owner-local Nightly 双平台二进制。source Flake 在
+cache miss 时会由 Crane 抓取大量 Cargo Git dependencies 并回退到完整 Rust 构建，
+违反维护者的 binary-first 要求。Nightly 官方 macOS DMG/Linux tarball 避免了源码编译，
+但 Linux 顶层 store path 不在 USTC、NixOS 官方 cache 或 Zed Cachix 中。
 
-真实故障证明这条路径不满足预期：只求值 Zed package 就会由 Crane 对大量
-Cargo Git dependencies 执行 refs/submodule 抓取；当前固定版本的 Darwin 与
-Linux 顶层 store path 又不在 Zed Cachix、NixOS 官方缓存或 USTC 缓存中。
-缓存未命中后，Nix 合法地回退到完整 Rust 源码构建。生产 server 上误构建
-`nixbox` output 时因此长时间抓取仓库，最终在真正开始构建前由 daemon 断开。
+nixbox 的预期网络模型是优先使用 USTC Nix binary cache，并不依赖通用外网或代理。
+因此 Nightly Linux artifact 需要直连 `cloud.zed.dev`，或由 macbook 中继进入 store；
+这可以偶发完成构建，却不是可重复的日常更新与恢复路径。macbook 则需要较新的编辑器
+功能，且能可靠取得 Zed 官方 macOS artifact。
 
-同一 commit 对应的 Zed 官方 Nightly 发布同时提供 macOS aarch64 DMG 与 Linux
-x86_64 tarball。因此本仓库不需要把“使用 Nightly”与“自行编译 Nightly”绑定。
+Darwin 与 Linux 已经按 ADR-0009 使用不同 nixpkgs cadence。Zed 也有真实的平台供应链
+差异，不再强求两台工作站使用同一通道或版本。
 
 ## 决策
 
-### 1. 只消费官方精确版本的 Nightly 二进制
+### 1. macbook 固定官方 Preview 二进制
 
-macbook 与 nixbox 使用 owner-local `software/zed/package.nix` derivation。每次固定：
+macbook 通过 owner-local `software/zed/package.nix` 固定：
 
-- 完整官方 release identity，包含版本、Nightly run number 与 40 位 commit SHA；
-- `cloud.zed.dev/releases/nightly/<exact-release>/download` 的双平台 URL；
-- macOS aarch64 DMG 的 flat hash；
-- Linux x86_64 tarball 解包后的 recursive hash。
+- 精确 Preview 语义版本；
+- `cloud.zed.dev/releases/preview/<version>/download` 的 aarch64-darwin DMG；
+- DMG 的固定 flat hash。
 
-不使用浮动 `latest` 作为 package source。Darwin derivation 只解包官方 DMG 并
-投影 `.app` 与 CLI；Linux derivation 只解包官方 tarball，执行 NixOS 所需的 ELF
-interpreter/RPATH 适配和必要 wrapper。两边都不得 checkout Zed source，也不得
-引入 Cargo、Rust、Crane 或 source-build fallback。
+Darwin derivation 只解包官方 DMG并投影 `Zed Preview.app` 与 `zed` CLI。它不 checkout
+Zed source，不引入 Cargo、Rust、Crane 或 source-build fallback。应用内自动更新关闭；
+版本推进只由维护者按需运行 `sync-zed-preview`，审阅 package pin 的 Git diff，并完成
+package/host build。
 
-### 2. 根 Flake 不再包含 Zed source Flake
+### 2. nixbox 使用 Linux release nixpkgs 的 Stable
 
-根 `flake.nix` 与 `flake.lock` 删除 `zed` input 及只由它引入的 Nixpkgs、Crane、
-Rust overlay 和 `flake-parts` 节点。显式 package outputs 与两个 workstation host
-共同调用 owner-local package；server 不选择 Zed capability，也不获得 Zed package。
+Zed GUI editor capability 在 Linux 直接选择 host package set 的 `pkgs.zed-editor`。
+nixbox 使用锁定的 `nixos-26.05` package set，因此 Zed Stable 随 Linux release input
+更新，不复用 macOS Preview derivation，也没有独立 updater。
 
-本仓库顶层继续使用普通 Flake。删除 Zed 叶子 input 不改变 ADR-0001 的模块组织
-决策，也不影响其他仍有自身传递图的 inputs。
+每次 Linux nixpkgs input 更新必须在合并前取得 `zed-stable` 精确 outPath，并确认 USTC
+binary cache 命中；官方 cache 命中作为次级供应链证据。USTC 查询失败时停止更新，继续
+使用上一个 lock，不在 nixbox 本地构建 Zed，也不临时增加 source Flake、Cargo/Rust、
+Cachix、通用外网代理或 production server builder。
 
-### 3. artifact 缺失必须失败，不得改走源码
+这一约束属于更新与 activation Gate：nixpkgs package expression 本身保留上游源码构建
+能力，但仓库操作合同不允许在缓存缺失时实现它。已确认的 content-addressed store path
+一旦在 USTC 命中，就可作为当前 lock 的可重复 substitution 证据。
 
-“binary-only”表示固定版本的任一官方产物不存在、hash 不符或无法解包时，更新和
-build 都应立即失败。失败时继续使用上一个已固定版本，不引入临时源码 package，
-不把 production server 当作桌面包 builder，也不等待 Rust 编译完成。
+### 3. server 不选择 Zed
 
-Nix 仍会实现一个很小的本地 derivation 来解包、patch ELF 或创建 wrapper；这不是
-Zed 源码构建。不得把“没有 Rust 编译”误写成“完全没有 Nix derivation realization”。
+server 不组合 code-development、GUI editor 或工作站软件。显式 `zed-preview`/
+`zed-stable` package output 只提供独立验证入口，不表示 server closure 选择 Zed，也不
+授权 server 代建桌面 package。
 
-### 4. 删除 Zed Cachix 信任
+### 4. 两个平台的版本差异是有意策略
 
-官方发行包通过固定 URL 与内容 hash 进入 store，不再请求 Zed source derivation 的
-store path。Darwin 与 NixOS 配置因此删除 `zed.cachix.org` substituter 与 trusted key：
+macbook Preview 与 nixbox Stable 不要求版本号相同。Preview 为 macbook 提供较新功能；
+Linux release Stable 为 nixbox 提供可缓存、可恢复的保守路径。版本差异由 package owner
+的显式 platform seam 表达，不建立 registry、自动平台选择框架或第二套 Intent。
 
-- 不上传本机构建结果；
-- 不配置 Cachix token 或签名私钥；
-- 不关闭 Nix 签名检查；
-- server/nixbox 的通用缓存优先级由各 host 自己声明，与 Zed capability 解耦。
+### 5. 根 Flake 与更新入口保持窄边界
 
-固定 hash 保证下载内容与审阅版本一致，但不能消除 Zed 官方发布流水线、签名证书
-或托管账号被攻破的供应链风险。macOS build 还应验证上游 App 的代码签名。
+根 Flake 不包含 Zed source input，也不信任 Zed Cachix。输出为：
 
-### 5. Nightly 更新只能由维护者手动触发
+- `packages.aarch64-darwin.zed-preview` 与 `sync-zed-preview`；
+- `packages.x86_64-linux.zed-stable`；
+- 仅 Darwin 暴露 `apps.aarch64-darwin.sync-zed-preview`。
 
-仓库不运行定期 Zed update Action。维护者需要更新时，在专用分支运行：
+Preview helper 只修改 owner-local package pin，不提交、不 push、不创建 PR、不 merge、
+不 activation。Linux Stable 只随独立的 Linux nixpkgs input PR 更新。
 
-```fish
-nix run .#sync-zed-nightly
-```
+### 6. 配置与 mutable state 边界不变
 
-该入口解析官方 `latest` redirect 得到精确 release identity，先确认双平台产物都
-存在并计算固定 hash，再只修改 owner-local package 文件。它不提交、不 push、
-不创建 PR、不 activation，也不编译 Zed。维护者必须审阅 diff、完成双平台适用的
-package/host build，再通过普通 Draft PR 推进。
-
-应用内自动更新继续关闭。Git 中固定的 release/hash、Nix build 与 generation 是
-唯一版本推进和声明式回滚路径。
-
-### 6. 编辑器配置与可变状态边界不变
-
-本次只替换 package source 与更新流程。Home Manager 仍管理 package、CLI、默认
-编辑器声明和 seed-only 配置；Zed settings、keymap、tasks、extensions、登录态、
-History、workspace/session 与 cache 继续属于每台机器的可变状态。
+Home Manager 仍管理 package、CLI、默认编辑器声明和 seed-only 配置。Preview、Stable、
+已退休 Nightly 的 settings、keymap、tasks、extensions、登录态、History、workspace/
+session、数据库与 cache 均为每台机器的外部可变状态。本决策不迁移、合并或删除它们；
+generation rollback 也不恢复这些状态。
 
 ## 结果
 
 ### 正面
 
-- 冷求值不再扫描 Zed Cargo Git refs；
-- cache miss 不再触发 Zed Rust 源码编译；
-- macOS 与 Linux 固定同一官方 release identity；
-- source Flake 的独立 Nixpkgs/Rust/Crane/`flake-parts` 图退出根 lock；
-- 不再保留实际上不能保证 cache hit 的 Zed Cachix 信任；
-- 手动更新有一个短入口，并在写入前验证双平台官方产物。
+- macbook 保留比 Stable 更新、但比 Nightly 更经过测试的官方 Preview；
+- nixbox 的 Zed 跟随 Linux release package set，并可从预期的 USTC 路径 substitution；
+- nixbox 不再需要直连 Zed artifact、Mac store relay 或 Nightly Linux adapter；
+- source Flake、Cargo/Rust/Crane 与 Zed Cachix 继续不进入根依赖图；
+- server 不承担桌面软件求值、下载或构建成本；
+- 平台版本差异与现有 Darwin rolling/Linux release cadence 对齐。
 
 ### 代价与风险
 
-- 每次更新需要下载两个官方产物来计算 hash，并分别验证两个平台；
-- Linux 官方 bundle 仍需 NixOS ELF/RPATH 适配和真实桌面 smoke；
-- Nightly 可能崩溃、回归或改变配置格式；
-- 上游托管对象带生命周期策略，固定的旧 artifact 未来可能被删除；更新应在产物
-  仍可获取时推进。若需要永久保留，必须另开 Issue 设计自有归档与签名边界；
-- generation 回滚不恢复 Zed 的可变状态。
+- 两台工作站运行不同 Zed channel/version，排障必须注明平台；
+- Preview 与 Stable 的功能、配置 schema 或 extension compatibility 可能不同；
+- Preview artifact 仍依赖 Zed 官方托管与签名；固定旧 artifact 可能被上游删除；
+- nixpkgs Stable 的 outPath 若在未来 lock 更新时未进入 USTC，更新必须暂停；
+- 第一次切换 channel 需要分别做真实机器 smoke，mutable state 不随 generation 回滚。
 
 ## 被否决的替代方案
 
-### 继续使用官方 source Flake 与 Zed Cachix
+### 两个平台继续使用 Nightly 官方 binary
 
-上游维护 package logic，但实际固定 store path 未命中缓存；求值会扫描大量 Git
-dependencies，完整 build 会回退 Rust 编译，与维护者的 binary-only 要求冲突。
+macOS 可行，但 Linux Nightly outPath 不在 nixbox 的预期 cache 中，需要直连上游或
+Mac relay，无法作为正常恢复路径。
 
-### 通过 `--no-build-output` 或只调整 substituter 顺序规避
+### 两个平台都使用 nixpkgs Stable
 
-这只能改变失败时机或查询顺序，不能让缺失的 store path 出现在缓存中，也不能
-消除 source Flake 求值时的 Git fetch。
+供应链最简单，但不满足维护者在 macbook 使用较新功能的明确需求。
 
-### macOS 使用 DMG，Linux 保留 source Flake
+### nixbox 使用 Preview/Nightly source Flake 或 cache miss 后本地构建
 
-会留下两个 package owner 与两套版本推进方式，不能保证两台工作站使用同一 release。
+会重新引入 Cargo Git fetch、Crane 与长时间 Rust build，正是本决策需要消除的故障。
+
+### 让 server 或 macbook 长期代理/代建 nixbox Zed
+
+会把桌面软件供应链耦合到另一台机器的在线状态和临时 transport。Mac relay 可用于一次性
+诊断证据，不是生产声明或恢复合同；server 仍保持 headless。
 
 ### Homebrew、Zed 自更新或浮动 `latest`
 
-会绕过固定 hash、Git 审阅和 generation 回滚，并让两台工作站产生版本漂移。
-
-### production server 代建 nixbox 的 Zed
-
-server 是 headless host，不应为桌面 package 承担求值、下载或构建成本。跨 host
-build 必须明确选择并审阅；Linux 原生验收等待 nixbox 恢复。
+会绕过固定 hash、Git 审阅和 generation rollback，不采用。
 
 ## 验证与人工关卡
 
 实施 PR 至少需要：
 
-- `nix fmt -- --check .` 与 `nix flake check`；
-- 构建 aarch64-darwin Zed package 与 macbook system，不 activation；
-- 验证 macOS App 代码签名、版本与 CLI projection；
-- 求值 x86_64-linux derivation，证明没有 Cargo/Rust/Crane/source inputs；
-- nixbox 恢复后原生构建 Linux package 与 nixbox toplevel；
-- 验证 server 不选择 Zed package；
-- 更新演练必须先取得两个官方 artifact，任何一个缺失都失败。
+- formatter、Flake check 与 Zed package selection seam check；
+- 构建 aarch64-darwin Preview package 与 macbook system，读取 App 签名、bundle identity
+  和版本，不 activation；
+- 记录 x86_64-linux Stable 版本、outPath 及 USTC/官方 cache 命中；
+- 在 nixbox 原生构建 Stable package 与 nixbox toplevel；
+- 验证 server 最终 package/closure 不选择 Zed；
+- 审阅 `flake.lock` 在本决策 PR 中保持不变。
 
-Draft PR、离线 build 或 ADR 修订不授权 activation、merge、Ready、卸载旧应用或
-删除可变状态。第一次采用新 package 的真实机器验证仍需当次维护者批准。
+Draft PR、离线 build、缓存命中或 ADR 修订均不授权 activation、Ready、merge、tag、
+卸载旧应用或删除 mutable state。第一次采用新通道的 activation 与运行态 smoke 需要当次
+维护者批准。
+
+## 回滚
+
+未 activation 时 revert 本决策 PR 并重新 build。已经 activation 时优先切回上一代
+nix-darwin/NixOS generation，再 revert 声明。任何 Preview/Stable/Nightly 外部状态仍由
+各自产品流程或仓库外私有备份恢复，不由 Git 回滚处理。
 
 ## 复审条件
 
-出现以下情况时重新评估：
-
-- Zed 官方改变精确版本 download API、bundle layout、签名或发布身份；
-- 官方停止提供任一受支持平台产物；
-- artifact 生命周期导致已固定版本无法可靠恢复；
-- Linux bundle 的运行时依赖或 NixOS patch 超出窄 adapter；
-- Nightly 稳定性或手动更新成本不再可接受；
-- 维护者决定设计自有二进制归档或回到 Preview/Stable。
+- Zed 改变 Preview download API、bundle layout、签名或发布身份；
+- 上游停止提供固定 Preview artifact；
+- Linux Stable 目标长期不进入 USTC；
+- Preview/Stable 的功能或配置差异产生不可接受的维护成本；
+- 维护者需要为 Zed 设计自有二进制归档或重新统一通道。
