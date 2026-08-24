@@ -11,6 +11,7 @@ let
   chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime { inherit lib; };
+  graphicalTerminal = import ../../intents/graphical-terminal { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
   hyprlandWorkstation = import ../../intents/hyprland-workstation { inherit lib; };
   terminalWork = import ../../intents/terminal-work { inherit lib; };
@@ -27,6 +28,7 @@ in
 
   imports =
     terminalWork.nixosModules
+    ++ graphicalTerminal.nixosModules
     ++ hyprlandWorkstation.nixosModules
     ++ alwaysOnWorkstation.nixosModules
     ++ chineseInput.nixosModules
@@ -36,7 +38,6 @@ in
       ../../software/avahi/capabilities/mdns/nixos.nix
       ../../software/bluez/capabilities/bluetooth/nixos.nix
       ../../software/curl/capabilities/network-transfer/nixos.nix
-      ../../software/fish/capabilities/interactive-shell/nixos.nix
       ../../software/google-chrome/capabilities/web-browser/nixos.nix
       ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
       ../../software/nix/capabilities/flake-interface/nixos.nix
@@ -91,7 +92,6 @@ in
         ++ alwaysOnWorkstation.homeModules
         ++ workstationHomeModules
         ++ [
-          ../../software/fish/capabilities/interactive-shell/home.nix
           ../../software/atuin/capabilities/shell-history/home.nix
         ]
         ++ githubCollaboration.homeModules
@@ -105,7 +105,9 @@ in
         ++ [
           ../../software/yazi/capabilities/terminal-file-manager/home.nix
           ../../software/helix/capabilities/terminal-editor/home.nix
-          ../../software/ghostty/capabilities/terminal-emulator/home.nix
+        ]
+        ++ graphicalTerminal.homeModules
+        ++ [
           ../../software/obsidian/capabilities/knowledge-base/home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
         ];

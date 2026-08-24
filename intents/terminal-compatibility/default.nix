@@ -12,6 +12,7 @@ let
     payRespects = import ../../software/pay-respects { inherit intentLib; };
     starship = import ../../software/starship { inherit intentLib; };
     wezterm = import ../../software/wezterm { inherit intentLib; };
+    yumeDesign = import ../../software/yume-design { inherit intentLib; };
     zoxide = import ../../software/zoxide { inherit intentLib; };
     zsh = import ../../software/zsh { inherit intentLib; };
   };
@@ -19,6 +20,7 @@ in
 intentLib.realize (
   lib.pipe intentLib.empty [
     software.zsh.compatibilityShell
+    software.yumeDesign.terminalTheme
     software.wezterm.terminalEmulator
     software.atuin.shellHistory
     software.atuin.zshIntegration

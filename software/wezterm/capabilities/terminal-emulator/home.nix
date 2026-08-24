@@ -12,10 +12,6 @@ let
   theme = terminalTheme.terminal;
 in
 {
-  imports = [
-    ../../../yume-design/capabilities/terminal-theme/home.nix
-  ];
-
   programs.wezterm = {
     enable = true;
     package = pkgs.wezterm;
