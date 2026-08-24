@@ -3,11 +3,11 @@
 - **状态：** 已接受
 - **日期：** 2026-07-20
 - **决策范围：** `macbook` 的 Nix bootstrap 与 nix-darwin 系统层
-- **批准记录：** 维护者在 Issue #4 / Phase 2 明确选择 Lix，并手动完成安装
+- **批准记录：** 维护者在 Issue #4 明确选择 Lix，并手动完成安装
 
 ## 背景
 
-`macbook` 在 Phase 2 开始时没有 Nix、Lix、`/nix`、`/etc/nix`、Nix daemon 或安装收据。nix-darwin 本身不是 Nix 实现；在构建和激活 `darwinConfigurations.macbook` 前，必须先安装上游 Nix 或兼容实现。
+Issue #4 开始时，`macbook` 没有 Nix、Lix、`/nix`、`/etc/nix`、Nix daemon 或安装收据。nix-darwin 本身不是 Nix 实现；在构建和激活 `darwinConfigurations.macbook` 前，必须先安装上游 Nix 或兼容实现。
 
 原迁移路线只要求建立 Nix 基础设置，没有预先规定使用上游 Nix 还是 Lix。因此，Lix 不能被当作原计划中的隐含要求，必须作为可追溯的维护者决策记录。
 

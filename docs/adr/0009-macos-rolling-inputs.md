@@ -47,7 +47,9 @@ input，使 macOS 的 package、system module 与 user module 共同 rolling；L
   follows 根 `nixpkgs`；
 - `flake.lock` 固定每个 input 的精确 revision 与 hash，rolling 表示更新来源，
   不表示构建时绕过锁文件获取最新提交；
-- Zed 仍由自己的上游 Flake 与独立的手动锁文件更新 PR 管理，不随 Darwin input 更新。
+- Zed 由 owner-local `software/zed/package.nix` 固定官方双平台 Nightly 二进制，按
+  ADR-0006 的手动 sync PR 更新，不随 Darwin inputs 更新，也不存在 source-Flake
+  构建回退。
 
 Darwin input 更新必须作为可审阅的 Git diff 进入独立维护范围，并至少通过 formatter、
 Flake check、macbook system build 和与已知兼容 seam 对应的 policy check。

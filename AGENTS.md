@@ -9,7 +9,7 @@ Build and maintain one auditable, reproducible Nix configuration repository for:
 - one primary macOS workstation managed by `nix-darwin` and Home Manager;
 - one secondary NixOS workstation and Linux experiment station;
 - one server that runs minimal NixOS and will gain production capabilities only from current requirements;
-- requirement-driven capability modules shared across those hosts.
+- requirement-driven Software owners and Intents explicitly selected by those hosts.
 
 The repository manages **configuration**, not mutable application data or backups.
 
@@ -22,7 +22,7 @@ Before changing files, read:
 3. [`CONTEXT.md`](CONTEXT.md);
 4. the relevant files under `docs/architecture/`;
 5. every applicable ADR under `docs/adr/`;
-6. the current phase in `docs/plans/migration-roadmap.md`.
+6. every current runbook applicable to the requested action.
 
 If no implementation issue exists, do not start implementation. Limit work to inspection, planning, or creating a properly scoped issue.
 
@@ -35,12 +35,12 @@ If no implementation issue exists, do not start implementation. Limit work to in
 
 ## 4. Work model
 
-- Implement exactly one migration phase or one narrowly scoped maintenance issue per pull request.
-- Use a dedicated branch. For planned phases, prefer `agent/phase-<number>-<short-name>`.
+- Implement exactly one issue or one independently reviewable child issue per pull request.
+- Use a dedicated branch and worktree. Prefer the `codex/<issue>-<short-name>` branch prefix.
 - Open a **draft pull request** by default.
 - Never push implementation changes directly to `main`.
 - Never merge, enable auto-merge, or mark a draft ready without explicit maintainer approval.
-- Do not begin the next phase until the current phase's completion criteria and human validation are recorded.
+- Do not begin a dependent issue until the current issue's completion criteria and required human validation are recorded.
 - Do not perform unrelated cleanup, dependency upgrades, renames, or framework migrations.
 - Respect the issue's “allowed changes” and “forbidden changes” sections literally.
 - When a machine fact is unknown, gather evidence or leave a documented placeholder. Never guess usernames, architecture, hostnames, disks, boot mode, interfaces, `stateVersion`, service inventory, or network settings.
@@ -53,12 +53,12 @@ If no implementation issue exists, do not start implementation. Limit work to in
 - Use NixOS modules for NixOS system configuration.
 - Do not restore the retired Ubuntu server layer. Keep the minimal NixOS server requirement-driven, and add each production capability through its own approved issue.
 - Keep host and hardware facts under `hosts/<host>/`.
-- Keep reusable macOS system modules under `modules/darwin/`.
-- Keep reusable NixOS system modules under `modules/nixos/`.
-- Keep reusable user modules under `modules/home/`.
-- Compose hosts through explicit imports of requirement-driven capability modules. An import is the selection mechanism; do not add a global capability registry.
-- Keep configuration primitives internal to capability implementations. Hosts must not import `common`, `desktop`, Darwin, Linux, or server bundles as substitutes for requirements.
-- Create a platform adapter only for a proven platform seam. Cross-layer adapters must expose package ownership, managed configuration, mutable-state paths, services, network effects, and human approval gates.
+- Keep each software package, stable configuration, service, and owner-local asset under `software/<software>/`.
+- Keep cross-software executable composition under `intents/<intent>/`; Intents may use only public Software Primary Capabilities and Extensions.
+- Keep only proven reusable System or Home Manager primitives under `modules/`.
+- Compose hosts through explicit Intent results, independent Software platform modules, and host facts. Imports are the selection mechanism; do not add a global capability registry or automatic discovery.
+- Hosts must not import `common`, `desktop`, Darwin, Linux, or server bundles as substitutes for requirements.
+- Create a platform implementation only for a proven behavioral seam. It must expose package ownership, managed configuration, mutable-state boundaries, services, network effects, and human approval gates.
 - Prefer existing Home Manager, NixOS, and nix-darwin options over custom activation scripts or generated shell code.
 - Put project-specific development dependencies in each project's dev shell, not in the global user profile.
 - Git synchronizes declarations. Mutable data, databases, browser profiles, service state, and backups require separate data-management procedures.
@@ -131,7 +131,7 @@ If a check cannot run, state exactly why, what evidence was obtained instead, an
 
 Every pull request must contain a Chinese description with:
 
-- the linked issue and migration phase;
+- the linked issue;
 - what changed and why;
 - files and hosts affected;
 - explicit out-of-scope items;
@@ -144,7 +144,7 @@ Keep the pull request in draft until the maintainer has reviewed the diff and co
 
 ## 10. Definition of done
 
-A phase is complete only when:
+An issue is complete only when:
 
 - its issue completion criteria are satisfied;
 - required documentation and ADRs are current;
@@ -152,7 +152,7 @@ A phase is complete only when:
 - required real-machine validation is recorded by the maintainer;
 - rollback steps are known;
 - the pull request is merged by a human;
-- the phase issue is closed with a completion summary.
+- the issue is closed with a completion summary.
 
 ## 11. Supporting process documents
 
@@ -161,4 +161,4 @@ A phase is complete only when:
 - Domain-document rules: `docs/agents/domain.md`
 - Chinese protocol translation: `docs/agents/protocol.zh-CN.md`
 - Architecture: `docs/architecture/overview.md`
-- Migration plan: `docs/plans/migration-roadmap.md`
+- Current operations: `docs/runbooks/`

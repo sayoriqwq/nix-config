@@ -7,7 +7,7 @@
 
 ## 历史决策
 
-Phase 11 曾采用 sops-nix + age，以非 production demo 验证三台机器各自使用 SSH host identity 解密本机 SOPS 文件的路径。管理员 identity、恢复副本与 host private identity 始终保存在仓库外；Git 只保存公开 recipient、加密文件与声明式运行时 metadata。验收完成后 demo 与 helper 已退出，仓库长期没有真实 secret 或 service consumer。
+早期实现曾采用 sops-nix + age，以非 production demo 验证三台机器各自使用 SSH host identity 解密本机 SOPS 文件的路径。管理员 identity、恢复副本与 host private identity 始终保存在仓库外；Git 只保存公开 recipient、加密文件与声明式运行时 metadata。验收完成后 demo 与 helper 已退出，仓库长期没有真实 secret 或 service consumer。
 
 ## 当前决策
 
