@@ -30,11 +30,11 @@ Homebrew、Darwin-only Zsh、编辑器 launcher 与 mise 退出的结论。
 | --- | --- | --- | --- |
 | Ghostty | `software/ghostty/capabilities/terminal-emulator/home.nix` | macbook、nixbox 直接选择 | 窗口、session、登录态与 macOS preferences 保持可写 |
 | WezTerm | `software/wezterm/capabilities/terminal-emulator/home.nix` | macbook 的 `terminal-compatibility` Intent | 窗口、mux 与运行时状态保持可写 |
-| Fish | 用户配置：`software/fish/capabilities/interactive-shell/home.nix`（#197/PR #223 已合并）；Darwin 注册：`modules/darwin/shell.nix`；NixOS 登录 Shell：`modules/capabilities/portable-shell/nixos.nix` | 三台 host 显式选择用户 owner，并按平台选择 system declaration；Fish 不拥有 Zsh 行为 | Fish history 与 universal variables 保持可写 |
+| Fish | `software/fish/capabilities/interactive-shell/` 的 `home.nix`、`darwin.nix` 与 `nixos.nix` | 三台 host 显式选择用户 owner，并按平台选择 system declaration；Fish 不拥有 Zsh 行为 | Fish history 与 universal variables 保持可写 |
 | Zsh | `software/zsh/capabilities/compatibility-shell/home.nix` | macbook 的 `terminal-compatibility` Intent；不拥有其他 Software 的 integration 原子 | `~/.zhistory` 保持可写 |
 | 终端主题 | `software/yume-design/capabilities/terminal-theme/home.nix` | `terminal-work` 选择；Ghostty/WezTerm owner 消费同一 `terminalTheme` interface | 无可变状态 |
 | Node/Bun/pnpm | mise owner | 项目版本继续由项目 `mise.toml` 或本机未提交 override 选择 | mise runtime、cache、state 保持可写 |
-| Maple Mono NF-CN | macOS：`modules/darwin/fonts.nix`；Linux Ghostty：Ghostty owner | host 按真实终端需求选择 | 无用户数据；headless server 不安装字体 |
+| Maple Mono NF-CN | macOS：`software/maple-mono/capabilities/workstation-font/darwin.nix`；Linux Ghostty：Ghostty owner | host 按真实终端需求选择 | 无用户数据；headless server 不安装字体 |
 
 Ghostty 与 WezTerm 的应用本体不由 Homebrew 声明。`homebrew.onActivation.cleanup` 保持
 `none`；任何真实机器安装来源切换或定向卸载都需要独立人工批准。
@@ -56,7 +56,10 @@ intents/
 
 software/
 ├── fish/
-│   └── capabilities/interactive-shell/home.nix   # #197 / PR #223 已合并
+│   └── capabilities/interactive-shell/
+│       ├── home.nix
+│       ├── darwin.nix
+│       └── nixos.nix
 ├── ghostty/
 │   └── capabilities/terminal-emulator/home.nix
 ├── wezterm/
@@ -70,10 +73,6 @@ software/
     └── capabilities/compatibility-shell/home.nix
 
 modules/
-├── capabilities/portable-shell/
-│   └── nixos.nix                  # NixOS Fish 登录 Shell declaration
-├── darwin/
-│   └── shell.nix                  # macOS Fish 注册；人工 chsh 另设 Gate
 └── home/
     ├── common/
     │   ├── shortcut-reference.nix # 共享 option primitive
@@ -91,8 +90,8 @@ modules/
   由 host 直接选择，因此不为目录外观创建空 interface。
 - `modules/home/desktop/terminal/{appearance,keybindings}.nix` 仍是被明确路径 import 的内部
   primitives，不是可选择 adapter、第二 owner 或 terminal bundle。
-- `modules/darwin/shell.nix` 与 `modules/capabilities/portable-shell/nixos.nix` 只拥有各自平台的
-  Fish system declaration；它们不拥有 Fish 用户配置，更不拥有 Zsh。
+- Fish owner 的 `darwin.nix` 与 `nixos.nix` 只拥有各自平台的 system declaration；它们不拥有
+  Zsh，且人工 `chsh` / activation 仍是独立 Gate。
 - 已退役的 `modules/home/desktop/terminal/adapters/` 与 `modules/home/common/shell/zsh.nix`
   不再是当前接口；不得恢复旧 `default.nix` 聚合树、registry 或自动扫描。
 - 快捷键只提供生成 `docs/guide/SHORTCUTS.md` 所需的最小元数据。

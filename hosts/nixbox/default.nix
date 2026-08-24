@@ -30,14 +30,23 @@ in
     ++ chineseInput.nixosModules
     ++ [
       ./hardware-configuration.nix
+      ../../modules/nixos/administrator-user.nix
       ../../software/avahi/capabilities/mdns/nixos.nix
       ../../software/bluez/capabilities/bluetooth/nixos.nix
-      ../../modules/capabilities/portable-shell/nixos.nix
+      ../../software/curl/capabilities/network-transfer/nixos.nix
+      ../../software/fish/capabilities/interactive-shell/nixos.nix
       ../../software/google-chrome/capabilities/web-browser/nixos.nix
       ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
+      ../../software/nix/capabilities/flake-interface/nixos.nix
+      ../../software/nixpkgs/capabilities/unfree-package-policy/nixos.nix
+      ../../software/openssh/capabilities/key-only-remote-access/nixos.nix
+      ../../software/pciutils/capabilities/hardware-inspection/nixos.nix
       ../../software/termius/capabilities/remote-access-client/nixos.nix
       ../../software/localsend/capabilities/local-file-sharing/nixos.nix
       ../../software/tailscale/capabilities/stable-workstation-access/nixos.nix
+      ../../software/usbutils/capabilities/hardware-inspection/nixos.nix
+      ../../software/vim/capabilities/system-editor/nixos.nix
+      ../../software/wget/capabilities/network-download/nixos.nix
       ../../modules/capabilities/secret-deployment/nixos.nix
     ];
 
@@ -51,8 +60,6 @@ in
   users.users.${username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIILj3vb/coYALTSiSSrCE5+wFeTwPBGUKjbrY1Ap7XOM sayori@nixbox-codex"
   ];
-
-  services.openssh.settings.PermitRootLogin = "no";
 
   time.timeZone = "Asia/Shanghai";
 

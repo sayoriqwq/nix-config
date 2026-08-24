@@ -111,8 +111,6 @@
         };
       serverModules = [
         ./hosts/server
-        ./modules/nixos/base.nix
-        ./modules/nixos/server.nix
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
       ];
@@ -176,7 +174,6 @@
         };
         modules = [
           ./hosts/macbook
-          ./modules/darwin/base.nix
           home-manager-darwin.darwinModules.home-manager
         ];
       };
@@ -192,7 +189,6 @@
         };
         modules = [
           ./hosts/nixbox
-          ./modules/nixos/base.nix
           home-manager.nixosModules.home-manager
         ];
       };

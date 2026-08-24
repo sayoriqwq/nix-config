@@ -26,9 +26,10 @@ in
     ++ codeDevelopment.darwinModules
     ++ chineseInput.darwinModules
     ++ [
-      ../../modules/darwin/defaults.nix
-      ../../modules/darwin/fonts.nix
-      ../../modules/darwin/shell.nix
+      ../../modules/darwin/workstation-defaults.nix
+      ../../software/fish/capabilities/interactive-shell/darwin.nix
+      ../../software/lix/capabilities/nix-daemon/darwin.nix
+      ../../software/maple-mono/capabilities/workstation-font/darwin.nix
       ../../software/homebrew/capabilities/non-destructive-application-management/darwin.nix
       ../../software/amphetamine/capabilities/sleep-control/darwin.nix
       ../../software/baidu-netdisk/capabilities/cloud-storage-client/darwin.nix

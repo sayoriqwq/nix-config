@@ -22,9 +22,18 @@ in
   imports = terminalWork.nixosModules ++ [
     ./disko.nix
     ./networking.nix
-    ../../modules/capabilities/portable-shell/nixos.nix
+    ../../modules/nixos/administrator-user.nix
     ../../modules/capabilities/secret-deployment/nixos.nix
-    ../../modules/nixos/server-diagnostics.nix
+    ../../software/bind/capabilities/dns-diagnostics/nixos.nix
+    ../../software/fish/capabilities/interactive-shell/nixos.nix
+    ../../software/lsof/capabilities/open-file-diagnostics/nixos.nix
+    ../../software/mtr/capabilities/network-path-diagnostics/nixos.nix
+    ../../software/nix/capabilities/flake-interface/nixos.nix
+    ../../software/openssh/capabilities/key-only-remote-access/nixos.nix
+    ../../software/openssh/capabilities/ssh-only-firewall/nixos.nix
+    ../../software/strace/capabilities/system-call-diagnostics/nixos.nix
+    ../../software/sudo/capabilities/passwordless-administration/nixos.nix
+    ../../software/tcpdump/capabilities/packet-diagnostics/nixos.nix
   ];
 
   boot.initrd.availableKernelModules = [

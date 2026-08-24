@@ -18,8 +18,10 @@
 | --- | --- |
 | `hosts/nixbox/hardware-configuration.nix` | 目标机硬件、根与 EFI 挂载、无 swap、平台与 Intel microcode |
 | `hosts/nixbox/default.nix` | bootloader、当前 hostname、timezone、locale、`system.stateVersion` |
-| `modules/nixos/base.nix` | Nix/Flakes、镜像、基础命令、普通用户、wheel、最小 SSH |
-| `modules/nixos/desktop.nix` | NetworkManager、GNOME/GDM、XKB、打印、PipeWire、rtkit、Firefox |
+| `modules/nixos/administrator-user.nix` | 普通用户与 wheel system declaration |
+| `software/{nix,nixpkgs,openssh,fish}/capabilities/` | Flakes、unfree package policy、key-only SSH 与登录 Shell |
+| `software/{vim,wget,curl,pciutils,usbutils}/capabilities/` | Phase 5 现机 adoption 保留的基础命令与硬件盘点工具 |
+| #203 的 workstation system owners | NetworkManager、desktop/XKB、PipeWire/rtkit、Avahi 与 Bluetooth；printing 已退休 |
 
 首次实现先以单一 host 模块复刻现机，再机械拆分。拆分前后求值得到相同的 system derivation，证明模块边界没有改变最终闭包。
 

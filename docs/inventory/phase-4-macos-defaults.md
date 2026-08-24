@@ -7,7 +7,7 @@
 
 ## 所有权
 
-`modules/darwin/defaults.nix` 是 macOS 系统行为的唯一声明入口。Home Manager
+`modules/darwin/workstation-defaults.nix` 是 macOS 系统行为的唯一声明入口。Home Manager
 不管理这些键。Raycast、Bartender 和 CleanShot X 继续分别拥有窗口操作、菜单栏
 布局和截图工作流；本模块只提供不会与这些应用争夺操作入口的系统基础行为。
 
