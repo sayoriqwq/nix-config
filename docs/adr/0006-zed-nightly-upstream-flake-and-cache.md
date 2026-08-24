@@ -15,9 +15,11 @@ cache miss 时会由 Crane 抓取大量 Cargo Git dependencies 并回退到完�
 但 Linux 顶层 store path 不在 USTC、NixOS 官方 cache 或 Zed Cachix 中。
 
 nixbox 的预期网络模型是优先使用 USTC Nix binary cache，并不依赖通用外网或代理。
-因此 Nightly Linux artifact 需要直连 `cloud.zed.dev`，或由 macbook 中继进入 store；
-这可以偶发完成构建，却不是可重复的日常更新与恢复路径。macbook 则需要较新的编辑器
-功能，且能可靠取得 Zed 官方 macOS artifact。
+因此 Nightly Linux artifact 需要直连 `cloud.zed.dev`，或由 macbook 获取后中继进入 store。
+Linux release nixpkgs 的 Stable 顶层 path 同时由官方 Nix cache 提供，但一次真实验证发现：
+USTC 可以返回 `.narinfo`，对应 closure 内的部分 NAR 却实际缺失；只运行 `nix path-info`
+会产生假阳性并让 nixbox 随后回退到源码构建。macbook 则能可靠访问官方 cache 和 Zed
+官方 macOS artifact。
 
 Darwin 与 Linux 已经按 ADR-0009 使用不同 nixpkgs cadence。Zed 也有真实的平台供应链
 差异，不再强求两台工作站使用同一通道或版本。
@@ -43,14 +45,16 @@ Zed GUI editor capability 在 Linux 直接选择 host package set 的 `pkgs.zed-
 nixbox 使用锁定的 `nixos-26.05` package set，因此 Zed Stable 随 Linux release input
 更新，不复用 macOS Preview derivation，也没有独立 updater。
 
-每次 Linux nixpkgs input 更新必须在合并前取得 `zed-stable` 精确 outPath，并确认 USTC
-binary cache 命中；官方 cache 命中作为次级供应链证据。USTC 查询失败时停止更新，继续
-使用上一个 lock，不在 nixbox 本地构建 Zed，也不临时增加 source Flake、Cargo/Rust、
-Cachix、通用外网代理或 production server builder。
+每次 Linux nixpkgs input 更新必须在合并前取得 `zed-stable` 精确 outPath，并用真实
+`nix copy` 验证完整闭包。先尝试从 USTC 复制；若 USTC 的 `.narinfo` 存在但任一 NAR
+缺失，macbook 从 `cache.nixos.org` 获取已签名闭包，再通过既有 SSH transport 把同一
+store path 复制到 nixbox。macbook 在这里是传输控制面，不编译 Zed，也不成为长期
+builder、通用代理或新 binary cache。
 
-这一约束属于更新与 activation Gate：nixpkgs package expression 本身保留上游源码构建
-能力，但仓库操作合同不允许在缓存缺失时实现它。已确认的 content-addressed store path
-一旦在 USTC 命中，就可作为当前 lock 的可重复 substitution 证据。
+只有在 nixbox 上确认该精确 outPath 有效后，才允许构建 nixbox toplevel。USTC 与官方
+cache 都无法提供完整闭包时停止更新并继续使用上一个 lock；不得在 nixbox 本地构建
+Zed，也不得临时增加 source Flake、Cargo/Rust、Cachix、通用外网代理或 production
+server builder。`nix path-info` 只证明 narinfo 可查，不再作为缓存验收证据。
 
 ### 3. server 不选择 Zed
 
@@ -87,8 +91,9 @@ generation rollback 也不恢复这些状态。
 ### 正面
 
 - macbook 保留比 Stable 更新、但比 Nightly 更经过测试的官方 Preview；
-- nixbox 的 Zed 跟随 Linux release package set，并可从预期的 USTC 路径 substitution；
-- nixbox 不再需要直连 Zed artifact、Mac store relay 或 Nightly Linux adapter；
+- nixbox 的 Zed 跟随 Linux release package set，并优先从 USTC substitution；
+- USTC closure 不完整时可由 macbook 中继官方 cache 的已签名二进制，不会回退源码构建；
+- nixbox 不再需要直连 Zed artifact 或保留 Nightly Linux adapter；
 - source Flake、Cargo/Rust/Crane 与 Zed Cachix 继续不进入根依赖图；
 - server 不承担桌面软件求值、下载或构建成本；
 - 平台版本差异与现有 Darwin rolling/Linux release cadence 对齐。
@@ -98,7 +103,8 @@ generation rollback 也不恢复这些状态。
 - 两台工作站运行不同 Zed channel/version，排障必须注明平台；
 - Preview 与 Stable 的功能、配置 schema 或 extension compatibility 可能不同；
 - Preview artifact 仍依赖 Zed 官方托管与签名；固定旧 artifact 可能被上游删除；
-- nixpkgs Stable 的 outPath 若在未来 lock 更新时未进入 USTC，更新必须暂停；
+- nixpkgs Stable 的 outPath 若在 USTC 与官方 cache 都不完整，更新必须暂停；
+- USTC 缺失 NAR 时，恢复与验收需要 macbook 和既有 SSH transport 暂时可用；
 - 第一次切换 channel 需要分别做真实机器 smoke，mutable state 不随 generation 回滚。
 
 ## 被否决的替代方案
@@ -116,10 +122,11 @@ Mac relay，无法作为正常恢复路径。
 
 会重新引入 Cargo Git fetch、Crane 与长时间 Rust build，正是本决策需要消除的故障。
 
-### 让 server 或 macbook 长期代理/代建 nixbox Zed
+### 让 server 代建，或让 macbook 编译/长期代理 nixbox Zed
 
-会把桌面软件供应链耦合到另一台机器的在线状态和临时 transport。Mac relay 可用于一次性
-诊断证据，不是生产声明或恢复合同；server 仍保持 headless。
+会把桌面软件构建或通用网络耦合到另一台机器。server 仍保持 headless；macbook 只允许
+把官方 cache 的已签名 closure 经既有 SSH transport 复制到 nixbox，不编译 Zed、不提供
+常驻代理，也不改变 production 声明。
 
 ### Homebrew、Zed 自更新或浮动 `latest`
 
@@ -132,8 +139,9 @@ Mac relay，无法作为正常恢复路径。
 - formatter、Flake check 与 Zed package selection seam check；
 - 构建 aarch64-darwin Preview package 与 macbook system，读取 App 签名、bundle identity
   和版本，不 activation；
-- 记录 x86_64-linux Stable 版本、outPath 及 USTC/官方 cache 命中；
-- 在 nixbox 原生构建 Stable package 与 nixbox toplevel；
+- 记录 x86_64-linux Stable 版本、outPath，并用真实 `nix copy` 验证 USTC 或官方 cache
+  的完整闭包；
+- 必要时从 macbook relay 同一签名闭包，在 nixbox 检查 path 有效后原生构建 toplevel；
 - 验证 server 最终 package/closure 不选择 Zed；
 - 审阅 `flake.lock` 在本决策 PR 中保持不变。
 
