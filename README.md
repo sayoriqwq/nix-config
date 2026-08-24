@@ -41,13 +41,13 @@ nix build .#nixosConfigurations.server.config.system.build.toplevel
 
 🧪 检查格式、Flake contracts，并构建受影响主机；这些命令都不会 activation。
 
-Server recovery 的隔离测试必须在有 KVM 和足够空间的 `x86_64-linux` 节点运行：
+只有修改 server 的磁盘、启动、网络或 SSH 声明时，才需要在 `x86_64-linux` 节点额外构建按需恢复配置：
 
 ```fish
-nix run .#server-recovery-test
+nix build .#nixosConfigurations.server-recovery-install.config.system.build.toplevel
 ```
 
-🛟 构建 production closure 并在隔离 VM 中验证 BIOS/disko、双栈网络、SSH 与 firewall，不接受或联系 production target。
+🛟 只构建隔离 installation configuration，不连接或修改 production target；完整 VM 演练由对应 Issue 的行动卡单独批准。
 
 ## 文档入口
 

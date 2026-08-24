@@ -42,13 +42,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-anywhere = {
-      url = "github:nix-community/nixos-anywhere/5887f1c72fbf0e88000716237194de414d2299ee";
-      inputs.disko.follows = "disko";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixos-stable.follows = "nixpkgs";
-    };
-
     # Issues #120 and #152: consume ax's published package output for the
     # explicitly approved workstation capabilities.
     # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
@@ -72,7 +65,6 @@
       nixpkgs,
       nixpkgs-darwin,
       disko,
-      nixos-anywhere,
       ...
     }:
     let
@@ -104,28 +96,13 @@
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
       ];
-      serverRecoveryPkgs = import nixpkgs {
-        system = "x86_64-linux";
-        config.allowUnfree = true;
-      };
-      serverRecoveryNetworkTest = serverRecoveryOperation.networkTest;
-      serverRecoveryPolicyCheck = import ./checks/server-recovery/policy.nix {
-        installConfiguration = serverRecoveryOperation.installConfiguration;
-        pkgs = serverRecoveryPkgs;
-        productionConfiguration = self.nixosConfigurations.server;
-        runner = serverRecoveryOperation.runner;
-        inherit username;
-      };
-      nixosAnywherePackage = nixos-anywhere.packages.x86_64-linux.nixos-anywhere;
       serverRecoveryOperation = import ./operations/server-recovery {
         inherit
           inputs
-          nixosAnywherePackage
           self
           serverModules
           username
           ;
-        pkgs = serverRecoveryPkgs;
       };
       darwinPkgs = packagesFor "aarch64-darwin";
       intentLib = import ./intents/lib.nix;
@@ -208,22 +185,13 @@
         };
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
-          server-recovery-test = serverRecoveryOperation.runner;
           zed-stable = (packagesFor "x86_64-linux").zed-editor;
         };
       };
 
-      apps = {
-        aarch64-darwin.sync-zed-preview = {
-          type = "app";
-          program = "${zedPreviewUpdater}/bin/sync-zed-preview";
-        };
-        x86_64-linux = {
-          server-recovery-test = {
-            type = "app";
-            program = "${serverRecoveryOperation.runner}/bin/server-recovery-test";
-          };
-        };
+      apps.aarch64-darwin.sync-zed-preview = {
+        type = "app";
+        program = "${zedPreviewUpdater}/bin/sync-zed-preview";
       };
 
       checks = {
@@ -238,8 +206,6 @@
         x86_64-linux = {
           nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;
           server-system = self.nixosConfigurations.server.config.system.build.toplevel;
-          server-recovery-network = serverRecoveryNetworkTest;
-          server-recovery-policy = serverRecoveryPolicyCheck;
         };
       };
 

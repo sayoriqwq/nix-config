@@ -1,7 +1,5 @@
 {
   inputs,
-  nixosAnywherePackage,
-  pkgs,
   self,
   serverModules,
   username,
@@ -17,16 +15,4 @@ let
 in
 {
   inherit installConfiguration;
-  networkTest = import ./network-test.nix {
-    inherit
-      inputs
-      pkgs
-      self
-      serverModules
-      username
-      ;
-  };
-  runner = import ./runner.nix {
-    inherit nixosAnywherePackage pkgs;
-  };
 }

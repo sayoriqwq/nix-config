@@ -52,7 +52,7 @@ Software 对另一个已选择行为的窄扩展，例如 Zsh integration、Zed 
 
 ### Operation
 
-`operations/` 下供维护者显式调用的安全操作入口。Operation 必须固定边界、拒绝隐式 target，并把 production mutation 留在单独的人工作业卡。当前 server recovery Operation 只运行隔离验证，不接受 production target。
+`operations/` 下供维护者显式使用的安全操作声明。Operation 必须固定边界，并把 production mutation 留在单独的人工作业卡。当前 server recovery 只保留按需 installation configuration；仓库不提供默认 VM runner，也不把完整恢复演练设为日常 release Gate。
 
 ### Managed configuration
 

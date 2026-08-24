@@ -59,21 +59,15 @@ Host 是选择事实的最终 owner：
 - `nixosConfigurations.nixbox`
 - `nixosConfigurations.server`
 
-显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Zed binary package、Clash Verge Rev package、Zed 手动同步和 server recovery test。Output 不是已经 activation 的声明。
+显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Zed binary package、Clash Verge Rev package 和 Zed 手动同步。按需的 `server-recovery-install` installation configuration 不是已经执行的恢复动作；任何 Output 也不表示已经 activation。
 
 Darwin 使用 rolling nixpkgs/nix-darwin/Home Manager inputs；Linux 使用 26.05 release inputs。两条 cadence 共享同一 lock file，但不强求 package 版本一致。
 
 ## 5. Check 与 Operation
 
-Check 验证窄接口和最终 host output，例如 FZF/Zed contribution、Pinshift host selection、Tailscale SSH fragment、server recovery policy 与网络黑盒。不要为“某路径不存在”长期建立架构测试。
+Check 验证窄接口和最终 host output，例如 FZF/Zed contribution、Pinshift host selection、Tailscale SSH fragment 与三台主机 closure。不要为“某路径不存在”长期建立架构测试。
 
-Operation 只在确实存在需要维护者运行的流程时建立。当前 `server-recovery-test`：
-
-- 只允许 `x86_64-linux` + KVM；
-- 要求 clean checkout 和足够磁盘空间；
-- 构建 production server closure；
-- 在隔离 VM 验证 BIOS/disko install、双栈网络、SSH 与 firewall；
-- 不接受 target，因此不能联系 production。
+Operation 只在确实存在需要维护者运行的流程时建立。Server recovery 当前只保留按需的 `server-recovery-install` installation configuration。完整 VM 演练不是默认 release Gate；只有磁盘、启动、网络或 SSH 声明发生相关变化时，才由对应 Issue 固定范围、执行器、停止条件与回滚后单独运行。
 
 ## 6. 配置与数据边界
 

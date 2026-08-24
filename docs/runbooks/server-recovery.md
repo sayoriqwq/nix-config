@@ -7,26 +7,29 @@
 - 主机组合：`hosts/server/default.nix`
 - 磁盘与启动：`hosts/server/disko.nix`
 - 网络、DNS、防火墙与 SSH：`hosts/server/networking.nix`
-- 隔离恢复演练：`operations/server-recovery/`
+- 按需恢复安装配置：`operations/server-recovery/`
 
 不要从历史迁移记录还原 server 配置。当前 Git tree 和以上文件才是声明源。
 
-## 合并前验证
+## 声明验证
 
-在具备 KVM、至少 100 GiB 可用空间的 `x86_64-linux` 主机上，从干净 checkout 运行：
+日常变更只构建 production server closure：
 
 ```fish
-nix run .#server-recovery-test
+nix build .#nixosConfigurations.server.config.system.build.toplevel
 ```
 
-该 Operation 不接受目标地址或额外参数，只会：
+🧪 验证 production server 声明可构建，不 activation。
 
-1. 检查恢复策略；
-2. 构建生产 server closure，但不 activation；
-3. 在隔离 VM 中执行 BIOS/disko 安装演练；
-4. 验证隔离网络、SSH 和防火墙行为。
+只有磁盘、启动、网络或 SSH 声明发生相关变化时，才额外构建按需 installation configuration：
 
-成功输出必须以 `PASS; no production target was accepted or contacted` 结束。它不能替代真实机器的人工作业与回读。
+```fish
+nix build .#nixosConfigurations.server-recovery-install.config.system.build.toplevel
+```
+
+🛟 验证隔离安装声明可构建，不接受或联系 production target。
+
+完整 BIOS/disko、网络、SSH 或 firewall VM 演练不是默认 release Gate。确有相关变更时，必须由对应 Issue 的行动卡固定执行器版本、精确命令、资源要求、停止条件与回滚；演练仍不能替代真实机器的人工作业与回读。
 
 ## SSH 失效时的升级顺序
 
