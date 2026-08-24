@@ -65,6 +65,24 @@ let
       expr = zedPackagePaths (packagePaths linuxHome);
       expected = [ (toString linuxZed) ];
     };
+    testDarwinEditorCommand = {
+      expr = {
+        inherit (darwinHome.config.home.sessionVariables) EDITOR VISUAL;
+      };
+      expected = {
+        EDITOR = "zed --wait";
+        VISUAL = "zed --wait";
+      };
+    };
+    testLinuxEditorCommand = {
+      expr = {
+        inherit (linuxHome.config.home.sessionVariables) EDITOR VISUAL;
+      };
+      expected = {
+        EDITOR = "zeditor --wait";
+        VISUAL = "zeditor --wait";
+      };
+    };
     testServerDoesNotSelectZed = {
       expr = zedPackagePaths serverPackagePaths;
       expected = [ ];

@@ -13,6 +13,7 @@ let
       pkgs.callPackage ../../package.nix { }
     else
       pkgs.zed-editor;
+  editorCommand = if pkgs.stdenv.hostPlatform.isDarwin then "zed" else "zeditor";
 in
 {
   imports = [
@@ -34,8 +35,8 @@ in
     # Zed is the sole owner of the default editor role. VS Code and Helix remain
     # available as explicit fallback editors.
     home.sessionVariables = {
-      EDITOR = "zed --wait";
-      VISUAL = "zed --wait";
+      EDITOR = "${editorCommand} --wait";
+      VISUAL = "${editorCommand} --wait";
     };
 
     # Live files stay writable. The generated task baseline is used only when
