@@ -19,10 +19,12 @@
 
 | 标签 | 用途 |
 | --- | --- |
-| `type:phase` | 路线图中的 Phase Issue |
-| `type:maintenance` | 不属于迁移阶段的窄范围维护 |
-| `type:decision` | 需要 ADR 或重新评估架构决策 |
-| `type:research` | 只做调查和证据收集，不实施 |
+| `type:maintenance` | 一个窄范围维护、重构或依赖更新 Issue |
+| `wayfinder:map` | 当前 Wayfinder 主线 Goal map |
+| `wayfinder:task` | Goal map 中可独立验收的任务 |
+| `wayfinder:research` | 只做调查和证据收集，不实施 |
+| `wayfinder:prototype` | 需要人工选择的原型决策 |
+| `wayfinder:grilling` | 需要与维护者压力测试的决策 |
 
 ## 3. 范围标签
 
@@ -32,9 +34,8 @@
 | `area:darwin` | nix-darwin 与 macOS 系统层 |
 | `area:home` | Home Manager 与用户配置 |
 | `area:nixos` | NixOS 工作站或通用 NixOS 模块 |
-| `area:server` | Ubuntu→NixOS 前置盘点、直接替换与服务恢复 |
+| `area:server` | 当前 NixOS server 配置、验证与恢复 |
 | `area:secrets` | secret consumer、部署机制与权限边界 |
-| `area:storage` | disko、分区、文件系统和挂载 |
 
 一个 Issue 可以有多个范围标签，但应保持最小集合。
 
@@ -50,7 +51,7 @@
 
 ## 5. 使用规则
 
-- 新 Phase Issue 默认从 `needs-triage` 开始。
+- 新 Issue 默认从 `needs-triage` 开始。
 - 事实与边界补齐后，由维护者改为 `ready-for-agent`。
 - Agent 遇到未知机器事实时改为 `needs-info`，而不是填入猜测值。
 - Agent 完成 build、文档和 PR 后改为 `ready-for-human`。

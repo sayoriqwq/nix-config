@@ -9,7 +9,7 @@
 - 一台由 nix-darwin 与 Home Manager 管理的 macOS 主工作站；
 - 一台作为次级工作站与 Linux 试验站的 NixOS 主机；
 - 一台当前运行最小 NixOS、只按当前需求增加生产能力的服务器；
-- 一组由三台主机按真实需求组合的能力模块。
+- 一组由三台主机显式选择、按真实需求组合的 Software owner 与 Intent。
 
 本仓库管理配置声明，不负责保存可变应用数据或充当备份系统。
 
@@ -22,7 +22,7 @@ Agent 修改文件前必须依次阅读：
 3. `CONTEXT.md`；
 4. `docs/architecture/` 下与任务有关的文档；
 5. `docs/adr/` 下所有适用的 ADR；
-6. `docs/plans/migration-roadmap.md` 中当前阶段。
+6. 与当前动作有关、仍会实际执行的 runbook。
 
 没有实施 Issue 时，不得自行开始实现，只能检查现状、形成计划或创建边界完整的 Issue。
 
@@ -35,12 +35,12 @@ Agent 修改文件前必须依次阅读：
 
 ## 4. 工作模型
 
-- 一个 PR 只实现一个迁移阶段或一个范围很窄的维护 Issue。
-- 使用独立分支；计划阶段优先命名为 `agent/phase-<编号>-<短名称>`。
+- 一个 PR 只实现一个 Issue 或一个可独立审阅的窄 child Issue。
+- 使用独立分支与 worktree；分支优先采用 `codex/<issue>-<短名称>` 前缀。
 - 默认创建 Draft PR。
 - 不得把实施变更直接提交到 `main`。
 - 没有维护者明确批准，不得合并、开启自动合并或把 Draft 标记为 Ready for review。
-- 当前阶段的完成标准和人工验证没有记录前，不得进入下一阶段。
+- 当前 Issue 的完成标准和必要人工验证没有记录前，不得进入依赖它的下一个 Issue。
 - 不得顺手做无关清理、依赖升级、重命名或框架迁移。
 - 必须严格遵守 Issue 中“允许修改”和“禁止修改”的路径与动作。
 - 机器事实未知时，必须收集证据或保留明确占位符，不能猜用户名、架构、主机名、磁盘、启动模式、网卡、`stateVersion`、服务清单或网络设置。
@@ -53,15 +53,15 @@ Agent 修改文件前必须依次阅读：
 - NixOS Modules 管理 NixOS 系统层。
 - 不恢复已退役的 Ubuntu server 层；保持最小 NixOS server 按需求组合，每项生产能力通过独立批准的 Issue 引入。
 - `hosts/<host>/` 保存主机与硬件事实。
-- `modules/darwin/` 保存可复用的 macOS 系统模块。
-- `modules/nixos/` 保存可复用的 NixOS 系统模块。
-- `modules/home/` 保存可复用的用户模块。
-- 主机通过显式 import 按需求组合能力模块；import 就是采用机制，不增加全局 capability registry。
-- 基础配置只作为能力模块内部实现；主机不得用 `common`、`desktop`、Darwin、Linux 或 server bundle 代替需求选择。
-- 只有已证明的平台差异才建立 adapter；跨层 adapter 必须公开软件所有权、托管配置、可变状态路径、服务、网络影响与人工关卡。
+- 每个软件的 package、稳定配置、服务与 owner-local asset 放在 `software/<software>/`。
+- 跨 Software 的可执行组合放在 `intents/<intent>/`；Intent 只能调用公开的 Software Primary Capability 与 Extension。
+- `modules/` 只保存已证明有实际消费者的 System 或 Home Manager primitive。
+- 主机通过显式 Intent result、独立 Software platform module 与主机事实组合；import 就是采用机制，不增加全局 capability registry 或自动发现。
+- 主机不得用 `common`、`desktop`、Darwin、Linux 或 server bundle 代替需求选择。
+- 只有已证明的行为差异才建立平台实现；它必须公开软件所有权、托管配置、可变状态边界、服务、网络影响与人工关卡。
 - 优先使用 Home Manager、NixOS 和 nix-darwin 的成熟选项，最后才考虑 activation script 或生成 shell 脚本。
 - 项目专用开发依赖进入各项目 dev shell，不进入全局用户 profile。
-- Git 同步声明；数据库、浏览器资料、容器卷、运行状态和备份采用独立流程。
+- Git 同步声明；可变数据、数据库、浏览器资料、服务状态和备份采用独立流程。
 
 路径级规则见 `docs/architecture/module-boundaries.md`。
 
@@ -130,7 +130,7 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 每个 PR 必须用中文说明：
 
-- 关联 Issue 与迁移阶段；
+- 关联 Issue；
 - 修改内容和原因；
 - 受影响文件与主机；
 - 明确不在范围内的事项；
@@ -143,7 +143,7 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## 10. 完成定义
 
-只有同时满足以下条件，阶段才算完成：
+只有同时满足以下条件，Issue 才算完成：
 
 - Issue 完成标准已满足；
 - 文档和 ADR 保持最新；
@@ -151,7 +151,7 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 - 维护者记录了要求的真实机器验证；
 - 回滚步骤已知；
 - PR 由人工合并；
-- Phase Issue 以完成摘要关闭。
+- Issue 以完成摘要关闭。
 
 ## 11. 辅助文档
 
@@ -159,4 +159,4 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 - 标签词汇：`docs/agents/triage-labels.md`
 - 领域文档规则：`docs/agents/domain.md`
 - 架构：`docs/architecture/overview.md`
-- 路线图：`docs/plans/migration-roadmap.md`
+- 当前操作手册：`docs/runbooks/`

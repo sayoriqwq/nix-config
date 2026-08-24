@@ -5,9 +5,13 @@
 
 ## 决策
 
-当前 server 运行 Ubuntu，但 Ubuntu 只是待替换的机器事实，不是长期架构角色。取消 standalone Home Manager 过渡配置，迁移顺序调整为：迁移前置盘点；最小 NixOS 与 disko 声明；隔离 VM 安装验证；经人工批准直接替换为只保证启动、网络、SSH、sudo 与救援能力的最小 NixOS；系统稳定后建立 sops-nix/age Secret 能力；最后按新需求从空白状态引入业务并建立相应运维能力，不恢复当前 Ubuntu 的业务与数据。
+本 ADR 作出时 server 运行 Ubuntu；Ubuntu 只是待替换的机器事实，不是长期架构角色。
+决策取消 standalone Home Manager 过渡层，经盘点、最小 NixOS/disko 声明和隔离 VM
+验证后，直接替换为只保证启动、网络、SSH、sudo 与救援能力的最小 NixOS。正式替换已于
+2026-08-03 完成。此后只按当前需求引入业务能力，不恢复旧 Ubuntu 管理层、业务或数据。
 
-实施状态：Phase 10 已于 2026-08-03 完成正式替换，Phase 11 已于 2026-08-04 完成 Secret 基础验收；上述“当前 Ubuntu”是本 ADR 作出时的历史前提，不是现状。由于始终没有真实 consumer，Issue #205 后续退役了空的 SOPS readiness，但保留 ADR-0003 的通用机密安全原则。Phase 12 已明确延后。
+仓库曾验证 sops-nix/age readiness；由于没有真实 consumer，Issue #205 已退役该空能力，
+但 ADR-0003 的通用机密安全原则继续有效。
 
 维护者于 2026-08-05 曾确定单管理员 root public-key-only 直连模型，因此关闭 root SSH 的 Issue #99 / PR #109 当时以未计划实施关闭，且从未 activation。该段只记录决策演变，不再表示当前目标。
 
@@ -24,7 +28,7 @@ nixbox 是与 server 同为 `x86_64-linux` 的预生产验证主机，负责构�
 - 当前 Ubuntu 的系统、服务、容器、数据库和数据全部可丢失；不创建 source backup、异机副本或 restore test，也不恢复旧业务；
 - 该 waiver 只替代 source-data recovery gate。target disk、BIOS boot、static network、firewall、SSH、VNC/Rescue、VM test、精确命令与当次人工批准仍是强制关卡；
 - public address、prefix、gateway 与 nameserver 是可版本化的非凭据 host facts；不为这些值建立第二个本地配置仓库；
-- 首次 NixOS 使用 `sayori`、macbook maintenance public key、nixbox 专用 deploy public key、passwordless sudo 与 key-only root SSH；Phase 10 当时把 root 路径视为安装期 break-glass，2026-08-05 曾短暂把它保留为长期模型，2026-08-10 最终恢复为双 key 登录 `sayori`、经 sudo 提权并关闭 root SSH；
+- 首次 NixOS 使用 `sayori`、macbook maintenance public key、nixbox 专用 deploy public key、passwordless sudo 与 key-only root SSH；正式替换时把 root 路径视为安装期 break-glass，2026-08-05 曾短暂把它保留为长期模型，2026-08-10 最终恢复为双 key 登录 `sayori`、经 sudo 提权并关闭 root SSH；
 - 在没有 compromise 证据时以 `--copy-host-keys` 保留既有 SSH host identity；失败恢复目标是重新建立可 SSH 的最小 NixOS。
 
 Private key、passphrase、token、VNC/Rescue credential、host-key private material 和 production secret 即使位于本地仓库也仍不得提交 Git。

@@ -227,6 +227,9 @@ sudo lsof +L1
 
 若当前会话仍在，保持它不要退出；另开 tmux pane 或第二个客户端做观察。依次确认 `sshd.service`、TCP 22 listener、firewall 现状和 auth log。不要为了“试一下”修改 SSH、network、DNS 或 firewall；这些都需要独立 Issue、行动卡和恢复路径。
 
+如果所有 SSH 路径都失效，按 [Server 恢复与访问失效处理](server-recovery.md) 的
+控制台、Rescue 与重装升级顺序继续，不要临时重新开放 root SSH。
+
 ## 5. 长任务与文件工作流
 
 创建一个可在 SSH 重连后恢复的会话：
@@ -263,17 +266,3 @@ server 的声明来自本仓库，主要由 nixbox 构建和验证 closure，再
 - 对真实服务执行 restart、数据修复或 restore，而当前问题尚未确认影响面。
 
 一次有用的交接记录只需要：现象与时间、执行过的只读命令、关键错误摘要、受影响 unit/port/filesystem、是否仍保留可用 SSH/VNC 路径。Public IP、完整 auth log、packet capture、private path、key、token 和业务内容应脱敏或不进入 Issue。
-
-## 7. Issue #99 activation 后的人工验收
-
-本手册随声明先合并，不表示 production 已切换。未来取得当次批准并 activation 后，必须由维护者现场确认：
-
-- macbook maintenance identity 能登录 `server:sayori`；
-- Termius 的 Host Username 为 `sayori` 且绑定 maintenance identity；
-- `sudo -n true` 与按需 `sudo -i` 正常；
-- nixbox deploy identity 能登录同一个 `sayori` 并通过已批准的 `sudo -n` 检查；
-- 两把 key 登录 `root` 都失败，password 与 keyboard-interactive 仍失败；
-- SSH 仍只暴露 TCP 22，VNC 恢复路径可用，failed unit 为零；
-- Helix、Yazi、`lsof`、`dig`、`mtr`、`tcpdump` 与 `strace` 可用，且没有新增 service、listener 或 firewall rule。
-
-任何一项失败都停止后续动作，保留现有会话并按行动卡回滚；不要临时重新开放 root SSH。

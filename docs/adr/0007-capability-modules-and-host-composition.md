@@ -1,32 +1,43 @@
-# ADR-0007：主机按能力模块显式组合
+# ADR-0007：Software / Intent / Host 显式组合
 
-- **状态：** V3 修订后保留核心约束
+- **状态：** 已接受；取代 ADR-0002
 - **日期：** 2026-07-29
-
-> 2026-08-24 修订：Issue #179 批准、Issue #196 首次实现的 V3 模型把“纵向能力模块”拆为 Software Capability 纵轴与 Executable Intent 横轴。本文关于显式 imports、无 registry、无平台 bundle、真实变化才建立 adapter 的约束继续有效；`modules/home/capabilities/` 作为终态 host interface 的路径结论已由 [`module-boundaries.md`](../architecture/module-boundaries.md) 取代。
+- **V3 修订：** 2026-08-24，Issues #179、#196–#199、#206
 
 ## 背景
 
-早期架构把 `common`、`desktop` 与平台模块同时当作复用边界和主机组合接口，实际实施时导致 nixbox 一次 import 意外继承 macOS 的完整桌面应用与兼容路径。主机今后只选择纵向的能力模块；能力模块由细粒度基础配置实现，并共同封装系统与用户层的软件和稳定配置托管、状态路径声明、可变状态边界及平台 adapter。macbook 组合全量工作站能力，nixbox 与 server 按需求选择子集并增加自身能力；不再建立强制全选的 `common`/`desktop` bundle，也不因平台名称预建通用 Linux 用户层。
+早期 `common`、`desktop` 与平台 bundle 同时承担复用和 Host interface，导致 nixbox 容易隐式继承 macbook 的 GUI、兼容层和未确认软件。随后“纵向能力模块”又把单软件 owner 与跨软件需求混在一起，难以表达 Zed task、Zsh integration 等窄 contribution。
 
-只有真实变化形成 seam 时才建立 adapter。基础配置属于能力模块实现，不成为 host 必须理解或逐项组合的 interface；验证以能力模块和最终 host composition 为测试面。Host 通过显式 `import` 选择一项能力，`import` 本身就是采用声明，不再叠加 `capabilities.*.enable` 一类全局注册机制。Host 对一项能力只选择一次；能力合同必须明确公开其软件与配置所有权、状态路径、系统服务或网络影响及人工关卡，不能用封装隐藏安全副作用。
+## 决策
 
-## 目录与依赖方向
+采用三类长期对象：
 
-- `modules/home/capabilities/` 是纯用户能力的 host interface；
-- `modules/home/common/`、`desktop/` 与 `darwin/` 保存可被能力复用的基础配置，不再作为 host bundle；
-- 真实跨层能力放在 `modules/capabilities/<name>/`，由 `home.nix` 与已证明的平台 adapter 组成；
-- 纯用户能力不为形式统一创建空 system adapter；平台名称本身不形成 seam。
+1. `software/<software>/` 是纵向 owner，公开命名 Primary Capability 与 Extension；
+2. `intents/<intent>/` 是横向纯组合，只调用 Software public interface；
+3. `hosts/<host>/` 是最终 caller，显式选择 Intent、独立 Software platform module 与机器事实。
+
+`intents/lib.nix` 只维护 `darwinModules`、`nixosModules`、`homeModules` 三个显式列表。Import graph 是唯一选择事实；不增加 registry、relation、workflow、substrate、platform namespace、自动扫描或强制 bundle。
+
+只有 package、配置、service、network effect 或人工关卡真的不同才建立 platform seam。Configuration primitive 可以留在 `modules/`，但必须有实际消费者，不能成为 Host 的全选 interface。
+
+可变 state 继续由应用/维护者拥有。必要边界在最近的 owner 或 runbook 表达，不维护没有 production consumer 的全局 state-path metadata。
 
 ## 结果
 
-- macbook 从“大而全的继承源”变为全量能力 composition；
-- nixbox 与 server 可以复用同一能力实现，又不会自动继承无关 GUI、凭据或兼容路径；
-- import graph 直接成为能力矩阵的可审计实现；
-- 能力内部需要维护 state path metadata 与跨层合同，但这种局部复杂度换取了 host interface 的稳定和安全可见性。
+- Software ownership 局部、可导航；跨软件关系只有 Intent 一个落点；
+- Host 选择显式，三台机器互不继承；
+- Extension 能表达窄贡献，不需要通用关系框架；
+- 删除空 adapter、旧 wrapper 或 metadata 不改变用户行为；
+- 显式 imports 较多，但审阅者可以直接看到最终 composition。
 
 ## 被否决的方案
 
-- 继续扩大 `common` / `desktop` / `linux` bundle：需求与平台混合，无法阻止隐式全选；
-- `capabilities.*.enable` registry：与显式 import 重复，制造第二个事实来源；
-- 为每个能力创建 Darwin/NixOS pass-through adapter：只有一个行为时是虚构 seam，增加浅层 indirection。
+- 扩大 `common` / `desktop` / `linux` bundle；
+- `capabilities.*.enable` registry 或自动目录发现；
+- 通用 workflow/relation/contribution framework；
+- 为每个 Software 预建空 Darwin/NixOS adapter；
+- 让 Host import owner 私有 primitive 后自行拼装。
+
+## 复审条件
+
+只有当三列表组合无法表达多个已证明的真实需求，或显式 import graph 成为可量化的主要维护瓶颈时，才通过新 ADR 复审；不能因目录较多提前引入框架。
