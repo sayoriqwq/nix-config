@@ -95,12 +95,12 @@ sudo nixos-rebuild test --flake .#nixbox
 
 🧪 临时切换当前运行系统到候选，不移动 system profile 或 boot default。
 
-命令返回后继续使用同一 SSH 或本地 TTY 控制面，确认 `sshd`、Tailscale、NetworkManager、printing、
+命令返回后继续使用同一 SSH 或本地 TTY 控制面，确认 `sshd`、Tailscale、NetworkManager、
 rtkit 与 GDM 没有异常；不要假设原 GNOME session 或 terminal 仍存活。PipeWire/WirePlumber 在登录
 Hyprland 后按第 5.1 节检查。若关键访问能力回退，直接进入第 8 节，不继续桌面 smoke。
 
 ```fish
-systemctl --no-pager --full status sshd tailscaled NetworkManager cups rtkit-daemon display-manager
+systemctl --no-pager --full status sshd tailscaled NetworkManager rtkit-daemon display-manager
 ```
 
 🩺 检查候选切换后的关键系统服务；个别未安装或 socket-activated unit 应结合声明与日志判断。
@@ -208,13 +208,13 @@ busctl --user list | string match '*org.freedesktop.secrets*'
 
 ### 5.4 Portal、屏幕共享、音频与网络
 
-在 Firefox 中打开一个可信的现有 WebRTC/会议页面，发起“共享屏幕”，确认出现 Hyprland portal
+在 Chrome 中打开一个可信的现有 WebRTC/会议页面，发起“共享屏幕”，确认出现 Hyprland portal
 选择器、可看到正确的 monitor/window，并在真正发送前取消。再触发一次文件选择器并取消。预期 desktop
 portal 只有 `xdg-desktop-portal-hyprland` 与 GTK fallback，不应出现 wlr 或 GNOME backend。官方依据见
 [XDPH](https://wiki.hypr.land/0.55.0/Hypr-Ecosystem/xdg-desktop-portal-hyprland/)；不得通过
 命令式环境变量或新增 portal 来掩盖失败。
 
-检查 PipeWire/WirePlumber 拓扑，在 Firefox 播放普通音频并确认输出正常：
+检查 PipeWire/WirePlumber 拓扑，在 Chrome 播放普通音频并确认输出正常：
 
 ```fish
 wpctl status
@@ -342,7 +342,7 @@ NixOS/Home Manager generation 能恢复声明式 system 与 Home Manager 配置�
 - XDG portal permission store 与 GDM 的 session choice/account state：由各自服务拥有；不会随 system
   generation 自动还原。
 - `~/.local/share/keyrings` 与登录解锁状态：敏感可变状态；禁止放入 Git/Nix Store，恢复依赖独立备份。
-- Ghostty、Firefox、Chrome、Zed、Obsidian、LocalSend 等应用的 profile、cache、session 与用户内容：
+- Ghostty、Chrome、Zed、Obsidian、LocalSend 等应用的 profile、cache、session 与用户内容：
   继续由应用/用户拥有，不由本 Issue 迁移、删除或恢复。
 - Home Manager 管理的 Hyprland、Hyprlock、Mako、Fuzzel 与 Waybar 稳定配置会随对应 generation 声明
   切换；应用运行时状态不会因此成为 Store 内容。

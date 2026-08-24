@@ -7,7 +7,10 @@
 
 let
   aiCoding = import ../../intents/ai-coding { inherit lib; };
+  alwaysOnWorkstation = import ../../intents/always-on-workstation { inherit lib; };
+  chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
+  hyprlandWorkstation = import ../../intents/hyprland-workstation { inherit lib; };
   terminalWork = import ../../intents/terminal-work { inherit lib; };
   workstationHomeModules = codeDevelopment.homeModules ++ aiCoding.coreCodingEnvironment.homeModules;
 in
@@ -20,19 +23,23 @@ in
     "https://cache.nixos.org?priority=40"
   ];
 
-  imports = terminalWork.nixosModules ++ [
-    ./hardware-configuration.nix
-    ../../modules/capabilities/chinese-input/nixos.nix
-    ../../modules/capabilities/hyprland-desktop/nixos.nix
-    ../../modules/capabilities/always-on-workstation/nixos.nix
-    ../../modules/capabilities/portable-shell/nixos.nix
-    ../../software/google-chrome/capabilities/web-browser/nixos.nix
-    ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
-    ../../software/termius/capabilities/remote-access-client/nixos.nix
-    ../../software/localsend/capabilities/local-file-sharing/nixos.nix
-    ../../modules/capabilities/stable-workstation-access/nixos.nix
-    ../../modules/capabilities/secret-deployment/nixos.nix
-  ];
+  imports =
+    terminalWork.nixosModules
+    ++ hyprlandWorkstation.nixosModules
+    ++ alwaysOnWorkstation.nixosModules
+    ++ chineseInput.nixosModules
+    ++ [
+      ./hardware-configuration.nix
+      ../../software/avahi/capabilities/mdns/nixos.nix
+      ../../software/bluez/capabilities/bluetooth/nixos.nix
+      ../../modules/capabilities/portable-shell/nixos.nix
+      ../../software/google-chrome/capabilities/web-browser/nixos.nix
+      ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
+      ../../software/termius/capabilities/remote-access-client/nixos.nix
+      ../../software/localsend/capabilities/local-file-sharing/nixos.nix
+      ../../software/tailscale/capabilities/stable-workstation-access/nixos.nix
+      ../../modules/capabilities/secret-deployment/nixos.nix
+    ];
 
   boot.loader = {
     systemd-boot.enable = true;
@@ -72,6 +79,8 @@ in
     users.${username} = {
       imports =
         terminalWork.homeModules
+        ++ hyprlandWorkstation.homeModules
+        ++ alwaysOnWorkstation.homeModules
         ++ workstationHomeModules
         ++ [
           ../../software/fish/capabilities/interactive-shell/home.nix

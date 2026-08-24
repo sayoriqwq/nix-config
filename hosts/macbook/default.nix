@@ -7,6 +7,7 @@
 
 let
   aiCoding = import ../../intents/ai-coding { inherit lib; };
+  chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
   intentLib = import ../../intents/lib.nix;
   pinshift = import ../../software/pinshift { inherit intentLib; };
@@ -23,6 +24,7 @@ in
   imports =
     terminalWork.darwinModules
     ++ codeDevelopment.darwinModules
+    ++ chineseInput.darwinModules
     ++ [
       ../../modules/darwin/defaults.nix
       ../../modules/darwin/fonts.nix
@@ -65,9 +67,8 @@ in
       ../../software/wechat/capabilities/messaging/darwin.nix
       ../../software/windows-app/capabilities/windows-remote-access/darwin.nix
       ../../software/localsend/capabilities/local-file-sharing/darwin.nix
-      ../../modules/capabilities/stable-workstation-access/darwin.nix
+      ../../software/tailscale/capabilities/stable-workstation-access/darwin.nix
       ../../modules/capabilities/secret-deployment/darwin.nix
-      ../../modules/capabilities/chinese-input/darwin.nix
     ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";

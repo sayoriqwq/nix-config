@@ -200,7 +200,6 @@ systemctl --user show-environment | string match -r '^(GTK_IM_MODULE|QT_IM_MODUL
 | 路径 | 启动/确认方式 | 必测结果 |
 | --- | --- | --- |
 | Ghostty / native Wayland | `Super+Q`；用 `hyprctl clients` 确认 `xwayland: 0` | GTK text input、候选窗、上屏、标点、左右 Shift |
-| Firefox / native Wayland | 从 Fuzzel 启动；用 `hyprctl clients` 确认 `xwayland: 0` | 网页普通文本框和地址栏均可输入，候选位置正确 |
 | Chrome / native Wayland | 从 Fuzzel 启动；用 `hyprctl clients` 确认 `xwayland: 0` | 网页普通文本框和地址栏均可输入，候选位置正确 |
 | Qt | 运行候选 closure 已提供的 `fcitx5-config-qt`，只在搜索框输入后取消 | Qt frontend 可输入，不保存任何设置 |
 | XWayland | 以 `GDK_BACKEND=x11` 启动一个新的 Ghostty 窗口，并用 `hyprctl clients` 确认 `xwayland: 1` | XIM 路径的候选、上屏、标点与 Shift 均正常 |
@@ -224,7 +223,7 @@ hyprctl clients
 3. 对右 Shift 重复同样步骤。
 4. 每次 Shift 前后执行 `fcitx5-remote -n`，都应仍为 `rime`；如果变成 `keyboard-us` 或 Fcitx
    inactive，记为 FAIL。
-5. 在中文 mode 与 ASCII mode 下分别切换 Ghostty、Firefox、Chrome、Qt 和 XWayland 窗口，确认
+5. 在中文 mode 与 ASCII mode 下分别切换 Ghostty、Chrome、Qt 和 XWayland 窗口，确认
    目标应用保持候选设计的共享输入状态，且不会因应用默认规则切走 Rime。
 
 Shift 只切换 Rime 内部中文/ASCII，不能触发 Fcitx framework toggle，也不能产生第二个 input-method
@@ -281,7 +280,7 @@ systemctl --user --no-pager --full status xdg-desktop-portal.service xdg-desktop
 
 🌐 确认 SSH/Tailscale、NetworkManager、portal 与音频没有因输入框架替换回退。
 
-再人工验证 LocalSend 可启动，Ghostty/Firefox/Chrome/Qt 应用切换稳定，Hyprland 绑定与锁屏正常。
+再人工验证 LocalSend 可启动，Ghostty/Chrome/Qt 应用切换稳定，Hyprland 绑定与锁屏正常。
 若失败，从已验证 SSH 或本地 TTY 收集当前 boot 的窄日志；先在本地审阅并脱敏：
 
 ```fish
@@ -373,7 +372,7 @@ sudo nixos-rebuild switch --rollback
   路径固化、退休或迁移另开 Issue。
 - `$XDG_RUNTIME_DIR` 下的 Fcitx socket、D-Bus owner、Wayland/XWayland connection 与 UWSM user
   session：易失运行态，由正常 logout/relogin 重建，不备份。
-- Ghostty、Firefox、Chrome、Qt 应用、LocalSend、portal permission store 与 keyring 的 profile、
+- Ghostty、Chrome、Qt 应用、LocalSend、portal permission store 与 keyring 的 profile、
   cache、session、credential 和用户内容：继续由各应用/用户拥有，generation rollback 不恢复。
 
 如果 smoke 写入了 userdb 或其他状态，只记录发生过写入及对应 metadata，不把数据提交到 Issue/PR。
@@ -391,7 +390,6 @@ SSH + TTY + boot recovery verified: PASS / FAIL
 UWSM XDG autostart; exactly one fcitx5: PASS / FAIL
 active/default engine remains rime; no IBus daemon: PASS / FAIL
 Ghostty Wayland: PASS / FAIL
-Firefox Wayland: PASS / FAIL
 Chrome Wayland: PASS / FAIL
 Qt frontend: PASS / FAIL
 XWayland/XIM: PASS / FAIL

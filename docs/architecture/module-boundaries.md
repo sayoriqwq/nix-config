@@ -90,7 +90,7 @@ Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports
 
 Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 只声明 sops-nix 和当前 host 的 SSH identity。具体 secret 的 source、运行时 owner/group/mode、服务依赖与 activation 人工关卡属于消费者的独立 Issue，不能用通用 demo 占位。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
 
-工作站稳定访问的跨层 seam 位于 `modules/capabilities/stable-workstation-access/`：Darwin
+工作站稳定访问的跨层 seam 位于 `software/tailscale/capabilities/stable-workstation-access/`：Darwin
 adapter 只拥有官方 Standalone cask，NixOS adapter 只拥有 tailscaled service、稳定 overlay
 machine name 与 NixOS firewall 的 UDP 41641 声明增量；运行中的 tailscaled 另按 vendor 默认
 维护 overlay iptables chains。登录、MagicDNS、Grants、SSH alias 和 vendor state 内容不进入
@@ -107,12 +107,18 @@ firewall、Tailscale、SSH、DNS、route、network interface 或 system proxy，
 不得恢复 GUI 的 DEB/RPM installer sidecar、写入 mutable `/usr/bin` 或
 `/etc/systemd/system`，也不得用 activation script 绕过 NixOS module。
 
-工作站中文输入的跨层 seam 位于 `modules/capabilities/chinese-input/`：内部
-`rime-data-package.nix` 只发布经过可变名称过滤并合入 overlay 的 `$out/share/rime-data`；
-`home.nix` 只投影静态 leaves 并声明 Fcitx/Rime 可写状态。Darwin adapter 只附加该用户实现与
-macOS installer/cache 状态边界，不安装 frontend；NixOS adapter 单一拥有 Fcitx framework、
-Rime addon、system defaults、session environment 与 package XDG autostart。Host 只能 import
-对应 adapter，不直接 import data-package 或 home primitive；server 不组合该 seam。
+工作站中文输入由 `intents/chinese-input/` 显式组合两个 Software owner：
+`software/fcitx5/capabilities/input-method/` 拥有 frontend、framework、session environment 与
+XDG autostart；`software/rime-ice/capabilities/chinese-input-schema/` 拥有 addon、默认组、
+静态 data package/overlay 与 Rime 可写状态边界。Darwin 继续把 Fcitx5.app frontend 留给
+外部 installer；NixOS 继续由锁定的 `i18n.inputMethod` 拥有唯一 daemon。Host 只消费
+Intent realized lists，不直接 import owner 内部 primitive；server 不组合该 Intent。
+
+nixbox 桌面不再存在 `graphical-workstation` bundle。`intents/hyprland-workstation/` 显式组合
+Hyprland 会话及 GDM、Xorg、Qt Wayland、NetworkManager、PipeWire、rtkit 和各用户桌面组件；
+`intents/always-on-workstation/` 只组合 Hypridle 与 GDM 自动挂起禁用。Avahi 与 BlueZ 是 Host
+直接选择的独立 Software Capability。各 owner 直接公开其 package/config/state/service/network effect
+与人工关卡；Firefox 与 printing 已退出 nixbox 声明。
 
 旧的 `modules/home/common/default.nix`、`desktop/default.nix` 与 `darwin/default.nix` 聚合入口已在 Phase 5.5 删除。Issue #196 又删除 `terminal-toolkit` 与其 terminal primitives；Issue #199 删除 `macos-legacy-applications` 与 `macos-user-applications`，让每个受管 App presence 由对应 `software/<software>/` owner 公开。其余 V2 owner 只能由后续唯一 owner Issue 迁移，不能作为新 V3 bundle 复活。
 
