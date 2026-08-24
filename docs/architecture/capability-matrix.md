@@ -33,7 +33,7 @@
 | Zed | 是 | 是 | 否 | 两台工作站的主编辑器，并提供 Nix 扩展所需的 `nil` 与 `nixd` language server；macOS Darwin adapter 让未来启动的 GUI 进程发现 Home Manager profile，live settings 保持可写。 |
 | LocalSend | 是 | 是 | 否 | Home Manager 拥有 package；平台 adapter 公开状态路径和 NixOS TCP/UDP 53317 合同。 |
 | Hyprland 工作站 | 否 | 是 | 否 | Intent 显式组合 Hyprland/GDM/Xorg/Qt Wayland、NetworkManager、PipeWire/rtkit 与桌面用户组件；Avahi 和 BlueZ 由 nixbox 直接选择。旧 graphical bundle、Firefox 与 printing 声明已退出；activation、登录、网络、音频、蓝牙和输入验收仍是人工关卡。 |
-| 工作站稳定访问 | 是 | 是 | 否 | Tailscale + MagicDNS 只承担 macbook→nixbox transport；native OpenSSH key-only/host key 继续认证，tmux 恢复断线现场。macbook 只用 Standalone cask；nixbox 使用锁定 NixOS service、machine name `nixbox`，NixOS firewall 只新增 UDP 41641，tailscaled 另按 vendor 默认维护 overlay iptables chains；server 排除。登录态、MagicDNS、Grants、key expiry 和 SSH alias 均在外部人工关卡。 |
+| 工作站稳定访问 | 是 | 是 | 否 | Tailscale 只承担 macbook→nixbox transport；native OpenSSH key-only/host key 继续认证，tmux 恢复断线现场。macbook 使用 Standalone cask，并生成只含 `tailscale nc %h %p` 的 SSH fragment，使 OpenSSH 不受 Clash fake-IP DNS 影响；nixbox 使用锁定 NixOS service、machine name `nixbox`，NixOS firewall 只新增 UDP 41641，tailscaled 另按 vendor 默认维护 overlay iptables chains；server 排除。主 SSH 配置、endpoint、identity、known_hosts、登录态、MagicDNS、Grants 与 key expiry 均在外部人工关卡。 |
 | Obsidian | 是 | 是 | 否 | 工作站 GUI 能力；vault 内容不由 Nix 管理。 |
 | Chrome、Termius | 是 | 是 | 否 | 工作站应用；平台安装方式由各能力 adapter 决定。 |
 | Clash Verge Rev | 是 | 是 | 否 | macbook 保持 Homebrew cask；nixbox 由 NixOS adapter 独占 Linux package 所有权，并通过窄、精确锁定的 package source seam 提供 2.5.2。nixbox 声明 root systemd Service Mode、专用 `clash-verge` socket group（仅加入 `sayori`），保持 `tunMode = false`、`autoStart = false`，不创建 GUI capability wrapper；应用内 TUN 只在绑定 exact commit 的人工关卡中通过声明式 service 验证。该能力不声明 firewall、Tailscale、SSH、DNS、route 或 system proxy；server 排除。 |
@@ -55,7 +55,7 @@
 - 桌面环境实验放在 NixOS 基线与核心迁移之后，不作为 nix-config 当前第一性目标。
 - server 不保存 GitHub 协作凭据，不使用工作站可变运行时管理 production workload；运行时来自 Nix closure、容器或服务声明。
 - server 只持有自己的既有 SSH host identity，并只能解密明确授予 server recipient 的文件；管理员恢复 identity 和其他主机 identity 都不进入 server。
-- 工作站稳定访问不启用 FRP、Tailscale SSH、routes/exit node、Serve/Funnel、公开 22、DDNS 或 mDNS 主路径；不预先修改 Clash Verge，必须分别完成 Clash off/on 真人验证。
+- 工作站稳定访问不启用 FRP、Tailscale SSH、routes/exit node、Serve/Funnel、公开 22、DDNS 或 mDNS 主路径；OpenSSH 只通过 Tailscale owner 的 `nc` transport 绕过系统 DNS，不修改 Clash Verge，仍须分别完成 Clash off/on 真人验证。Termius/Zed 等不读取 OpenSSH config 的客户端不在该修复合同内。
 - Clash Verge Rev 2.5.2 与 Service Mode 当前只是 Issue #157 的待激活声明；构建不表示真实 daemon、GUI TUN、DNS/route/system proxy 或与 Tailscale/SSH/tmux 的共存矩阵已经验证。真实动作必须绑定 Draft PR 的 exact commit 并另获批准。
 
 ## 当前状态

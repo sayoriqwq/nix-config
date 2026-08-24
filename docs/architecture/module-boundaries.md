@@ -91,10 +91,13 @@ Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports
 Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 只声明 sops-nix 和当前 host 的 SSH identity。具体 secret 的 source、运行时 owner/group/mode、服务依赖与 activation 人工关卡属于消费者的独立 Issue，不能用通用 demo 占位。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
 
 工作站稳定访问的跨层 seam 位于 `software/tailscale/capabilities/stable-workstation-access/`：Darwin
-adapter 只拥有官方 Standalone cask，NixOS adapter 只拥有 tailscaled service、稳定 overlay
-machine name 与 NixOS firewall 的 UDP 41641 声明增量；运行中的 tailscaled 另按 vendor 默认
-维护 overlay iptables chains。登录、MagicDNS、Grants、SSH alias 和 vendor state 内容不进入
-能力声明，server 不组合该 seam。
+adapter 只拥有官方 Standalone cask，Darwin Home Manager attachment 只生成非 secret 的
+`Host nixbox` ProxyCommand fragment，通过官方 Standalone CLI 的 `tailscale nc %h %p` 提供
+OpenSSH transport；它不拥有主 SSH config、HostName、User、identity 或 host-key policy。
+NixOS adapter 只拥有 tailscaled service、稳定 overlay machine name 与 NixOS firewall 的 UDP
+41641 声明增量；运行中的 tailscaled 另按 vendor 默认维护 overlay iptables chains。登录、
+MagicDNS、Grants、endpoint、known_hosts 和 vendor state 内容不进入能力声明，server 不组合
+该 seam。Clash owner 不获得 Tailscale/SSH/DNS 配置。
 
 Clash Verge Rev 的跨层 seam 位于 `software/clash-verge-rev/capabilities/proxy-client/`。Darwin adapter
 继续只拥有既有 Homebrew cask；NixOS adapter 是 Linux package 与 systemd Service Mode 的
