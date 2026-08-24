@@ -329,17 +329,17 @@
     "raycast-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1785710091,
-        "narHash": "sha256-7omG/kTS0jGvDpwbVOUE6uYwGKfZOhCtaeAue1Uh2yg=",
+        "lastModified": 1787568989,
+        "narHash": "sha256-FenbqLsAwpwoTr6IsU/m8e3YE0U+BDYi1RgYe7CeMRY=",
         "owner": "sayoriqwq",
         "repo": "raycast",
-        "rev": "48f7a10551f7ae2cada8f7bbe4243ce36ed656ee",
+        "rev": "7b8ac1fee61703b26cc881903e23bc2d73d4ca3a",
         "type": "github"
       },
       "original": {
         "owner": "sayoriqwq",
         "repo": "raycast",
-        "rev": "48f7a10551f7ae2cada8f7bbe4243ce36ed656ee",
+        "rev": "7b8ac1fee61703b26cc881903e23bc2d73d4ca3a",
         "type": "github"
       }
     },

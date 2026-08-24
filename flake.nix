@@ -26,7 +26,7 @@
     # Issue #90: consume only the reviewed source contract. Raycast's own
     # extension tooling remains in the leaf repository, so this is not a Flake.
     raycast-source = {
-      url = "github:sayoriqwq/raycast/48f7a10551f7ae2cada8f7bbe4243ce36ed656ee";
+      url = "github:sayoriqwq/raycast/7b8ac1fee61703b26cc881903e23bc2d73d4ca3a";
       flake = false;
     };
 
