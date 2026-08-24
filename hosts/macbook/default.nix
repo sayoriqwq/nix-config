@@ -13,7 +13,12 @@ let
   githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
   intentLib = import ../../intents/lib.nix;
   mise = import ../../software/mise { inherit intentLib; };
-  macosRuntimeDefaults = intentLib.realize (mise.macosRuntimeDefaults intentLib.empty);
+  macosRuntimeDefaults = intentLib.realize (
+    lib.pipe intentLib.empty [
+      mise.runtimeManager
+      mise.macosRuntimeDefaults
+    ]
+  );
   pinshift = import ../../software/pinshift { inherit intentLib; };
   pinshiftDevelopment = intentLib.realize (pinshift.developmentCli intentLib.empty);
   terminalWork = import ../../intents/terminal-work { inherit lib; };
