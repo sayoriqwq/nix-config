@@ -10,6 +10,7 @@ in
 intentLib.realize (
   lib.pipe intentLib.empty [
     software.hypridle.idleCoordinator
+    software.gdm.displayManager
     software.gdm.disableAutomaticSuspend
   ]
 )

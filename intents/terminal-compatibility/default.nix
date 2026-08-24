@@ -20,14 +20,23 @@ intentLib.realize (
   lib.pipe intentLib.empty [
     software.zsh.compatibilityShell
     software.wezterm.terminalEmulator
+    software.atuin.shellHistory
     software.atuin.zshIntegration
+    software.direnv.developmentEnvironment
     software.direnv.zshIntegration
+    software.eza.directoryListing
     software.eza.zshIntegration
+    software.fzf.fuzzySelector
     software.fzf.zshIntegration
+    software.lazygit.gitTui
     software.lazygit.zshIntegration
+    software.mise.runtimeManager
     software.mise.zshIntegration
+    software.payRespects.commandCorrection
     software.payRespects.zshIntegration
+    software.starship.shellPrompt
     software.starship.zshIntegration
+    software.zoxide.directoryJumper
     software.zoxide.zshIntegration
   ]
 )
