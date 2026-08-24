@@ -23,7 +23,6 @@ in
     ./disko.nix
     ./networking.nix
     ../../modules/nixos/administrator-user.nix
-    ../../modules/capabilities/secret-deployment/nixos.nix
     ../../software/bind/capabilities/dns-diagnostics/nixos.nix
     ../../software/fish/capabilities/interactive-shell/nixos.nix
     ../../software/lsof/capabilities/open-file-diagnostics/nixos.nix

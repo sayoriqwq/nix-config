@@ -34,7 +34,6 @@
 │   ├── terminal-work/             # 获批的窄 contribution seam
 │   └── server-recovery/           # Operation 公开 policy seam
 ├── dotfiles/
-├── secrets/
 └── docs/
 ```
 
@@ -86,9 +85,8 @@ Host 在 system `imports` 中消费对应平台 list，在 Home Manager `imports
 | `checks/terminal-work/` | 获批的 `fzf.configure` public contribution 行为 | `IntentState` shape、pipeline order、目录/import 数量 |
 | `checks/code-development/` | 获批的 `zed.addTask` public contribution 行为，以及 Pinshift 的 host selection、参数转发与缺失 checkout 失败语义 | `IntentState` shape、pipeline order、Intent 内部列表、真实 checkout/build/sign/Controller/device action |
 | `dotfiles/` | 稳定、静态、由程序读取的配置源 | 缓存、数据库、session、下载内容、私钥 |
-| `secrets/` | SOPS 加密文件 | 明文 secret、age 私钥 |
 
-Phase 11 的机密部署 seam 位于 `modules/capabilities/secret-deployment/`：Darwin 与 NixOS adapter 只声明 sops-nix 和当前 host 的 SSH identity。具体 secret 的 source、运行时 owner/group/mode、服务依赖与 activation 人工关卡属于消费者的独立 Issue，不能用通用 demo 占位。编辑工具属于独立的纯用户机密管理能力，只由持有管理员 identity 的 macbook 组合。
+当前仓库没有 secret consumer，也不保留空的部署 adapter、编辑工具、recipient 规则或加密文件目录。未来 consumer 必须通过独立 Issue 证明需求，并明确 source、目标 host、运行时 owner/group/mode、服务依赖、轮换、恢复与 activation 人工关卡；不得为了 readiness 预建空 adapter 或框架。
 
 工作站稳定访问的跨层 seam 位于 `software/tailscale/capabilities/stable-workstation-access/`：Darwin
 adapter 只拥有官方 Standalone cask，Darwin Home Manager attachment 只生成非 secret 的

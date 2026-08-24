@@ -69,7 +69,6 @@ in
       ../../software/windows-app/capabilities/windows-remote-access/darwin.nix
       ../../software/localsend/capabilities/local-file-sharing/darwin.nix
       ../../software/tailscale/capabilities/stable-workstation-access/darwin.nix
-      ../../modules/capabilities/secret-deployment/darwin.nix
     ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -137,7 +136,6 @@ in
           ../../software/rclone/capabilities/cloud-storage/home.nix
           ../../software/tailscale/capabilities/stable-workstation-access/darwin-home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
-          ../../modules/home/capabilities/secret-administration.nix
         ];
 
       home = {

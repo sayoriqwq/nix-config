@@ -139,11 +139,11 @@ Issue 必须列出精确 target、disk、命令、窗口和回滚步骤并获得
 
 先用非 production secret 验证 recipient、解密、owner/mode、轮换与恢复，再接入真实服务。明文不得进入 Git、Issue、PR、log 或 Nix Store。
 
-当前实现采用管理员恢复 recipient 加每机独立 SSH-host-derived recipient；只有 macbook 提供编辑工具，nixbox 与 server 只有本机解密能力。管理员 identity 的仓库外恢复副本由维护者自行管理且不由 Agent 验证。macbook、nixbox 与 server 的首次 activation、public fingerprint、运行时 owner/group/mode、非生产内容、system health 与临时入口清理均已由维护者逐机验收；PR #102 已合并，Issue #10 已关闭。验收用 demo 在后续 reconcile 中退场，基础 adapter 不声明任何实际 secret。
+Phase 11 的非生产验证、三机 activation 与 demo reconcile 已完成，PR #102 已合并、Issue #10 已关闭。由于此后始终没有真实 consumer，Issue #205 退役了 `.sops.yaml`、sops-nix input、空 adapter、管理工具与 SOPS-only 文档；这不读取或修改仓库外 identity、credential 或运行时残留。历史验证不再构成当前能力合同，未来 consumer 必须重新立项并从具体需求选择实现。
 
 ### Phase 12 — 业务按需重建、加固与 v1 收尾（#14）
 
-不恢复旧 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 与 sops-nix 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update 与 rollback contract。维护者于 2026-08-04 明确延后 Phase 12；延后期间不把业务占位、生产 secret 或额外框架提前塞入基线。
+不恢复旧 Ubuntu 的 Compose、容器、数据库、volume 或用户数据。最小 NixOS 稳定后，只按维护者届时的新需求从空白状态逐项引入业务；每个新 stateful service 在进入 production 前独立确定 backup、restore、monitoring、update、credential 与 rollback contract。维护者于 2026-08-04 明确延后 Phase 12；延后期间不把业务占位、production secret 或额外框架提前塞入基线。
 
 2026-08-05 曾决定保留 macbook→server 的 root public-key-only 交互路径；维护者于 2026-08-10 复审并以 Issue #99 取代该决定：macbook maintenance identity 与 nixbox deploy identity 都登录远端 `sayori`，日常经 sudo 提权，root SSH 关闭。该维护 Issue 不启动 Phase 12，也不授权 production activation。
 

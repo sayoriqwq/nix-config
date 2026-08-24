@@ -9,7 +9,7 @@
 
 ## 当前状态
 
-Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS，SOPS/age 基础已在三台机器完成实机验收。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。Issue #99 正在把 server 的长期交互管理恢复为 `sayori + sudo`：macbook 与 nixbox 使用不同现有密钥登录同一个远端 `sayori` 用户，root SSH 关闭；仓库变更不等于 production 已 activation。
+Phase 0–11 已完成：三台机器均由同一 Flake 管理，server 已从 Ubuntu 替换为最小 NixOS；Phase 11 的 SOPS/age 非生产路径曾完成三机实机验收，但无 consumer 的 readiness 已由 Issue #205 退役。Phase 12 按维护者决定明确延后；当前只处理独立维护 Issue 与按需能力。Issue #99 正在把 server 的长期交互管理恢复为 `sayori + sudo`：macbook 与 nixbox 使用不同现有密钥登录同一个远端 `sayori` 用户，root SSH 关闭；仓库变更不等于 production 已 activation。
 
 ## 目标模型
 
@@ -48,7 +48,7 @@ Git 只同步声明式配置。数据库、浏览器资料、服务数据、备�
 4. **每个阶段一个 Issue、一个 Draft PR。** 当前阶段完成并经过人工验收后才进入下一阶段。
 5. **危险操作必须人工批准。** 磁盘、启动、网络、防火墙、远程重装、重启和数据迁移不能由 Agent 自主执行。
 6. **优先使用成熟模块。** 先查 Home Manager、NixOS 和 nix-darwin 现有选项，再考虑脚本或自定义模块。
-7. **不把秘密放进 Nix Store 或 Git。** 后续统一使用 sops-nix 与 age 管理需要部署的机密。
+7. **不把秘密放进 Nix Store 或 Git。** 当前没有 secret consumer 或预置框架；未来需求必须独立立项并明确运行时权限、轮换与恢复合同。
 
 ## 文档导航
 
@@ -109,7 +109,6 @@ modules/
   darwin/
   nixos/
 dotfiles/
-secrets/
 docs/
 ```
 
