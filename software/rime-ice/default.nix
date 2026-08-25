@@ -2,7 +2,7 @@
 
 {
   chineseInputSchema = intentLib.addModules {
-    darwinModules = [ ./capabilities/chinese-input-schema/darwin.nix ];
+    homeModules = [ ./capabilities/chinese-input-schema/home.nix ];
     nixosModules = [ ./capabilities/chinese-input-schema/nixos.nix ];
   };
 }

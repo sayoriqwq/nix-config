@@ -1,9 +1,7 @@
 { lib, ... }:
 
 {
-  imports = [
-    ../../../../modules/home/darwin/hushlogin.nix
-  ];
+  home.file.".hushlogin".text = "";
 
   programs.zsh = {
     enable = true;

@@ -38,13 +38,11 @@ in
       ../../software/avahi/capabilities/mdns/nixos.nix
       ../../software/bluez/capabilities/bluetooth/nixos.nix
       ../../software/curl/capabilities/network-transfer/nixos.nix
-      ../../software/google-chrome/capabilities/web-browser/nixos.nix
       ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
       ../../software/nix/capabilities/flake-interface/nixos.nix
       ../../software/nixpkgs/capabilities/unfree-package-policy/nixos.nix
       ../../software/openssh/capabilities/key-only-remote-access/nixos.nix
       ../../software/pciutils/capabilities/hardware-inspection/nixos.nix
-      ../../software/termius/capabilities/remote-access-client/nixos.nix
       ../../software/localsend/capabilities/local-file-sharing/nixos.nix
       ../../software/tailscale/capabilities/stable-workstation-access/nixos.nix
       ../../software/usbutils/capabilities/hardware-inspection/nixos.nix
@@ -109,6 +107,8 @@ in
         ++ graphicalTerminal.homeModules
         ++ [
           ../../software/obsidian/capabilities/knowledge-base/home.nix
+          ../../software/google-chrome/capabilities/web-browser/linux-home.nix
+          ../../software/termius/capabilities/remote-access-client/linux-home.nix
           ../../modules/home/capabilities/shortcut-reference.nix
         ];
 
