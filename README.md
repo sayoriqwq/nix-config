@@ -59,6 +59,7 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 - [主机盘点](docs/runbooks/host-inventory.md)
 - [macOS 恢复](docs/runbooks/restore-macos-environment.md)
 - [nixbox 稳定访问](docs/runbooks/stable-workstation-access.md)
+- [nixbox 桌面恢复](docs/runbooks/nixbox-desktop-recovery.md)
 - [Server recovery](docs/runbooks/server-recovery.md)
 - [Server 终端排障](docs/runbooks/server-terminal-troubleshooting.md)
 - [Zed Preview / Stable 手动更新](docs/runbooks/update-zed-preview.md)
