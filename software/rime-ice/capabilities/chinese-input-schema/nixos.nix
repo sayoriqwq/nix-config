@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  username,
   ...
 }:
 
@@ -36,6 +35,4 @@ in
       addons.rime.globalSection.InputState = "All";
     };
   };
-
-  home-manager.users.${username}.imports = [ ./home.nix ];
 }
