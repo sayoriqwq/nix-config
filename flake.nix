@@ -140,6 +140,12 @@
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
+      shortcutReferenceCheck = import ./checks/shortcut-reference {
+        homeManager = home-manager-darwin;
+        inherit intentLib;
+        inherit (darwinPkgs) lib;
+        pkgs = darwinPkgs;
+      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -199,6 +205,7 @@
           fzf-configure = fzfConfigureCheck;
           macbook-pinshift-development = macbookPinshiftDevelopmentCheck;
           macbook-system = self.darwinConfigurations.macbook.system;
+          shortcut-reference = shortcutReferenceCheck;
           tailscale-ssh-proxy = tailscaleSshProxyCheck;
           zed-add-task = zedAddTaskCheck;
           zed-package-selection = zedPackageSelectionCheck;
