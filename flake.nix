@@ -112,6 +112,10 @@
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
+      zoxideZshBehaviorCheck = import ./checks/terminal-work/zoxide-zsh-behavior.nix {
+        homeManager = home-manager-darwin;
+        pkgs = darwinPkgs;
+      };
       zedAddTaskCheck = import ./checks/code-development/zed-add-task.nix {
         homeManager = home-manager-darwin;
         inherit intentLib;
@@ -202,6 +206,7 @@
           tailscale-ssh-proxy = tailscaleSshProxyCheck;
           zed-add-task = zedAddTaskCheck;
           zed-package-selection = zedPackageSelectionCheck;
+          zoxide-zsh-behavior = zoxideZshBehaviorCheck;
         };
         x86_64-linux = {
           nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;

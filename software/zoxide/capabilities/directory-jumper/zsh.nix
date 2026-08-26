@@ -41,7 +41,7 @@
         query_argv=("$2")
       fi
 
-      matches=("''${(@f)$(command zoxide query --exclude "$PWD" --list -- "''${query_argv[@]}" 2>/dev/null)}")
+      matches=(''${(f)"$(command zoxide query --exclude "$PWD" --list -- "''${query_argv[@]}" 2>/dev/null)"})
 
       if (( ''${#matches[@]} == 0 )); then
         __zoxide_z "$@"
