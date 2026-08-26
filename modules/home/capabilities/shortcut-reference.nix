@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -16,26 +15,17 @@ let
   reference = ''
     # 快捷键与快速入口
 
-    > 本表由各能力模块声明的行为元数据生成，并在 Nix 求值时检查漂移。配置事实仍归对应模块所有。
+    > 本表由当前 Host 最终选择的 Software 声明生成。配置事实仍归对应 Software 所有。
 
     | 范围 | 快捷键或入口 | 行为 | 所有者 |
     | --- | --- | --- | --- |
     ${concatMapStringsSep "\n" renderRow (
       sort (left: right: left.order < right.order) config.sayori.shortcuts
     )}
-
-    `Cmd+Backquote` 未被 nix-config 绑定；Ghostty Quick Terminal 不在当前支持范围内。
   '';
 in
 {
-  # The guide is the macOS user-facing reference and includes Darwin-only
-  # shortcuts. Linux hosts still contribute metadata for their own composition,
-  # but must not make the macOS guide fail when a platform-specific capability
-  # is absent.
-  assertions = lib.optional pkgs.stdenv.hostPlatform.isDarwin {
-    assertion = reference == builtins.readFile ../../../docs/guide/SHORTCUTS.md;
-    message = ''
-      docs/guide/SHORTCUTS.md is out of sync with capability shortcut metadata.
-    '';
-  };
+  imports = [ ../common/shortcut-reference.nix ];
+
+  xdg.dataFile."nix-config/SHORTCUTS.md".text = reference;
 }

@@ -11,6 +11,7 @@ in
 {
   imports = [
     ./fish.nix
+    ../../../../modules/home/common/shortcut-reference.nix
   ];
 
   programs.fzf = {

@@ -1,6 +1,8 @@
 { lib, ... }:
 
 {
+  imports = [ ../../../../modules/home/common/shortcut-reference.nix ];
+
   home.file.".hushlogin".text = "";
 
   programs.zsh = {
