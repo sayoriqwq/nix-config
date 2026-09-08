@@ -7,11 +7,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "antigravity-cli";
-  version = "1.1.9";
+  version = "1.1.27";
 
   src = fetchurl {
     url = "https://github.com/google-antigravity/antigravity-cli/releases/download/${finalAttrs.version}/agy_cli_mac_arm64.tar.gz";
-    hash = "sha256-u8QsdfbmA/01pw81Pylj50u06iYfieQlb19gp4+Vu4Q=";
+    hash = "sha256-6QHlyP0gq0whwB3zBgMAeShtCObTcs21NdXMx6P1ZfQ=";
   };
 
   nativeBuildInputs = [ makeWrapper ];

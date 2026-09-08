@@ -216,6 +216,7 @@ in
       imports =
         terminalHomeModules
         ++ workstationHomeModules
+        ++ chineseInput.homeModules
         ++ [
           ../../software/atuin/capabilities/shell-history/home.nix
         ]
