@@ -1,23 +1,7 @@
-{
-  empty = {
-    darwinModules = [ ];
-    nixosModules = [ ];
-    homeModules = [ ];
-  };
+{ lib }:
 
-  addModules =
-    {
-      darwinModules ? [ ],
-      nixosModules ? [ ],
-      homeModules ? [ ],
-    }:
-    state: {
-      darwinModules = state.darwinModules ++ darwinModules;
-      nixosModules = state.nixosModules ++ nixosModules;
-      homeModules = state.homeModules ++ homeModules;
-    };
-
-  realize = state: {
-    inherit (state) darwinModules nixosModules homeModules;
-  };
+capabilities: {
+  darwinModules = lib.concatMap (capability: capability.darwinModules or [ ]) capabilities;
+  nixosModules = lib.concatMap (capability: capability.nixosModules or [ ]) capabilities;
+  homeModules = lib.concatMap (capability: capability.homeModules or [ ]) capabilities;
 }

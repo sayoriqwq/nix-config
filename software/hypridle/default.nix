@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  idleCoordinator = intentLib.addModules {
-    homeModules = [ ./capabilities/idle-coordinator/home.nix ];
-  };
+  idleCoordinator.homeModules = [ ./capabilities/idle-coordinator/home.nix ];
 }

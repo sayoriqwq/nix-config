@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  developmentCli = intentLib.addModules {
-    homeModules = [ ./capabilities/development-cli/home.nix ];
-  };
+  developmentCli.homeModules = [ ./capabilities/development-cli/home.nix ];
 }

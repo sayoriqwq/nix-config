@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  textSearch = intentLib.addModules {
-    homeModules = [ ./capabilities/text-search/home.nix ];
-  };
+  textSearch.homeModules = [ ./capabilities/text-search/home.nix ];
 }

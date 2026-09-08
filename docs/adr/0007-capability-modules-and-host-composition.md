@@ -3,10 +3,13 @@
 - **状态：** 已接受；取代 ADR-0002
 - **日期：** 2026-07-29
 - **V3 修订：** 2026-08-24，Issues #179、#196–#199、#206
+- **组合简化：** 2026-09-08，移除没有 state 读取需求的函数管线
 
 ## 背景
 
 早期 `common`、`desktop` 与平台 bundle 同时承担复用和 Host interface，导致 nixbox 容易隐式继承 macbook 的 GUI、兼容层和未确认软件。随后“纵向能力模块”又把单软件 owner 与跨软件需求混在一起，难以表达 Zed task、Zsh integration 等窄 contribution。
+
+后续检查确认所有公开能力只追加模块，不读取或修改已有组合状态。为这些声明维护 `empty`、`addModules`、`realize` 与 `lib.pipe` 管线增加了接口和调用负担，普通 attrset 与列表拼接已能表达现有行为。
 
 ## 决策
 
@@ -16,7 +19,7 @@
 2. `intents/<intent>/` 是横向纯组合，只调用 Software public interface；
 3. `hosts/<host>/` 是最终 caller，显式选择 Intent、独立 Software platform module 与机器事实。
 
-`intents/lib.nix` 只维护 `darwinModules`、`nixosModules`、`homeModules` 三个显式列表。Import graph 是唯一选择事实；不增加 registry、relation、workflow、substrate、platform namespace、自动扫描或强制 bundle。
+Software public interface 直接暴露包含模块列表的 attrset；有真实参数的 Extension 是返回该 attrset 的函数。`intents/lib.nix` 只用 `lib.concatMap` 按顺序拼接 `darwinModules`、`nixosModules`、`homeModules`，把缺失字段视为空列表，并返回三个显式列表。Import graph 是唯一选择事实；不增加 registry、relation、workflow、substrate、platform namespace、自动扫描或强制 bundle。
 
 只有 package、配置、service、network effect 或人工关卡真的不同才建立 platform seam。Configuration primitive 可以留在 `modules/`，但必须有实际消费者，不能成为 Host 的全选 interface。
 
@@ -27,6 +30,7 @@
 - Software ownership 局部、可导航；跨软件关系只有 Intent 一个落点；
 - Host 选择显式，三台机器互不继承；
 - Extension 能表达窄贡献，不需要通用关系框架；
+- Software 声明不依赖 Intent helper，组合不再维护额外的 state 协议；
 - 删除空 adapter、旧 wrapper 或 metadata 不改变用户行为；
 - 显式 imports 较多，但审阅者可以直接看到最终 composition。
 

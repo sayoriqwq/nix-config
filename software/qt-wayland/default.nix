@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  platformPlugins = intentLib.addModules {
-    nixosModules = [ ./capabilities/platform-plugins/nixos.nix ];
-  };
+  platformPlugins.nixosModules = [ ./capabilities/platform-plugins/nixos.nix ];
 }

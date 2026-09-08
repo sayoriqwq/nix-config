@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  authenticationAgent = intentLib.addModules {
-    homeModules = [ ./capabilities/authentication-agent/home.nix ];
-  };
+  authenticationAgent.homeModules = [ ./capabilities/authentication-agent/home.nix ];
 }

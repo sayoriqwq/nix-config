@@ -15,19 +15,13 @@
 
 ## 2. Software public interface
 
-供 Intent 使用的 Software owner 在 `software/<name>/default.nix` 暴露命名接口。接口通常是 `state: state` 变换，通过 `intentLib.addModules` 追加：
+供 Intent 使用的 Software owner 在 `software/<name>/default.nix` 暴露命名接口。每个接口是普通 attrset，按需包含 `darwinModules`、`nixosModules`、`homeModules` 列表：
 
 ```nix
-{ intentLib }:
-
 {
-  primaryBehavior = intentLib.addModules {
-    homeModules = [ ./capabilities/primary-behavior/home.nix ];
-  };
+  primaryBehavior.homeModules = [ ./capabilities/primary-behavior/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/primary-behavior/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/primary-behavior/zsh.nix ];
 }
 ```
 
@@ -35,28 +29,26 @@
 
 - 名称描述行为，不描述目录或平台；
 - Primary Capability 拥有主要 package/config；Extension 只增加窄贡献；
+- 无参数接口直接暴露 attrset；需要真实参数的 Extension 返回同样的 attrset；
 - Extension 不能 import Intent，也不能为了方便复制另一个 Software 的实现；
 - owner-local package、脚本、manifest 和固定数据留在同一 Software tree；
 - 只有一个真实实现时，不创建空 Darwin/NixOS pass-through。
 
 ## 3. Intent contract
 
-`intents/lib.nix` 只提供：
+`intents/lib.nix` 只提供一个组合函数：用 `lib.concatMap` 按输入顺序分别拼接三类 module lists，缺失的字段视为空列表。结果始终包含 `darwinModules`、`nixosModules`、`homeModules`，可继续参与组合。
 
-- `empty`：三个空 module lists；
-- `addModules`：向 state 追加显式 lists；
-- `realize`：暴露 `darwinModules`、`nixosModules`、`homeModules`。
-
-Intent 使用 `lib.pipe` 组合公开接口：
+Intent 显式列出要组合的公开接口：
 
 ```nix
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.editor.guiEditor
-    software.git.versionControl
-    (software.editor.addTask { name = "Git"; command = "lazygit"; })
-  ]
-)
+let
+  compose = import ../lib.nix { inherit lib; };
+in
+compose [
+  software.editor.guiEditor
+  software.git.versionControl
+  (software.editor.addTask { name = "Git"; command = "lazygit"; })
+]
 ```
 
 不得扩展为 registry、relation graph、workflow DSL、自动扫描、优先级求解器或平台 substrate。出现新的真实需求时先增加命名 Primary Capability/Extension；只有 `intents/lib.nix` 的三列表模型本身无法表达时，才通过新 ADR 复审。
@@ -88,7 +80,7 @@ Check / Operation ──▶ production declaration
 
 Host 可以：
 
-- 追加 realized Intent 的三类 module lists；
+- 追加 Intent 结果的三类 module lists；
 - 直接 import 不需要横向协调的独立 Software platform capability；
 - import hardware/system primitive；
 - 通过 `specialArgs`/`extraSpecialArgs` 传入非 secret 的真实参数。

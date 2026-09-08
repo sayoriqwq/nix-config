@@ -1,17 +1,15 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    direnv = import ../../software/direnv { inherit intentLib; };
-    mise = import ../../software/mise { inherit intentLib; };
-    uv = import ../../software/uv { inherit intentLib; };
+    direnv = import ../../software/direnv;
+    mise = import ../../software/mise;
+    uv = import ../../software/uv;
   };
 in
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.direnv.developmentEnvironment
-    software.mise.runtimeManager
-    software.uv.pythonPackageManager
-  ]
-)
+compose [
+  software.direnv.developmentEnvironment
+  software.mise.runtimeManager
+  software.uv.pythonPackageManager
+]

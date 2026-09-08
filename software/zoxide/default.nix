@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  directoryJumper = intentLib.addModules {
-    homeModules = [ ./capabilities/directory-jumper/home.nix ];
-  };
+  directoryJumper.homeModules = [ ./capabilities/directory-jumper/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/directory-jumper/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/directory-jumper/zsh.nix ];
 }

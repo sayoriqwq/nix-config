@@ -6,9 +6,7 @@
 }:
 
 let
-  intentLib = import ../../intents/lib.nix;
-  git = import ../../software/git { inherit intentLib; };
-  gitFoundation = intentLib.realize (git.versionControl intentLib.empty);
+  git = import ../../software/git;
   terminalWork = import ../../intents/terminal-work { inherit lib; };
 in
 {
@@ -58,7 +56,7 @@ in
     users.${username} = {
       imports =
         terminalWork.homeModules
-        ++ gitFoundation.homeModules
+        ++ git.versionControl.homeModules
         ++ [
           ../../software/atuin/capabilities/shell-history/home.nix
           ../../software/nh/capabilities/nix-operations/home.nix

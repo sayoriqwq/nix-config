@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  commandCorrection = intentLib.addModules {
-    homeModules = [ ./capabilities/command-correction/home.nix ];
-  };
+  commandCorrection.homeModules = [ ./capabilities/command-correction/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/command-correction/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/command-correction/zsh.nix ];
 }

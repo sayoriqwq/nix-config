@@ -1,20 +1,18 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    git = import ../../software/git { inherit intentLib; };
-    gh = import ../../software/gh { inherit intentLib; };
-    gitleaks = import ../../software/gitleaks { inherit intentLib; };
-    lazygit = import ../../software/lazygit { inherit intentLib; };
+    git = import ../../software/git;
+    gh = import ../../software/gh;
+    gitleaks = import ../../software/gitleaks;
+    lazygit = import ../../software/lazygit;
   };
 in
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.git.versionControl
-    software.lazygit.gitTui
-    software.gh.githubCli
-    software.gh.gitCredentialHelper
-    software.gitleaks.secretScanner
-  ]
-)
+compose [
+  software.git.versionControl
+  software.lazygit.gitTui
+  software.gh.githubCli
+  software.gh.gitCredentialHelper
+  software.gitleaks.secretScanner
+]

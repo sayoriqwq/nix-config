@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  versionControl = intentLib.addModules {
-    homeModules = [ ./capabilities/version-control/home.nix ];
-  };
+  versionControl.homeModules = [ ./capabilities/version-control/home.nix ];
 }

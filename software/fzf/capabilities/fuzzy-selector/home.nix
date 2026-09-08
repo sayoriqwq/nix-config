@@ -11,7 +11,6 @@ in
 {
   imports = [
     ./fish.nix
-    ../../../../modules/home/common/shortcut-reference.nix
   ];
 
   programs.fzf = {
@@ -27,21 +26,4 @@ in
   home.sessionVariables = lib.optionalAttrs (!hasStructuredHistoryWidget) {
     FZF_CTRL_R_COMMAND = "";
   };
-
-  sayori.shortcuts = [
-    {
-      scope = "Fish / Zsh";
-      keys = "Ctrl+T";
-      action = "用 fzf 选择文件并插入命令行";
-      owner = "fzf";
-      order = 30;
-    }
-    {
-      scope = "Fish / Zsh";
-      keys = "Alt+C";
-      action = "用 fzf 选择目录并进入";
-      owner = "fzf";
-      order = 31;
-    }
-  ];
 }

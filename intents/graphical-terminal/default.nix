@@ -1,17 +1,15 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    fish = import ../../software/fish { inherit intentLib; };
-    ghostty = import ../../software/ghostty { inherit intentLib; };
-    yumeDesign = import ../../software/yume-design { inherit intentLib; };
+    fish = import ../../software/fish;
+    ghostty = import ../../software/ghostty;
+    yumeDesign = import ../../software/yume-design;
   };
 in
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.fish.interactiveShell
-    software.yumeDesign.terminalTheme
-    software.ghostty.terminalEmulator
-  ]
-)
+compose [
+  software.fish.interactiveShell
+  software.yumeDesign.terminalTheme
+  software.ghostty.terminalEmulator
+]

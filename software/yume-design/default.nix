@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  terminalTheme = intentLib.addModules {
-    homeModules = [ ./capabilities/terminal-theme/home.nix ];
-  };
+  terminalTheme.homeModules = [ ./capabilities/terminal-theme/home.nix ];
 }

@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  containerRuntime = intentLib.addModules {
-    darwinModules = [ ./capabilities/container-runtime/darwin.nix ];
-  };
+  containerRuntime.darwinModules = [ ./capabilities/container-runtime/darwin.nix ];
 
-  shellIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/container-runtime/home.nix ];
-  };
+  shellIntegration.homeModules = [ ./capabilities/container-runtime/home.nix ];
 }

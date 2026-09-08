@@ -10,10 +10,6 @@ let
   inherit (terminalTheme.tokens) bg intent text;
 in
 {
-  imports = [
-    ../../../../modules/home/common/shortcut-reference.nix
-  ];
-
   # This is the three-host login-environment owner, not incidental Fish-only PATH configuration.
   home.sessionPath = [
     "${config.home.profileDirectory}/bin"
@@ -61,15 +57,4 @@ in
       set --global fish_pager_color_progress ${color intent.warning} --bold --background=${color bg.surface}
     '';
   };
-
-  sayori.shortcuts = [
-    {
-      scope = "Fish";
-      keys = "↑ / ↓";
-      action = "按当前输入前缀浏览 Fish 原生历史";
-      owner = "fish";
-      order = 10;
-    }
-  ];
-
 }

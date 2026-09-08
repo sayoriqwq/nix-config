@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  directoryListing = intentLib.addModules {
-    homeModules = [ ./capabilities/directory-listing/home.nix ];
-  };
+  directoryListing.homeModules = [ ./capabilities/directory-listing/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/directory-listing/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/directory-listing/zsh.nix ];
 }

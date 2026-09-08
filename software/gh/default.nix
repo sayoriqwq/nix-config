@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  githubCli = intentLib.addModules {
-    homeModules = [ ./capabilities/github-cli/home.nix ];
-  };
+  githubCli.homeModules = [ ./capabilities/github-cli/home.nix ];
 
-  gitCredentialHelper = intentLib.addModules {
-    homeModules = [ ./capabilities/github-cli/git-credential-helper.nix ];
-  };
+  gitCredentialHelper.homeModules = [ ./capabilities/github-cli/git-credential-helper.nix ];
 }

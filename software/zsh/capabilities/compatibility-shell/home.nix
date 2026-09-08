@@ -1,8 +1,6 @@
 { lib, ... }:
 
 {
-  imports = [ ../../../../modules/home/common/shortcut-reference.nix ];
-
   home.file.".hushlogin".text = "";
 
   programs.zsh = {
@@ -28,15 +26,4 @@
       bindkey '^[[B' history-search-forward
     '';
   };
-
-  sayori.shortcuts = [
-    {
-      scope = "Zsh";
-      keys = "↑ / ↓";
-      action = "按当前输入前缀浏览原生 Shell 历史";
-      owner = "zsh";
-      order = 11;
-    }
-  ];
-
 }

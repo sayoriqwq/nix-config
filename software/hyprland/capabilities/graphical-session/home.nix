@@ -31,8 +31,6 @@ in
   # mutable-state paths = none (runtime sockets/session are ephemeral); services
   # = no second Home Manager systemd target; network effects = none; human gate
   # = exact-commit login, bindings, portal and session-exit smoke.
-  imports = [ ../../../../modules/home/common/shortcut-reference.nix ];
-
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
@@ -144,35 +142,4 @@ in
       ++ workspaceBinds;
     };
   };
-
-  sayori.shortcuts = [
-    {
-      scope = "Hyprland";
-      keys = "Super+Q";
-      action = "启动 Ghostty";
-      owner = "hyprland";
-      order = 300;
-    }
-    {
-      scope = "Hyprland";
-      keys = "Super+R";
-      action = "打开 Fuzzel 应用启动器";
-      owner = "hyprland";
-      order = 301;
-    }
-    {
-      scope = "Hyprland";
-      keys = "Super+L";
-      action = "锁定当前会话";
-      owner = "hyprland";
-      order = 302;
-    }
-    {
-      scope = "Hyprland";
-      keys = "Super+Shift+M";
-      action = "正常退出 UWSM 管理的 Hyprland 会话";
-      owner = "hyprland";
-      order = 303;
-    }
-  ];
 }

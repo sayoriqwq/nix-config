@@ -105,10 +105,8 @@
           ;
       };
       darwinPkgs = packagesFor "aarch64-darwin";
-      intentLib = import ./intents/lib.nix;
       fzfConfigureCheck = import ./checks/terminal-work/fzf-configure.nix {
         homeManager = home-manager-darwin;
-        inherit intentLib;
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
@@ -118,12 +116,11 @@
       };
       zedAddTaskCheck = import ./checks/code-development/zed-add-task.nix {
         homeManager = home-manager-darwin;
-        inherit intentLib;
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
       zedPackageSelectionCheck = import ./checks/code-development/zed-package-selection.nix {
-        inherit darwinPkgs intentLib username;
+        inherit darwinPkgs username;
         darwinHomeManager = home-manager-darwin;
         linuxHomeManager = home-manager;
         linuxPkgs = packagesFor "x86_64-linux";
@@ -141,12 +138,6 @@
           };
       tailscaleSshProxyCheck = import ./checks/stable-workstation-access/tailscale-ssh-proxy.nix {
         homeManager = home-manager-darwin;
-        inherit (darwinPkgs) lib;
-        pkgs = darwinPkgs;
-      };
-      shortcutReferenceCheck = import ./checks/shortcut-reference {
-        homeManager = home-manager-darwin;
-        inherit intentLib;
         inherit (darwinPkgs) lib;
         pkgs = darwinPkgs;
       };
@@ -209,7 +200,6 @@
           fzf-configure = fzfConfigureCheck;
           macbook-pinshift-development = macbookPinshiftDevelopmentCheck;
           macbook-system = self.darwinConfigurations.macbook.system;
-          shortcut-reference = shortcutReferenceCheck;
           tailscale-ssh-proxy = tailscaleSshProxyCheck;
           zed-add-task = zedAddTaskCheck;
           zed-package-selection = zedPackageSelectionCheck;

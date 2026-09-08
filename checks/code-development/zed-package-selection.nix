@@ -1,7 +1,6 @@
 {
   darwinHomeManager,
   darwinPkgs,
-  intentLib,
   linuxHomeManager,
   linuxPkgs,
   serverConfiguration,
@@ -9,10 +8,7 @@
 }:
 
 let
-  zed = import ../../software/zed {
-    inherit intentLib;
-  };
-  configured = intentLib.realize (zed.guiEditor intentLib.empty);
+  zed = import ../../software/zed;
   makeHome =
     {
       homeManager,
@@ -22,7 +18,7 @@ let
     }:
     homeManager.lib.homeManagerConfiguration {
       inherit pkgs;
-      modules = configured.homeModules ++ [
+      modules = zed.guiEditor.homeModules ++ [
         {
           home = {
             inherit homeDirectory username;

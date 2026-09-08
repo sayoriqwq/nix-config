@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  fileFinder = intentLib.addModules {
-    homeModules = [ ./capabilities/file-finder/home.nix ];
-  };
+  fileFinder.homeModules = [ ./capabilities/file-finder/home.nix ];
 }

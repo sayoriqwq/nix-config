@@ -4,10 +4,6 @@
 }:
 
 {
-  imports = [
-    ../../../../modules/home/common/shortcut-reference.nix
-  ];
-
   programs.atuin = {
     enable = true;
     enableFishIntegration = true;
@@ -23,16 +19,6 @@
       };
     };
   };
-
-  sayori.shortcuts = [
-    {
-      scope = "Fish / Zsh";
-      keys = "Ctrl+R";
-      action = "打开 Atuin 增强历史搜索";
-      owner = "atuin";
-      order = 20;
-    }
-  ];
 
   # The standalone installer used to prepend ~/.atuin/bin. Replacing that
   # snippet makes the Home Manager package authoritative while preserving

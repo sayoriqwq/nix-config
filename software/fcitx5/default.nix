@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  inputMethod = intentLib.addModules {
-    nixosModules = [ ./capabilities/input-method/nixos.nix ];
-  };
+  inputMethod.nixosModules = [ ./capabilities/input-method/nixos.nix ];
 }

@@ -1,20 +1,15 @@
 {
   homeManager,
-  intentLib,
   lib,
   pkgs,
 }:
 
 let
-  fzf = import ../../software/fzf {
-    inherit intentLib lib;
+  fzf = import ../../software/fzf { inherit lib; };
+  configured = fzf.configure {
+    defaultCommand = "fd --type f";
+    previewCommand = "bat --color=always --style=plain {}";
   };
-  configured = intentLib.realize (
-    fzf.configure {
-      defaultCommand = "fd --type f";
-      previewCommand = "bat --color=always --style=plain {}";
-    } intentLib.empty
-  );
   home = homeManager.lib.homeManagerConfiguration {
     inherit pkgs;
     modules = configured.homeModules ++ [

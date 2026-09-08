@@ -1,15 +1,13 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    fcitx5 = import ../../software/fcitx5 { inherit intentLib; };
-    rimeIce = import ../../software/rime-ice { inherit intentLib; };
+    fcitx5 = import ../../software/fcitx5;
+    rimeIce = import ../../software/rime-ice;
   };
 in
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.fcitx5.inputMethod
-    software.rimeIce.chineseInputSchema
-  ]
-)
+compose [
+  software.fcitx5.inputMethod
+  software.rimeIce.chineseInputSchema
+]

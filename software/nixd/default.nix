@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  nixLanguageServer = intentLib.addModules {
-    homeModules = [ ./capabilities/nix-language-server/home.nix ];
-  };
+  nixLanguageServer.homeModules = [ ./capabilities/nix-language-server/home.nix ];
 }

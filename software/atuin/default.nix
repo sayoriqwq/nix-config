@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  shellHistory = intentLib.addModules {
-    homeModules = [ ./capabilities/shell-history/home.nix ];
-  };
+  shellHistory.homeModules = [ ./capabilities/shell-history/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/shell-history/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/shell-history/zsh.nix ];
 }

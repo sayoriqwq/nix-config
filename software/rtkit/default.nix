@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  realtimeScheduling = intentLib.addModules {
-    nixosModules = [ ./capabilities/realtime-scheduling/nixos.nix ];
-  };
+  realtimeScheduling.nixosModules = [ ./capabilities/realtime-scheduling/nixos.nix ];
 }

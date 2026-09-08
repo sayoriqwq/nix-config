@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  compatibilityShell = intentLib.addModules {
-    homeModules = [ ./capabilities/compatibility-shell/home.nix ];
-  };
+  compatibilityShell.homeModules = [ ./capabilities/compatibility-shell/home.nix ];
 }

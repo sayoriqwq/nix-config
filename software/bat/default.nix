@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  contentViewer = intentLib.addModules {
-    homeModules = [ ./capabilities/content-viewer/home.nix ];
-  };
+  contentViewer.homeModules = [ ./capabilities/content-viewer/home.nix ];
 }

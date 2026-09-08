@@ -1,23 +1,19 @@
 {
   homeManager,
-  intentLib,
   lib,
   pkgs,
 }:
 
 let
-  zed = import ../../software/zed {
-    inherit intentLib;
-  };
-  configured = intentLib.realize (
-    lib.pipe intentLib.empty [
-      zed.guiEditor
-      (zed.addTask {
-        name = "Test Task";
-        command = "test-command";
-      })
-    ]
-  );
+  compose = import ../../intents/lib.nix { inherit lib; };
+  zed = import ../../software/zed;
+  configured = compose [
+    zed.guiEditor
+    (zed.addTask {
+      name = "Test Task";
+      command = "test-command";
+    })
+  ];
   home = homeManager.lib.homeManagerConfiguration {
     inherit pkgs;
     modules = configured.homeModules ++ [

@@ -1,16 +1,14 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    gdm = import ../../software/gdm { inherit intentLib; };
-    hypridle = import ../../software/hypridle { inherit intentLib; };
+    gdm = import ../../software/gdm;
+    hypridle = import ../../software/hypridle;
   };
 in
-intentLib.realize (
-  lib.pipe intentLib.empty [
-    software.hypridle.idleCoordinator
-    software.gdm.displayManager
-    software.gdm.disableAutomaticSuspend
-  ]
-)
+compose [
+  software.hypridle.idleCoordinator
+  software.gdm.displayManager
+  software.gdm.disableAutomaticSuspend
+]

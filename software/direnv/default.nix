@@ -1,11 +1,5 @@
-{ intentLib }:
-
 {
-  developmentEnvironment = intentLib.addModules {
-    homeModules = [ ./capabilities/development-environment/home.nix ];
-  };
+  developmentEnvironment.homeModules = [ ./capabilities/development-environment/home.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/development-environment/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/development-environment/zsh.nix ];
 }

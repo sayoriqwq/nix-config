@@ -1,22 +1,16 @@
-{ intentLib }:
-
 {
-  guiEditor = intentLib.addModules {
+  guiEditor = {
     darwinModules = [ ./capabilities/gui-editor/darwin.nix ];
     homeModules = [ ./capabilities/gui-editor/home.nix ];
   };
 
-  fishQuickCommand = intentLib.addModules {
-    homeModules = [ ./capabilities/gui-editor/fish.nix ];
-  };
+  fishQuickCommand.homeModules = [ ./capabilities/gui-editor/fish.nix ];
 
-  zshQuickCommand = intentLib.addModules {
-    homeModules = [ ./capabilities/gui-editor/zsh.nix ];
-  };
+  zshQuickCommand.homeModules = [ ./capabilities/gui-editor/zsh.nix ];
 
   addTask =
     { name, command }:
-    intentLib.addModules {
+    {
       homeModules = [
         {
           sayori.zed.tasks = [

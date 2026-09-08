@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  codingSession = intentLib.addModules {
-    homeModules = [ ./capabilities/coding-session/home.nix ];
-  };
+  codingSession.homeModules = [ ./capabilities/coding-session/home.nix ];
 }

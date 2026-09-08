@@ -1,7 +1,3 @@
-{ intentLib }:
-
 {
-  codingAgent = intentLib.addModules {
-    homeModules = [ ./capabilities/coding-agent/home.nix ];
-  };
+  codingAgent.homeModules = [ ./capabilities/coding-agent/home.nix ];
 }

@@ -12,23 +12,20 @@ let
   developmentRuntime = import ../../intents/development-runtime { inherit lib; };
   graphicalTerminal = import ../../intents/graphical-terminal { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
-  intentLib = import ../../intents/lib.nix;
-  mise = import ../../software/mise { inherit intentLib; };
-  macosRuntimeDefaults = intentLib.realize (
-    lib.pipe intentLib.empty [
-      mise.runtimeManager
-      mise.macosRuntimeDefaults
-    ]
-  );
-  pinshift = import ../../software/pinshift { inherit intentLib; };
-  pinshiftDevelopment = intentLib.realize (pinshift.developmentCli intentLib.empty);
+  compose = import ../../intents/lib.nix { inherit lib; };
+  mise = import ../../software/mise;
+  macosRuntimeDefaults = compose [
+    mise.runtimeManager
+    mise.macosRuntimeDefaults
+  ];
+  pinshift = import ../../software/pinshift;
   terminalWork = import ../../intents/terminal-work { inherit lib; };
   terminalCompatibility = import ../../intents/terminal-compatibility { inherit lib; };
   terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
   workstationHomeModules =
     codeDevelopment.homeModules
     ++ aiCoding.multiClientCodingEnvironment.homeModules
-    ++ pinshiftDevelopment.homeModules;
+    ++ pinshift.developmentCli.homeModules;
 in
 {
   imports =

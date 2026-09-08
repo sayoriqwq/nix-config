@@ -8,15 +8,10 @@
 
 let
   appearance = import ../../../../modules/home/desktop/terminal/appearance.nix;
-  keybindings = import ../../../../modules/home/desktop/terminal/keybindings.nix { inherit lib; };
   theme = terminalTheme.terminal;
   palette = lib.imap0 (index: color: "${toString index}=${color}") (theme.ansi ++ theme.brights);
 in
 {
-  imports = [
-    ../../../../modules/home/common/shortcut-reference.nix
-  ];
-
   home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     pkgs.maple-mono.NF-CN
   ];
@@ -55,6 +50,4 @@ in
       "selection-foreground" = theme.selectionForeground;
     };
   };
-
-  sayori.shortcuts = keybindings.shortcuts;
 }

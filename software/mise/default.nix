@@ -1,15 +1,7 @@
-{ intentLib }:
-
 {
-  runtimeManager = intentLib.addModules {
-    homeModules = [ ./capabilities/runtime-manager/home.nix ];
-  };
+  runtimeManager.homeModules = [ ./capabilities/runtime-manager/home.nix ];
 
-  macosRuntimeDefaults = intentLib.addModules {
-    homeModules = [ ./capabilities/runtime-manager/macos-defaults.nix ];
-  };
+  macosRuntimeDefaults.homeModules = [ ./capabilities/runtime-manager/macos-defaults.nix ];
 
-  zshIntegration = intentLib.addModules {
-    homeModules = [ ./capabilities/runtime-manager/zsh.nix ];
-  };
+  zshIntegration.homeModules = [ ./capabilities/runtime-manager/zsh.nix ];
 }

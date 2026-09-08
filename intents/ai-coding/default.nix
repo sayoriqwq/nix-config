@@ -1,20 +1,20 @@
 { lib }:
 
 let
-  intentLib = import ../lib.nix;
+  compose = import ../lib.nix { inherit lib; };
   software = {
-    antigravity = import ../../software/antigravity { inherit intentLib; };
-    ax = import ../../software/ax { inherit intentLib; };
-    claudeCode = import ../../software/claude-code { inherit intentLib; };
-    codex = import ../../software/codex { inherit intentLib; };
-    git = import ../../software/git { inherit intentLib; };
-    herdr = import ../../software/herdr { inherit intentLib; };
-    ohMyPi = import ../../software/oh-my-pi { inherit intentLib; };
-    python = import ../../software/python { inherit intentLib; };
-    rtk = import ../../software/rtk { inherit intentLib; };
-    tmux = import ../../software/tmux { inherit intentLib; };
+    antigravity = import ../../software/antigravity;
+    ax = import ../../software/ax;
+    claudeCode = import ../../software/claude-code;
+    codex = import ../../software/codex;
+    git = import ../../software/git;
+    herdr = import ../../software/herdr;
+    ohMyPi = import ../../software/oh-my-pi;
+    python = import ../../software/python;
+    rtk = import ../../software/rtk;
+    tmux = import ../../software/tmux;
   };
-  coreCodingEnvironment = lib.pipe intentLib.empty [
+  coreCodingEnvironment = compose [
     software.herdr.codingSession
     # Herdr is the preferred session path; tmux remains only as the existing
     # compatibility dependency for tools that still require a multiplexer.
@@ -26,14 +26,13 @@ let
   ];
 in
 {
-  coreCodingEnvironment = intentLib.realize coreCodingEnvironment;
+  inherit coreCodingEnvironment;
 
-  multiClientCodingEnvironment = intentLib.realize (
-    lib.pipe coreCodingEnvironment [
-      software.git.versionControl
-      software.claudeCode.codingAgent
-      software.antigravity.codingAgent
-      software.ohMyPi.codingAgent
-    ]
-  );
+  multiClientCodingEnvironment = compose [
+    coreCodingEnvironment
+    software.git.versionControl
+    software.claudeCode.codingAgent
+    software.antigravity.codingAgent
+    software.ohMyPi.codingAgent
+  ];
 }
