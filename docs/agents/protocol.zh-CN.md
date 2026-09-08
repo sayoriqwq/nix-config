@@ -1,162 +1,116 @@
 # Agent 协议（中文译文）
 
-> `AGENTS.md` 是规范性英文版本，本文件用于维护者准确理解。如果两者不一致，以 `AGENTS.md` 为准，并必须在同一个 PR 中修复翻译差异。
+[AGENTS.md](../../AGENTS.md) 是本仓库面向 Agent 的规范性英文版本。如果两者不一致，以英文为准，并在同一变更中修复翻译。
 
 ## 1. 项目使命
 
-在一个可审计、可复现的 Nix 配置仓库中长期维护：
+维护一个可审计、可复现的 Nix 配置仓库，服务于：
 
 - 一台由 nix-darwin 与 Home Manager 管理的 macOS 主工作站；
-- 一台作为次级工作站与 Linux 试验站的 NixOS 主机；
-- 一台当前运行最小 NixOS、只按当前需求增加生产能力的服务器；
-- 一组由三台主机显式选择、按真实需求组合的 Software owner 与 Intent。
+- 一台作为次级工作站与 Linux 实验站的 NixOS 主机；
+- 一台按当前需求增加生产能力的最小 NixOS 服务器；
+- 由这些主机显式选择、按真实需求组合的 Software owner 与 Intent。
 
-本仓库管理配置声明，不负责保存可变应用数据或充当备份系统。
+本仓库管理**配置声明**，不管理可变应用数据或备份。私有机器证据保存在 Macwarden，与用户选择纳入本仓库的稳定声明分开。
 
-## 2. 开始工作前的阅读顺序
+## 2. 从当前请求开始
 
-Agent 修改文件前必须依次阅读：
+修改文件前依次阅读：
 
-1. 根目录 `AGENTS.md`；
-2. 当前 GitHub Issue 及其评论和人工关卡；
-3. `CONTEXT.md`；
-4. `docs/architecture/` 下与任务有关的文档；
-5. `docs/adr/` 下所有适用的 ADR；
-6. 与当前动作有关、仍会实际执行的 runbook。
+1. AGENTS.md 和当前任务请求，包括工作范围与已有授权；
+2. 已存在且相关的 Issue 或 PR，包括评论、允许修改的范围和安全条件；
+3. [CONTEXT.md](../../CONTEXT.md) 中的领域词汇；
+4. 相关架构文档、已接受 ADR，以及将要执行的操作所对应的 runbook。
 
-没有实施 Issue 时，不得自行开始实现，只能检查现状、形成计划或创建边界完整的 Issue。
+清楚的当前请求足以开始工作。Issue 是可选工具，不为取得实施许可创建占位 Issue。
 
-## 3. 语言规则
+协作流程以本协议为准。辅助文档中旧有的 Issue、PR、独立 worktree 或 merged commit 要求，不再构成通用门槛；其中的架构决策、证据要求和具体操作安全条件继续保留。
 
-- 给 Agent 的规范性硬约束使用英文，以减少歧义。
-- 给维护者阅读的文档、Issue、PR 描述、验证报告和操作说明使用中文。
-- 代码标识符和普通代码注释优先使用英文，只有中文明显更利于维护时才使用中文。
-- 修改 `AGENTS.md` 时，必须在同一个 PR 更新本译文。
+## 3. 日常工作
 
-## 4. 工作模型
+1. 默认在当前 checkout 工作。并行任务需要隔离或用户明确要求时，再使用独立分支或 worktree；分支优先采用 `codex/<短名称>`，不要求 Issue 编号。
+2. 在约定范围内完成必要修改。保留无关工作和已有未提交修改，不把它们混入提交或清理。
+3. 运行最小相关验证，检查最终 diff。
+4. 除非用户另有要求，为完成的变更创建本地提交，报告提交、验证结果及剩余操作或限制。
 
-- 一个 PR 只实现一个 Issue 或一个可独立审阅的窄 child Issue。
-- 使用独立分支与 worktree；分支优先采用 `codex/<issue>-<短名称>` 前缀。
-- 默认创建 Draft PR。
-- 不得把实施变更直接提交到 `main`。
-- 没有维护者明确批准，不得合并、开启自动合并或把 Draft 标记为 Ready for review。
-- 当前 Issue 的完成标准和必要人工验证没有记录前，不得进入依赖它的下一个 Issue。
-- 不得顺手做无关清理、依赖升级、重命名或框架迁移。
-- 必须严格遵守 Issue 中“允许修改”和“禁止修改”的路径与动作。
-- 机器事实未知时，必须收集证据或保留明确占位符，不能猜用户名、架构、主机名、磁盘、启动模式、网卡、`stateVersion`、服务清单或网络设置。
+允许在当前分支（包括 main）创建本地提交。Push、创建或修改 GitHub 条目以及向外部发送消息需要用户授权；本地工作不意味着发布。
+
+确有跨会话计划或协作需求时使用 Issue；需要审阅或用户要求时使用 PR。获得创建 PR 的授权后，除非用户明确要求其他状态，先创建 Draft。将 Draft 标记 Ready、merge 和开启 auto-merge 均需明确授权。通过 Issue 或 PR 协作时阅读 [issue-tracker.md](issue-tracker.md)；标签可选。
+
+按真实依赖推进：下一步需要的前置动作完成后即可继续，不等待标签、PR 合并或 Issue 关闭。无关清理、升级、重命名和框架变更保持在范围外。
+
+## 4. 语言
+
+- 规范性 Agent 约束使用英文，以保证精度。
+- 维护者文档、Issue 与 PR 描述、验证报告、提交信息和操作说明使用中文。
+- 代码标识符与普通代码注释使用英文，只有中文明显更利于维护时才例外。
+- 英文协议发生修改时，必须在同一变更中更新本译文。
 
 ## 5. 架构不变量
 
-- 使用一个顶层 Flake 作为配置事实来源。
-- Home Manager 管理可移植用户层。
-- nix-darwin 管理 macOS 系统层。
-- NixOS Modules 管理 NixOS 系统层。
-- 不恢复已退役的 Ubuntu server 层；保持最小 NixOS server 按需求组合，每项生产能力通过独立批准的 Issue 引入。
-- `hosts/<host>/` 保存主机与硬件事实。
-- 每个软件的 package、稳定配置、服务与 owner-local asset 放在 `software/<software>/`。
-- 跨 Software 的可执行组合放在 `intents/<intent>/`；Intent 只能调用公开的 Software Primary Capability 与 Extension。
-- `modules/` 只保存已证明有实际消费者的 System 或 Home Manager primitive。
-- 主机通过显式 Intent result、独立 Software platform module 与主机事实组合；import 就是采用机制，不增加全局 capability registry 或自动发现。
-- 主机不得用 `common`、`desktop`、Darwin、Linux 或 server bundle 代替需求选择。
-- 只有已证明的行为差异才建立平台实现；它必须公开软件所有权、托管配置、可变状态边界、服务、网络影响与人工关卡。
-- 优先使用 Home Manager、NixOS 和 nix-darwin 的成熟选项，最后才考虑 activation script 或生成 shell 脚本。
+- 使用一个顶层 Flake 作为声明事实源。
+- Home Manager 管理可移植用户层，nix-darwin 管理 macOS 系统配置，NixOS modules 管理 NixOS 系统配置。
+- 最小 NixOS server 按需求演进，每项生产能力通过范围明确的请求引入，不恢复已退役的 Ubuntu server 层。
+- 主机与硬件事实放在 `hosts/<host>/`。
+- 每个软件的 package、稳定配置、服务和 owner-local asset 放在 `software/<software>/`。
+- 跨软件可执行组合放在 `intents/<intent>/`；Intent 只使用公开的 Software Primary Capability 与 Extension。
+- `modules/` 只保留已经证明可复用的 System 或 Home Manager primitive。
+- 主机通过显式 Intent 结果、独立 Software platform module 和主机事实组合。Import 就是选择机制，不增加全局 capability registry 或自动发现。
+- 主机不得用 common、desktop、Darwin、Linux 或 server bundle 代替需求选择。
+- 只有已证明的行为差异才建立平台实现，并公开 package 所有权、受管配置、可变状态边界、服务、网络影响和人工关卡。
+- 优先使用 Home Manager、NixOS 与 nix-darwin 的现有选项，最后才考虑自定义 activation script 或生成 shell 代码。
 - 项目专用开发依赖进入各项目 dev shell，不进入全局用户 profile。
-- Git 同步声明；可变数据、数据库、浏览器资料、服务状态和备份采用独立流程。
+- Git 同步声明；可变数据、数据库、浏览器资料、服务状态和备份采用独立的数据管理流程。
 
-路径级规则见 `docs/architecture/module-boundaries.md`。
+路径级规则见 [module-boundaries.md](../architecture/module-boundaries.md)。
 
-## 6. 安全规则
+## 6. 安全与授权
 
-以下操作必须在当前 Issue 或 PR 中获得明确、针对本次动作的人工批准，否则禁止执行：
+以下动作需要用户在当前会话或相关 Issue、PR 中给出明确、具体的授权：
 
 - 在真实机器激活 macOS、NixOS 或 Home Manager 配置；
-- 修改 bootloader、分区、文件系统、加密、挂载、远程网络、DNS、防火墙或 SSH 访问；
-- 运行 `disko`、`nixos-anywhere`、格式化、破坏性迁移或生产恢复命令；
+- 修改 bootloader、分区、文件系统、加密、挂载、远程网络、DNS、防火墙或 SSH 访问配置；
+- 运行 disko、nixos-anywhere、磁盘格式化、破坏性迁移或生产恢复命令；
 - 重启、关机或替换远程服务器；
 - 迁移或删除生产数据。
 
+为这些动作明确目标、精确动作、相关 revision 或 build、执行窗口、停止条件、读回验证和回滚。在已授权的范围和条件仍有效时继续使用已有授权；只有拟执行动作超出范围时才重新询问。Build、本地提交、PR 合并或泛化的改进意愿，不授权另一个机器操作。
+
 其他硬性规则：
 
-- 不得提交明文密码、token、私钥、恢复码、解密后的 SOPS 内容或私有 `.env`。
-- 不得仅因为当前 Nix 版本更高就修改已有 `system.stateVersion` 或 `home.stateVersion`。
-- 没有目标机器证据且 Issue 未明确授权时，不得编辑生成的硬件配置。
-- 不得为了部署方便而削弱 SSH 或防火墙安全。
-- 未经独立 Issue 与已接受 ADR，不得引入 flake-parts、Blueprint、Clan、deploy-rs、Colmena、impermanence、ZFS、LUKS 或其他重大框架/存储设计。
-- 无人值守的 Agent 不得执行远程重装或破坏性命令。
-- 必须按维护者在目标机器上的实际输入能力设计人工命令。不得要求维护者手打 hash、Nix store path、公钥或长参数列表。精确动作无法写成短命令时，Agent 必须安全传输并校验范围收窄的临时 helper，只向维护者提供短入口，并在使用后删除 helper。
+- 不得提交明文 secret、token、密码、私钥、恢复码、解密后的 SOPS 内容或私有 .env。
+- 不得仅为匹配当前版本而改变已有 `system.stateVersion` 或 `home.stateVersion`。
+- 只有具备目标机器证据且任务明确包含该范围时，才能编辑生成的硬件配置。
+- 不得为了部署方便而削弱 SSH 访问或防火墙安全。
+- 引入 flake-parts、Blueprint、Clan、deploy-rs、Colmena、impermanence、ZFS、LUKS 或其他重大框架/存储设计，需要明确范围和已接受 ADR；该决策不强制采用 Issue 形式。
+- 无人值守 Agent 不得执行远程安装或破坏性命令。
+- 按维护者在目标机器上的输入能力设计人工命令，不要求手打 hash、store path、公钥或长参数列表。精确动作无法表达为短命令时，传输并验证范围收窄的临时 helper，提供短入口，并在使用后删除 helper。
 
-## 7. 证据与盘点
+## 7. 证据
 
-编写主机专属配置前，必须收集 `docs/runbooks/host-inventory.md` 中的证据。
+编写主机专属配置前，按 [host-inventory.md](../runbooks/host-inventory.md) 收集与变更有关的事实。已验证且仍适用的事实可以复用；事实缺失或相互矛盾时，收集新证据或明确记录未知项。不得猜测用户名、架构、主机名、磁盘、启动模式、网卡、state version、服务清单或网络设置。
 
-- 只记录复现需要的非秘密事实。
-- 未经维护者明确许可，应隐去公网 IP、账号标识、token、序列号、私有主机名等敏感信息。
-- 接入现有 NixOS 时，保留原始 `hardware-configuration.nix`、boot 配置和 state version。
-- 服务器破坏性步骤前必须记录：备份位置、恢复验证、救援控制台、目标磁盘、启动模式、网络模型和 SSH 恢复路径。
+- 只记录复现所需的非秘密事实。
+- 未经维护者明确批准存储，隐去公网 IP、账号标识、token、序列号、私有主机名等敏感值。
+- 接入现有 NixOS 时，保留原始硬件配置、boot 配置和 state version。
+- 服务器破坏性步骤前，记录备份位置、恢复验证、救援控制台、目标磁盘、启动模式、网络模型与 SSH 恢复路径。
 
-## 8. 验证协议
+## 8. 验证与完成
 
-Agent 必须运行与变更最匹配的最小检查，并报告准确命令和结果。
+运行最小相关检查，并报告精确命令和结果：
 
-### 纯文档变更
+- 文档变更：检查链接、标题、术语及英中一致性；不声称未运行的 Nix evaluation 或 build 已通过。
+- Nix 变更：格式化修改的文件、求值受影响声明并运行相关合同检查。需要验证集成时构建受影响 package 或 host output。根据影响范围选择完整 `nix flake check` 或 system build，不为每次编辑固定执行全套检查。
+- 临时构建优先使用 `--no-link`，确需结果链接时例外。Output 名称取自实际声明。Build 和 activation 是不同动作。
+- 某项检查无法执行时，说明原因、已获得的替代证据和仍未验证的内容。
 
-检查链接、标题、术语，以及英文规范与中文文档是否一致。仓库尚无 Nix 实现时，不得声称已经通过 Nix evaluation。
+完成边界来自用户请求，不取决于 GitHub 状态。记录本地提交、验证以及相关风险或回滚方式。如实报告尚未执行的实机验证；若它属于用户要求的结果，该部分在实际执行前保持待完成。普通本地维护不依赖 PR 合并或 Issue 关闭。
 
-### Flake 或 Nix 变更
+## 9. 辅助文档
 
-在命令可用且与任务相关时执行：
-
-```bash
-nix fmt -- --check .
-nix flake check
-```
-
-只构建受影响 output，不激活：
-
-```bash
-# macOS
-nix build .#darwinConfigurations.<host>.system
-
-# NixOS
-nix build .#nixosConfigurations.<host>.config.system.build.toplevel
-
-```
-
-使用 Issue 中确认的真实 output 名称。构建成功不等于获得激活许可。
-
-某项检查无法运行时，必须明确说明原因、替代证据，以及留给维护者或机器本地 Codex 会话的工作。
-
-## 9. PR 协议
-
-每个 PR 必须用中文说明：
-
-- 关联 Issue；
-- 修改内容和原因；
-- 受影响文件与主机；
-- 明确不在范围内的事项；
-- 验证命令和结果；
-- 风险与回滚方式；
-- 人工动作和批准关卡；
-- 未确认事实或后续 Issue。
-
-维护者检查 diff 并完成必要的真实机器验证前，PR 保持 Draft。
-
-## 10. 完成定义
-
-只有同时满足以下条件，Issue 才算完成：
-
-- Issue 完成标准已满足；
-- 文档和 ADR 保持最新；
-- 相关 evaluation/build 成功，或阻塞原因已记录；
-- 维护者记录了要求的真实机器验证；
-- 回滚步骤已知；
-- PR 由人工合并；
-- Issue 以完成摘要关闭。
-
-## 11. 辅助文档
-
-- Issue 流程：`docs/agents/issue-tracker.md`
-- 标签词汇：`docs/agents/triage-labels.md`
-- 领域文档规则：`docs/agents/domain.md`
-- 架构：`docs/architecture/overview.md`
-- 当前操作手册：`docs/runbooks/`
+- 通过可选 Issue/PR 协作时：[issue-tracker.md](issue-tracker.md)。
+- 选择 Issue 标签时：[triage-labels.md](triage-labels.md)。
+- 修改领域文档或处理来源冲突时：[domain.md](domain.md)。
+- 处理日常工作站管理、偏移、私有记录和选择同步时：[主工作站管理](../architecture/workstation-management.md)。
+- 查看拓扑与组合时：[架构概览](../architecture/overview.md)。
+- 执行真实机器操作时：`docs/runbooks/` 下适用的文件。

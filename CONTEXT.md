@@ -1,112 +1,74 @@
-# 项目上下文
+# 工作站托管与声明配置词汇
 
-## 1. 领域与边界
+## 托管与状态
 
-本仓库管理个人基础设施的声明式配置：系统设置、软件、稳定用户配置、服务定义与可重复验证。Git 保存声明和审计历史，Nix 负责求值与构建。
+**托管（Management）**：
+对长期环境变化保留可追溯的内容、原因、位置、用途与已核实的运行依赖，并为选中的软件和配置保留按需复用依据的管理方式。托管容许实际状态偏离稳定基线。
 
-本仓库不拥有应用数据库、浏览器资料、账号登录态、凭据、用户内容或备份。Agent 可以修改声明并完成非激活验证；真实机器 activation、外部控制面和破坏性动作受人工关卡约束。
+_Avoid_：始终与声明一致、仅指由 Nix 安装。
 
-## 2. 当前主机
+**声明（Declaration）**：
+软件版本、配置及其组合的可复用描述。声明不证明维护者已经认可它，也不证明它已经应用到真实机器。
 
-| 逻辑 output | 已声明角色 | 主要管理层 |
-| --- | --- | --- |
-| `macbook` | 主工作站与维护者控制面 | nix-darwin + Home Manager，Darwin rolling inputs |
-| `nixbox` | 次级工作站、Linux 实验站、server 同架构验证节点 | NixOS + Home Manager，Linux release inputs |
-| `server` | 最小 headless NixOS production host | NixOS + Home Manager，只组合基础运维、诊断与 recovery 所需能力 |
+**稳定基线（Stable baseline）**：
+维护者在某个时点明确认可、并保存为声明的软件版本与配置集合。它是以后复用的依据，不代表机器当前的全部状态。
 
-逻辑 output 名称不要求等于真实 hostname。地址、账号标识、credential 和其他不影响构建的敏感事实不进入文档；可复现所需的 host/hardware facts 直接保存在 `hosts/<host>/`。
+**实际状态（Actual state）**：
+某台机器在一个时间边界实际存在的软件、配置、服务及其运行关系。对实际状态的陈述以该时间边界的证据为限。
 
-## 3. 统一语言
+**偏移（Drift）**：
+实际状态相对所比较的稳定基线的差异。偏移是允许存在的正常状态，本身不构成修复或同步请求。
 
-### Declaration
+_Avoid_：Side-effect drift（旧称，统一使用 Drift）。
 
-进入 Git、可由 Nix 求值或构建的期望状态。Declaration 不表示真实机器已经 activation。
+**副作用（Side effect）**：
+一次操作在环境中建立、修改或移除的影响，包括文件位置、设置、服务与运行关系。副作用可以是有意且有用的，理解它需要知道其位置、用途和相关依赖。
 
-### Software
+**运行依赖（Runtime dependency）**：
+软件或服务正常工作所依赖的路径、程序、配置及其他资源关系。它是判断移动、修改或删除某个对象会影响什么的依据。
 
-`software/<software>/` 下的软件 owner。它拥有该软件的 package、稳定配置、服务、平台实现与必要安全边界，不把可变应用数据据为 Nix 所有。
+**同步（Synchronization）**：
+维护者发起的、有明确选择范围的复用：从主工作站选取认可的软件版本与配置，保存为稳定声明，再应用到指定机器。选中软件的版本相同、配置允许必要的平台适配；未选中的目标状态保留，同步后仍允许新的偏移。
 
-### Primary Capability
+_Avoid_：持续镜像、自动消除偏移、整机状态复制。
 
-Software 对外提供的主要行为，例如 Git version control、Zed GUI editor 或 Tailscale stable workstation access。供 Intent 使用时，由 owner 的 `default.nix` 暴露为对组合 state 的窄变换。
+**恢复（Recovery）**：
+依据实际留存的证据与材料，重建可被这些材料支持的状态。恢复能力受已保存内容的限制，不包含对未留存内容的推造。
 
-### Extension / Contribution
+**受管配置（Managed configuration）**：
+由声明承担安装或稳定配置所有权的那部分环境。这个范围不因软件被安装而扩大到应用数据库、缓存、登录态和用户内容。
 
-Software 对另一个已选择行为的窄扩展，例如 Zsh integration、Zed task 或 FZF configure。Extension 仍由提供它的 Software owner 定义；它不形成通用 relation、registry 或 contribution framework。
+**可变或外部状态（Mutable / external state）**：
+由应用或维护者拥有、能够独立于稳定声明变化的状态。它包括可写配置和应用数据，实际归属取决于相应软件的管理边界。
 
-### Intent
+## 声明组合
 
-`intents/<intent>/` 下跨多个 Software 的可执行需求组合。Intent 只调用 Software 的公开 Primary Capability 或 Extension，最终产生 `darwinModules`、`nixosModules` 与 `homeModules` 三个显式列表。
+**Software**：
+一个软件的所有权边界，拥有该软件的安装、稳定配置、服务及必要的平台差异。它向其他组合公开主要能力和扩展。
 
-### Host
+**Primary Capability**：
+Software 对外提供的主要行为，例如版本控制、图形编辑或中文输入。
 
-`hosts/<host>/` 下的最终 caller。Host 选择 Intent、无需横向组合的独立 Software platform module，以及机器和硬件事实。Host import graph 就是最终选择事实；不存在第二份 capability registry 或自动发现。
+**Extension / Contribution**：
+Software 对另一个已选择行为的窄扩展。该扩展仍由提供它的 Software 拥有。
 
-### System primitive
+**Intent**：
+同一个使用需求下，多个 Software 的公开能力与扩展共同构成的行为组合。
 
-`modules/` 下少量不属于单个 Software、且被实际消费者复用的系统或 Home Manager primitive。它不是 host bundle，也不能替代 Intent 或 Software owner。
+**Host**：
+一台目标机器的独立选择边界，持有该机器的软件组合与主机事实。一个 Host 的选择不隐含其他 Host 的选择。
 
-### Check
+**System primitive**：
+不属于单个 Software、由实际消费者复用的系统或用户环境基础能力。
 
-`checks/` 下的窄、确定性合同验证。Check 可以引用 production declaration；production graph 不得反向依赖 check。
+**Check**：
+对声明是否满足特定行为合同的窄、确定性验证。
 
-### Operation
+**Operation**：
+供维护者显式使用、目标与影响边界确定的操作声明。它描述可执行的操作，不表示操作已经发生。
 
-`operations/` 下供维护者显式使用的安全操作声明。Operation 必须固定边界，并把 production mutation 留在单独的人工作业卡。当前 server recovery 只保留按需 installation configuration；仓库不提供默认 VM runner，也不把完整恢复演练设为日常 release Gate。
+**激活（Activation）**：
+把已构建的配置版本应用到真实机器的动作。构建成功与声明已保存均不证明激活已经发生。
 
-### Managed configuration
-
-由 Nix 拥有的软件安装或稳定配置。它不因此拥有数据库、缓存、登录态、history、workspace、userdb 或用户文件。
-
-### Mutable / external state
-
-应用或维护者在 Nix Store 外拥有的可写状态。必要 owner 边界应靠局部注释、runbook 或服务合同表达，不建立无人消费的全局路径清单。
-
-### Activation
-
-把已构建 generation 应用到真实机器。Build、evaluation、PR merge 与 activation 是不同关卡。
-
-### Human approval gate
-
-对真实机器或外部控制面动作的当前、具体授权。高风险批准必须写明 target、动作、执行窗口、停止条件、验证与 rollback；早期泛化同意不能自动复用。
-
-### Side-effect drift
-
-声明合同与外部运行态事实不一致。处理 drift 必须明确 owner、readback 与 control/human gate，不推导为“所有外部状态都应自动 reconcile”。
-
-## 4. 组合关系
-
-```text
-Flake output
-  └── Host
-       ├── realized Intent lists
-       │    └── public Software capabilities/extensions
-       ├── independent Software platform modules
-       └── host facts and proven system primitives
-
-Check / Operation ──read──▶ production declarations
-production declarations ──X──▶ Check / Operation
-```
-
-- 一个真实需求只有一个 owner；不要用 platform、workflow、relation、substrate、internal 或 bundle 建第二套架构语言。
-- 一个 Software 可以有多个平台文件，但只有行为真的不同才形成 platform seam。
-- Host 明确选择，不从 macbook、Linux 或 desktop 角色隐式继承。
-- 项目开发依赖属于项目 dev shell；工作站可变运行时属于明确选择的 Software/Intent；server workload 运行时属于服务 closure 或容器合同。
-- Secret 机制只由真实 consumer 引入；当前没有预置 secret framework。
-
-## 5. 控制与恢复关系
-
-- 维护者从 macbook 直接登录 `server:sayori`，再经 `sudo` 或获批的 `sudo -i` 管理；root SSH、password 与 keyboard-interactive 关闭。
-- nixbox 使用独立机器凭据登录同一个远端 `sayori`，负责 `x86_64-linux` closure 的构建、测试与获批部署。两把 key 是凭据保管和撤销边界，不是 Unix 权限隔离。
-- nixbox 不是 server 的 bastion；macbook 直达链路与 provider VNC/Rescue 共同保留恢复能力。
-- macbook 到 nixbox 的稳定 transport 使用 Tailscale；用户与 host 认证仍由 native OpenSSH 承担，tmux 负责断线后的工作现场。
-
-## 6. 不变量
-
-1. 一个顶层 Flake 和一个 lock file 管理三台主机。
-2. Host/hardware facts 留在 `hosts/`；Software ownership 留在 `software/`；横向需求留在 `intents/`。
-3. 明确 import 优先于 registry、自动扫描和平台 bundle。
-4. Home Manager 管用户层；nix-darwin 与 NixOS modules 管系统层。
-5. `system.stateVersion` 与 `home.stateVersion` 保留首次采用值，不随 channel 升级。
-6. 外部 state、secret 和数据恢复不由 Git 或 generation 隐式接管。
-7. Server 不恢复旧 Ubuntu 业务；新 production 能力必须按当前需求独立建立运行、备份、恢复与 rollback 合同。
+**人工授权（Human approval gate）**：
+维护者对需要确认的具体动作给出的当前授权。授权范围由目标、动作及其影响边界确定。

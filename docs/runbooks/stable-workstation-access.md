@@ -1,20 +1,22 @@
 # macbook → nixbox 稳定访问手册
 
-本文是 Issue #148 的维护者执行与验收手册。目标是通过 Tailscale + MagicDNS 提供稳定
+本文源于 Issue #148 的维护者执行与验收手册。目标是通过 Tailscale + MagicDNS 提供稳定
 transport，同时继续使用 native OpenSSH key-only、sshd host key 与 tmux。命令均为 Fish；
-输出只在本机审阅，提交 Issue/PR 前必须移除账户、地址、tailnet suffix、device ID、key 和
+输出只在本机审阅，形成公开记录前必须移除账户、地址、tailnet suffix、device ID、key 和
 host-key 内容。
+
+当前通用协作流程以 [AGENTS.md](../../AGENTS.md) 为准；Issue、PR 与 merge 不作为本文操作的前置条件。下列目标、动作、声明版本、当次授权与访问恢复要求仍须满足。
 
 ## 1. 执行边界
 
 - build/check 不等于 activation、Homebrew 安装落地或 Tailscale enrollment。
 - macbook activation、nixbox activation、System Extension/VPN approval、两端 enrollment、
   firewall runtime mutation、MagicDNS/Grants、SSH alias、reboot 与 key-expiry 各需独立的
-  exact-commit/current-window 人工批准。
+  准确声明版本与当前执行窗口的人工批准。
 - 全部 soak 完成前保留 nixbox 物理 console、既有可信 LAN SSH 和实施前 SSH alias 记录。
 - 不在 overlay 唯一通道中执行 reauth、远程 activation 或恢复操作。
 
-## 2. Gate 1：只读 inventory 与 Draft PR
+## 2. Gate 1：只读 inventory 与声明审阅
 
 ### 2026-08-12 脱敏基线
 
@@ -49,7 +51,7 @@ sudo /run/current-system/sw/bin/darwin-rebuild --list-generations
 🧾 记录 macbook 的 exact pre-change closure 与 generation，供定向回滚核对。
 
 在 nixbox 的物理 console 或可信 LAN SSH 中只读确认恢复入口与服务基线。当前尚未 activation
-时，`tailscaled.service` 不存在是预期结果；vendor state 路径证据来自 Draft PR 对锁定 package
+时，`tailscaled.service` 不存在是预期结果；vendor state 路径证据来自对锁定 package
 unit/source 的审阅，不要求从尚未安装的 live unit 猜测。不要发布地址或 fingerprint：
 
 ```fish
@@ -73,7 +75,7 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 
 🧾 记录 nixbox 的 exact pre-change closure 与 generation，避免中间 generation 导致回错。
 
-审阅 Draft PR 时确认 ADR-0010 为“已接受”、server 零变化，且没有敏感值或禁止功能。仓库内
+审阅本次声明改动时确认 ADR-0010 为“已接受”、server 零变化，且没有敏感值或禁止功能。仓库内
 允许执行的离线验证如下，不会激活机器或连接 tailnet：
 
 ```fish
@@ -87,7 +89,7 @@ nix build --no-link .#nixosConfigurations.nixbox.config.system.build.toplevel
 
 ## 3. Gate 2：macbook activation 与 enrollment
 
-仅在维护者已对 exact merged commit 和当前窗口单独批准后 activation macbook。随后由维护者
+仅在维护者已对准确声明版本、macbook activation 与当前窗口单独批准后执行。随后由维护者
 确认只存在 Standalone variant，在 GUI 中人工批准 System Extension/VPN configuration 并登录
 tailnet；不要使用自动 auth key。首次基线保持 Clash Verge 关闭。
 
@@ -106,8 +108,8 @@ env TAILSCALE_BE_CLI=1 /Applications/Tailscale.app/Contents/MacOS/Tailscale stat
 
 ## 4. Gate 3：nixbox activation 与 enrollment
 
-仅当维护者人在 nixbox 旁、物理 console 和旧 LAN SSH 同时可用，并已对同一 exact commit 与
-当前窗口单独批准后，才 activation nixbox。防火墙运行态变化属于本关卡。activation 后从
+仅当维护者人在 nixbox 旁、物理 console 和旧 LAN SSH 同时可用，并已对同一准确声明版本、
+nixbox activation 与当前窗口单独批准后，才执行。防火墙运行态变化属于本关卡。activation 后从
 本机 console 交互注册，不提交 auth key：
 
 ```fish
@@ -180,9 +182,9 @@ test -n "$magicdns_name"; and ssh-keygen -F "$magicdns_name"
 
 🔐 检查新 MagicDNS 名是否已有受信 host-key 记录；命令输出只在本地与 console fingerprint 比对。
 
-若没有记录，当前 #148 明确禁止修改 known_hosts，必须暂停 Gate 5，并先取得对“把可信 console/
-LAN 通道读回且 fingerprint 已匹配的公钥，定向绑定到该 MagicDNS hostname”的独立 scope
-扩展与当前窗口批准。不得用 `ssh-keyscan`、`accept-new`、临时关闭严格检查或盲目确认绕过；
+若没有记录，先确认当次授权已覆盖“把可信 console/LAN 通道读回且 fingerprint 已匹配的公钥，
+定向绑定到该 MagicDNS hostname”；Issue #148 的原始范围未包含此动作，不能复用该历史授权。
+未获当次批准时暂停 Gate 5。不得用 `ssh-keyscan`、`accept-new`、临时关闭严格检查或盲目确认绕过；
 在可信记录存在之前，下面的 SSH smoke 不得运行。
 
 编辑后只输出脱敏字段，确认 endpoint 不再是实施前 DHCP 地址、受管 ProxyCommand 已生效且
@@ -202,8 +204,7 @@ dscl . -read /Users/sayori UserShell
 test -x "$SHELL"
 ```
 
-🐚 若 account UserShell 正确而当前 `$SHELL` 已不存在，重启发起 SSH 的 Terminal/Codex 等应用
-或重新登录 macOS，再重试；不要把旧 Homebrew/Nix store shell 路径写进 SSH fragment。
+🐚 若 account UserShell 正确而当前 `$SHELL` 已不存在，重启发起 SSH 的 Terminal/Codex 等应用或重新登录 macOS，再重试；不要把旧 Homebrew/Nix store shell 路径写进 SSH fragment。
 
 随后执行普通 OpenSSH 与文件传输 smoke；测试文件使用临时目录，不接触 production 数据：
 
@@ -230,7 +231,7 @@ nix store ping --store ssh-ng://nixbox
 
 ## 7. Gate 6：真人连接矩阵
 
-逐项执行并把结果以脱敏 PASS/FAIL 摘要记录在 Issue/PR：同一 LAN、手机热点、家庭网络、公司
+逐项执行并把结果以脱敏 PASS/FAIL 摘要记录在当次工作记录中：同一 LAN、手机热点、家庭网络、公司
 网络、macbook Wi-Fi 切换、nixbox DHCP renew、获批真实 reboot、macbook relogin、direct 与
 relay fallback、Clash Verge off/on、SSH 真断后的同名重连。Termius 与 Zed 只做人工连接
 smoke，不接管其数据库或 session。
@@ -253,9 +254,9 @@ ssh -t nixbox 'tmux new -A -s work'
 🧵 验证 SSH 断线后可以用同一 alias 恢复既有 tmux 工作现场。
 
 Clash 关闭和开启必须分别通过。OpenSSH 应在两种状态都读到同一个受管 ProxyCommand；Termius
-与 Zed 若仍受 fake-IP 影响，只记录为不读取 OpenSSH config 的独立事实，不扩大本票去修改
+与 Zed 若仍受 fake-IP 影响，只记录为不读取 OpenSSH config 的独立事实，不扩大本次范围去修改
 Clash。任一 route 或 SSH transport 冲突都暂停，不修改 Clash、不启用 `tailscaled` userspace
-networking mode，也不自行加入 split-tunnel workaround；另开 Issue 由维护者裁决。
+networking mode，也不自行加入 split-tunnel workaround；由维护者单独裁决并明确后续范围。
 
 验收口径是“地址漂移后无需改配置、跨网仍能同名连接、断线后工作可恢复”，不是“一条
 TCP/SSH session 在换网、睡眠或 VPN 重启时永不掉线”。

@@ -1,50 +1,29 @@
-# Issue 与 Pull Request 工作流
+# 可选的 Issue 与 PR 协作
 
-GitHub Issue、PR 与 Milestone 管理计划和完成证据；聊天和 Agent 临时计划不是长期事实源。
+日常维护遵循 [Agent 协议](../../AGENTS.md)：当前请求确定范围，在当前 checkout 完成必要修改、最小相关验证和本地提交。Issue、PR、Milestone 和标签不是开工或完成的前提。
 
-## 1. 实施前提
+## 什么时候使用
 
-开始写入前必须存在边界完整的 Issue，至少说明：
+- Issue：确实需要跨会话保存计划、协调多人或跟踪未完成依赖。
+- PR：需要远端审阅或用户明确要求。
+- Branch/worktree：并行工作需要隔离或用户明确要求；分支优先采用 `codex/<短名称>`。
 
-- 目标与已知事实；
-- owned paths / objects；
-- frozen / forbidden；
-- 前置依赖与 blocker；
-- 验证命令；
-- 风险、rollback 与人工关卡；
-- 完成标准；
-- 简短、规范性的英文 Agent Contract。
+本地工作不授权外部写入。创建或修改 GitHub 条目、push、评论和其他对外消息应有用户授权；不为了满足流程创建占位 Issue 或 PR。
 
-没有实施 Issue 时，只能只读检查、研究或准备 Issue，不能直接改配置。
+## 范围与记录
 
-## 2. 粒度与顺序
+已有相关 Issue/PR 时，先读正文和评论，遵守允许修改、禁止修改、依赖和操作安全条件。当前会话可以明确范围或更新决定；只把需要跨会话保留的计划和完成证据写入协作记录，不复制整段聊天。
 
-- 一个 PR 只实现一个 Issue 或一个可独立验收的窄 child Issue。
-- 依赖顺序以 GitHub sub-issue/dependency、`Blocked by` 和维护者批准为准，不维护第二份路线图。
-- 前置未关闭时不实施，除非 Issue 明确允许并行且 owned paths 不冲突。
-- 缺少机器事实使用 `needs-info`；外部依赖使用 `blocked`；不再实施使用 `wontfix` 并记录理由。
+Issue 用中文说明目标、涉及的对象或主机、必要依赖、验证方法和完成条件。只有涉及风险或真实机器动作时，再补充具体操作、停止条件、读回与回滚。字段按任务需要组织，不要求额外英文 Agent Contract。
 
-## 3. 分支与 Draft PR
+PR 用中文说明问题与结果、范围、验证结果和相关风险；有对应 Issue 时关联它。尚未执行的实机验证、待批准动作和未决事项必须如实列出。获得创建授权后默认使用 Draft；Ready、merge 和 auto-merge 各自需要明确授权。
 
-- 使用独立 branch/worktree；默认分支前缀为 `codex/`。
-- 默认创建 Draft PR，并关联 Issue。
-- PR 使用中文记录范围、文件/Host、明确不在范围、验证原始结果、风险、rollback、人工动作与未决事实。
-- 未获维护者当前明确批准，不标 Ready、不 merge、不启用 auto-merge。
-- Dirty worktree 中的无关修改属于维护者，不得一起提交或清理。
+## 依赖、授权与完成
 
-## 4. 人工批准
+按实际依赖推进。前置所需结果和证据已具备时，不因它的 Issue 仍开放或 PR 尚未合并而等待；缺少关键事实时只暂停依赖该事实的动作，其余范围继续完成。
 
-Activation、remote access、network/DNS/firewall/SSH、boot/disk、reboot、Rescue、Reinstall 与 production data 动作的批准必须：
+真实机器与高风险操作采用 [Agent 协议的授权规则](../../AGENTS.md#6-safety-and-authorization)。当前会话中的具体授权有效，不要求另抄进 Issue/PR 后才执行，也不在有效范围内重复索取。
 
-- 出现在当前 Issue/PR 或当前会话；
-- 绑定 exact target、commit、动作和执行窗口；
-- 包含停止条件、readback 与 rollback；
-- 只对当次动作有效。
+本地完成记录包含提交、验证结果和未执行事项即可。若任务本来使用 Issue/PR 跟踪，且用户授权维护它们，再按实际完成范围更新；关闭 Issue 不依赖必然存在 PR，也不能把未执行的实机动作写成已完成。
 
-早期泛化同意、build 成功或 PR merge 不能替代上述批准。
-
-## 5. 完成
-
-只有完成标准满足、验证记录完整、必要实机验收完成且 PR 已由维护者批准合并，Issue 才能关闭。关闭摘要应说明最终 commit/PR、验证、未执行动作与 follow-up。
-
-标签词汇见 [triage-labels.md](triage-labels.md)。
+需要标签时参考 [triage-labels.md](triage-labels.md)。

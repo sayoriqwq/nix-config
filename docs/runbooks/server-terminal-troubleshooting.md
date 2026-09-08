@@ -257,7 +257,7 @@ yazi /var/log
 
 server 的声明来自本仓库，主要由 nixbox 构建和验证 closure，再在独立批准下推送并 activation。Server 上看到的 `/etc`、systemd unit 和 profile 多数是生成结果，不应现场修改后当作长期修复。
 
-以下动作必须停下来走独立 Issue 或当次行动卡：
+以下动作需要先明确本次范围、影响与授权；记录方式遵循 [AGENTS.md](../../AGENTS.md)：
 
 - `nixos-rebuild switch`、`nh os switch` 或 profile rollback；
 - reboot、shutdown、Rescue、Reinstall；

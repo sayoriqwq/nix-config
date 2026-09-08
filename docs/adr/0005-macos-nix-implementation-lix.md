@@ -27,7 +27,7 @@ nix.package = pkgs.lix;
 
 这意味着首次安装和后续由 nix-darwin 管理的 Nix 实现保持为 Lix。Flakes、Nix language、Nix Store、nixpkgs、Home Manager 与仓库 output 模型保持不变。
 
-安装、构建和激活仍是不同人工关卡：
+首次接入阶段采用以下人工执行安排，作为历史记录保留：
 
 1. Lix 安装由维护者手动执行；
 2. 原生 Darwin build 由维护者手动执行，且不激活；
@@ -102,7 +102,7 @@ nix-darwin 官方说明技术上可行，但首次激活会切换实现，增加
 
 - 第一次 nix-darwin 激活前，本机安装收据为 `/nix/receipt.json`，实际安装器入口为 `/nix/nix-installer uninstall`；具体命令以当时安装收据和 runbook 为准。
 - 激活 nix-darwin 后，优先回滚 nix-darwin generation；不能用完整卸载代替 generation 回滚。
-- Agent 不得自行执行 Lix 安装、卸载、升级、原生 Mac build 或 nix-darwin 激活。
+- 当前操作权限与通用协作流程遵循 [AGENTS.md](../../AGENTS.md)。Agent 可以完成原生 Mac 非激活 build；Lix 安装、卸载、升级与 nix-darwin activation 仍须核对各自的当次授权与恢复边界。
 
 维护者于 2026-07-20 授权 Agent 执行首次激活前备份。备份位于 `/Users/sayori/nix-darwin-backup-phase2.zpxaHo`，包含 Nix 配置、挂载文件、shell/profile 集成、三个相关 launchd plist、安装收据与实际安装器；副本验证通过。此授权只覆盖备份，不覆盖 nix-darwin activation。
 
@@ -118,7 +118,7 @@ nix-darwin 官方说明技术上可行，但首次激活会切换实现，增加
 
 ## 复审条件
 
-出现以下情况时通过新的 Issue 与 ADR 复审，不直接修改 `nix.package`：
+出现以下情况时复审本 ADR，不直接修改 `nix.package`；协作方式遵循当前 AGENTS.md：
 
 - Lix 与锁定的 nixpkgs、nix-darwin 或 Home Manager 出现持续兼容问题；
 - Lix 项目的维护、安全或发布状态发生重大变化；

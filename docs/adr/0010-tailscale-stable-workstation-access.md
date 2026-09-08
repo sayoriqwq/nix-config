@@ -80,7 +80,7 @@ Nix 声明；这样既避免依赖 GUI variant 的平台默认值，也不把外
 
 ### 人工关卡
 
-以下各项必须绑定 exact merged commit 与当前执行窗口，并分别取得维护者批准：
+通用协作流程以 [AGENTS.md](../../AGENTS.md) 为准，不要求先创建或合并 PR。以下各项仍须绑定已审阅的准确声明版本、具体动作与当前执行窗口，并分别取得维护者批准：
 
 1. macbook activation，以及随后的 Standalone 安装落地、System Extension/VPN 批准与注册；
 2. nixbox activation、防火墙运行态变化与交互式注册；

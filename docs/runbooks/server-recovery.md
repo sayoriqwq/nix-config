@@ -29,7 +29,7 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 
 🛟 验证隔离安装声明可构建，不接受或联系 production target。
 
-完整 BIOS/disko、网络、SSH 或 firewall VM 演练不是默认 release Gate。确有相关变更时，必须由对应 Issue 的行动卡固定执行器版本、精确命令、资源要求、停止条件与回滚；演练仍不能替代真实机器的人工作业与回读。
+完整 BIOS/disko、网络、SSH 或 firewall VM 演练不是默认 release Gate。确有相关变更时，必须在当前任务中明确执行器版本、精确命令、资源要求、停止条件与回滚；演练仍不能替代真实机器的人工作业与回读。通用协作与授权记录方式遵循 [AGENTS.md](../../AGENTS.md)。
 
 ## SSH 失效时的升级顺序
 
@@ -38,10 +38,10 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 1. 保留所有仍可用的 SSH 会话，不要主动退出。
 2. 尝试已知的直连路径和现有管理网络；不要临时放宽 SSH 或防火墙。
 3. 使用提供商 VNC/串口控制台观察启动、地址、路由和服务状态。
-4. 只有在当前 Issue/PR 已记录明确批准时，才进入 Rescue。使用临时凭据，作业后撤销。
+4. 只有当前明确授权已覆盖本次目标与 Rescue 动作时，才进入 Rescue。使用临时凭据，作业后撤销。
 5. 重装是最后手段。它具有破坏性，必须另有明确批准、已验证备份和恢复测试。
 
-每次真实机器操作前都要建立 action card，至少写明：
+涉及 Rescue、重装或会改变远端访问的操作前，在当前任务中至少明确：
 
 - 精确目标与识别方式；
 - 预期磁盘、启动模式和网络模型；
@@ -67,7 +67,7 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 
 ## 恢复后验收
 
-按 action card 逐项记录：
+按本次操作范围逐项记录：
 
 - VNC/控制台仍可进入；
 - `sayori` 的预期 SSH 路径可用；

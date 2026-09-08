@@ -1,47 +1,47 @@
 # 领域文档使用规则
 
-## 1. 阅读顺序
+## 1. 阅读与范围
 
-实施前依次阅读：
+先读 [AGENTS.md](../../AGENTS.md) 和当前任务请求，再读已存在且相关的 Issue/PR、[CONTEXT.md](../../CONTEXT.md) 词汇表，以及相关架构文档、ADR 和将要执行的 runbook。明确的会话请求即可确定工作范围，不要求先有 Issue。
 
-1. 根目录 `AGENTS.md`；
-2. 当前 GitHub Issue 与评论；
-3. `CONTEXT.md`；
-4. 相关 `docs/architecture/`；
-5. 所有适用 ADR；
-6. 当前会实际执行的 runbook。
-
-缺少会影响实现的机器事实时，在 Issue 记录 blocker；不得从历史聊天、别的 Host 或旧报告猜测。
+机器事实按当前代码和可信现场证据判断。已有证据适用时可以复用；缺少会影响实现或安全的事实时，收集证据或记录未知项，只暂停依赖该事实的动作，不从其他 Host 或历史聊天猜测。
 
 ## 2. 权威来源
 
 | 内容 | 权威来源 |
 | --- | --- |
-| 规范性 Agent 约束 | `AGENTS.md`，中文译文必须同步 |
-| 领域词汇与当前拓扑 | `CONTEXT.md` |
-| 结构与依赖规则 | `docs/architecture/` |
-| 长期决策与被否决方案 | `docs/adr/` |
-| 当前操作与 rollback | `docs/runbooks/` |
-| 实际实现与 Host 选择 | `software/`、`intents/`、`hosts/`、`operations/` |
-| 计划、依赖与完成证据 | GitHub Issues、PR 与 Milestone |
-| 历史追溯 | Git history、closed Issues/PR 与 tags |
+| 规范性 Agent 约束 | AGENTS.md，中文译文同一变更同步 |
+| 当前工作范围与授权 | 当前任务请求及明确授权；已存在且相关的 Issue/PR 正文与评论 |
+| 领域词汇 | CONTEXT.md |
+| 主工作站管理、偏移、记录与选择同步约定 | docs/architecture/workstation-management.md |
+| 当前拓扑、结构与依赖规则 | docs/architecture/；实际选择仍以代码为准 |
+| 长期架构决策与被否决方案 | docs/adr/ |
+| 当前操作、读回与 rollback | docs/runbooks/ 和执行 Agent 针对本次动作形成的方案 |
+| 用户选定的稳定声明与 Host 选择 | flake.nix、flake.lock、software/、intents/、hosts/、modules/、dotfiles/、operations/ |
+| 私有机器现场与历史变化证据 | Macwarden 私有记录与带时间、范围的现场读回；不等同于仓库声明 |
+| 本次变更与验证结果 | 本地提交及任务完成报告；使用 Issue/PR 协作时可在那里补充必要记录 |
+| 需要跨会话保存的计划与依赖 | 按需使用的 Issue、PR 或 Milestone |
+| 历史追溯 | Git history、已有 Issues/PR 与 tags |
 
-不在当前 tree 保留迁移 inventory、研究计划或手写 capability matrix 作为第二事实源。
+稳定声明表达用户选择保留的版本和配置，不证明机器此刻已经采用。Macwarden 的私有证据与公开声明独立；只有用户选定且适合公开的稳定内容进入本仓库。临时会话、历史运行态、盘点清单和手写 capability matrix 不成为第二套配置事实源。
 
-## 3. 术语
+## 3. 词汇与文档落点
 
-使用 `CONTEXT.md` 的 Software、Primary Capability、Extension、Intent、Host、Check、Operation、mutable state、activation 与 human gate。不要重新引入 `common` bundle、workflow、relation、substrate、platform registry 或“Phase”作为当前架构对象。
+领域词汇沿用 CONTEXT.md。它只承担词汇表；当前拓扑和组合说明进入 docs/architecture/overview.md，实现与 Host 选择由源码拥有，必要操作步骤进入 runbook。
 
-需要新长期概念时，在同一 PR 更新 `CONTEXT.md`；若改变已接受决策，先建立新 ADR。
+新增长期概念时，在同一变更更新词汇表和实际消费者；不为单次聊天建立长期对象。改变已接受架构决策时，用明确范围和 ADR 记录决定，不强制采用 Issue 或 PR 形式。common bundle、通用 relation/workflow、platform registry 等仍受现有架构边界约束。
 
-## 4. 事实、决策、计划
+## 4. 事实、决定与执行
 
-- 事实来自真实机器、当前代码或可靠命令输出；
-- 决策由 ADR 或维护者明确批准；
-- 计划与顺序由当前 GitHub Issue/Milestone 承担。
+- 事实来自当前代码、真实机器或可信命令输出，并区分观察时间与适用范围。
+- 用户的明确请求可以确定本次工作和授权；需要长期约束后续实现的架构决定进入 ADR。
+- 执行 Agent 负责把请求转为具体方案，说明影响、必要验证和授权范围；文档不预先代替每次执行判断。
+- 本地提交和完成报告承载本次必要证据，不要求把临时对话或私有现场全文写入公开仓库。
 
-不得把 build 写成 activation，把建议写成决策，或把历史运行态写成现状。
+不把 build 写成 activation，不把建议写成决定，也不把历史运行态写成现状。未执行的真实机器验证保持明确的未验证状态。
 
-## 5. 冲突
+## 5. 处理冲突
 
-发现文档与代码、ADR 或 Issue 冲突时，按更严格、更安全的规则停止相关实现，并记录冲突位置、影响、建议 owner 与是否需要英中协议同步。普通实现 PR 不得静默推翻长期决策。
+先辨别是过时流程、源码与文档不符，还是实质架构或安全条件冲突。通用协作流程按当前 AGENTS.md 执行；用户已经明确调整旧流程时，在授权范围内同步必要文档，不因旧有 Issue/PR 格式门槛停止工作。
+
+涉及架构、安全或未知机器事实的冲突，说明位置、影响与需要的决定；继续完成不依赖该决定的工作。实质改变已接受架构决策时更新适用 ADR，不能借普通维护静默改变其含义。修改英文规范时同步中文译文。

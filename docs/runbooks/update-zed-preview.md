@@ -8,17 +8,18 @@ Zed 的 package owner 按平台分流：macbook 使用 `software/zed/package.nix
 package，并优先从 USTC substitution；USTC closure 不完整时由 macbook 中继官方 cache
 的已签名二进制。应用自更新关闭，仓库不运行定期更新 Action。
 
+通用协作流程以 [AGENTS.md](../../AGENTS.md) 为准；分支、worktree 与 PR 按当前任务需要选择，不是更新前提。
+
 ## macbook：手动同步 Preview
 
-从最新 `main` 创建专用分支，并确认 package 文件没有待处理修改：
+先确认当前工作树与 package 文件中的已有改动；package 文件有未处理改动时先厘清，再运行同步：
 
 ```fish
 git status --short --branch
-git switch -c codex/update-zed-preview-YYYYMMDD
 nix run .#sync-zed-preview
 ```
 
-🔄 解析官方最新 Preview，预取 aarch64-darwin DMG 并更新固定版本与 hash。
+🔄 确认工作树后解析官方最新 Preview，预取 aarch64-darwin DMG 并更新固定版本与 hash。
 
 `sync-zed-preview` 会先完成以下工作，任一步失败都不会写入 package 文件：
 
@@ -54,7 +55,7 @@ checkout、Cargo、Rust 或 Crane。helper 不会 commit、push、创建 PR、me
 ## nixbox：随 Linux release nixpkgs 更新 Stable
 
 nixbox 没有独立 Zed updater。Stable 版本只随经过审阅的 Linux `nixpkgs` input 更新。
-在任何包含 Linux input 变化的 PR 合并前，先取得目标版本和 outPath，并真实复制完整
+采用任何 Linux input 更新前，先取得目标版本和 outPath，并真实复制完整
 closure。不要用 `nix path-info` 代替复制；镜像可能存在 `.narinfo` 却缺少某个 NAR：
 
 ```fish
@@ -100,9 +101,9 @@ extension smoke。不得自动迁移、合并或删除旧 channel state。
 
 ## 失败与回滚
 
-- Preview identity、artifact、hash、解包、签名或 host build 失败时，不合并更新；
-- Stable 在 USTC 与官方 cache 都无法完成 closure 复制时，不合并对应 Linux input 更新；
-- 未合并时关闭或放弃 PR；已合并但未 activation 时 revert 对应 PR 并重新 build；
+- Preview identity、artifact、hash、解包、签名或 host build 失败时，停止采用本次更新；
+- Stable 在 USTC 与官方 cache 都无法完成 closure 复制时，停止采用对应 Linux input 更新；
+- 未 activation 时定向撤回本次声明改动；已提交的改动按实际提交回滚，再重新 build；
 - 已 activation 时先切回上一代 nix-darwin/NixOS generation，再 revert 声明；
 - Zed live state 异常时从仓库外私有备份人工恢复。
 

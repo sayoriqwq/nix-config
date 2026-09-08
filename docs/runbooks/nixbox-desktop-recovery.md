@@ -2,7 +2,9 @@
 
 ## 1. 用途与边界
 
-本文用于维护者在 `nixbox` 上验收或恢复当前声明的 Hyprland、Fcitx 5 与 Rime Ice 桌面能力。仓库检查或构建通过不代表真实 activation、注销、重启或 rollback 已获批准；每次操作都必须在对应 Issue 或 PR 中绑定准确提交、目标机器、命令、执行窗口和恢复路径。
+本文用于维护者在 `nixbox` 上验收或恢复当前声明的 Hyprland、Fcitx 5 与 Rime Ice 桌面能力。仓库检查或构建通过不代表真实 activation、注销、重启或 rollback 已获批准；当次授权须绑定准确声明版本、目标机器、命令、执行窗口和恢复路径。
+
+通用协作流程与授权记录方式以 [AGENTS.md](../../AGENTS.md) 为准，不要求先创建 Issue 或 PR。
 
 不得为排障运行 GC、删除 system generation、GC root 或 boot entry，也不得删除或迁移 keyring、Fcitx、Rime、dconf、portal permission、浏览器配置和其他应用状态。Generation rollback 只回退声明式系统，不恢复可变用户数据。
 
@@ -10,7 +12,7 @@
 
 执行任何 `test`、`switch`、注销或重启前，维护者必须确认：
 
-1. 当前 Issue 或 PR 已批准准确提交与准确动作；
+1. 当前明确授权已覆盖准确声明版本与准确动作；
 2. 工作树无未审阅改动；
 3. 当前运行 closure、system profile、可恢复 generation 与 boot entry 已记录并核实；
 4. 本地 TTY 或显示器可用，既有 SSH/Tailscale 恢复通道已从另一台获授权机器实测；
@@ -104,7 +106,7 @@ journalctl --user -b | rg -i 'fcitx|rime|uwsm|hyprland'
 
 ### `nixos-rebuild switch` 后失败
 
-`switch` 会更新 system profile 与 boot default。只有当前 Issue 或 PR 已批准准确 rollback、已重新核实上一代身份且恢复入口仍可用时，维护者才能执行：
+`switch` 会更新 system profile 与 boot default。只有当前明确授权已覆盖准确 rollback、已重新核实上一代身份且恢复入口仍可用时，维护者才能执行：
 
 ```fish
 sudo nixos-rebuild switch --rollback
@@ -112,7 +114,7 @@ sudo nixos-rebuild switch --rollback
 
 ↩️ 把 system profile 切回已核实的上一代；命令本身不授权重启，也不恢复可变用户数据。
 
-若命令式 rollback 不安全或无法完成，使用本地 boot menu 选择操作前核实的旧 entry；重启同样需要当前批准。恢复访问后记录实际运行 closure、profile 与失败证据，再为声明修复建立独立 Issue。
+若命令式 rollback 不安全或无法完成，使用本地 boot menu 选择操作前核实的旧 entry；重启同样需要当前批准。恢复访问后记录实际运行 closure、profile 与失败证据，再按当前协作流程修复声明。
 
 ## 7. 可变状态边界
 
@@ -123,7 +125,7 @@ sudo nixos-rebuild switch --rollback
 - `~/.local/share/keyrings/`
 - dconf、portal permissions、浏览器 profile 与其他应用状态
 
-除非另有一个包含备份、精确目标和恢复验证的批准 Issue，不得删除、覆盖或迁移这些路径。排障只记录必要的路径、类型、权限和时间戳，不公开内容。
+除非本次动作另有包含备份、精确目标和恢复验证的明确批准，不得删除、覆盖或迁移这些路径。排障只记录必要的路径、类型、权限和时间戳，不公开内容。
 
 ## 8. 记录模板
 
