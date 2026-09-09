@@ -9,18 +9,8 @@ let
       pkgs.codex
     else
       throw "Codex coding-agent capability is unsupported on ${system}";
-  policySource =
-    if system == "aarch64-darwin" then
-      ../../../../dotfiles/codex/AGENTS.md
-    else
-      ../../../../dotfiles/codex/AGENTS.linux.md;
 in
 {
+  # Personal instructions and config stay writable and owned by the user/Codex.
   home.packages = [ codexPackage ];
-
-  home.file.".codex/AGENTS.md" = {
-    source = policySource;
-    force = true;
-  };
-
 }
