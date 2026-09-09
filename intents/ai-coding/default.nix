@@ -5,11 +5,9 @@ let
   software = {
     antigravity = import ../../software/antigravity;
     ax = import ../../software/ax;
-    claudeCode = import ../../software/claude-code;
     codex = import ../../software/codex;
     git = import ../../software/git;
     herdr = import ../../software/herdr;
-    ohMyPi = import ../../software/oh-my-pi;
     python = import ../../software/python;
     rtk = import ../../software/rtk;
     tmux = import ../../software/tmux;
@@ -31,8 +29,6 @@ in
   multiClientCodingEnvironment = compose [
     coreCodingEnvironment
     software.git.versionControl
-    software.claudeCode.codingAgent
     software.antigravity.codingAgent
-    software.ohMyPi.codingAgent
   ];
 }
