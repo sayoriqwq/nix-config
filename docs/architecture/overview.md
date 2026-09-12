@@ -2,7 +2,7 @@
 
 ## 1. 目标与入口
 
-nix-config 是个人工作站托管的统一入口，先满足 macOS 主工作站的日常使用，再按维护者的选择复用到 nixbox 或 server。Git 保存认可的软件版本与稳定配置，Nix 负责求值与构建；实际状态及变化证据由私有 Macwarden authority 保存。日常偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
+nix-config 保存个人工作站的配置基线，按维护者的选择复用到 nixbox 或 server。Git 保存认可的软件版本与稳定配置，Nix 负责求值与构建；实际状态以现场为准，显式选中的历史证据由私有 Macwarden authority 保存。日常偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
 
 声明使用一个顶层 Flake、一个 lock file 和显式 import graph：
 
