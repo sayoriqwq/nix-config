@@ -1,5 +1,23 @@
 # Zed 平台通道更新与回滚
 
+## 当前 macOS 路径（2026-09-13）
+
+Mac 的日常 Zed 改由原生 Preview 安装与自更新负责；Nix Host 不再安装固定包。
+下文 `sync-zed-preview` 用于维护显式恢复基线，不是日常更新的前置步骤。
+Linux Stable 路径继续适用。下文旧的 Mac 安装与 generation 回滚说明只适用于
+仍采用旧 Store 安装的现场，不代表原生应用能随 generation 回滚。
+
+首次迁移需安装可写的 Preview 应用，提供 `zed` CLI，将现有 settings 中的
+`auto_update` 改为 `true`，并移除旧 Host 安装的命令和应用入口。配置初始化只在
+文件不存在时执行，修改仓库基线不会自动更新现有 settings。
+
+验证 CLI、Finder/Raycast 打开同一份原生应用，设置可写、任务与工具可用，并检查
+原生更新入口。下一次有真实更新时再验证下载、替换与重启；仅能检查更新不代表
+完成了一次更新验收。应用 Nix 基线后也应确认没有重新安装 Store 版本。
+
+迁移现场与 nix-darwin 激活是独立机器操作，先核实拟应用构建及全部影响，再按
+当前授权执行。以下正文保留原有固定包维护和 Linux 更新流程。
+
 Zed 的 package owner 按平台分流：macbook 使用 `software/zed/package.nix` 固定的
 官方 Preview aarch64-darwin DMG；nixbox 使用 Linux release nixpkgs 中的
 `pkgs.zed-editor` Stable。server 不选择 Zed。

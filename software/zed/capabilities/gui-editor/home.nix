@@ -8,11 +8,15 @@
 let
   configDirectory = "${config.home.homeDirectory}/.config/zed";
   tasksBaseline = pkgs.writeText "zed-tasks.json" (builtins.toJSON config.sayori.zed.tasks);
-  zedPackage =
+  settingsBaseline =
     if pkgs.stdenv.hostPlatform.isDarwin then
-      pkgs.callPackage ../../package.nix { }
+      pkgs.writeText "zed-settings.json" (
+        builtins.replaceStrings [ ''"auto_update": false'' ] [ ''"auto_update": true'' ] (
+          builtins.readFile ./settings.jsonc
+        )
+      )
     else
-      pkgs.zed-editor;
+      ./settings.jsonc;
   editorCommand = if pkgs.stdenv.hostPlatform.isDarwin then "zed" else "zeditor";
 in
 {
@@ -28,9 +32,9 @@ in
   };
 
   config = {
-    # ADR-0006: macOS pins an official Preview binary; Linux follows the stable
-    # zed-editor from its release Nixpkgs package set and binary caches.
-    home.packages = [ zedPackage ];
+    # macOS uses a writable native installation; the pinned package remains an
+    # explicit recovery output. Linux keeps its release package and update policy.
+    home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.zed-editor ];
 
     # Zed is the sole owner of the default editor role. VS Code and Helix remain
     # available as explicit fallback editors.
@@ -44,7 +48,7 @@ in
     sayori.editors.seedFiles = [
       {
         target = "${configDirectory}/settings.json";
-        baseline = ./settings.jsonc;
+        baseline = settingsBaseline;
       }
       {
         target = "${configDirectory}/keymap.json";

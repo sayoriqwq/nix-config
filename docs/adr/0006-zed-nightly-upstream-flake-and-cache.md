@@ -26,6 +26,21 @@ Darwin 与 Linux 已经按 ADR-0009 使用不同 nixpkgs cadence。Zed 也有真
 
 ## 决策
 
+### 2026-09-13 修订：macOS 原生更新，Nix 保留恢复基线
+
+维护者选择优先恢复 macOS 的独立更新路径：Mac 的日常环境不再安装 Store 中的
+Zed，使用原生、可写的 Preview 应用和其更新器。现有固定 Preview package output
+与更新 helper 保留为显式恢复材料，不随 Host 激活安装。Linux Stable 策略不变。
+
+Mac 新建 settings 时启用自更新，现有可写配置仍不会被初始化逻辑覆盖；迁移时需
+单独修改现场的 `auto_update`。默认编辑器、快捷命令、任务和环境集成继续保留。
+原生安装需提供 PATH 中的 `zed` 命令，并验证其与 Finder/Raycast 指向同一应用。
+
+取舍是 Mac 日常版本不再由固定 hash 或 Nix generation 控制；需要配置恢复时使用
+保存的基线，固定包仍可显式构建。此修订取代下文关于 Mac 必须安装固定包、关闭
+自更新以及否决原生更新的旧决定；以下相关内容保留为历史背景。
+本次声明修改不表示已完成真实机器迁移，整机激活仍按当前授权范围执行。
+
 ### 1. macbook 固定官方 Preview 二进制
 
 macbook 通过 owner-local `software/zed/package.nix` 固定：
