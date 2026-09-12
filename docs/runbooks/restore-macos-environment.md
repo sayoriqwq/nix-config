@@ -40,6 +40,7 @@ nix build .#darwinConfigurations.macbook.system
 
 按单一 owner 恢复外部状态：
 
+- Ghostty 的 Mac 日常安装使用官方签名的 `/Applications/Ghostty.app`，通过应用原生渠道独立更新；Nix 只保留 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`。恢复时先安装[官方 macOS 应用](https://ghostty.org/docs/install/binary)，再应用配置；Linux 继续使用 Nix 包。Mac 不再由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
 - Codex/RTK CLI 由 Nix 安装；`~/.codex/AGENTS.md` 和 `config.toml` 由用户或 Codex 管理，保持可写，不由 Home Manager 投影或覆盖。`~/.codex/RTK.md` 由 RTK init 生命周期生成；Codex/Claude/Antigravity/Oh My Pi 的 auth、session、history、plugins 与 cache 保持外部。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
@@ -67,6 +68,8 @@ echo $VISUAL
 ✅ 确认主要 CLI 来自 Home Manager profile，并核对默认编辑器环境。
 
 随后人工验证 Ghostty/Fish、Zed、Raycast、Fcitx/Rime、Tailscale、Homebrew/MAS 应用和必要 macOS defaults。Build 不能替代这些 runtime checks。
+
+Ghostty 还需确认启动器与 `ghostty` CLI 使用同一份原生应用，Fish、主题和分屏可用；用 `ghostty +validate-config` 显式校验配置。通过应用完成一次真实更新与重启，并在随后应用基线后确认新版仍在、旧 Home Manager 应用入口未重建、现场偏好未覆盖。没有可用更新时，该项保持待验收，不能把“已是最新”当作更新成功。
 
 ## 4. 回滚
 
