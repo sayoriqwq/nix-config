@@ -1,6 +1,6 @@
 # 日常 Nix 维护
 
-适用：本机 nh 4.4.2、`darwinConfigurations.macbook` 和集成式 Home Manager。在准备应用的 nix-config checkout 根目录执行。原则见[主工作站管理](../architecture/workstation-management.md)；普通本地维护不要求 PR。
+适用：本机 nh 4.4.2、`darwinConfigurations.macbook` 和集成式 Home Manager。在准备应用的 nix-config checkout 根目录执行。原则见[主工作站管理](../architecture/workstation-management.md)。
 
 ## 修改配置后应用
 

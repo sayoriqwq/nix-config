@@ -8,7 +8,7 @@
 
 长期软件优先使用社区 Nix 模块和 nh，允许合理版本滞后；实际阻碍可以支持原生迁移。迁出后删除无人使用的固定包与更新器，保留仍有用途的配置和集成。当前 Lix、nix-darwin、集成 Home Manager 与 Darwin rolling/Linux release 都可按真实需求复审，不预设永久绑定。
 
-日常入口见[日常 Nix 维护](../runbooks/daily-nix-maintenance.md)。必要薄包装只复用 Git/Nix/nh 的现有机制，不增加第二份清单、版本数据库或恢复框架。
+日常入口见[日常 Nix 维护](../runbooks/daily-nix-maintenance.md)。按实际操作需要增加包装命令，复用 Git/Nix/nh，减少重复输入；不另造声明或恢复系统。
 
 ## 写入边界与偏移
 

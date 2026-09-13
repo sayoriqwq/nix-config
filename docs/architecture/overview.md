@@ -58,9 +58,3 @@ Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、�
 维护者从 macbook 直接登录 `server:sayori`，经 `sudo` 或获准的 `sudo -i` 管理；root SSH、password 与 keyboard-interactive 关闭。nixbox 使用独立机器凭据登录同一个远端 `sayori`，负责 `x86_64-linux` closure 的构建、测试与获准部署；两把 key 划分凭据保管和撤销边界，不提供 Unix 权限隔离。
 
 nixbox 不是 server 的 bastion。macbook 直达链路与 provider VNC/Rescue 共同保留恢复能力；server 接收已构建 closure，运行时不依赖 GitHub 或 mutable checkout。macbook 到 nixbox 的稳定 transport 使用 Tailscale，用户与 host 认证由 native OpenSSH 承担，tmux 保留断线后的工作现场。技术决策见 [ADR-0008](../adr/0008-direct-nixos-server-replacement.md) 和 [ADR-0010](../adr/0010-tailscale-stable-workstation-access.md)。
-
-## 7. 变更归属与当前协议
-
-单软件行为进入 Software，一起选择的使用需求进入 Intent，硬件/provider facts 进入 Host。检查、构建、真实机器操作与协作方式以当前 [AGENTS.md](../../AGENTS.md)、[协作流程](../agents/issue-tracker.md)和适用 runbook 为准。
-
-历史 ADR 保留技术选择与当时证据；其中迁移期的 Issue/PR、合并后激活等协作要求按当前协议执行。流程简化不自动更改软件来源、固定版本、供应链或数据安全边界。

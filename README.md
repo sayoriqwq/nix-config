@@ -55,8 +55,9 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 
 ## 文档入口
 
-- [Agent 规范](AGENTS.md) 与 [中文译文](docs/agents/protocol.zh-CN.md)
+- [维护约定](AGENTS.md)
 - [领域词汇](CONTEXT.md)
+- [日常 Nix 维护](docs/runbooks/daily-nix-maintenance.md)
 - [主工作站管理](docs/architecture/workstation-management.md)
 - [整体架构](docs/architecture/overview.md)
 - [模块与目录边界](docs/architecture/module-boundaries.md)
@@ -70,15 +71,6 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 - [Zed Preview / Stable 手动更新](docs/runbooks/update-zed-preview.md)
 - [快捷键参考](docs/guide/SHORTCUTS.md)
 
-## 变更流程
+## 日常维护
 
-普通维护按当前明确请求，在现有 checkout 完成修改、必要验证和本地提交。保留与本次任务无关的未提交改动；不默认 push。
-
-需要跨会话跟踪或协作时使用 Issue，需要审阅时使用 PR，需要并行隔离时使用 branch/worktree。它们都不是日常工作的前置条件。授权、验证与完成标准以 [Agent 规范](AGENTS.md) 为准，具体使用方式见[协作流程](docs/agents/issue-tracker.md)。
-
-## 安全边界
-
-- 不提交明文 secret、private key、token、credential、解密输出或私有 `.env`。
-- 不猜测 host、disk、boot、network、SSH、firewall、stateVersion 或运行态事实。
-- 不用 generation rollback 代替应用数据恢复，也不把 external state 清理隐含在配置变更中。
-- Disk、boot、filesystem、encryption、mount、remote network、DNS、firewall、SSH access、reboot、Rescue 和 Reinstall 都需要绑定 exact target 与 rollback 的当次人工批准。
+使用 nh 和按需增加的包装命令，见[日常 Nix 维护](docs/runbooks/daily-nix-maintenance.md)。Agent 的必要约定集中在 [AGENTS.md](AGENTS.md)。
