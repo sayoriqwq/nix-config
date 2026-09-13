@@ -126,16 +126,6 @@
         linuxPkgs = packagesFor "x86_64-linux";
         serverConfiguration = self.nixosConfigurations.server;
       };
-      macbookPinshiftDevelopmentCheck =
-        import ./checks/code-development/macbook-pinshift-development.nix
-          {
-            inherit (darwinPkgs) lib;
-            inherit username;
-            macbookConfiguration = self.darwinConfigurations.macbook;
-            nixboxConfiguration = self.nixosConfigurations.nixbox;
-            pkgs = darwinPkgs;
-            serverConfiguration = self.nixosConfigurations.server;
-          };
       tailscaleSshProxyCheck = import ./checks/stable-workstation-access/tailscale-ssh-proxy.nix {
         homeManager = home-manager-darwin;
         inherit (darwinPkgs) lib;
@@ -198,7 +188,6 @@
       checks = {
         aarch64-darwin = {
           fzf-configure = fzfConfigureCheck;
-          macbook-pinshift-development = macbookPinshiftDevelopmentCheck;
           macbook-system = self.darwinConfigurations.macbook.system;
           tailscale-ssh-proxy = tailscaleSshProxyCheck;
           zed-add-task = zedAddTaskCheck;

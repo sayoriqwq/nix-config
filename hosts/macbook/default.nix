@@ -18,14 +18,11 @@ let
     mise.runtimeManager
     mise.macosRuntimeDefaults
   ];
-  pinshift = import ../../software/pinshift;
   terminalWork = import ../../intents/terminal-work { inherit lib; };
   terminalCompatibility = import ../../intents/terminal-compatibility { inherit lib; };
   terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
   workstationHomeModules =
-    codeDevelopment.homeModules
-    ++ aiCoding.multiClientCodingEnvironment.homeModules
-    ++ pinshift.developmentCli.homeModules;
+    codeDevelopment.homeModules ++ aiCoding.multiClientCodingEnvironment.homeModules;
 in
 {
   imports =
