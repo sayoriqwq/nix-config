@@ -11,13 +11,15 @@ Issue #4 开始时，`macbook` 没有 Nix、Lix、`/nix`、`/etc/nix`、Nix daem
 
 原迁移路线只要求建立 Nix 基础设置，没有预先规定使用上游 Nix 还是 Lix。因此，Lix 不能被当作原计划中的隐含要求，必须作为可追溯的维护者决策记录。
 
-nix-darwin 官方说明：
+当时的 nix-darwin 接入依据与本机选择：
 
 - 上游 Nix 与 Lix 都是受支持的前置实现；
-- 官方 Nix 安装器不提供自动卸载器，而 macOS 手动卸载较复杂，因此新安装推荐考虑 Lix Installer；
+- 当时按首次接入的安装收据与卸载需求选择 Lix Installer；该历史理由不代表其他安装器永远没有卸载能力；
 - 安装器不决定 nix-darwin 后续使用的实现；若要继续使用 Lix，必须显式设置 `nix.package = pkgs.lix`。
 
 ## 决策
+
+2026-09-14 复审：保留当前 Lix 与 nix-darwin/Home Manager 组合，不将实现或安装器永久绑定。迁移由实际收益、兼容性与恢复条件决定；本次不更换实现或安装器。
 
 `macbook` 使用 Lix Installer 完成 bootstrap，并在 nix-darwin 配置中声明：
 
@@ -123,5 +125,5 @@ nix-darwin 官方说明技术上可行，但首次激活会切换实现，增加
 - Lix 与锁定的 nixpkgs、nix-darwin 或 Home Manager 出现持续兼容问题；
 - Lix 项目的维护、安全或发布状态发生重大变化；
 - 多主机运维明确需要统一 Nix 实现，并有证据表明差异造成实际成本；
-- 上游 Nix Installer 在 macOS 上提供同等可靠的自动卸载与升级路径；
+- 其他安装器或实现能满足当前恢复需求，并有实际迁移收益；
 - 维护者决定迁移回上游 Nix。

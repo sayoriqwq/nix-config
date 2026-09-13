@@ -13,7 +13,7 @@
     {
       homeModules = [
         {
-          sayori.zed.tasks = [
+          programs.zed-editor.userTasks = [
             {
               label = name;
               inherit command;

@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | `flake.nix` | inputs、outputs、顶层 package/check/operation wiring | 软件内部配置、Host 业务 bundle |
 | `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
-| `software/<software>/` | 单个 Software 的 package、配置、服务、资产与公开能力 | Host 选择、跨软件需求编排 |
-| `intents/<intent>/` | 通过公开接口组合多个 Software | 写 owner 私有 option、runtime mutation |
+| `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
+| `intents/<intent>/` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
 | `modules/` | 有真实消费者的 System 或跨 owner primitive | `common`/`desktop`/平台全选 bundle |
 | `checks/` | 窄、确定性的 contract validation | production configuration source |
 | `operations/` | 人工可调用且边界固定的安全操作 | 隐式 target、无人值守 production mutation |
@@ -28,9 +28,9 @@
 规则：
 
 - 名称描述行为，不描述目录或平台；
-- Primary Capability 拥有主要 package/config；Extension 只增加窄贡献；
-- 无参数接口直接暴露 attrset；需要真实参数的 Extension 返回同样的 attrset；
-- Extension 不能 import Intent，也不能为了方便复制另一个 Software 的实现；
+- 公开接口表示可选择的行为，不划分 Primary Capability、Extension 或 Contribution 类型；
+- 无参数接口直接暴露 attrset；需要真实参数的行为 返回同样的 attrset；
+- Software 行为不能 import Intent，也不能为了方便复制另一个 Software 的实现；
 - owner-local package、脚本、manifest 和固定数据留在同一 Software tree；
 - 只有一个真实实现时，不创建空 Darwin/NixOS pass-through。
 
@@ -38,7 +38,7 @@
 
 `intents/lib.nix` 只提供一个组合函数：用 `lib.concatMap` 按输入顺序分别拼接三类 module lists，缺失的字段视为空列表。结果始终包含 `darwinModules`、`nixosModules`、`homeModules`，可继续参与组合。
 
-Intent 显式列出要组合的公开接口：
+Intent 表达一起选择的使用需求，可以只有一个软件，也不要求存在胶水代码。依赖必须显式选择，不能依赖另一个 Intent 恰好安装所需程序。Intent 显式列出公开接口：
 
 ```nix
 let
@@ -51,7 +51,7 @@ compose [
 ]
 ```
 
-不得扩展为 registry、relation graph、workflow DSL、自动扫描、优先级求解器或平台 substrate。出现新的真实需求时先增加命名 Primary Capability/Extension；只有 `intents/lib.nix` 的三列表模型本身无法表达时，才通过新 ADR 复审。
+不得扩展为 registry、relation graph、workflow DSL、自动扫描、优先级求解器或平台 substrate。出现新的真实需求时先增加命名行为；只有 `intents/lib.nix` 的三列表模型本身无法表达时，才通过新 ADR 复审。
 
 ## 4. Import 方向
 
@@ -116,9 +116,9 @@ Host 不可以：
 
 ## 8. 选择判断
 
-1. 单软件 package/config/service：进入 Software Primary Capability。
-2. 单软件对既有行为的窄贡献：进入 Software Extension。
-3. 多个 Software 必须一起选择：建立 Intent。
+1. 单软件声明、材料、实现和外部状态边界：进入 Software。
+2. 需要被选择的行为或参数化贡献：暴露普通命名接口。
+3. 一起选择的使用需求：建立 Intent，显式列出依赖。
 4. Boot、disk、NIC、provider、stateVersion：进入 Host/System。
 5. 项目依赖：进入项目 dev shell。
 6. External state 或 secret：保持外部，并建立数据/secret 流程。

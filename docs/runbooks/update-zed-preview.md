@@ -1,128 +1,40 @@
-# Zed 平台通道更新与回滚
+# Zed 更新与配置应用
 
-## 当前 macOS 路径（2026-09-13）
+当前决定见 [ADR-0006](../adr/0006-zed-nightly-upstream-flake-and-cache.md)。macOS 使用原生 Preview 自更新；Linux 使用锁定的 release Stable。Mac 固定包与 `sync-zed-preview` 已删除，旧操作只保留在 Git 历史。
 
-Mac 的日常 Zed 改由原生 Preview 安装与自更新负责；Nix Host 不再安装固定包。
-下文 `sync-zed-preview` 用于维护显式恢复基线，不是日常更新的前置步骤。
-Linux Stable 路径继续适用。下文旧的 Mac 安装与 generation 回滚说明只适用于
-仍采用旧 Store 安装的现场，不代表原生应用能随 generation 回滚。
+## 配置写入范围
 
-首次迁移需安装可写的 Preview 应用，提供 `zed` CLI，将现有 settings 中的
-`auto_update` 改为 `true`，并移除旧 Host 安装的命令和应用入口。配置初始化只在
-文件不存在时执行，修改仓库基线不会自动更新现有 settings。
+Home Manager 持续合并 settings、keymap 与 tasks，文件仍可由 Zed 修改。声明字段优先，settings 递归合并，keymap 按 context、tasks 按 label 合并；其他字段与任务保留。当前稳定材料在 `software/zed/capabilities/gui-editor/`，任务通过 `zed.addTask` 提供。
 
-验证 CLI、Finder/Raycast 打开同一份原生应用，设置可写、任务与工具可用，并检查
-原生更新入口。下一次有真实更新时再验证下载、替换与重启；仅能检查更新不代表
-完成了一次更新验收。应用 Nix 基线后也应确认没有重新安装 Store 版本。
+跨主机复用重点是所选设置和编辑习惯，允许 Preview/Stable 版本差异。`secondary-shift-g` 在 Mac 表示 Cmd，在 Linux 表示 Ctrl；现场已有 `cmd-shift-g` 不应当作不同使用意图。上游合并按字面键名处理，因而可能保留两个等价别名。
 
-迁移现场与 nix-darwin 激活是独立机器操作，先核实拟应用构建及全部影响，再按
-当前授权执行。以下正文保留原有固定包维护和 Linux 更新流程。
+删除声明不会删除现场遗留字段、快捷键或任务；需要删除时另行明确目标。数组通常被声明数组替换，不能假定逐项保留。合并会丢失注释与原有格式。当前上游 JSON5 解析失败会退回空对象/数组，存在覆盖风险；它不是备份机制。
 
-Zed 的 package owner 按平台分流：macbook 使用 `software/zed/package.nix` 固定的
-官方 Preview aarch64-darwin DMG；nixbox 使用 Linux release nixpkgs 中的
-`pkgs.zed-editor` Stable。server 不选择 Zed。
+## 激活前
 
-两条通道不追求版本一致。macbook 需要较新的 Preview 功能；nixbox 使用 release
-package，并优先从 USTC substitution；USTC closure 不完整时由 macbook 中继官方 cache
-的已签名二进制。应用自更新关闭，仓库不运行定期更新 Action。
+1. 在目标机器读回三份现场文件，核实 JSON/JSONC 解析成功且根类型正确（settings 对象、keymap/tasks 数组）；发现错误就停止并先修复。
+2. 比较已声明字段，将想保留的现场修改保存到仓库，审阅 diff；不要顺带导入账号、令牌、私有路径或全部配置。
+3. 退出 Zed，避免应用在合并期间再次写入；复制现存 settings.json、keymap.json、tasks.json 到私有、带时间的备份目录，确认副本一致。缺失文件记录为缺失，不造假备份。
+4. 检查候选与整机影响，确认目标、revision、执行窗口、停止条件和已知可用 generation 后，再按[日常维护](daily-nix-maintenance.md)执行授权的激活。正常 Mac 激活也会重新执行这些合并。
 
-通用协作流程以 [AGENTS.md](../../AGENTS.md) 为准；分支、worktree 与 PR 按当前任务需要选择，不是更新前提。
+检查、备份、退出应用和激活须针对具体操作执行，本手册本身不表示已经执行或授权。复杂动作应由当前任务准备短入口，不要求维护者手抄 Store path 或长参数。
 
-## macbook：手动同步 Preview
+## 读回与恢复
 
-先确认当前工作树与 package 文件中的已有改动；package 文件有未处理改动时先厘清，再运行同步：
+激活后确认三份文件可解析、仍是可写普通文件，声明字段生效，未声明的测试字段与任务保留。启动 Zed 检查主题、键位、LazyGit 任务和默认编辑器；仅 Nix 求值通过不能代替真实使用验收。
 
-```fish
-git status --short --branch
-nix run .#sync-zed-preview
-```
+失败时停止继续应用，退出 Zed，从本次私有副本恢复可写文件并核对内容；必要时按授权回滚 generation。先修复或撤销 Git 中的失败声明，否则下一次激活会再次应用。generation 回退不能保证恢复可写配置或原生应用版本，缺失前不存在的文件也不能靠副本自动撤销。
 
-🔄 确认工作树后解析官方最新 Preview，预取 aarch64-darwin DMG 并更新固定版本与 hash。
+## 应用更新
 
-`sync-zed-preview` 会先完成以下工作，任一步失败都不会写入 package 文件：
+Mac 使用 Preview 自身的更新入口；确认 CLI `zed` 和图形入口指向同一原生应用。应用安装与版本恢复使用原生流程，Nix 不提供 Mac Zed 恢复包。
 
-1. 通过官方 Preview `latest` redirect 取得精确语义版本；
-2. 用 Nix 预取 macOS aarch64 DMG 并计算 flat hash；
-3. 只替换 `software/zed/package.nix` 的 release 与 DMG hash；
-4. 格式化 package 文件并展示 diff。
-
-需要重做某个已知官方 Preview 时：
+Linux 随 Linux nixpkgs input 更新。求值精确目标：
 
 ```fish
-nix run .#sync-zed-preview -- --release '<major.minor.patch>'
+nix eval --raw .#packages.x86_64-linux.zed-stable.outPath
 ```
 
-🎯 重新固定已知 Preview，不把浮动 `latest` 写入 package source。
+🔎 只读取锁定的目标路径，不证明缓存完整，也不编译 Zed。
 
-审阅和非 activation 验证：
-
-```fish
-git diff --name-only
-git diff -- software/zed/package.nix
-nix fmt -- --check .
-nix flake check
-nix build --no-link .#packages.aarch64-darwin.zed-preview
-nix build --no-link .#darwinConfigurations.macbook.system
-```
-
-✅ 验证范围、Flake policy、官方 Preview package 与 macbook closure。
-
-构建后的 `.app` 必须读取代码签名、bundle identity 与版本；日志不得出现 Zed source
-checkout、Cargo、Rust 或 Crane。helper 不会 commit、push、创建 PR、merge 或 activation。
-
-## nixbox：随 Linux release nixpkgs 更新 Stable
-
-nixbox 没有独立 Zed updater。Stable 版本只随经过审阅的 Linux `nixpkgs` input 更新。
-采用任何 Linux input 更新前，先取得目标版本和 outPath，并真实复制完整
-closure。不要用 `nix path-info` 代替复制；镜像可能存在 `.narinfo` 却缺少某个 NAR：
-
-```fish
-set zed_stable (nix eval --raw .#packages.x86_64-linux.zed-stable)
-nix copy --from https://mirrors.ustc.edu.cn/nix-channels/store $zed_stable
-```
-
-🧊 以完整 NAR 复制验证 USTC 正常路径，不接受仅有 narinfo 的假阳性。
-
-USTC 缺少任一 NAR 时，macbook 从官方 cache 取得同一签名 closure，再经既有 SSH
-transport relay。以下命令不编译 Zed，也不改变 nixbox 的 substituter 或代理配置：
-
-```fish
-nix copy --from https://cache.nixos.org $zed_stable
-nix copy --to ssh-ng://nixbox $zed_stable
-```
-
-📦 从官方缓存获取并中继已经签名的 Stable closure。
-
-官方 cache 也无法完成复制时立即停止该 Linux input 更新。不在 nixbox 运行 Zed source
-build，不临时增加 source Flake、Cargo/Rust、Cachix、通用外网代理或 production server
-builder。macbook 只中继 store closure，不承担编译或常驻代理。
-
-复制完成后，先在 nixbox 验证精确 path，再原生构建：
-
-```fish
-set zed_stable (nix eval --raw .#packages.x86_64-linux.zed-stable)
-nix-store --check-validity $zed_stable
-nix build --no-link .#packages.x86_64-linux.zed-stable
-nix build --no-link .#nixosConfigurations.nixbox.config.system.build.toplevel
-```
-
-🐧 验证 Stable substitution 与整机 closure，不 activation。
-
-## Mutable state 与首次运行
-
-Preview、Stable 和已退休的 Nightly 可能使用不同的 channel/state namespace。本仓库只
-管理 package、CLI、默认编辑器声明和 seed-only 配置；settings、keymap、tasks、
-extensions、登录态、History、workspace/session、数据库与 cache 仍是外部可变状态。
-
-第一次 activation 新通道后需要维护者分别完成启动、版本、CLI、项目打开、task 与
-extension smoke。不得自动迁移、合并或删除旧 channel state。
-
-## 失败与回滚
-
-- Preview identity、artifact、hash、解包、签名或 host build 失败时，停止采用本次更新；
-- Stable 在 USTC 与官方 cache 都无法完成 closure 复制时，停止采用对应 Linux input 更新；
-- 未 activation 时定向撤回本次声明改动；已提交的改动按实际提交回滚，再重新 build；
-- 已 activation 时先切回上一代 nix-darwin/NixOS generation，再 revert 声明；
-- Zed live state 异常时从仓库外私有备份人工恢复。
-
-Git/generation 回滚只改变应用 package，不恢复任何 Zed mutable state。
+更新前必须真实复制完整签名闭包：先用 USTC，缺失时 Mac 从官方 cache 获取并经已有 SSH transport 中继到 nixbox。由当前任务准备使用求值结果的短命令，不能手抄 Store path。nixbox 确认该路径有效后才构建 toplevel；两处缓存均不完整则保留原 lock，禁止源码构建回退。此修改若不更新 Linux input，不需要重复下载现有 Zed 闭包。

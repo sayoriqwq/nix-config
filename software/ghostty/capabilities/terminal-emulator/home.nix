@@ -16,9 +16,14 @@ in
     pkgs.maple-mono.NF-CN
   ];
 
+  # The native macOS bundle owns updates; keep CLI calls on that same version.
+  home.file.".local/bin/ghostty" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    source = config.lib.file.mkOutOfStoreSymlink "/Applications/Ghostty.app/Contents/MacOS/ghostty";
+  };
+
   programs.ghostty = {
     enable = true;
-    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
+    package = if pkgs.stdenv.hostPlatform.isDarwin then null else pkgs.ghostty;
 
     # Ghostty automatically integrates the initially launched Fish process.
     # Manual Home Manager injection is deliberately disabled for both shells.
@@ -30,13 +35,13 @@ in
       command = "direct:${lib.getExe config.programs.fish.package} -l";
       "font-family" = appearance.fontFamily;
       "font-size" = appearance.fontSize;
+      "cursor-style" = "bar";
       "window-padding-x" = 20;
       "background-opacity" = appearance.backgroundOpacity;
       "background-opacity-cells" = true;
       "background-blur" = appearance.backgroundBlur;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-      "auto-update" = "off";
       "macos-titlebar-style" = "tabs";
       "macos-window-buttons" = "hidden";
     };

@@ -39,18 +39,8 @@ let
     pkgs = linuxPkgs;
     username = "zed-package-selection-linux";
   };
-  darwinZed = darwinPkgs.callPackage ../../software/zed/package.nix { };
   linuxZed = linuxPkgs.zed-editor;
   packagePaths = home: map toString home.config.home.packages;
-  settingsText =
-    home:
-    builtins.readFile (
-      (builtins.head (
-        builtins.filter (
-          seed: darwinPkgs.lib.hasSuffix "/settings.json" seed.target
-        ) home.config.sayori.editors.seedFiles
-      )).baseline
-    );
   zedPackagePaths =
     paths: builtins.filter (path: builtins.match ".*zed-(editor|preview).*" path != null) paths;
   serverPackagePaths = map toString (
@@ -62,16 +52,16 @@ let
       expr = zedPackagePaths (packagePaths darwinHome);
       expected = [ ];
     };
-    testDarwinDistribution = {
-      expr = darwinZed.passthru.zedDistribution;
-      expected = "official-preview-binary";
+    testDarwinNativePackage = {
+      expr = darwinHome.config.programs.zed-editor.package;
+      expected = null;
     };
     testDarwinAutoUpdateEnabled = {
-      expr = darwinPkgs.lib.hasInfix ''"auto_update": true'' (settingsText darwinHome);
+      expr = darwinHome.config.programs.zed-editor.userSettings.auto_update;
       expected = true;
     };
     testLinuxAutoUpdateDisabled = {
-      expr = darwinPkgs.lib.hasInfix ''"auto_update": false'' (settingsText linuxHome);
+      expr = !linuxHome.config.programs.zed-editor.userSettings.auto_update;
       expected = true;
     };
     testLinuxUsesReleaseStable = {

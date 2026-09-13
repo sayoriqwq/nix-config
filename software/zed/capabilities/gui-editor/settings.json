@@ -1,5 +1,3 @@
-// Zed settings baseline. Live settings remain writable and are never
-// overwritten by Home Manager after initialization.
 {
   "auto_update": false,
   "cli_default_open_behavior": "new_window",
@@ -61,7 +59,7 @@
   "buffer_font_size": 16.0,
   "theme": {
     "mode": "dark",
-    "light": "Catppuccin Latte",
+    "light": "One Light",
     "dark": "Ayu Darker"
   }
 }

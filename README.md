@@ -8,7 +8,7 @@
 | `nixbox` | `x86_64-linux` | NixOS 次级工作站、Linux 实验与 server 预生产验证节点 |
 | `server` | `x86_64-linux` | 最小 NixOS production host，只按真实需求增加服务 |
 
-Git 和 `flake.lock` 保存稳定声明；本机安装、更新和调整产生的偏移可以正常存在，维护者要求同步时才更新选中的基线。私有现场证据由 Macwarden 保存于本地 `.macwarden/`，该目录不进入 Git 或 Nix 构建输入。管理约定见[主工作站管理](docs/architecture/workstation-management.md)。
+Git 和 `flake.lock` 保存稳定声明；当前运行环境是实际状态的唯一事实来源。可以先在 Mac 调整，再保存希望复用的配置；每次应用前检查已声明字段，避免覆盖想保留的修改。未声明的额外设置不构成偏移。私有现场证据由独立 Macwarden 项目管理，不进入公开声明。管理约定见[主工作站管理](docs/architecture/workstation-management.md)。
 
 Build 只证明配置可构建；真实 activation、远端访问、磁盘和生产数据操作仍需针对目标与动作的明确授权。
 
@@ -17,15 +17,15 @@ Build 只证明配置可构建；真实 activation、远端访问、磁盘和生
 ```text
 flake.nix
   ├── hosts/<host>                 精确选择
-  │    ├── intents/<intent>        跨 Software 的可执行组合
+  │    ├── intents/<intent>        一起选择的使用需求
   │    ├── software/<software>     软件 package/config/service owner
   │    └── modules/                少量系统或跨 owner primitive
   ├── checks/                      窄 contract checks
   └── operations/                  人工触发、无隐式 target 的安全操作
 ```
 
-- Software 是纵轴 owner：拥有一个软件的 package、稳定配置、服务与平台实现。
-- Intent 是横轴组合：只通过 Software 的公开 Primary Capability 或 Extension 形成需求结果。
+- Software 聚合同一软件的声明、材料、实现与外部状态边界；选择软件不代表拥有其全部状态。
+- Intent 表达一起选择的使用需求，通过 Software 公开行为显式列出依赖，可以只涉及一个软件。
 - Host 是最终 caller：显式选择 Intent、独立 Software 与机器事实；没有 registry、bundle、自动扫描或平台全选。
 - 可变数据库、登录态、缓存、凭据和用户内容继续由应用或维护者拥有，不进入 Nix Store。
 
@@ -55,8 +55,9 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 
 ## 文档入口
 
-- [Agent 规范](AGENTS.md) 与 [中文译文](docs/agents/protocol.zh-CN.md)
+- [维护约定](AGENTS.md)
 - [领域词汇](CONTEXT.md)
+- [日常 Nix 维护](docs/runbooks/daily-nix-maintenance.md)
 - [主工作站管理](docs/architecture/workstation-management.md)
 - [整体架构](docs/architecture/overview.md)
 - [模块与目录边界](docs/architecture/module-boundaries.md)
@@ -70,15 +71,6 @@ nix build .#nixosConfigurations.server-recovery-install.config.system.build.topl
 - [Zed Preview / Stable 手动更新](docs/runbooks/update-zed-preview.md)
 - [快捷键参考](docs/guide/SHORTCUTS.md)
 
-## 变更流程
+## 日常维护
 
-普通维护按当前明确请求，在现有 checkout 完成修改、必要验证和本地提交。保留与本次任务无关的未提交改动；不默认 push。
-
-需要跨会话跟踪或协作时使用 Issue，需要审阅时使用 PR，需要并行隔离时使用 branch/worktree。它们都不是日常工作的前置条件。授权、验证与完成标准以 [Agent 规范](AGENTS.md) 为准，具体使用方式见[协作流程](docs/agents/issue-tracker.md)。
-
-## 安全边界
-
-- 不提交明文 secret、private key、token、credential、解密输出或私有 `.env`。
-- 不猜测 host、disk、boot、network、SSH、firewall、stateVersion 或运行态事实。
-- 不用 generation rollback 代替应用数据恢复，也不把 external state 清理隐含在配置变更中。
-- Disk、boot、filesystem、encryption、mount、remote network、DNS、firewall、SSH access、reboot、Rescue 和 Reinstall 都需要绑定 exact target 与 rollback 的当次人工批准。
+使用 nh 和按需增加的包装命令，见[日常 Nix 维护](docs/runbooks/daily-nix-maintenance.md)。Agent 的必要约定集中在 [AGENTS.md](AGENTS.md)。
