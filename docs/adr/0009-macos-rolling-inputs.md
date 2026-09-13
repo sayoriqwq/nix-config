@@ -77,6 +77,11 @@ Obsidian capability 仅在 Darwin 对 `pkgs.obsidian` 做 override：清除错�
 `sourceRoot` 假设，并在解包结果中定位第一个 `Obsidian.app`。Linux 继续直接使用
 原始 `pkgs.obsidian`。
 
+2026-09-13 后续变更：Mac 的 Obsidian 改为官方原生安装，日常应用更新由
+Obsidian 拥有，Electron 安装器更新按官方流程手动安装；因此删除上述 Darwin
+DMG 解包 override。Linux 继续使用原始 `pkgs.obsidian`，rolling inputs 决策不变。
+恢复与可变数据边界见[macOS 恢复手册](../runbooks/restore-macos-environment.md)。
+
 Home Manager 26.05 曾直接读取 Fish package 中已经移除的
 `create_manpage_completions.py`，因此 Darwin 暂时关闭过 man-page completion 生成。
 锁定的 Home Manager `master` 已改为从 Fish 二进制的内置资源提取生成器；#115 删除该

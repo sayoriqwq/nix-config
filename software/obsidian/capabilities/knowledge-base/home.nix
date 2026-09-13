@@ -1,24 +1,15 @@
-{ pkgs, ... }:
-
-let
-  obsidian =
-    if pkgs.stdenv.hostPlatform.isDarwin then
-      pkgs.obsidian.overrideAttrs (_old: {
-        # The unstable Darwin DMG currently nests Obsidian.app under a
-        # versioned directory, while the package's sourceRoot expects it at
-        # the archive root.
-        sourceRoot = null;
-        setSourceRoot = ''
-          sourceRoot="$(find . -type d -name 'Obsidian.app' -print -quit)"
-          if [ -z "$sourceRoot" ]; then
-            echo "Obsidian.app was not found in the unpacked DMG" >&2
-            exit 1
-          fi
-        '';
-      })
-    else
-      pkgs.obsidian;
-in
 {
-  home.packages = [ obsidian ];
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+{
+  home.packages = lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.obsidian ];
+
+  # The native macOS bundle owns updates; vaults and preferences stay external.
+  home.file.".local/bin/obsidian" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    source = config.lib.file.mkOutOfStoreSymlink "/Applications/Obsidian.app/Contents/MacOS/Obsidian";
+  };
 }
