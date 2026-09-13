@@ -14,7 +14,8 @@
 | 长期架构决策与被否决方案 | docs/adr/ |
 | 当前操作、读回与 rollback | docs/runbooks/ 和执行 Agent 针对本次动作形成的方案 |
 | 用户选定的稳定声明与 Host 选择 | flake.nix、flake.lock、software/、intents/、hosts/、modules/、dotfiles/、operations/ |
-| 私有机器现场与历史变化证据 | Macwarden 私有记录与带时间、范围的现场读回；不等同于仓库声明 |
+| 当前机器实际状态 | 当前运行环境的直接读回；声明和历史都不能代替 |
+| 私有历史变化证据 | 独立 Macwarden 私有记录与带时间、范围的观察 |
 | 本次变更与验证结果 | 本地提交及任务完成报告；使用 Issue/PR 协作时可在那里补充必要记录 |
 | 需要跨会话保存的计划与依赖 | 按需使用的 Issue、PR 或 Milestone |
 | 历史追溯 | Git history、已有 Issues/PR 与 tags |

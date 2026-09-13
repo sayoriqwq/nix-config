@@ -8,7 +8,7 @@
 | `nixbox` | `x86_64-linux` | NixOS 次级工作站、Linux 实验与 server 预生产验证节点 |
 | `server` | `x86_64-linux` | 最小 NixOS production host，只按真实需求增加服务 |
 
-Git 和 `flake.lock` 保存稳定声明；本机安装、更新和调整产生的偏移可以正常存在，维护者要求同步时才更新选中的基线。私有现场证据由 Macwarden 保存于本地 `.macwarden/`，该目录不进入 Git 或 Nix 构建输入。管理约定见[主工作站管理](docs/architecture/workstation-management.md)。
+Git 和 `flake.lock` 保存稳定声明；当前运行环境是实际状态的唯一事实来源。可以先在 Mac 调整，再保存希望复用的配置；每次应用前检查已声明字段，避免覆盖想保留的修改。未声明的额外设置不构成偏移。私有现场证据由独立 Macwarden 项目管理，不进入公开声明。管理约定见[主工作站管理](docs/architecture/workstation-management.md)。
 
 Build 只证明配置可构建；真实 activation、远端访问、磁盘和生产数据操作仍需针对目标与动作的明确授权。
 
@@ -17,15 +17,15 @@ Build 只证明配置可构建；真实 activation、远端访问、磁盘和生
 ```text
 flake.nix
   ├── hosts/<host>                 精确选择
-  │    ├── intents/<intent>        跨 Software 的可执行组合
+  │    ├── intents/<intent>        一起选择的使用需求
   │    ├── software/<software>     软件 package/config/service owner
   │    └── modules/                少量系统或跨 owner primitive
   ├── checks/                      窄 contract checks
   └── operations/                  人工触发、无隐式 target 的安全操作
 ```
 
-- Software 是纵轴 owner：拥有一个软件的 package、稳定配置、服务与平台实现。
-- Intent 是横轴组合：只通过 Software 的公开 Primary Capability 或 Extension 形成需求结果。
+- Software 聚合同一软件的声明、材料、实现与外部状态边界；选择软件不代表拥有其全部状态。
+- Intent 表达一起选择的使用需求，通过 Software 公开行为显式列出依赖，可以只涉及一个软件。
 - Host 是最终 caller：显式选择 Intent、独立 Software 与机器事实；没有 registry、bundle、自动扫描或平台全选。
 - 可变数据库、登录态、缓存、凭据和用户内容继续由应用或维护者拥有，不进入 Nix Store。
 

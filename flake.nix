@@ -79,18 +79,6 @@
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
-      zedPreview = darwinPkgs.callPackage ./software/zed/package.nix { };
-      zedPreviewUpdater = darwinPkgs.writeShellApplication {
-        name = "sync-zed-preview";
-        runtimeInputs = [
-          darwinPkgs.curl
-          darwinPkgs.git
-          darwinPkgs.jq
-          darwinPkgs.nix
-          darwinPkgs.python3
-        ];
-        text = builtins.readFile ./software/zed/update.sh;
-      };
       serverModules = [
         ./hosts/server
         disko.nixosModules.disko
@@ -168,21 +156,12 @@
       nixosConfigurations.server-recovery-install = serverRecoveryOperation.installConfiguration;
 
       # Explicit package outputs give CI and future hosts stable validation
-      # targets for the narrow Clash seam and Zed's platform-specific channels.
+      # targets for the narrow Clash seam and Linux Zed Stable.
       packages = {
-        aarch64-darwin = {
-          sync-zed-preview = zedPreviewUpdater;
-          zed-preview = zedPreview;
-        };
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
           zed-stable = (packagesFor "x86_64-linux").zed-editor;
         };
-      };
-
-      apps.aarch64-darwin.sync-zed-preview = {
-        type = "app";
-        program = "${zedPreviewUpdater}/bin/sync-zed-preview";
       };
 
       checks = {

@@ -47,7 +47,7 @@ nix build .#darwinConfigurations.macbook.system
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
 - Codex/RTK CLI 由 Nix 安装；`~/.codex/AGENTS.md` 和 `config.toml` 由用户或 Codex 管理，保持可写，不由 Home Manager 投影或覆盖。`~/.codex/RTK.md` 由 RTK init 生命周期生成；Codex/Claude/Antigravity/Oh My Pi 的 auth、session、history、plugins 与 cache 保持外部。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
-- Browser profile、Obsidian vault、VS Code/Zed live settings、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
+- Browser profile、Obsidian vault、VS Code live settings、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
 
 RTK 需要恢复时由维护者运行：
 

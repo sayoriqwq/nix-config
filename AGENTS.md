@@ -11,7 +11,7 @@ Maintain one auditable, reproducible Nix configuration repository for:
 - one minimal NixOS server whose production capabilities follow current requirements;
 - requirement-driven Software owners and Intents explicitly selected by those hosts.
 
-The repository manages **configuration declarations**, not mutable application data or backups. Private machine evidence belongs in Macwarden, separately from the stable declarations selected for this repository.
+The repository manages selected **configuration declarations**, reusable configuration material and nearby ownership/path documentation. The running environment is the source of truth for actual state. Macwarden provides independent private historical evidence through its own skills; this repository does not govern agents working in other projects or maintain application data and backups.
 
 ## 2. Start from the current request
 
@@ -49,12 +49,12 @@ Respect real dependencies: complete a prerequisite needed for the next action, r
 ## 5. Architecture invariants
 
 - Use one top-level Flake as the declaration source of truth.
-- Treat Nix declarations and the lock file as the authority for managed desired state. Record lasting managed changes in declarations; use live evidence to verify deployment. Improve routine update/apply workflows before changing ownership, and keep helpers limited to existing Git/Nix/nh mechanisms without a second inventory or declaration format. See [workstation management](docs/architecture/workstation-management.md) for guarantees and exceptions.
+- Prefer community packages and existing Git/Nix/nh operations for selected long-lived software; choose external ownership when concrete usage or compatibility needs justify it. State each resource's actual write boundary. Before applying or sharing continuously managed settings, inspect relevant live drift and save changes the maintainer wants to retain. Existing community mutable-configuration modules may control selected fields; init-only resources remain independent after creation. See [workstation management](docs/architecture/workstation-management.md).
 - Use Home Manager for the portable user layer, nix-darwin for macOS system configuration, and NixOS modules for NixOS system configuration.
 - Keep the minimal NixOS server requirement-driven. Add each production capability through an explicitly scoped request; do not restore the retired Ubuntu server layer.
 - Keep host and hardware facts under `hosts/<host>/`.
 - Keep each software package, stable configuration, service and owner-local asset under `software/<software>/`.
-- Keep cross-software executable composition under `intents/<intent>/`; Intents may use only public Software Primary Capabilities and Extensions.
+- Keep collectively selected usage requirements under `intents/<intent>/`; Intents use public Software behaviors and explicit dependencies. An Intent need not involve multiple software packages. Do not rely on another Intent incidentally providing a required program.
 - Keep only proven reusable System or Home Manager primitives under `modules/`.
 - Compose hosts through explicit Intent results, independent Software platform modules and host facts. Imports are the selection mechanism; do not add a global capability registry or automatic discovery.
 - Hosts must not import common, desktop, Darwin, Linux or server bundles as substitutes for requirements.

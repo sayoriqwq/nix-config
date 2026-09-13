@@ -11,7 +11,7 @@
 - 一台按当前需求增加生产能力的最小 NixOS 服务器；
 - 由这些主机显式选择、按真实需求组合的 Software owner 与 Intent。
 
-本仓库管理**配置声明**，不管理可变应用数据或备份。私有机器证据保存在 Macwarden，与用户选择纳入本仓库的稳定声明分开。
+本仓库管理选定的**配置声明**、可复用配置材料及邻近的归属和路径说明。当前运行环境是实际状态的事实来源。Macwarden 通过自己的 Skills 提供独立私有历史证据；本仓库不管理其他项目中的 Agent，也不维护应用数据和备份。
 
 ## 2. 从当前请求开始
 
@@ -49,12 +49,12 @@
 ## 5. 架构不变量
 
 - 使用一个顶层 Flake 作为声明事实源。
-- Nix 声明与 lock 是受管期望状态的权威来源。希望长期保留的受管变更进入声明，现场证据用于验证部署。改变所有权前先改善日常更新与应用流程；辅助命令仅组合现有 Git/Nix/nh 机制，不另建软件清单或声明格式。保证与例外见[主工作站管理](../architecture/workstation-management.md)。
+- 选定的长期软件优先采用社区包与现有 Git/Nix/nh 操作；具体使用或兼容需求可以支持外部所有权。说明每项资源实际的写入边界。应用或共享持续管理的设置前，检查相关现场偏移并保存维护者想保留的修改。已有社区可写配置模块可以管理所选字段；仅初始化的资源在创建后独立。见[主工作站管理](../architecture/workstation-management.md)。
 - Home Manager 管理可移植用户层，nix-darwin 管理 macOS 系统配置，NixOS modules 管理 NixOS 系统配置。
 - 最小 NixOS server 按需求演进，每项生产能力通过范围明确的请求引入，不恢复已退役的 Ubuntu server 层。
 - 主机与硬件事实放在 `hosts/<host>/`。
 - 每个软件的 package、稳定配置、服务和 owner-local asset 放在 `software/<software>/`。
-- 跨软件可执行组合放在 `intents/<intent>/`；Intent 只使用公开的 Software Primary Capability 与 Extension。
+- 整体选择的使用需求放在 `intents/<intent>/`；Intent 使用公开的 Software 行为并明确依赖，不要求涉及多个软件，也不依赖其他 Intent 恰好提供所需程序。
 - `modules/` 只保留已经证明可复用的 System 或 Home Manager primitive。
 - 主机通过显式 Intent 结果、独立 Software platform module 和主机事实组合。Import 就是选择机制，不增加全局 capability registry 或自动发现。
 - 主机不得用 common、desktop、Darwin、Linux 或 server bundle 代替需求选择。

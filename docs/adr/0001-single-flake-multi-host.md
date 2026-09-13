@@ -15,6 +15,7 @@
 - `flake.lock` 固定所有 inputs；
 - 每台机器拥有独立、明确命名的 output；
 - 主机通过模块组合共享配置，不复制完整配置；
+- 共享重点是维护者选中的配置与使用行为；平台包来源、版本和更新节奏可以不同，不要求同一个 nixpkgs revision；
 - macOS 使用 `darwinConfigurations`；
 - NixOS 工作站与最终服务器使用 `nixosConfigurations`；
 - server 已从 Ubuntu 直接替换并由最终 `nixosConfigurations.server` 管理；不恢复过渡 output；
@@ -29,8 +30,8 @@
 - 所有机器共享同一个依赖锁和审计历史；
 - 可在合适的同架构节点 build 另一台机器的配置；nixbox 是 server 的主要预生产构建节点；
 - 共享边界通过 import 关系显式表达；
-- 更新 inputs 可以在一个 PR 中比较三台机器的影响；
-- Codex 只需理解一个仓库和一套治理协议。
+- 更新 inputs 可以在同一个 Git diff 中比较受影响主机的声明；
+- Agent 可以从同一声明结构与就近说明找到配置及外部边界，本仓库不承担跨项目 Agent 治理。
 
 ### 代价
 

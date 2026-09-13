@@ -2,12 +2,12 @@
 
 ## 1. 目标与入口
 
-nix-config 的 Nix 声明与 lock 是受管环境期望状态的唯一真源，按维护者的选择复用到 nixbox 或 server。长期变更进入声明，Nix 负责求值与构建，现场读回验证实际部署；显式选中的历史证据由私有 Macwarden authority 保存。日常维护、偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
+当前运行环境是实际状态的唯一事实来源。nix-config 的声明与 lock 保存维护者选定的配置和输入，按需复用到其他机器；Nix 负责求值、构建和所选写入机制，现场读回验证实际部署。私有历史证据由独立 Macwarden 项目维护。日常维护、偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
 
 声明使用一个顶层 Flake、一个 lock file 和显式 import graph：
 
 - 一个软件只有一个 package/config/service owner；
-- 跨软件需求集中在 Intent，Host 保留最终选择；
+- 一起选择的使用需求集中在 Intent，Host 保留最终选择；
 - Check、Operation 与 production graph 单向依赖；
 - 外部 state 和操作影响保持可见。
 
@@ -15,7 +15,7 @@ nix-config 的 Nix 声明与 lock 是受管环境期望状态的唯一真源，�
 
 Software、Intent、Host 的接口与 import 方向统一见[模块与目录边界](module-boundaries.md)。
 
-Macwarden 工具源码和 Skills 由独立项目维护；主 checkout 的私有 `.macwarden/` 被 Git 忽略，不进入 Flake 或公开历史。
+Macwarden 的模型、工具和 Skills 由独立项目维护，本仓库不复制其合同或接管跨 Agent 管理。
 
 ## 3. Flake outputs
 
@@ -25,9 +25,9 @@ Macwarden 工具源码和 Skills 由独立项目维护；主 checkout 的私有 
 - `nixosConfigurations.nixbox`
 - `nixosConfigurations.server`
 
-显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Zed binary package、Clash Verge Rev package 和 Zed 手动更新。按需的 `server-recovery-install` installation configuration 不是已经执行的恢复动作；任何 Output 也不表示已经 activation。
+显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Linux Zed Stable 与 Clash Verge Rev package。按需的 `server-recovery-install` installation configuration 不是已经执行的恢复动作；任何 Output 也不表示已经 activation。
 
-Darwin 使用 rolling nixpkgs/nix-darwin/Home Manager inputs；Linux 使用 26.05 release inputs。两条 cadence 共享同一 lock file；现有平台版本差异不表示维护者已经要求同步。显式同步选中软件时，仍须满足[主工作站管理](workstation-management.md)中的版本要求。
+当前 Darwin 使用 rolling nixpkgs/nix-darwin/Home Manager inputs；Linux 使用 26.05 release inputs。两条 cadence 共享同一 lock file；现有平台版本差异不表示维护者已经要求同步。显式同步选中软件时，仍须满足[主工作站管理](workstation-management.md)中的版本要求。
 
 `system.stateVersion` 与 `home.stateVersion` 保留首次采用值，不随 channel 升级。
 
@@ -61,6 +61,6 @@ nixbox 不是 server 的 bastion。macbook 直达链路与 provider VNC/Rescue �
 
 ## 7. 变更归属与当前协议
 
-单软件行为进入 Software，跨软件选择进入 Intent，硬件/provider facts 进入 Host。检查、构建、真实机器操作与协作方式以当前 [AGENTS.md](../../AGENTS.md)、[协作流程](../agents/issue-tracker.md)和适用 runbook 为准。
+单软件行为进入 Software，一起选择的使用需求进入 Intent，硬件/provider facts 进入 Host。检查、构建、真实机器操作与协作方式以当前 [AGENTS.md](../../AGENTS.md)、[协作流程](../agents/issue-tracker.md)和适用 runbook 为准。
 
 历史 ADR 保留技术选择与当时证据；其中迁移期的 Issue/PR、合并后激活等协作要求按当前协议执行。流程简化不自动更改软件来源、固定版本、供应链或数据安全边界。
