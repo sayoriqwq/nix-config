@@ -40,6 +40,7 @@ nix build .#darwinConfigurations.macbook.system
 
 按单一 owner 恢复外部状态：
 
+- Pinshift 的 `~/.local/bin/pinshift` 由项目自己的 `pinshift register` 注册，Home Manager 不再提供转发命令。项目移动后从新 checkout 重新注册；项目依赖、签名、设备操作和应用数据仍由 Pinshift 管理。
 - Obsidian 的 Mac 安装使用[官方安装器](https://obsidian.md/download)提供的 `/Applications/Obsidian.app`；Nix 只提供指向该应用的 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：后者仍需按[官方更新说明](https://obsidian.md/help/updates)定期重新安装。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
 - VS Code 的 Mac 安装使用微软签名的 `/Applications/Visual Studio Code.app`，由应用原生更新；Nix 只提供首次设置基线和指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。恢复时先安装[官方 macOS 应用](https://code.visualstudio.com/docs/setup/mac)，再应用配置。Mac 首次基线使用 `update.mode = default`；已有设置不会被基线覆盖，旧现场若为 `none`，需在所选迁移范围内改为 `default`。设置、扩展和用户数据保持外部，版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 日常安装使用官方签名的 `/Applications/Ghostty.app`，通过应用原生渠道独立更新；Nix 只保留 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`。恢复时先安装[官方 macOS 应用](https://ghostty.org/docs/install/binary)，再应用配置；Linux 继续使用 Nix 包。Mac 不再由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
