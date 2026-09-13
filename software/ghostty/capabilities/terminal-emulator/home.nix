@@ -35,6 +35,7 @@ in
       command = "direct:${lib.getExe config.programs.fish.package} -l";
       "font-family" = appearance.fontFamily;
       "font-size" = appearance.fontSize;
+      "cursor-style" = "bar";
       "window-padding-x" = 20;
       "background-opacity" = appearance.backgroundOpacity;
       "background-opacity-cells" = true;
