@@ -49,6 +49,7 @@
 ## 5. 架构不变量
 
 - 使用一个顶层 Flake 作为声明事实源。
+- Nix 声明与 lock 是受管期望状态的权威来源。希望长期保留的受管变更进入声明，现场证据用于验证部署。改变所有权前先改善日常更新与应用流程；辅助命令仅组合现有 Git/Nix/nh 机制，不另建软件清单或声明格式。保证与例外见[主工作站管理](../architecture/workstation-management.md)。
 - Home Manager 管理可移植用户层，nix-darwin 管理 macOS 系统配置，NixOS modules 管理 NixOS 系统配置。
 - 最小 NixOS server 按需求演进，每项生产能力通过范围明确的请求引入，不恢复已退役的 Ubuntu server 层。
 - 主机与硬件事实放在 `hosts/<host>/`。

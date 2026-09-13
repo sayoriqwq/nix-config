@@ -49,6 +49,7 @@ Respect real dependencies: complete a prerequisite needed for the next action, r
 ## 5. Architecture invariants
 
 - Use one top-level Flake as the declaration source of truth.
+- Treat Nix declarations and the lock file as the authority for managed desired state. Record lasting managed changes in declarations; use live evidence to verify deployment. Improve routine update/apply workflows before changing ownership, and keep helpers limited to existing Git/Nix/nh mechanisms without a second inventory or declaration format. See [workstation management](docs/architecture/workstation-management.md) for guarantees and exceptions.
 - Use Home Manager for the portable user layer, nix-darwin for macOS system configuration, and NixOS modules for NixOS system configuration.
 - Keep the minimal NixOS server requirement-driven. Add each production capability through an explicitly scoped request; do not restore the retired Ubuntu server layer.
 - Keep host and hardware facts under `hosts/<host>/`.

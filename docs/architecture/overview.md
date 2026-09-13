@@ -2,7 +2,7 @@
 
 ## 1. 目标与入口
 
-nix-config 保存个人工作站的配置基线，按维护者的选择复用到 nixbox 或 server。Git 保存认可的软件版本与稳定配置，Nix 负责求值与构建；实际状态以现场为准，显式选中的历史证据由私有 Macwarden authority 保存。日常偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
+nix-config 的 Nix 声明与 lock 是受管环境期望状态的唯一真源，按维护者的选择复用到 nixbox 或 server。长期变更进入声明，Nix 负责求值与构建，现场读回验证实际部署；显式选中的历史证据由私有 Macwarden authority 保存。日常维护、偏移、选择同步与记录边界见[主工作站管理](workstation-management.md)，术语见 [CONTEXT.md](../../CONTEXT.md)。
 
 声明使用一个顶层 Flake、一个 lock file 和显式 import graph：
 
