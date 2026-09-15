@@ -1,0 +1,336 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "终端入口与兼容环境",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      590
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "550c689d58d1788ea3034a6a06345d9dd143ce5b",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "theme",
+      "type": "backend",
+      "label": "Yume · 主题与共享外观",
+      "sublabel": "terminalTheme · appearance.nix",
+      "pos": [
+        40,
+        150
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/yume-design/capabilities/terminal-theme/home.nix"
+        },
+        {
+          "path": "modules/home/desktop/terminal/appearance.nix"
+        }
+      ]
+    },
+    {
+      "id": "ghostty",
+      "type": "frontend",
+      "label": "Ghostty · terminalEmulator",
+      "sublabel": "原生 Shell 集成 · 禁用 HM 重复注入",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "type": "backend",
+      "label": "Fish · interactiveShell",
+      "sublabel": "同时被图形终端、兼容与开发组合选择",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/fish/default.nix"
+        },
+        {
+          "path": "intents/graphical-terminal/default.nix"
+        },
+        {
+          "path": "intents/terminal-compatibility/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "development",
+      "type": "external",
+      "label": "开发工作站 · 共享接口",
+      "sublabel": "Fish · Zed · LazyGit · mise · direnv",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/archify/development-workstation.json"
+        }
+      ]
+    },
+    {
+      "id": "wezterm",
+      "type": "frontend",
+      "label": "WezTerm · terminalEmulator",
+      "sublabel": "Nix 软件包 · Zsh 集成 · 共享快捷键",
+      "pos": [
+        390,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/wezterm/capabilities/terminal-emulator/home.nix"
+        },
+        {
+          "path": "modules/home/desktop/terminal/keybindings.nix"
+        }
+      ]
+    },
+    {
+      "id": "zsh",
+      "type": "backend",
+      "label": "Zsh · compatibilityShell",
+      "sublabel": "补全建议 · 语法高亮 · 历史搜索",
+      "pos": [
+        740,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zsh/capabilities/compatibility-shell/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "integrations",
+      "type": "backend",
+      "label": "Atuin · direnv · mise · eza · fzf",
+      "sublabel": "LazyGit · pay-respects · starship · zoxide",
+      "pos": [
+        1090,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/terminal-compatibility/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "hosts",
+      "type": "external",
+      "label": "主机选择",
+      "sublabel": "两机选 Ghostty；macbook 另选兼容组合",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "orbstack",
+      "type": "backend",
+      "label": "OrbStack · 容器环境",
+      "sublabel": "Fish / Zsh：初始化文件存在时加载",
+      "pos": [
+        390,
+        440
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/orbstack/capabilities/container-runtime/darwin.nix"
+        },
+        {
+          "path": "software/orbstack/capabilities/container-runtime/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "editors",
+      "type": "frontend",
+      "label": "Zed + VS Code",
+      "sublabel": "z → zed · v → code（Fish / Zsh）",
+      "pos": [
+        1090,
+        440
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/capabilities/gui-editor/zsh.nix"
+        },
+        {
+          "path": "software/vscode/capabilities/editor-compatibility/shell.nix"
+        },
+        {
+          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "graphical-terminal · 默认图形终端（共用 Yume）",
+      "wraps": [
+        "ghostty",
+        "fish"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "terminal-compatibility · macbook 兼容环境（另共用 Fish / Yume）",
+      "wraps": [
+        "wezterm",
+        "zsh",
+        "integrations",
+        "orbstack",
+        "editors"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "theme-ghostty",
+      "from": "theme",
+      "to": "ghostty",
+      "label": "主题与外观",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "theme-wezterm",
+      "from": "theme",
+      "to": "wezterm",
+      "label": "主题与外观",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ghostty-fish",
+      "from": "ghostty",
+      "to": "fish",
+      "label": "fish -l",
+      "variant": "emphasis"
+    },
+    {
+      "id": "wezterm-zsh",
+      "from": "wezterm",
+      "to": "zsh",
+      "label": "zsh -l",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fish-seam",
+      "from": "fish",
+      "to": "development",
+      "label": "共享能力",
+      "variant": "dashed"
+    },
+    {
+      "id": "zsh-integrations",
+      "from": "zsh",
+      "to": "integrations",
+      "label": "显式启用"
+    },
+    {
+      "id": "orbstack-zsh",
+      "from": "orbstack",
+      "to": "zsh",
+      "label": "source 初始化",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "zsh-editors",
+      "from": "zsh",
+      "to": "editors",
+      "label": "快捷命令",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "接口沿用开发工作站",
+      "items": [
+        "兼容组合复用已有工具，再逐项启用 Zsh 集成；Fish 的既有集成继续保留。",
+        "zoxide 使用 cd，给编辑器保留 z；Atuin 接管增强历史，fzf 不占用 Ctrl+R。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "安装与可写状态",
+      "items": [
+        "macOS 的 Ghostty、VS Code 使用原生应用；OrbStack 由 Homebrew 安装；WezTerm 由 Nix 管理。",
+        "VS Code 仅首次播种设置；OrbStack 初始化文件、Atuin 数据库与密钥保持外部。"
+      ]
+    }
+  ]
+}
