@@ -1,5 +1,5 @@
 {
-  githubCli.homeModules = [ ./capabilities/github-cli/home.nix ];
+  githubCli.homeModules = [ ./home-manager.nix ];
 
-  gitCredentialHelper.homeModules = [ ./capabilities/github-cli/git-credential-helper.nix ];
+  gitCredentialHelper.homeModules = [ ./git-credential-helper.nix ];
 }

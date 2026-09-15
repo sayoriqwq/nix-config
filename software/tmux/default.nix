@@ -1,3 +1,3 @@
 {
-  terminalMultiplexer.homeModules = [ ./capabilities/terminal-multiplexer/home.nix ];
+  terminalMultiplexer.homeModules = [ ./home-manager.nix ];
 }

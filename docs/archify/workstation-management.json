@@ -50,7 +50,7 @@
       ],
       "sources": [
         {
-          "path": "software/homebrew/capabilities/non-destructive-application-management/darwin.nix"
+          "path": "software/homebrew/darwin.nix"
         }
       ]
     },
@@ -72,7 +72,7 @@
           "path": "hosts/macbook/default.nix"
         },
         {
-          "path": "software/pages/capabilities/document-editing/darwin.nix"
+          "path": "software/pages/darwin.nix"
         }
       ]
     },
@@ -91,13 +91,13 @@
       ],
       "sources": [
         {
-          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+          "path": "software/ghostty/home-manager.nix"
         },
         {
-          "path": "software/zed/capabilities/gui-editor/home.nix"
+          "path": "software/zed/home-manager.nix"
         },
         {
-          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+          "path": "software/vscode/home-manager.nix"
         }
       ]
     },
@@ -116,7 +116,7 @@
       ],
       "sources": [
         {
-          "path": "software/lix/capabilities/nix-daemon/darwin.nix"
+          "path": "software/lix/darwin.nix"
         }
       ]
     },
@@ -160,10 +160,10 @@
       ],
       "sources": [
         {
-          "path": "software/raycast/capabilities/application-launcher/darwin.nix"
+          "path": "software/raycast/darwin.nix"
         },
         {
-          "path": "software/raycast/capabilities/application-launcher/home.nix"
+          "path": "software/raycast/home-manager.nix"
         }
       ]
     },
@@ -242,10 +242,10 @@
       ],
       "sources": [
         {
-          "path": "software/clash-verge-rev/capabilities/proxy-client/darwin.nix"
+          "path": "software/clash-verge-rev/darwin.nix"
         },
         {
-          "path": "software/clash-verge-rev/capabilities/proxy-client/nixos.nix"
+          "path": "software/clash-verge-rev/nixos.nix"
         }
       ]
     },

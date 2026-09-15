@@ -1,5 +1,5 @@
 {
-  commandCorrection.homeModules = [ ./capabilities/command-correction/home.nix ];
+  commandCorrection.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/command-correction/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

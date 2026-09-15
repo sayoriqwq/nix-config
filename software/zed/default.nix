@@ -1,12 +1,12 @@
 {
   guiEditor = {
-    darwinModules = [ ./capabilities/gui-editor/darwin.nix ];
-    homeModules = [ ./capabilities/gui-editor/home.nix ];
+    darwinModules = [ ./darwin.nix ];
+    homeModules = [ ./home-manager.nix ];
   };
 
-  fishQuickCommand.homeModules = [ ./capabilities/gui-editor/fish.nix ];
+  fishQuickCommand.homeModules = [ ./fish-command.nix ];
 
-  zshQuickCommand.homeModules = [ ./capabilities/gui-editor/zsh.nix ];
+  zshQuickCommand.homeModules = [ ./zsh-command.nix ];
 
   addTask =
     { name, command }:

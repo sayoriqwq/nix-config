@@ -1,3 +1,3 @@
 {
-  versionControl.homeModules = [ ./capabilities/version-control/home.nix ];
+  versionControl.homeModules = [ ./home-manager.nix ];
 }

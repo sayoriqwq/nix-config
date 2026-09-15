@@ -8,7 +8,7 @@ let
   home = homeManager.lib.homeManagerConfiguration {
     inherit pkgs;
     modules = [
-      ../../software/tailscale/capabilities/stable-workstation-access/darwin-home.nix
+      ../../software/tailscale/darwin-home-manager.nix
       {
         home = {
           username = "stable-access-check";

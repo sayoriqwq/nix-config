@@ -19,7 +19,7 @@ flake.nix
   ├── hosts/<host>                 精确选择
   │    ├── intents/<intent>.nix    一起选择的使用需求
   │    ├── software/<software>     软件 package/config/service owner
-  │    └── modules/                少量系统或跨 owner primitive
+  │    └── shared/                 有实际复用的公共数据与声明
   └── checks/                      窄 contract checks
 ```
 

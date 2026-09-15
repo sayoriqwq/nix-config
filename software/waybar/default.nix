@@ -1,3 +1,3 @@
 {
-  desktopStatus.homeModules = [ ./capabilities/desktop-status/home.nix ];
+  desktopStatus.homeModules = [ ./home-manager.nix ];
 }

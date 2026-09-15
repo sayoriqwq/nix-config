@@ -1,5 +1,5 @@
 {
-  editorCompatibility.homeModules = [ ./capabilities/editor-compatibility/home.nix ];
+  editorCompatibility.homeModules = [ ./home-manager.nix ];
 
-  shellQuickCommand.homeModules = [ ./capabilities/editor-compatibility/shell.nix ];
+  shellQuickCommand.homeModules = [ ./shell-command.nix ];
 }

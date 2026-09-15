@@ -31,7 +31,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/data-package.nix"
+          "path": "software/rime-ice/data-package.nix"
         }
       ]
     },
@@ -50,7 +50,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/data-package.nix"
+          "path": "software/rime-ice/data-package.nix"
         }
       ]
     },
@@ -69,7 +69,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/data-package.nix"
+          "path": "software/rime-ice/data-package.nix"
         }
       ]
     },
@@ -88,7 +88,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/default.custom.yaml"
+          "path": "software/rime-ice/default-custom.yaml"
         }
       ]
     },
@@ -107,7 +107,7 @@
       ],
       "sources": [
         {
-          "path": "software/fcitx5/capabilities/input-method/nixos.nix"
+          "path": "software/fcitx5/nixos.nix"
         }
       ]
     },
@@ -126,7 +126,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/nixos.nix"
+          "path": "software/rime-ice/nixos.nix"
         }
       ]
     },
@@ -145,7 +145,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/home.nix"
+          "path": "software/rime-ice/home-manager.nix"
         }
       ]
     },
@@ -208,7 +208,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/data-package.nix"
+          "path": "software/rime-ice/data-package.nix"
         },
         {
           "path": "docs/runbooks/nixbox-desktop-recovery.md"
@@ -230,7 +230,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/home.nix"
+          "path": "software/rime-ice/home-manager.nix"
         },
         {
           "path": "docs/runbooks/nixbox-desktop-recovery.md"

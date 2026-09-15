@@ -1,3 +1,3 @@
 {
-  pythonPackageManager.homeModules = [ ./capabilities/python-package-manager/home.nix ];
+  pythonPackageManager.homeModules = [ ./home-manager.nix ];
 }

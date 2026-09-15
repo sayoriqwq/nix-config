@@ -31,10 +31,10 @@
       ],
       "sources": [
         {
-          "path": "modules/home/desktop/terminal/obsidian.nix"
+          "path": "shared/obsidian.nix"
         },
         {
-          "path": "modules/home/desktop/terminal/appearance.nix"
+          "path": "shared/terminal-appearance.nix"
         }
       ]
     },
@@ -53,7 +53,7 @@
       ],
       "sources": [
         {
-          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+          "path": "software/ghostty/home-manager.nix"
         }
       ]
     },
@@ -116,10 +116,10 @@
       ],
       "sources": [
         {
-          "path": "software/wezterm/capabilities/terminal-emulator/home.nix"
+          "path": "software/wezterm/home-manager.nix"
         },
         {
-          "path": "modules/home/desktop/terminal/keybindings.nix"
+          "path": "software/wezterm/keybindings.nix"
         }
       ]
     },
@@ -138,7 +138,7 @@
       ],
       "sources": [
         {
-          "path": "software/zsh/capabilities/compatibility-shell/home.nix"
+          "path": "software/zsh/home-manager.nix"
         }
       ]
     },
@@ -198,10 +198,10 @@
       ],
       "sources": [
         {
-          "path": "software/orbstack/capabilities/container-runtime/darwin.nix"
+          "path": "software/orbstack/darwin.nix"
         },
         {
-          "path": "software/orbstack/capabilities/container-runtime/home.nix"
+          "path": "software/orbstack/home-manager.nix"
         }
       ]
     },
@@ -220,13 +220,13 @@
       ],
       "sources": [
         {
-          "path": "software/zed/capabilities/gui-editor/zsh.nix"
+          "path": "software/zed/zsh-command.nix"
         },
         {
-          "path": "software/vscode/capabilities/editor-compatibility/shell.nix"
+          "path": "software/vscode/shell-command.nix"
         },
         {
-          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+          "path": "software/vscode/home-manager.nix"
         }
       ]
     }

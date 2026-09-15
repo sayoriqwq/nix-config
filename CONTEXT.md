@@ -60,8 +60,8 @@ _Avoid_：Primary Capability、Extension Capability。
 **Host**：
 一台目标机器的独立选择边界，持有该机器的软件组合与主机事实。一个 Host 的选择不隐含其他 Host 的选择。
 
-**System primitive**：
-不属于单个 Software、由实际消费者复用的系统或用户环境基础能力。
+**共享基础内容（Shared foundation）**：
+不属于单个 Software、由多个实际消费者复用的基础数据或声明，例如主题、终端外观和公共账号设置。它不承担使用需求的组合或主机选择。
 
 **Check**：
 对声明是否满足特定行为合同的窄、确定性验证。

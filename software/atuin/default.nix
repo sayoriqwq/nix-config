@@ -1,5 +1,5 @@
 {
-  shellHistory.homeModules = [ ./capabilities/shell-history/home.nix ];
+  shellHistory.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/shell-history/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

@@ -1,3 +1,3 @@
 {
-  inputMethod.nixosModules = [ ./capabilities/input-method/nixos.nix ];
+  inputMethod.nixosModules = [ ./nixos.nix ];
 }

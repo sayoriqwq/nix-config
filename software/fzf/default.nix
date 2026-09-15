@@ -1,9 +1,9 @@
 { lib }:
 
 {
-  fuzzySelector.homeModules = [ ./capabilities/fuzzy-selector/home.nix ];
+  fuzzySelector.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/fuzzy-selector/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 
   configure =
     {

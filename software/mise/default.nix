@@ -1,7 +1,7 @@
 {
-  runtimeManager.homeModules = [ ./capabilities/runtime-manager/home.nix ];
+  runtimeManager.homeModules = [ ./home-manager.nix ];
 
-  macosRuntimeDefaults.homeModules = [ ./capabilities/runtime-manager/macos-defaults.nix ];
+  macosRuntimeDefaults.homeModules = [ ./macos-defaults.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/runtime-manager/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

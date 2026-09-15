@@ -1,3 +1,3 @@
 {
-  textSearch.homeModules = [ ./capabilities/text-search/home.nix ];
+  textSearch.homeModules = [ ./home-manager.nix ];
 }

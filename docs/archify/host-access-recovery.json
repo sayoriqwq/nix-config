@@ -31,7 +31,7 @@
       ],
       "sources": [
         {
-          "path": "software/tailscale/capabilities/stable-workstation-access/darwin-home.nix"
+          "path": "software/tailscale/darwin-home-manager.nix"
         }
       ]
     },
@@ -50,10 +50,10 @@
       ],
       "sources": [
         {
-          "path": "software/tailscale/capabilities/stable-workstation-access/darwin.nix"
+          "path": "software/tailscale/darwin.nix"
         },
         {
-          "path": "software/tailscale/capabilities/stable-workstation-access/darwin-home.nix"
+          "path": "software/tailscale/darwin-home-manager.nix"
         }
       ]
     },
@@ -72,7 +72,7 @@
       ],
       "sources": [
         {
-          "path": "software/tailscale/capabilities/stable-workstation-access/nixos.nix"
+          "path": "software/tailscale/nixos.nix"
         }
       ]
     },
@@ -113,7 +113,7 @@
           "path": "hosts/server/networking.nix"
         },
         {
-          "path": "software/openssh/capabilities/ssh-only-firewall/nixos.nix"
+          "path": "software/openssh/ssh-only-firewall-nixos.nix"
         }
       ]
     },
@@ -132,7 +132,7 @@
       ],
       "sources": [
         {
-          "path": "software/openssh/capabilities/key-only-remote-access/nixos.nix"
+          "path": "software/openssh/key-only-remote-access-nixos.nix"
         }
       ]
     },
@@ -151,10 +151,10 @@
       ],
       "sources": [
         {
-          "path": "modules/nixos/administrator-user.nix"
+          "path": "shared/administrator-nixos.nix"
         },
         {
-          "path": "software/sudo/capabilities/passwordless-administration/nixos.nix"
+          "path": "software/sudo/nixos.nix"
         }
       ]
     },

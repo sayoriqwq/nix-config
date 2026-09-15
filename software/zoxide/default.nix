@@ -1,5 +1,5 @@
 {
-  directoryJumper.homeModules = [ ./capabilities/directory-jumper/home.nix ];
+  directoryJumper.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/directory-jumper/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

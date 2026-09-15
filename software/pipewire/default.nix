@@ -1,3 +1,3 @@
 {
-  desktopAudio.nixosModules = [ ./capabilities/desktop-audio/nixos.nix ];
+  desktopAudio.nixosModules = [ ./nixos.nix ];
 }

@@ -160,13 +160,13 @@
       ],
       "sources": [
         {
-          "path": "modules/home/desktop/terminal/appearance.nix"
+          "path": "shared/terminal-appearance.nix"
         },
         {
-          "path": "modules/home/desktop/editors/seed-files.nix"
+          "path": "software/vscode/seed-files.nix"
         },
         {
-          "path": "modules/nixos/administrator-user.nix"
+          "path": "shared/administrator-nixos.nix"
         }
       ]
     },
@@ -251,7 +251,7 @@
       ],
       "sources": [
         {
-          "path": "software/nh/capabilities/nix-operations/home.nix"
+          "path": "software/nh/home-manager.nix"
         },
         {
           "path": "docs/runbooks/daily-nix-maintenance.md"

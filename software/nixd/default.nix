@@ -1,3 +1,3 @@
 {
-  nixLanguageServer.homeModules = [ ./capabilities/nix-language-server/home.nix ];
+  nixLanguageServer.homeModules = [ ./home-manager.nix ];
 }

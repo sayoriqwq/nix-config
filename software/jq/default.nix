@@ -1,3 +1,3 @@
 {
-  jsonProcessor.homeModules = [ ./capabilities/json-processor/home.nix ];
+  jsonProcessor.homeModules = [ ./home-manager.nix ];
 }

@@ -42,7 +42,7 @@
       "id": "assembly",
       "type": "backend",
       "label": "配置装配与验证",
-      "sublabel": "flake → hosts → intents / software → modules",
+      "sublabel": "flake → hosts → intents / software → shared",
       "pos": [
         390,
         60
@@ -116,7 +116,7 @@
       ],
       "sources": [
         {
-          "path": "software/tailscale/capabilities/stable-workstation-access/darwin-home.nix"
+          "path": "software/tailscale/darwin-home-manager.nix"
         },
         {
           "path": "hosts/server/default.nix"

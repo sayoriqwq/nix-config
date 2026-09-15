@@ -20,16 +20,16 @@ in
   imports = terminalWork.nixosModules ++ [
     ./disko.nix
     ./networking.nix
-    ../../modules/nixos/administrator-user.nix
-    ../../software/bind/capabilities/dns-diagnostics/nixos.nix
-    ../../software/lsof/capabilities/open-file-diagnostics/nixos.nix
-    ../../software/mtr/capabilities/network-path-diagnostics/nixos.nix
-    ../../software/nix/capabilities/flake-interface/nixos.nix
-    ../../software/openssh/capabilities/key-only-remote-access/nixos.nix
-    ../../software/openssh/capabilities/ssh-only-firewall/nixos.nix
-    ../../software/strace/capabilities/system-call-diagnostics/nixos.nix
-    ../../software/sudo/capabilities/passwordless-administration/nixos.nix
-    ../../software/tcpdump/capabilities/packet-diagnostics/nixos.nix
+    ../../shared/administrator-nixos.nix
+    ../../software/bind/nixos.nix
+    ../../software/lsof/nixos.nix
+    ../../software/mtr/nixos.nix
+    ../../software/nix/nixos.nix
+    ../../software/openssh/key-only-remote-access-nixos.nix
+    ../../software/openssh/ssh-only-firewall-nixos.nix
+    ../../software/strace/nixos.nix
+    ../../software/sudo/nixos.nix
+    ../../software/tcpdump/nixos.nix
   ];
 
   boot.initrd.availableKernelModules = [
@@ -58,13 +58,13 @@ in
         terminalWork.homeModules
         ++ git.versionControl.homeModules
         ++ [
-          ../../software/atuin/capabilities/shell-history/home.nix
-          ../../software/nh/capabilities/nix-operations/home.nix
-          ../../software/pay-respects/capabilities/command-correction/home.nix
-          ../../software/btop/capabilities/system-monitor/home.nix
-          ../../software/fastfetch/capabilities/system-overview/home.nix
-          ../../software/yazi/capabilities/terminal-file-manager/home.nix
-          ../../software/helix/capabilities/terminal-editor/home.nix
+          ../../software/atuin/home-manager.nix
+          ../../software/nh/home-manager.nix
+          ../../software/pay-respects/home-manager.nix
+          ../../software/btop/home-manager.nix
+          ../../software/fastfetch/home-manager.nix
+          ../../software/yazi/home-manager.nix
+          ../../software/helix/home-manager.nix
         ];
 
       home = {

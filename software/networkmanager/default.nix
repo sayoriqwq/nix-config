@@ -1,3 +1,3 @@
 {
-  networkConnectivity.nixosModules = [ ./capabilities/network-connectivity/nixos.nix ];
+  networkConnectivity.nixosModules = [ ./nixos.nix ];
 }

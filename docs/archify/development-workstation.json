@@ -202,7 +202,7 @@
       ],
       "sources": [
         {
-          "path": "software/uv/capabilities/python-package-manager/home.nix"
+          "path": "software/uv/home-manager.nix"
         }
       ]
     },
@@ -221,7 +221,7 @@
       ],
       "sources": [
         {
-          "path": "software/gh/capabilities/github-cli/git-credential-helper.nix"
+          "path": "software/gh/git-credential-helper.nix"
         }
       ]
     },
@@ -240,7 +240,7 @@
       ],
       "sources": [
         {
-          "path": "software/gitleaks/capabilities/secret-scanner/home.nix"
+          "path": "software/gitleaks/home-manager.nix"
         }
       ]
     }

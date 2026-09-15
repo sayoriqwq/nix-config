@@ -1,5 +1,5 @@
 {
-  containerRuntime.darwinModules = [ ./capabilities/container-runtime/darwin.nix ];
+  containerRuntime.darwinModules = [ ./darwin.nix ];
 
-  shellIntegration.homeModules = [ ./capabilities/container-runtime/home.nix ];
+  shellIntegration.homeModules = [ ./home-manager.nix ];
 }

@@ -1,3 +1,3 @@
 {
-  secretService.nixosModules = [ ./capabilities/secret-service/nixos.nix ];
+  secretService.nixosModules = [ ./nixos.nix ];
 }

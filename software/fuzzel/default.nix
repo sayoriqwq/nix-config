@@ -1,3 +1,3 @@
 {
-  applicationLauncher.homeModules = [ ./capabilities/application-launcher/home.nix ];
+  applicationLauncher.homeModules = [ ./home-manager.nix ];
 }

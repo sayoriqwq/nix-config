@@ -1,3 +1,3 @@
 {
-  directoryTree.homeModules = [ ./capabilities/directory-tree/home.nix ];
+  directoryTree.homeModules = [ ./home-manager.nix ];
 }

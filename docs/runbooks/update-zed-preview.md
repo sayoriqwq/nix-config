@@ -4,7 +4,7 @@
 
 ## 配置写入范围
 
-Home Manager 持续合并 settings、keymap 与 tasks，文件仍可由 Zed 修改。声明字段优先，settings 递归合并，keymap 按 context、tasks 按 label 合并；其他字段与任务保留。当前稳定材料在 `software/zed/capabilities/gui-editor/`，任务通过 `zed.addTask` 提供。
+Home Manager 持续合并 settings、keymap 与 tasks，文件仍可由 Zed 修改。声明字段优先，settings 递归合并，keymap 按 context、tasks 按 label 合并；其他字段与任务保留。当前稳定材料在 `software/zed/`，任务通过 `zed.addTask` 提供。
 
 跨主机复用重点是所选设置和编辑习惯，允许 Preview/Stable 版本差异。`secondary-shift-g` 在 Mac 表示 Cmd，在 Linux 表示 Ctrl；现场已有 `cmd-shift-g` 不应当作不同使用意图。上游合并按字面键名处理，因而可能保留两个等价别名。
 

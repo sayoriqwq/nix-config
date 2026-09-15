@@ -63,7 +63,7 @@ Pinshift 旧包装与项目自行注册的新入口并存，根因是重复所�
 
 ## 4. nh 可以简化哪部分
 
-本机已安装 **nh 4.4.2**；[仓库声明](../../software/nh/capabilities/nix-operations/home.nix)已启用它。它不是尚待引入的新方案。
+本机已安装 **nh 4.4.2**；[仓库声明](../../software/nh/home-manager.nix)已启用它。它不是尚待引入的新方案。
 
 nh 提供 NixOS、Home Manager、nix-darwin 的操作入口，改善构建进度、版本差异、确认、搜索和清理体验。若问题是命令难记、输出难读，先用好已有 nh 比迁移安装来源更直接。[nh 官方项目](https://github.com/nix-community/nh)
 
@@ -90,9 +90,9 @@ Nix 本身也提供独立包 profile 和单包升级。这说明“用 Nix”不
 
 这是比较框架，不是推荐立刻改成第二种。选择性管理也会造成复杂性；只有分工减少实际冲突时才有价值。
 
-现有仓库已经有中间路径：[Homebrew 模块](../../software/homebrew/capabilities/non-destructive-application-management/darwin.nix)关闭激活时自动更新、升级和清理；nix-darwin 可以保存安装需求而不要求这些应用都成为 Nix 包。Brewfile 也可独立维护。两种入口不应重复拥有同一份安装清单。[nix-darwin Homebrew 行为](https://nix-darwin.github.io/nix-darwin/manual/#opt-homebrew.onActivation.upgrade)
+现有仓库已经有中间路径：[Homebrew 模块](../../software/homebrew/darwin.nix)关闭激活时自动更新、升级和清理；nix-darwin 可以保存安装需求而不要求这些应用都成为 Nix 包。Brewfile 也可独立维护。两种入口不应重复拥有同一份安装清单。[nix-darwin Homebrew 行为](https://nix-darwin.github.io/nix-darwin/manual/#opt-homebrew.onActivation.upgrade)
 
-当前 [VS Code 声明](../../software/vscode/capabilities/editor-compatibility/home.nix)只为首次设置提供基线；[seed-files 实现](../../modules/home/desktop/editors/seed-files.nix)遇到已有路径就跳过。这能保留现场调整，却不会自动把后续现场设置记录进 Git。若“恢复我后来调好的设置”很重要，仍需显式选取和保存，而不能把首次模板误当完整恢复方案。
+当前 [VS Code 声明](../../software/vscode/home-manager.nix)只为首次设置提供基线；[seed-files 实现](../../software/vscode/seed-files.nix)遇到已有路径就跳过。这能保留现场调整，却不会自动把后续现场设置记录进 Git。若“恢复我后来调好的设置”很重要，仍需显式选取和保存，而不能把首次模板误当完整恢复方案。
 
 ## 6. 下一步应验证问题，而非继续搬应用
 

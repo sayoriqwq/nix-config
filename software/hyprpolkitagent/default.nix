@@ -1,3 +1,3 @@
 {
-  authenticationAgent.homeModules = [ ./capabilities/authentication-agent/home.nix ];
+  authenticationAgent.homeModules = [ ./home-manager.nix ];
 }

@@ -1,3 +1,3 @@
 {
-  fileFinder.homeModules = [ ./capabilities/file-finder/home.nix ];
+  fileFinder.homeModules = [ ./home-manager.nix ];
 }

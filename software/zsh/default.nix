@@ -1,3 +1,3 @@
 {
-  compatibilityShell.homeModules = [ ./capabilities/compatibility-shell/home.nix ];
+  compatibilityShell.homeModules = [ ./home-manager.nix ];
 }

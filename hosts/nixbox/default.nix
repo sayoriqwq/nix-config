@@ -30,20 +30,20 @@ in
     ++ chineseInput.nixosModules
     ++ [
       ./hardware-configuration.nix
-      ../../modules/nixos/administrator-user.nix
-      ../../software/avahi/capabilities/mdns/nixos.nix
-      ../../software/bluez/capabilities/bluetooth/nixos.nix
-      ../../software/curl/capabilities/network-transfer/nixos.nix
-      ../../software/clash-verge-rev/capabilities/proxy-client/nixos.nix
-      ../../software/nix/capabilities/flake-interface/nixos.nix
-      ../../software/nixpkgs/capabilities/unfree-package-policy/nixos.nix
-      ../../software/openssh/capabilities/key-only-remote-access/nixos.nix
-      ../../software/pciutils/capabilities/hardware-inspection/nixos.nix
-      ../../software/localsend/capabilities/local-file-sharing/nixos.nix
-      ../../software/tailscale/capabilities/stable-workstation-access/nixos.nix
-      ../../software/usbutils/capabilities/hardware-inspection/nixos.nix
-      ../../software/vim/capabilities/system-editor/nixos.nix
-      ../../software/wget/capabilities/network-download/nixos.nix
+      ../../shared/administrator-nixos.nix
+      ../../software/avahi/nixos.nix
+      ../../software/bluez/nixos.nix
+      ../../software/curl/nixos.nix
+      ../../software/clash-verge-rev/nixos.nix
+      ../../software/nix/nixos.nix
+      ../../software/nixpkgs/nixos.nix
+      ../../software/openssh/key-only-remote-access-nixos.nix
+      ../../software/pciutils/nixos.nix
+      ../../software/localsend/nixos.nix
+      ../../software/tailscale/nixos.nix
+      ../../software/usbutils/nixos.nix
+      ../../software/vim/nixos.nix
+      ../../software/wget/nixos.nix
     ];
 
   boot.loader = {
@@ -85,25 +85,25 @@ in
         ++ hyprlandWorkstation.homeModules
         ++ codeDevelopment.homeModules
         ++ [
-          ../../software/atuin/capabilities/shell-history/home.nix
+          ../../software/atuin/home-manager.nix
         ]
         ++ githubCollaboration.homeModules
         ++ [
-          ../../software/nh/capabilities/nix-operations/home.nix
-          ../../software/pay-respects/capabilities/command-correction/home.nix
-          ../../software/btop/capabilities/system-monitor/home.nix
-          ../../software/fastfetch/capabilities/system-overview/home.nix
+          ../../software/nh/home-manager.nix
+          ../../software/pay-respects/home-manager.nix
+          ../../software/btop/home-manager.nix
+          ../../software/fastfetch/home-manager.nix
         ]
         ++ developmentRuntime.homeModules
         ++ [
-          ../../software/yazi/capabilities/terminal-file-manager/home.nix
-          ../../software/helix/capabilities/terminal-editor/home.nix
+          ../../software/yazi/home-manager.nix
+          ../../software/helix/home-manager.nix
         ]
         ++ graphicalTerminal.homeModules
         ++ [
-          ../../software/obsidian/capabilities/knowledge-base/home.nix
-          ../../software/google-chrome/capabilities/web-browser/linux-home.nix
-          ../../software/termius/capabilities/remote-access-client/linux-home.nix
+          ../../software/obsidian/home-manager.nix
+          ../../software/google-chrome/linux-home-manager.nix
+          ../../software/termius/linux-home-manager.nix
         ];
 
       home = {

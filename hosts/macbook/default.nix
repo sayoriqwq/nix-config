@@ -129,45 +129,45 @@ in
           };
         };
       }
-      ../../software/lix/capabilities/nix-daemon/darwin.nix
-      ../../software/maple-mono/capabilities/workstation-font/darwin.nix
-      ../../software/homebrew/capabilities/non-destructive-application-management/darwin.nix
-      ../../software/amphetamine/capabilities/sleep-control/darwin.nix
-      ../../software/baidu-netdisk/capabilities/cloud-storage-client/darwin.nix
-      ../../software/balena-etcher/capabilities/disk-image-writer/darwin.nix
-      ../../software/chatgpt/capabilities/desktop-ai-client/darwin.nix
-      ../../software/clash-verge-rev/capabilities/proxy-client/darwin.nix
-      ../../software/easyfind/capabilities/file-search/darwin.nix
-      ../../software/feishu/capabilities/team-collaboration/darwin.nix
-      ../../software/figma/capabilities/interface-design/darwin.nix
-      ../../software/fuse-t/capabilities/filesystem-bridge/darwin.nix
-      ../../software/garageband/capabilities/music-creation/darwin.nix
-      ../../software/google-chrome/capabilities/web-browser/darwin.nix
-      ../../software/hazeover/capabilities/focus-overlay/darwin.nix
-      ../../software/izip/capabilities/archive-manager/darwin.nix
-      ../../software/keynote/capabilities/presentation-editing/darwin.nix
-      ../../software/keyscreen/capabilities/keystroke-visualization/darwin.nix
-      ../../software/linear/capabilities/issue-tracking/darwin.nix
-      ../../software/mega/capabilities/cloud-storage-client/darwin.nix
-      ../../software/netease-cloud-music/capabilities/music-player/darwin.nix
-      ../../software/numbers/capabilities/spreadsheet-editing/darwin.nix
-      ../../software/obs-studio/capabilities/screen-recording/darwin.nix
-      ../../software/one-thing/capabilities/menu-bar-reminder/darwin.nix
-      ../../software/pages/capabilities/document-editing/darwin.nix
-      ../../software/paseo/capabilities/application-presence/darwin.nix
-      ../../software/pearcleaner/capabilities/app-maintenance/darwin.nix
-      ../../software/qq/capabilities/messaging/darwin.nix
-      ../../software/raycast/capabilities/application-launcher/darwin.nix
-      ../../software/scratch/capabilities/markdown-editor/darwin.nix
-      ../../software/telegram/capabilities/messaging/darwin.nix
-      ../../software/tencent-meeting/capabilities/video-conferencing/darwin.nix
-      ../../software/termius/capabilities/remote-access-client/darwin.nix
-      ../../software/topnotch/capabilities/display-customization/darwin.nix
-      ../../software/transmission/capabilities/bittorrent-client/darwin.nix
-      ../../software/vorssaint/capabilities/application-presence/darwin.nix
-      ../../software/wechat/capabilities/messaging/darwin.nix
-      ../../software/windows-app/capabilities/windows-remote-access/darwin.nix
-      ../../software/tailscale/capabilities/stable-workstation-access/darwin.nix
+      ../../software/lix/darwin.nix
+      ../../software/maple-mono/darwin.nix
+      ../../software/homebrew/darwin.nix
+      ../../software/amphetamine/darwin.nix
+      ../../software/baidu-netdisk/darwin.nix
+      ../../software/balena-etcher/darwin.nix
+      ../../software/chatgpt/darwin.nix
+      ../../software/clash-verge-rev/darwin.nix
+      ../../software/easyfind/darwin.nix
+      ../../software/feishu/darwin.nix
+      ../../software/figma/darwin.nix
+      ../../software/fuse-t/darwin.nix
+      ../../software/garageband/darwin.nix
+      ../../software/google-chrome/darwin.nix
+      ../../software/hazeover/darwin.nix
+      ../../software/izip/darwin.nix
+      ../../software/keynote/darwin.nix
+      ../../software/keyscreen/darwin.nix
+      ../../software/linear/darwin.nix
+      ../../software/mega/darwin.nix
+      ../../software/netease-cloud-music/darwin.nix
+      ../../software/numbers/darwin.nix
+      ../../software/obs-studio/darwin.nix
+      ../../software/one-thing/darwin.nix
+      ../../software/pages/darwin.nix
+      ../../software/paseo/darwin.nix
+      ../../software/pearcleaner/darwin.nix
+      ../../software/qq/darwin.nix
+      ../../software/raycast/darwin.nix
+      ../../software/scratch/darwin.nix
+      ../../software/telegram/darwin.nix
+      ../../software/tencent-meeting/darwin.nix
+      ../../software/termius/darwin.nix
+      ../../software/topnotch/darwin.nix
+      ../../software/transmission/darwin.nix
+      ../../software/vorssaint/darwin.nix
+      ../../software/wechat/darwin.nix
+      ../../software/windows-app/darwin.nix
+      ../../software/tailscale/darwin.nix
     ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -210,34 +210,34 @@ in
         ++ codeDevelopment.homeModules
         ++ chineseInput.homeModules
         ++ [
-          ../../software/atuin/capabilities/shell-history/home.nix
+          ../../software/atuin/home-manager.nix
         ]
         ++ githubCollaboration.homeModules
         ++ [
-          ../../software/nh/capabilities/nix-operations/home.nix
-          ../../software/pay-respects/capabilities/command-correction/home.nix
-          ../../software/btop/capabilities/system-monitor/home.nix
-          ../../software/fastfetch/capabilities/system-overview/home.nix
+          ../../software/nh/home-manager.nix
+          ../../software/pay-respects/home-manager.nix
+          ../../software/btop/home-manager.nix
+          ../../software/fastfetch/home-manager.nix
         ]
         ++ developmentRuntime.homeModules
         ++ macosRuntimeDefaults.homeModules
         ++ [
-          ../../software/yazi/capabilities/terminal-file-manager/home.nix
-          ../../software/helix/capabilities/terminal-editor/home.nix
+          ../../software/yazi/home-manager.nix
+          ../../software/helix/home-manager.nix
         ]
         ++ graphicalTerminal.homeModules
         ++ [
-          ../../software/obsidian/capabilities/knowledge-base/home.nix
-          ../../software/discord/capabilities/messaging/home.nix
-          ../../software/iina/capabilities/media-player/home.nix
-          ../../software/localsend/capabilities/local-file-sharing/home.nix
-          ../../software/man/capabilities/manual-pages/home.nix
-          ../../software/monitorcontrol/capabilities/display-control/home.nix
-          ../../software/mos/capabilities/mouse-utility/home.nix
-          ../../software/upscayl/capabilities/image-upscaling/home.nix
-          ../../software/xbar/capabilities/menu-bar-plugins/home.nix
-          ../../software/rclone/capabilities/cloud-storage/home.nix
-          ../../software/tailscale/capabilities/stable-workstation-access/darwin-home.nix
+          ../../software/obsidian/home-manager.nix
+          ../../software/discord/home-manager.nix
+          ../../software/iina/home-manager.nix
+          ../../software/localsend/home-manager.nix
+          ../../software/man/home-manager.nix
+          ../../software/monitorcontrol/home-manager.nix
+          ../../software/mos/home-manager.nix
+          ../../software/upscayl/home-manager.nix
+          ../../software/xbar/home-manager.nix
+          ../../software/rclone/home-manager.nix
+          ../../software/tailscale/darwin-home-manager.nix
         ];
 
       home = {

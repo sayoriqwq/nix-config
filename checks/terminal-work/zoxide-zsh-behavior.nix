@@ -4,7 +4,7 @@ let
   home = homeManager.lib.homeManagerConfiguration {
     inherit pkgs;
     modules = [
-      ../../software/zoxide/capabilities/directory-jumper/zsh.nix
+      ../../software/zoxide/zsh-integration.nix
       {
         home = {
           username = "zoxide-zsh-check";

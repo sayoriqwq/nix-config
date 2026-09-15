@@ -94,10 +94,10 @@
       ],
       "sources": [
         {
-          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+          "path": "software/ghostty/home-manager.nix"
         },
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/home.nix"
+          "path": "software/rime-ice/home-manager.nix"
         }
       ]
     },
@@ -116,7 +116,7 @@
       ],
       "sources": [
         {
-          "path": "software/homebrew/capabilities/non-destructive-application-management/darwin.nix"
+          "path": "software/homebrew/darwin.nix"
         },
         {
           "path": "hosts/macbook/default.nix"
@@ -138,7 +138,7 @@
       ],
       "sources": [
         {
-          "path": "software/zed/capabilities/gui-editor/home.nix"
+          "path": "software/zed/home-manager.nix"
         },
         {
           "path": "docs/runbooks/update-zed-preview.md"
@@ -160,10 +160,10 @@
       ],
       "sources": [
         {
-          "path": "modules/home/desktop/editors/seed-files.nix"
+          "path": "software/vscode/seed-files.nix"
         },
         {
-          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+          "path": "software/vscode/home-manager.nix"
         }
       ]
     },
@@ -182,13 +182,13 @@
       ],
       "sources": [
         {
-          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+          "path": "software/ghostty/home-manager.nix"
         },
         {
-          "path": "software/zed/capabilities/gui-editor/home.nix"
+          "path": "software/zed/home-manager.nix"
         },
         {
-          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+          "path": "software/vscode/home-manager.nix"
         }
       ]
     },
@@ -229,7 +229,7 @@
       ],
       "sources": [
         {
-          "path": "software/zed/capabilities/gui-editor/home.nix"
+          "path": "software/zed/home-manager.nix"
         },
         {
           "path": "docs/architecture/workstation-management.md"

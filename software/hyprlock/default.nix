@@ -1,6 +1,6 @@
 {
   sessionLock = {
-    homeModules = [ ./capabilities/session-lock/home.nix ];
-    nixosModules = [ ./capabilities/session-lock/nixos.nix ];
+    homeModules = [ ./home-manager.nix ];
+    nixosModules = [ ./nixos.nix ];
   };
 }

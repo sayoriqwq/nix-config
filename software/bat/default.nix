@@ -1,3 +1,3 @@
 {
-  contentViewer.homeModules = [ ./capabilities/content-viewer/home.nix ];
+  contentViewer.homeModules = [ ./home-manager.nix ];
 }

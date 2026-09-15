@@ -1,5 +1,5 @@
 {
-  developmentEnvironment.homeModules = [ ./capabilities/development-environment/home.nix ];
+  developmentEnvironment.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/development-environment/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

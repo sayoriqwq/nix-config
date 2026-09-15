@@ -1,6 +1,6 @@
 {
   graphicalSession = {
-    homeModules = [ ./capabilities/graphical-session/home.nix ];
-    nixosModules = [ ./capabilities/graphical-session/nixos.nix ];
+    homeModules = [ ./home-manager.nix ];
+    nixosModules = [ ./nixos.nix ];
   };
 }

@@ -1,3 +1,3 @@
 {
-  notificationDaemon.homeModules = [ ./capabilities/notification-daemon/home.nix ];
+  notificationDaemon.homeModules = [ ./home-manager.nix ];
 }

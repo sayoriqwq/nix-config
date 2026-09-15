@@ -31,10 +31,10 @@
       ],
       "sources": [
         {
-          "path": "software/gdm/capabilities/display-manager/nixos.nix"
+          "path": "software/gdm/display-manager-nixos.nix"
         },
         {
-          "path": "software/gdm/capabilities/disable-automatic-suspend/nixos.nix"
+          "path": "software/gdm/disable-automatic-suspend-nixos.nix"
         }
       ]
     },
@@ -53,10 +53,10 @@
       ],
       "sources": [
         {
-          "path": "software/hyprland/capabilities/graphical-session/nixos.nix"
+          "path": "software/hyprland/nixos.nix"
         },
         {
-          "path": "software/hyprland/capabilities/graphical-session/home.nix"
+          "path": "software/hyprland/home-manager.nix"
         }
       ]
     },
@@ -75,10 +75,10 @@
       ],
       "sources": [
         {
-          "path": "software/hyprland/capabilities/graphical-session/home.nix"
+          "path": "software/hyprland/home-manager.nix"
         },
         {
-          "path": "software/fuzzel/capabilities/application-launcher/home.nix"
+          "path": "software/fuzzel/home-manager.nix"
         }
       ]
     },
@@ -116,7 +116,7 @@
       ],
       "sources": [
         {
-          "path": "software/hypridle/capabilities/idle-coordinator/home.nix"
+          "path": "software/hypridle/home-manager.nix"
         }
       ]
     },
@@ -135,10 +135,10 @@
       ],
       "sources": [
         {
-          "path": "software/hyprlock/capabilities/session-lock/home.nix"
+          "path": "software/hyprlock/home-manager.nix"
         },
         {
-          "path": "software/hyprlock/capabilities/session-lock/nixos.nix"
+          "path": "software/hyprlock/nixos.nix"
         }
       ]
     },
@@ -157,7 +157,7 @@
       ],
       "sources": [
         {
-          "path": "software/waybar/capabilities/desktop-status/home.nix"
+          "path": "software/waybar/home-manager.nix"
         }
       ]
     },
@@ -179,7 +179,7 @@
           "path": "intents/hyprland-workstation.nix"
         },
         {
-          "path": "software/pipewire/capabilities/desktop-audio/nixos.nix"
+          "path": "software/pipewire/nixos.nix"
         }
       ]
     },
@@ -198,7 +198,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/data-package.nix"
+          "path": "software/rime-ice/data-package.nix"
         }
       ]
     },
@@ -217,7 +217,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/nixos.nix"
+          "path": "software/rime-ice/nixos.nix"
         }
       ]
     },
@@ -236,7 +236,7 @@
       ],
       "sources": [
         {
-          "path": "software/fcitx5/capabilities/input-method/nixos.nix"
+          "path": "software/fcitx5/nixos.nix"
         }
       ]
     },
@@ -255,7 +255,7 @@
       ],
       "sources": [
         {
-          "path": "software/rime-ice/capabilities/chinese-input-schema/home.nix"
+          "path": "software/rime-ice/home-manager.nix"
         }
       ]
     }

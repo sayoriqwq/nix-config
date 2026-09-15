@@ -8,7 +8,7 @@
 | `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
 | `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
 | `intents/<intent>.nix` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
-| `modules/` | 有真实消费者的 System 或跨 owner primitive | `common`/`desktop`/平台全选 bundle |
+| `shared/` | 多个消费者复用且不归单个 Software 的基础数据或声明 | 单软件实现、需求组合、全选入口 |
 | `checks/` | 窄、确定性的 contract validation | production configuration source |
 | `dotfiles/` | 稳定、可投影的静态内容 | auth、session、cache、database 或 secret |
 
@@ -18,9 +18,9 @@
 
 ```nix
 {
-  primaryBehavior.homeModules = [ ./capabilities/primary-behavior/home.nix ];
+  primaryBehavior.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/primary-behavior/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }
 ```
 
@@ -32,6 +32,10 @@
 - Software 行为不能 import Intent，也不能为了方便复制另一个 Software 的实现；
 - owner-local package、脚本、manifest 和固定数据留在同一 Software tree；
 - 只有一个真实实现时，不创建空 Darwin/NixOS pass-through。
+
+Software 内部默认平铺；只有实际文件规模需要分组才增加子目录。公开行为由 `default.nix` 表达，不要求每个行为对应目录。
+
+`shared/` 仅保留多个消费者实际复用、且不归某个 Software 的基础内容。Software 或 Host 直接引用具体文件；不提供全选入口，也不让 Intent 为内部共享数据额外接线。单消费者实现留在对应 Software。
 
 ## 3. Intent contract
 
@@ -59,9 +63,9 @@ flake
   └── Host
        ├── Intent
        │    └── Software public interface
-       │         └── owner-local capability files
+       │         └── owner-local files → 按需引用 shared/
        ├── independent Software platform files
-       └── proven modules/
+       └── shared/ 中的公共声明
 
 Check ──▶ production declaration
 ```
@@ -93,7 +97,7 @@ Host 不可以：
 
 ## 6. Platform seam
 
-平台不同只有在 package、配置 API、service、network effect 或人工关卡实际不同时才形成 seam。常见布局可以是同一 capability 下的 `home.nix`、`darwin.nix`、`nixos.nix`，但文件名不是架构层。
+平台不同只有在 package、配置 API、service、network effect 或人工关卡实际不同时才形成 seam。Software 内默认平铺 `home-manager.nix`、`darwin.nix`、`nixos.nix`；多个同平台行为用 `display-manager-nixos.nix` 等名称区分。文件名中的词以连字符分隔，平台与配置机制不另建目录。
 
 增加 platform implementation 前必须说明：
 
@@ -103,7 +107,7 @@ Host 不可以：
 - service 和 network effect；
 - activation/readback/rollback gate。
 
-移除无人消费 metadata 后只剩同一个 `home.nix` 的平台 pass-through，应让 caller 直接选择真实实现并删除空层。
+移除无人消费 metadata 后只剩同一个 `home-manager.nix` 的平台 pass-through，应让 caller 直接选择真实实现并删除空层。
 
 ## 7. State、secret 与共享值
 

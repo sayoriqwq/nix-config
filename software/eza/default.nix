@@ -1,5 +1,5 @@
 {
-  directoryListing.homeModules = [ ./capabilities/directory-listing/home.nix ];
+  directoryListing.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/directory-listing/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }

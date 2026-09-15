@@ -1,3 +1,3 @@
 {
-  idleCoordinator.homeModules = [ ./capabilities/idle-coordinator/home.nix ];
+  idleCoordinator.homeModules = [ ./home-manager.nix ];
 }

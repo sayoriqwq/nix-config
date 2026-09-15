@@ -1,3 +1,3 @@
 {
-  terminalEmulator.homeModules = [ ./capabilities/terminal-emulator/home.nix ];
+  terminalEmulator.homeModules = [ ./home-manager.nix ];
 }

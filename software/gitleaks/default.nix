@@ -1,3 +1,3 @@
 {
-  secretScanner.homeModules = [ ./capabilities/secret-scanner/home.nix ];
+  secretScanner.homeModules = [ ./home-manager.nix ];
 }

@@ -1,5 +1,5 @@
 {
-  gitTui.homeModules = [ ./capabilities/git-tui/home.nix ];
+  gitTui.homeModules = [ ./home-manager.nix ];
 
-  zshIntegration.homeModules = [ ./capabilities/git-tui/zsh.nix ];
+  zshIntegration.homeModules = [ ./zsh-integration.nix ];
 }
