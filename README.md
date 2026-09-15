@@ -18,12 +18,12 @@ Build 只证明配置可构建；真实 activation、远端访问、磁盘和生
 flake.nix
   └── hosts/<host>                 精确选择
        ├── intents/<intent>.nix    一起选择的使用需求
-       ├── software/<software>     软件 package/config/service owner
+       ├── software/<software>     独立配置、素材与平台实现
        └── shared/                 有实际复用的公共数据与声明
 ```
 
-- Software 聚合同一软件的声明、材料、实现与外部状态边界；选择软件不代表拥有其全部状态。
-- Intent 表达一起选择的使用需求，通过 Software 公开行为显式列出依赖，可以只涉及一个软件。
+- Software 聚合值得独立维护的配置、材料与平台实现；纯安装不要求一包一目录。
+- Intent 表达一起选择的使用需求，直接持有包声明和简短接线，并复用 Software 配置。
 - Host 是最终 caller：显式选择 Intent、独立 Software 与机器事实；没有 registry、bundle、自动扫描或平台全选。
 - 可变数据库、登录态、缓存、凭据和用户内容继续由应用或维护者拥有，不进入 Nix Store。
 

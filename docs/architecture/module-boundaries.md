@@ -2,124 +2,61 @@
 
 ## 1. 路径职责
 
-| 路径 | 负责 | 不负责 |
-| --- | --- | --- |
-| `flake.nix` | inputs、outputs、顶层 package wiring | 软件内部配置、Host 业务 bundle |
-| `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
-| `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
-| `intents/<intent>.nix` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
-| `shared/` | 多个消费者复用且不归单个 Software 的基础数据或声明 | 单软件实现、需求组合、全选入口 |
-| `dotfiles/` | 稳定、可投影的静态内容 | auth、session、cache、database 或 secret |
+| 路径 | 负责 |
+| --- | --- |
+| `flake.nix` | inputs、outputs 与顶层接线 |
+| `hosts/<host>/` | 使用需求的最终选择、目标用户与机器事实 |
+| `intents/<intent>.nix` | 一起选择的使用需求、包声明、依赖和简短接线 |
+| `software/<software>/` | 值得独立维护的单软件配置、素材、平台实现及外部状态说明 |
+| `shared/` | 多个实际消费者复用且不归单个 Software 的基础内容 |
+| `dotfiles/` | 稳定、可投影的静态内容 |
 
-## 2. Software public interface
+## 2. Intent 是使用需求的选择入口
 
-需要组合多个实现或提供参数化行为的 Software，在 `software/<name>/default.nix` 暴露命名接口。每个接口是普通 attrset，按需包含 `darwinModules`、`nixosModules`、`homeModules` 列表：
+Intent 可以直接声明 `home.packages`、`environment.systemPackages`、Homebrew 安装项或社区模块的启用选项。只有安装声明的软件不要求独立文件或目录。简短且仅属于当前需求的接线可以一起放入 Intent，例如 OrbStack 安装与 Shell 初始化。
 
-```nix
-{
-  primaryBehavior.homeModules = [ ./home-manager.nix ];
+有实际配置、素材或平台差异的实现继续留在 Software，由 Intent 显式引用。依赖必须完整：需要 Git、Fish 或 LazyGit 的需求直接选择同一配置模块，不能依赖另一个 Intent 恰好提供。相同实现按模块路径复用，避免在多个 Intent 复制配置。
 
-  zshIntegration.homeModules = [ ./zsh-integration.nix ];
-}
-```
+`intents/lib.nix` 只按顺序拼接 `darwinModules`、`nixosModules`、`homeModules`，缺失字段视为空列表。需要合并已有组合时使用它；只含一个模块列表的 Intent 直接返回 attrset，不增加无用函数或空列表。Host 读取该 Intent 实际提供的字段。
 
-规则：
+Intent 按实际一起启停的需求成立，不按软件类别强行分组，也不要求涉及多个软件。不得扩展成注册表、自动扫描、第二份安装清单或通用关系框架。
 
-- 名称描述行为，不描述目录或平台；
-- 公开接口表示可选择的行为，不划分 Primary Capability、Extension 或 Contribution 类型；
-- 无参数接口直接暴露 attrset；需要真实参数的行为 返回同样的 attrset；
-- Software 行为不能 import Intent，也不能为了方便复制另一个 Software 的实现；
-- owner-local package、脚本、manifest 和固定数据留在同一 Software tree；
-- 只有一个真实实现时，不创建空 Darwin/NixOS pass-through。
+## 3. Software 的公开入口
 
-Software 内部默认平铺；只有实际文件规模需要分组才增加子目录。简单 Software 的单文件平台声明也可以作为公开入口，由 Intent 或 Host 显式引用；不为转发一条声明新增 `default.nix`。命名行为不要求各自对应目录。
+实际配置文件可直接作为公开模块入口。只有组合真实平台实现或提供有意义的参数化行为时，才用 `default.nix` 提供命名行为；不为一个文件增加路径别名。Fish 的平台组合和 Zed 的任务行为保留这种入口。
 
-`shared/` 仅保留多个消费者实际复用、且不归某个 Software 的基础内容。Software 或 Host 直接引用具体文件；不提供全选入口，也不让 Intent 为内部共享数据额外接线。单消费者实现留在对应 Software。
+Software 内部默认平铺。脚本、配置素材和实现放在一起，只有实际规模需要时才分目录。Zsh adapter 随使用需求选择，仅在 Zsh 已启用时生效，不反向开启兼容终端。
 
-## 3. Intent contract
+`shared/` 只存多个实际消费者复用的基础内容；直接引用具体文件，不提供全选入口。单消费者的辅助实现留在所属 Software 或 Intent。
 
-`intents/lib.nix` 只提供一个组合函数：用 `lib.concatMap` 按输入顺序分别拼接三类 module lists，缺失的字段视为空列表。结果始终包含 `darwinModules`、`nixosModules`、`homeModules`，可继续参与组合。
-
-Intent 表达一起选择的使用需求，可以只有一个软件，也不要求存在胶水代码。依赖必须显式选择，不能依赖另一个 Intent 恰好安装所需程序。Intent 显式列出公开接口：
-
-```nix
-let
-  compose = import ./lib.nix { inherit lib; };
-in
-compose [
-  software.editor.guiEditor
-  software.git.versionControl
-  (software.editor.addTask { name = "Git"; command = "lazygit"; })
-]
-```
-
-共同 CLI／TUI 由 `shell-work` 选择；主力与兼容终端只组织入口及其 Shell。代码工作、容器开发和服务端诊断分别选择，编辑器是否存在不由兼容终端决定。工具的 Zsh adapter 放在所属 Software，由对应 Intent 选择，并在 Zsh 启用时生效，不反向启用兼容 Shell。
-
-不得扩展为 registry、relation graph、workflow DSL、自动扫描、优先级求解器或平台 substrate。出现新的真实需求时先增加命名行为；只有 `intents/lib.nix` 的三列表模型本身无法表达时，才通过新 ADR 复审。
-
-## 4. Import 方向
+## 4. Import 方向与 Host 选择
 
 ```text
 flake
-  └── Host
+  └── Host：需求选择与机器事实
        ├── Intent
-       │    └── Software public interface
-       │         └── owner-local files → 按需引用 shared/
-       ├── independent Software platform files
-       └── shared/ 中的公共声明
+       │    ├── 包声明、社区选项、简短接线
+       │    └── Software 配置或组合入口 → 按需引用 shared/
+       ├── 尚未梳理的独立 Software、系统模块
+       └── hardware 与公共主机声明
 ```
 
-硬规则：
+第一组命令行、终端、编辑器、开发运行时、容器和 GitHub 协作已从 Intent 选择。其余软件按后续使用需求逐组梳理，不因本次规则变更自动搬迁。
 
 - Software 不 import Intent 或 Host；Intent 不 import Host。
 - Home Manager module 不 import nix-darwin/NixOS system module。
 - Darwin 与 NixOS 实现不互相 import。
-- 所有 imports 显式列出；不递归扫描目录。
+- 所有 imports 显式列出，不从另一台 Host 继承后排除。
+- 磁盘、启动、NIC、provider、stateVersion 等机器事实留在 Host。
 
-## 5. Host 选择
+## 5. Platform seam 与外部状态
 
-Host 可以：
+平台的安装来源、配置、运行进程、网络影响或人工操作实际不同才形成 platform seam。平台差异就近保存在对应实现，不为不存在的第二个平台创建空 adapter。
 
-- 追加 Intent 结果的三类 module lists；
-- 直接 import 不需要横向协调的独立 Software platform capability；
-- import hardware/system primitive；
-- 通过 `specialArgs`/`extraSpecialArgs` 传入非 secret 的真实参数。
+实现附近说明选定的安装与配置职责，以及必要的外部状态和恢复限制。可变数据库、认证、登录态、缓存与用户内容保持外部；Secret 按实际 consumer 单独引入。构建不证明已激活，声明不证明现场。
 
-Host 不可以：
+## 6. 删除检验
 
-- import `common`、`desktop`、`darwin`、`linux` 或 server bundle 代替需求；
-- 自动选择整个 `software/` 目录；
-- 为减少 imports 建 `capabilities.*.enable` 第二注册层；
-- 从另一个 Host 继承后逐项排除。
+若删掉一个 module 后只少了跳转，直接收拢声明；若配置知识会散落到多个调用点，则保留 module。包名出现次数不是唯一来源的判断依据：包可由多个真实需求共同选择，同一份定制配置应复用同一实现。
 
-## 6. Platform seam
-
-平台不同只有在 package、配置 API、service、network effect 或人工关卡实际不同时才形成 seam。Software 内默认平铺 `home-manager.nix`、`darwin.nix`、`nixos.nix`；多个同平台行为用 `display-manager-nixos.nix` 等名称区分。文件名中的词以连字符分隔，平台与配置机制不另建目录。
-
-增加 platform implementation 前必须说明：
-
-- package owner；
-- managed configuration；
-- mutable/external state boundary；
-- service 和 network effect；
-- activation/readback/rollback gate。
-
-移除无人消费 metadata 后只剩同一个 `home-manager.nix` 的平台 pass-through，应让 caller 直接选择真实实现并删除空层。
-
-## 7. State、secret 与共享值
-
-- 可变数据库、key、登录态、cache、session、browser profile、user content 不得整体链接到 Store。
-- Secret 不通过普通 Nix string、args、Issue 或日志传递。出现真实 consumer 时另立机制与权限合同。
-- 必要 mutable boundary 保留在最近的 Software 注释或当前 runbook；不建立无 consumer 的全局清单。
-- Username、inputs 等非 secret 可以经 module args 传递；不要建立巨大无类型 `vars` attrset。
-- Host 与 hardware facts 只放 `hosts/<host>/`。
-
-## 8. 选择判断
-
-1. 单软件声明、材料、实现和外部状态边界：进入 Software。
-2. 需要被选择的行为或参数化贡献：暴露普通命名接口。
-3. 一起选择的使用需求：建立 Intent，显式列出依赖。
-4. Boot、disk、NIC、provider、stateVersion：进入 Host/System。
-5. 项目依赖：进入项目 dev shell。
-6. External state 或 secret：保持外部，并建立数据/secret 流程。
-7. 只为历史追溯存在的 wrapper、metadata、matrix 或 test：由 Git history/Issue 承担，当前 tree 删除。
+项目依赖由项目声明管理；主机 Intent 提供需要的运行工具。历史决策依据见 [ADR-0007](../adr/0007-capability-modules-and-host-composition.md)。

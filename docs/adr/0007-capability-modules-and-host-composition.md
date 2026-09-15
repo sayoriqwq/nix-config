@@ -9,6 +9,8 @@
 - **使用需求修订：** 2026-09-16，围绕三台 Host 的命令行、终端入口、代码工作与诊断组合；移除独立 checks 层
 - **目录简化：** 2026-09-16，Software 内部平铺，公共基础内容统一归入 shared
 
+- **第一组精简：** 2026-09-16，纯安装与简短接线进入 Intent，移除没有独立选择价值的转发
+
 ## 背景
 
 早期 `common`、`desktop` 与平台 bundle 同时承担复用和 Host interface，导致 nixbox 容易隐式继承 macbook 的 GUI、兼容层和未确认软件。随后“纵向能力模块”又把单软件 owner 与跨软件需求混在一起，难以表达 Zed task、Zsh integration 等窄 contribution。
@@ -19,23 +21,29 @@
 
 采用三类长期对象：
 
-1. `software/<software>/` 聚合同一软件的声明、素材、实现及外部边界，公开可选择的行为；
-2. `intents/<intent>.nix` 表达维护者希望整体选择的使用需求，只调用 Software public interface；不要求多个软件或必须存在接线逻辑；
+1. `software/<software>/` 聚合同一软件值得独立维护的配置、素材、实现及外部边界，公开可选择的行为；
+2. `intents/<intent>.nix` 表达维护者希望整体选择的使用需求，直接持有包声明与简短接线，并复用 Software public interface；不要求多个软件或必须存在接线逻辑；
 3. `hosts/<host>/` 是最终 caller，显式选择 Intent、独立 Software platform module 与机器事实。
 
-Software public interface 直接暴露包含模块列表的 attrset；有真实参数的行为接口返回同型 attrset。`intents/lib.nix` 只用 `lib.concatMap` 按顺序拼接 `darwinModules`、`nixosModules`、`homeModules`，把缺失字段视为空列表，并返回三个显式列表。Import graph 表达声明选择，不增加第二份选择清单。
+有真实组合价值的 Software public interface 暴露包含模块列表的 attrset；有真实参数的行为接口返回同型 attrset。`intents/lib.nix` 只用 `lib.concatMap` 按顺序拼接 `darwinModules`、`nixosModules`、`homeModules`，把缺失字段视为空列表，并返回三个显式列表。Import graph 表达声明选择，不增加第二份选择清单。
 
-每个行为的依赖必须明确：由 Nix 提供的程序通过模块选择、包依赖或确定路径表达，原生安装提供的程序则就近说明外部前提。依赖另一个 Intent 恰好提供程序，说明组合边界仍需修正。公开接口无需分为 Primary、Extension 或 Contribution 三种类型，是否独立选择由实际行为决定。Software 内部默认平铺，移除 `capabilities/<行为>/` 固定层级；需要组合或参数化的公开行为由 `default.nix` 表达；简单 Software 的单文件平台声明也可由 Intent 或 Host 直接选择，不增加空转发入口。只有实际文件规模需要时才分组，文件名使用连字符，配置机制或平台在文件名中表达。
+每个行为的依赖必须明确：由 Nix 提供的程序通过模块选择、包依赖或确定路径表达，原生安装提供的程序则就近说明外部前提。依赖另一个 Intent 恰好提供程序，说明组合边界仍需修正。公开接口无需分为 Primary、Extension 或 Contribution 三种类型，是否独立选择由实际行为决定。Software 内部默认平铺，移除 `capabilities/<行为>/` 固定层级；需要组合或参数化的公开行为由 `default.nix` 表达；已有配置模块可直接选择，不为路径别名增加转发入口。仅安装软件或启用社区默认模块的声明直接进入所属 Intent，不要求一包一目录。只有实际文件规模需要时才分组，文件名使用连字符，配置机制或平台在文件名中表达。
 
 只有 package、配置、service、network effect 或人工关卡真的不同才建立 platform seam。共享主题、外观与公共账号声明统一放在 `shared/`，替代原 `modules/`。准入条件是多个实际消费者且不归单个 Software；消费者直接引用具体文件，不提供全选 interface。只有一个 Software 使用的辅助实现归回该 Software。
 
-Software 就近说明实际受管配置、外部可写内容、数据和必要路径。社区可写合并可以持续管理选定字段；init 只初始化缺失目标。二者按具体需求选择，不由 Software 名称推导整份文件的所有权，也不维护全局 state-path metadata。
+持有实现的 Software 或 Intent 就近说明实际受管配置、外部可写内容、数据和必要路径。社区可写合并可以持续管理选定字段；init 只初始化缺失目标。二者按具体需求选择，不由 Software 名称推导整份文件的所有权，也不维护全局 state-path metadata。
 
 ### 按真实工作需求组合
 
 三台 Host 共享 `shell-work` 的 Fish 和 CLI／TUI；两台工作站选择 `primary-terminal`，macbook 额外选择 WezTerm + Zsh 的 `terminal-compatibility`。编辑器、开发运行时、GitHub 协作与容器开发独立于兼容入口；`code-development` 以 `withVscode` 表达 macbook 与 nixbox 的真实差异。server 只选择命令行工作和诊断需求，不继承工作站后排除 GUI。
 
 工具的 Zsh adapter 随其所属需求选择，仅在已启用 Zsh 时生效；选择工具不能额外开启兼容入口。保留普通三列表组合，不为每项软件预建安装／配置开关或新的关系框架。普通 App 是否继续托管另行确认。
+
+第一组已采用上述规则：CLI 纯安装、Nix 语言工具与 GitHub 工具直接声明在各自 Intent；终端、Git、Fish、Zed 等实际配置继续复用 Software 文件。相同配置依赖继续引用同一模块路径，不复制成多个匿名声明。macbook 的 mise 默认版本通过开发运行时 Intent 显式选择。
+
+OrbStack 保留，职责是 macOS 项目容器运行环境。安装与 Shell 初始化一起放在 `container-development`；两者没有独立选择需求，不再公开两个行为。项目仓库管理 Compose 等项目声明，OrbStack 管理镜像、容器和数据卷。此处简短接线内联，不意味着所有软件配置都必须进入 Intent。
+
+此次取舍来自单包文件和行为别名造成的导航成本；包安装本身是有效声明职责，不以是否定制设置衡量是否值得托管。后续按真实需求逐组收拢 Host 的软件选择，未梳理的独立软件和系统模块暂时保留，避免用软件类别造全选 Intent。
 
 维护者选择删除独立 checks 与 flake checks 输出，验证采用格式化、相关 Host 求值、必要的 nh 构建和本次功能现场验收。nh 不提供行为回归检查，原自动化保护随删除一同退出，不建立替代检查目录。
 

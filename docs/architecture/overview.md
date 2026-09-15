@@ -6,7 +6,7 @@
 
 声明使用一个顶层 Flake、一个 lock file 和显式 import graph：
 
-- 一个软件只有一个 package/config/service owner；
+- 安装选择由使用需求持有，同一份定制配置复用同一实现；
 - 一起选择的使用需求集中在 Intent，Host 保留最终选择；
 - 外部 state 和操作影响保持可见。
 
@@ -52,7 +52,7 @@ Nix 修改格式化并求值相关 Host，必要时通过 nh 或原生命令构�
 
 Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、静态文件、明确 firewall rule。它们不自动拥有数据库、history、userdb、cache、browser profile、应用账号、token、private key、workspace、容器 volume、云端数据与备份。
 
-必要的可变状态边界保留在最近的 Software owner 或当前 runbook。项目开发依赖属于项目 dev shell；工作站可变运行时属于明确选择的 Software/Intent；server workload 运行时属于服务 closure 或容器合同。Secret 机制由真实 consumer 引入，当前没有预置 secret framework。
+必要的可变状态边界保留在持有实现的 Software、Intent 或当前 runbook。项目开发依赖属于项目 dev shell；工作站可变运行时属于明确选择的 Software/Intent；server workload 运行时属于服务 closure 或容器合同。Secret 机制由真实 consumer 引入，当前没有预置 secret framework。
 
 可复现所需的 host/hardware facts 保存在 `hosts/<host>/`。Credential、账号标识及其他不影响构建的敏感事实不进入公开文档；已获准版本化的非凭据主机事实遵循对应主机合同。
 

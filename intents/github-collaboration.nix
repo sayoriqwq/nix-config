@@ -1,19 +1,15 @@
-{ lib }:
-
-let
-  compose = import ./lib.nix { inherit lib; };
-  software = {
-    git = import ../software/git;
-    gh = import ../software/gh;
-    gitleaks = import ../software/gitleaks;
-    lazygit = import ../software/lazygit;
-  };
-in
-compose [
-  software.git.versionControl
-  software.lazygit.gitTui
-  software.lazygit.zshIntegration
-  software.gh.githubCli
-  software.gh.gitCredentialHelper
-  software.gitleaks.secretScanner
-]
+{
+  homeModules = [
+    ../software/git/home-manager.nix
+    ../software/lazygit/home-manager.nix
+    ../software/lazygit/zsh-integration.nix
+    ../software/gh/git-credential-helper.nix
+    ({ pkgs, ... }: {
+      # gh 账号和认证状态继续由应用维护。
+      home.packages = [
+        pkgs.gh
+        pkgs.gitleaks
+      ];
+    })
+  ];
+}

@@ -11,18 +11,15 @@ let
     inherit lib;
     withVscode = true;
   };
-  containerDevelopment = import ../../intents/container-development.nix { inherit lib; };
-  developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
+  containerDevelopment = import ../../intents/container-development.nix;
+  developmentRuntime = import ../../intents/development-runtime.nix {
+    inherit lib;
+    withMacosDefaults = true;
+  };
   primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
-  githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
-  compose = import ../../intents/lib.nix { inherit lib; };
-  mise = import ../../software/mise;
-  macosRuntimeDefaults = compose [
-    mise.runtimeManager
-    mise.macosRuntimeDefaults
-  ];
+  githubCollaboration = import ../../intents/github-collaboration.nix;
   shellWork = import ../../intents/shell-work.nix { inherit lib; };
-  terminalCompatibility = import ../../intents/terminal-compatibility.nix { inherit lib; };
+  terminalCompatibility = import ../../intents/terminal-compatibility.nix;
 in
 {
   imports =
@@ -217,14 +214,12 @@ in
         ++ developmentRuntime.homeModules
         ++ containerDevelopment.homeModules
         ++ githubCollaboration.homeModules
-        ++ macosRuntimeDefaults.homeModules
         ++ chineseInput.homeModules
         ++ [
           ../../software/obsidian/home-manager.nix
           ../../software/discord/home-manager.nix
           ../../software/iina/home-manager.nix
           ../../software/localsend/home-manager.nix
-          ../../software/man/home-manager.nix
           ../../software/monitorcontrol/home-manager.nix
           ../../software/mos/home-manager.nix
           ../../software/upscayl/home-manager.nix

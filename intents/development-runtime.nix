@@ -1,17 +1,18 @@
-{ lib }:
+{
+  lib,
+  withMacosDefaults ? false,
+}:
 
-let
-  compose = import ./lib.nix { inherit lib; };
-  software = {
-    direnv = import ../software/direnv;
-    mise = import ../software/mise;
-    uv = import ../software/uv;
-  };
-in
-compose [
-  software.direnv.developmentEnvironment
-  software.direnv.zshIntegration
-  software.mise.runtimeManager
-  software.mise.zshIntegration
-  software.uv.pythonPackageManager
-]
+{
+  homeModules = [
+    ../software/direnv/home-manager.nix
+    ../software/direnv/zsh-integration.nix
+    ../software/mise/home-manager.nix
+    ../software/mise/zsh-integration.nix
+    ({ pkgs, ... }: {
+      # 项目自行管理 Python 版本、虚拟环境、依赖与锁文件。
+      home.packages = [ pkgs.uv ];
+    })
+  ]
+  ++ lib.optionals withMacosDefaults [ ../software/mise/macos-defaults.nix ];
+}

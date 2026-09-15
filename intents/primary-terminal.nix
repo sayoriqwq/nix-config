@@ -2,12 +2,9 @@
 
 let
   compose = import ./lib.nix { inherit lib; };
-  software = {
-    fish = import ../software/fish;
-    ghostty = import ../software/ghostty;
-  };
+  fish = import ../software/fish;
 in
 compose [
-  software.fish.interactiveShell
-  software.ghostty.terminalEmulator
+  fish.interactiveShell
+  { homeModules = [ ../software/ghostty/home-manager.nix ]; }
 ]

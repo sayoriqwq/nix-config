@@ -10,7 +10,7 @@ let
   codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
   primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
-  githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
+  githubCollaboration = import ../../intents/github-collaboration.nix;
   hyprlandWorkstation = import ../../intents/hyprland-workstation.nix { inherit lib; };
   shellWork = import ../../intents/shell-work.nix { inherit lib; };
 in

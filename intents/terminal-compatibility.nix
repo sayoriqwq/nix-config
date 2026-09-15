@@ -1,11 +1,7 @@
-{ lib }:
-
-let
-  compose = import ./lib.nix { inherit lib; };
-  wezterm = import ../software/wezterm;
-  zsh = import ../software/zsh;
-in
-compose [
-  zsh.compatibilityShell
-  wezterm.terminalEmulator
-]
+{
+  darwinModules = [ ];
+  homeModules = [
+    ../software/zsh/home-manager.nix
+    ../software/wezterm/home-manager.nix
+  ];
+}

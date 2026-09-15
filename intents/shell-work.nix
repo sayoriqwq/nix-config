@@ -2,55 +2,45 @@
 
 let
   compose = import ./lib.nix { inherit lib; };
-  software = {
-    atuin = import ../software/atuin;
-    git = import ../software/git;
-    payRespects = import ../software/pay-respects;
-    bat = import ../software/bat;
-    eza = import ../software/eza;
-    fd = import ../software/fd;
-    fish = import ../software/fish;
-    fzf = import ../software/fzf { inherit lib; };
-    jq = import ../software/jq;
-    ripgrep = import ../software/ripgrep;
-    starship = import ../software/starship;
-    tmux = import ../software/tmux;
-    tree = import ../software/tree;
-    zoxide = import ../software/zoxide;
-  };
+  fish = import ../software/fish;
 in
 compose [
-  software.fish.interactiveShell
-  software.git.versionControl
-  software.atuin.shellHistory
-  software.atuin.zshIntegration
-  software.payRespects.commandCorrection
-  software.payRespects.zshIntegration
+  fish.interactiveShell
   {
     homeModules = [
-      ../software/nh/home-manager.nix
-      ../software/btop/home-manager.nix
-      ../software/fastfetch/home-manager.nix
-      ../software/yazi/home-manager.nix
+      ../software/git/home-manager.nix
+      ../software/atuin/home-manager.nix
+      ../software/atuin/zsh-integration.nix
+      ../software/pay-respects/home-manager.nix
+      ../software/pay-respects/zsh-integration.nix
       ../software/helix/home-manager.nix
+      ../software/eza/home-manager.nix
+      ../software/eza/zsh-integration.nix
+      ../software/fzf/home-manager.nix
+      ../software/fzf/zsh-integration.nix
+      ../software/starship/home-manager.nix
+      ../software/starship/zsh-integration.nix
+      ../software/tmux/home-manager.nix
+      ../software/zoxide/home-manager.nix
+      ../software/zoxide/zsh-integration.nix
+      ({ pkgs, ... }: {
+        home.packages = with pkgs; [
+          fastfetch
+          yazi
+          fd
+          jq
+          ripgrep
+          tree
+        ];
+        programs.bat.enable = true;
+        programs.btop.enable = true;
+        programs.nh.enable = true;
+        programs.man.generateCaches = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin false;
+        programs.fzf = {
+          defaultCommand = "fd";
+          defaultOptions = [ "--preview ${lib.escapeShellArg "bat --color=always {}"}" ];
+        };
+      })
     ];
   }
-  software.bat.contentViewer
-  software.eza.directoryListing
-  software.eza.zshIntegration
-  software.fd.fileFinder
-  software.fzf.fuzzySelector
-  software.fzf.zshIntegration
-  (software.fzf.configure {
-    defaultCommand = "fd";
-    previewCommand = "bat --color=always {}";
-  })
-  software.jq.jsonProcessor
-  software.ripgrep.textSearch
-  software.starship.shellPrompt
-  software.starship.zshIntegration
-  software.tmux.terminalMultiplexer
-  software.tree.directoryTree
-  software.zoxide.directoryJumper
-  software.zoxide.zshIntegration
 ]
