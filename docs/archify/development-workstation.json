@@ -7,11 +7,11 @@
     "quality_profile": "showcase",
     "viewBox": [
       1390,
-      720
+      560
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "9d76835f2afbedb038b353ce8df0b60cef919c2e",
+      "revision": "696452c5e4a8beb83f96268e73bd786e4766672c",
       "link_mode": "local-only"
     }
   },
@@ -96,7 +96,7 @@
       "id": "multiplexer",
       "type": "backend",
       "label": "tmux · terminalMultiplexer",
-      "sublabel": "terminal-work 与 AI 核心共用",
+      "sublabel": "terminal-work 提供终端复用",
       "pos": [
         40,
         240
@@ -134,7 +134,7 @@
       "id": "git",
       "type": "backend",
       "label": "Git · versionControl",
-      "sublabel": "开发、GitHub 协作、AI 多客户端共用",
+      "sublabel": "代码开发与 GitHub 协作共用",
       "pos": [
         740,
         240
@@ -243,66 +243,6 @@
           "path": "software/gitleaks/capabilities/secret-scanner/home.nix"
         }
       ]
-    },
-    {
-      "id": "ai-core",
-      "type": "backend",
-      "label": "Herdr + Codex",
-      "sublabel": "ax · rtk · Python · 共用 tmux",
-      "pos": [
-        40,
-        600
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "sources": [
-        {
-          "path": "intents/ai-coding/default.nix"
-        }
-      ]
-    },
-    {
-      "id": "ai-multi",
-      "type": "backend",
-      "label": "多客户端扩展",
-      "sublabel": "Antigravity · 共用 Git",
-      "pos": [
-        390,
-        600
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "sources": [
-        {
-          "path": "intents/ai-coding/default.nix"
-        }
-      ]
-    },
-    {
-      "id": "hosts",
-      "type": "external",
-      "label": "主机合并五个组合的 Home 模块",
-      "sublabel": "macbook：AI 多客户端 + Darwin 模块；nixbox：AI 核心 + NixOS 模块",
-      "pos": [
-        740,
-        600
-      ],
-      "size": [
-        610,
-        90
-      ],
-      "sources": [
-        {
-          "path": "hosts/macbook/default.nix"
-        },
-        {
-          "path": "hosts/nixbox/default.nix"
-        }
-      ]
     }
   ],
   "boundaries": [
@@ -345,15 +285,6 @@
       "wraps": [
         "environment",
         "project-python"
-      ],
-      "pad": 20
-    },
-    {
-      "kind": "region",
-      "label": "ai-coding · 核心与多客户端",
-      "wraps": [
-        "ai-core",
-        "ai-multi"
       ],
       "pad": 20
     }
@@ -413,20 +344,6 @@
       "label": "Fish 环境集成",
       "fromSide": "bottom",
       "toSide": "right"
-    },
-    {
-      "id": "core-extension",
-      "from": "ai-core",
-      "to": "ai-multi",
-      "label": "扩展核心",
-      "variant": "emphasis"
-    },
-    {
-      "id": "ai-hosts",
-      "from": "ai-multi",
-      "to": "hosts",
-      "label": "按主机选择",
-      "variant": "dashed"
     }
   ],
   "cards": [
@@ -434,16 +351,16 @@
       "dot": "cyan",
       "title": "共享能力就是接缝",
       "items": [
-        "Fish、Git、LazyGit、tmux 各一处；交叠边界或节点文字标明共同选择。",
-        "macbook / nixbox 均合并五个组合；nixbox 的 Fish 系统模块由 terminal-work 提供。"
+        "Fish、Git、LazyGit 各一处；交叠边界或节点文字标明共同选择。",
+        "macbook / nixbox 均合并四个组合；nixbox 的 Fish 系统模块由 terminal-work 提供。"
       ]
     },
     {
       "dot": "amber",
       "title": "保留声明边界",
       "items": [
-        "mise 管 Node / Bun / pnpm；uv 管项目 Python；AI 的 Nix Python 仅作基础解释器。",
-        "Herdr 会话与编码代理配置留在应用侧；此处没有声明 Zed → Codex 的调用链。"
+        "mise 管 Node / Bun / pnpm；uv 管项目 Python 版本与依赖。",
+        "AI 编码工作流暂由外部管理，稳定后再重新评估迁移。"
       ]
     }
   ]

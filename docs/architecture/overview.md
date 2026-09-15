@@ -49,8 +49,8 @@ Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、�
 
 | Host | 角色与主要管理层 | 组合重点与边界 |
 | --- | --- | --- |
-| `macbook` | 主工作站与维护者控制面；nix-darwin + Home Manager | 完整工作站 Software、开发/AI/终端 Intents；不承担 Linux closure 原生构建 |
-| `nixbox` | 次级工作站、Linux 实验站、server 同架构验证节点；NixOS + Home Manager | Hyprland、核心开发/AI/终端 Intents 与预生产验证；不镜像 macbook GUI，不持有 maintenance private key |
+| `macbook` | 主工作站与维护者控制面；nix-darwin + Home Manager | 完整工作站 Software、开发/终端 Intents；不承担 Linux closure 原生构建 |
+| `nixbox` | 次级工作站、Linux 实验站、server 同架构验证节点；NixOS + Home Manager | Hyprland、核心开发/终端 Intents 与预生产验证；不镜像 macbook GUI，不持有 maintenance private key |
 | `server` | 最小 headless NixOS production host；NixOS + Home Manager | 终端、Git、基础运维、诊断与 recovery；无 GUI、GitHub credential、工作站 runtime、Tailscale mesh 或旧 Ubuntu workload |
 
 逻辑 output 名称不要求等于真实 hostname。Server 只按当前需求引入生产能力，并为实际服务明确运行、备份、恢复与 rollback 边界。

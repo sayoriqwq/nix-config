@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "revision": "696452c5e4a8beb83f96268e73bd786e4766672c",
       "link_mode": "local-only"
     }
   },
@@ -257,28 +257,6 @@
           "path": "docs/runbooks/daily-nix-maintenance.md"
         }
       ]
-    },
-    {
-      "id": "unused",
-      "type": "external",
-      "label": "存在但未被主机选用",
-      "sublabel": "Claude Code · oh-my-pi 能力文件",
-      "pos": [
-        1090,
-        480
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "sources": [
-        {
-          "path": "software/claude-code/default.nix"
-        },
-        {
-          "path": "software/oh-my-pi/default.nix"
-        }
-      ]
     }
   ],
   "boundaries": [
@@ -310,8 +288,7 @@
       "wraps": [
         "checks",
         "packages",
-        "activation",
-        "unused"
+        "activation"
       ],
       "pad": 20
     }
@@ -392,7 +369,7 @@
       "title": "验证覆盖与使用边界",
       "items": [
         "checks 是 flake 导出，仓库当前没有 .github CI 工作流；恢复安装检查按相关变更需要单独运行。",
-        "构建通过不等于激活或现场验收。未被导入的 Claude Code、oh-my-pi 不能算作已部署软件。"
+        "构建通过不等于激活或现场验收；主机只部署实际导入的能力。"
       ]
     }
   ]

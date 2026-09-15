@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "revision": "696452c5e4a8beb83f96268e73bd786e4766672c",
       "link_mode": "local-only"
     }
   },
@@ -127,7 +127,7 @@
       "id": "macbook",
       "type": "frontend",
       "label": "macbook · aarch64-darwin",
-      "sublabel": "多客户端开发 · 终端兼容 · 原生桌面",
+      "sublabel": "代码开发 · 终端兼容 · 原生桌面",
       "pos": [
         390,
         270
@@ -146,7 +146,7 @@
       "id": "nixbox",
       "type": "frontend",
       "label": "nixbox · x86_64-linux",
-      "sublabel": "核心开发环境 · Hyprland · 中文输入",
+      "sublabel": "代码开发 · Hyprland · 中文输入",
       "pos": [
         740,
         270
@@ -209,7 +209,7 @@
       "id": "development",
       "type": "backend",
       "label": "开发工作站",
-      "sublabel": "代码开发 · 终端工作 · 运行环境 · AI / GitHub",
+      "sublabel": "代码开发 · 终端工作 · 运行环境 · GitHub",
       "pos": [
         390,
         480
@@ -221,9 +221,6 @@
       "sources": [
         {
           "path": "intents/code-development/default.nix"
-        },
-        {
-          "path": "intents/ai-coding/default.nix"
         },
         {
           "path": "intents/development-runtime/default.nix"
