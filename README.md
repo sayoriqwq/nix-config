@@ -17,11 +17,10 @@ Build 只证明配置可构建；真实 activation、远端访问、磁盘和生
 ```text
 flake.nix
   ├── hosts/<host>                 精确选择
-  │    ├── intents/<intent>        一起选择的使用需求
+  │    ├── intents/<intent>.nix    一起选择的使用需求
   │    ├── software/<software>     软件 package/config/service owner
   │    └── modules/                少量系统或跨 owner primitive
-  ├── checks/                      窄 contract checks
-  └── operations/                  人工触发、无隐式 target 的安全操作
+  └── checks/                      窄 contract checks
 ```
 
 - Software 聚合同一软件的声明、材料、实现与外部状态边界；选择软件不代表拥有其全部状态。
@@ -44,14 +43,6 @@ nix build --no-link .#nixosConfigurations.server.config.system.build.toplevel
 ```
 
 🧪 按影响范围验证声明；构建不会激活，也不留下 result 链接。
-
-只有修改 server 的磁盘、启动、网络或 SSH 声明时，才需要在 `x86_64-linux` 节点额外构建按需恢复配置：
-
-```fish
-nix build .#nixosConfigurations.server-recovery-install.config.system.build.toplevel
-```
-
-🛟 只构建隔离 installation configuration；完整 VM 演练需要在当前任务中明确范围与授权。
 
 ## 文档入口
 

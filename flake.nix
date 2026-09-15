@@ -71,19 +71,6 @@
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
-      serverModules = [
-        ./hosts/server
-        disko.nixosModules.disko
-        home-manager.nixosModules.home-manager
-      ];
-      serverRecoveryOperation = import ./operations/server-recovery {
-        inherit
-          inputs
-          self
-          serverModules
-          username
-          ;
-      };
       darwinPkgs = packagesFor "aarch64-darwin";
       fzfConfigureCheck = import ./checks/terminal-work/fzf-configure.nix {
         homeManager = home-manager-darwin;
@@ -142,10 +129,12 @@
         specialArgs = {
           inherit inputs self username;
         };
-        modules = serverModules;
+        modules = [
+          ./hosts/server
+          disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+        ];
       };
-
-      nixosConfigurations.server-recovery-install = serverRecoveryOperation.installConfiguration;
 
       # Explicit package outputs give CI and future hosts stable validation
       # targets for the narrow Clash seam and Linux Zed Stable.

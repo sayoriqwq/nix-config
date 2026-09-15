@@ -8,7 +8,7 @@
 
 - 一个软件只有一个 package/config/service owner；
 - 一起选择的使用需求集中在 Intent，Host 保留最终选择；
-- Check、Operation 与 production graph 单向依赖；
+- Check 与 production graph 单向依赖；
 - 外部 state 和操作影响保持可见。
 
 ## 2. 目录与组合
@@ -25,21 +25,19 @@ Macwarden 的模型、工具和 Skills 由独立项目维护，本仓库不复�
 - `nixosConfigurations.nixbox`
 - `nixosConfigurations.server`
 
-显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Linux Zed Stable 与 Clash Verge Rev package。按需的 `server-recovery-install` installation configuration 不是已经执行的恢复动作；任何 Output 也不表示已经 activation。
+显式 package/app outputs 只为真实操作或独立验证提供稳定入口，例如 Linux Zed Stable 与 Clash Verge Rev package。任何 Output 也不表示已经 activation。
 
 当前 Darwin 使用 rolling nixpkgs/nix-darwin/Home Manager inputs；Linux 使用 26.05 release inputs。两条 cadence 共享同一 lock file；现有平台版本差异不表示维护者已经要求同步。显式同步选中软件时，仍须满足[主工作站管理](workstation-management.md)中的版本要求。
 
 `system.stateVersion` 与 `home.stateVersion` 保留首次采用值，不随 channel 升级。
 
-## 4. Check 与 Operation
+## 4. Check
 
 Check 验证窄接口和最终 host output，例如 FZF/Zed contribution、Pinshift host selection、Tailscale SSH fragment 与主机 closure。构建成功不能替代现场行为验证，也不能证明未选中的目标状态没有改变。
 
-Operation 只在确实存在需要维护者运行的流程时建立。Server recovery 当前只保留按需的 `server-recovery-install` installation configuration；仓库不提供默认 VM runner，完整 VM 演练也不是日常验证的必经步骤。磁盘、启动、网络或 SSH 声明发生相关变化时，再明确目标、执行器、停止条件与回滚，并按当前协议执行对应验证。
-
 ## 5. 配置与数据边界
 
-Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、静态文件、明确 firewall rule 与可构建 Operation。它们不自动拥有数据库、history、userdb、cache、browser profile、应用账号、token、private key、workspace、容器 volume、云端数据与备份。
+Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、静态文件、明确 firewall rule。它们不自动拥有数据库、history、userdb、cache、browser profile、应用账号、token、private key、workspace、容器 volume、云端数据与备份。
 
 必要的可变状态边界保留在最近的 Software owner 或当前 runbook。项目开发依赖属于项目 dev shell；工作站可变运行时属于明确选择的 Software/Intent；server workload 运行时属于服务 closure 或容器合同。Secret 机制由真实 consumer 引入，当前没有预置 secret framework。
 

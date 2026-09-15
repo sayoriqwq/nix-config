@@ -4,13 +4,12 @@
 
 | 路径 | 负责 | 不负责 |
 | --- | --- | --- |
-| `flake.nix` | inputs、outputs、顶层 package/check/operation wiring | 软件内部配置、Host 业务 bundle |
+| `flake.nix` | inputs、outputs、顶层 package/check wiring | 软件内部配置、Host 业务 bundle |
 | `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
 | `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
 | `intents/<intent>.nix` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
 | `modules/` | 有真实消费者的 System 或跨 owner primitive | `common`/`desktop`/平台全选 bundle |
 | `checks/` | 窄、确定性的 contract validation | production configuration source |
-| `operations/` | 人工可调用且边界固定的安全操作 | 隐式 target、无人值守 production mutation |
 | `dotfiles/` | 稳定、可投影的静态内容 | auth、session、cache、database 或 secret |
 
 ## 2. Software public interface
@@ -64,14 +63,14 @@ flake
        ├── independent Software platform files
        └── proven modules/
 
-Check / Operation ──▶ production declaration
+Check ──▶ production declaration
 ```
 
 硬规则：
 
 - Software 不 import Intent 或 Host；Intent 不 import Host。
-- Production Host 不 import `checks/` 或 test-only Operation modules。
-- Check/Operation 可以读取 production declaration，但不得成为其运行依赖。
+- Production Host 不 import `checks/`。
+- Check 可以读取 production declaration，但不得成为其运行依赖。
 - Home Manager module 不 import nix-darwin/NixOS system module。
 - Darwin 与 NixOS 实现不互相 import。
 - 所有 imports 显式列出；不递归扫描目录。
