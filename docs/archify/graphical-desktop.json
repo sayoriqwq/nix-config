@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
+      "revision": "f28e0e6168b6389a827ef4c1e73082fa10c012df",
       "link_mode": "local-only"
     }
   },
@@ -263,7 +263,7 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "nixbox 图形会话 · hyprland-workstation + always-on",
+      "label": "nixbox 图形会话 · hyprland-workstation",
       "wraps": [
         "gdm",
         "hyprland",
@@ -273,15 +273,6 @@
         "lock",
         "bar",
         "services"
-      ],
-      "pad": 20
-    },
-    {
-      "kind": "region",
-      "label": "always-on · 共用 GDM",
-      "wraps": [
-        "gdm",
-        "idle"
       ],
       "pad": 20
     },
@@ -361,7 +352,7 @@
       "title": "会话与常开策略",
       "items": [
         "UWSM 负责图形会话；Home Manager 不再启用第二个 Hyprland systemd target。",
-        "always-on 复用同一个 GDM；无闲置定时器，仍支持手动锁屏与休眠前锁屏。"
+        "同一桌面意图选择锁屏发送方、Hypridle、Hyprlock 与 PAM；无闲置定时器，GDM 禁自动挂起。"
       ]
     },
     {

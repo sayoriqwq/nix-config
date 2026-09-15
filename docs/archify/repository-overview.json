@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "cf52ea3f2a81ed419881816e9507e2e6db942399",
+      "revision": "f28e0e6168b6389a827ef4c1e73082fa10c012df",
       "link_mode": "local-only"
     }
   },
@@ -243,9 +243,6 @@
       "sources": [
         {
           "path": "intents/hyprland-workstation.nix"
-        },
-        {
-          "path": "intents/always-on-workstation.nix"
         },
         {
           "path": "intents/chinese-input.nix"

@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "8c2b8336bcc1e5ce4138a9ddfc9247ca059421a9",
+      "revision": "f28e0e6168b6389a827ef4c1e73082fa10c012df",
       "link_mode": "local-only"
     }
   },
@@ -153,37 +153,18 @@
       "id": "hyprland-workstation",
       "type": "backend",
       "label": "hyprland-workstation",
-      "sublabel": "图形工作站 · Hyprland · GDM · 锁屏 / 状态栏 / 音频 / 网络",
+      "sublabel": "图形桌面 · Hypridle / Hyprlock 锁屏协作 · GDM 禁自动挂起 · 音频 / 网络",
       "pos": [
         500,
         480
       ],
       "size": [
-        390,
+        850,
         90
       ],
       "sources": [
         {
           "path": "intents/hyprland-workstation.nix"
-        }
-      ]
-    },
-    {
-      "id": "always-on-workstation",
-      "type": "backend",
-      "label": "always-on-workstation",
-      "sublabel": "常开工作站 · Hypridle · GDM · 禁止自动挂起",
-      "pos": [
-        960,
-        480
-      ],
-      "size": [
-        390,
-        90
-      ],
-      "sources": [
-        {
-          "path": "intents/always-on-workstation.nix"
         }
       ]
     }
@@ -214,8 +195,7 @@
       "kind": "region",
       "label": "仅 nixbox",
       "wraps": [
-        "hyprland-workstation",
-        "always-on-workstation"
+        "hyprland-workstation"
       ],
       "pad": 20
     }
@@ -234,13 +214,6 @@
       "to": "github-collaboration",
       "label": "共选 Git / LazyGit",
       "variant": "dashed"
-    },
-    {
-      "id": "hyprland-workstation-shared",
-      "from": "hyprland-workstation",
-      "to": "always-on-workstation",
-      "label": "共选 GDM",
-      "variant": "dashed"
     }
   ],
   "cards": [
@@ -248,7 +221,7 @@
       "dot": "cyan",
       "title": "三台主机如何选择",
       "items": [
-        "macbook 选择前六项与 terminal-compatibility；nixbox 选择前六项与两个 Linux 桌面意图。",
+        "macbook 选择前六项与 terminal-compatibility；nixbox 选择前六项与 hyprland-workstation。",
         "server 仅选择 terminal-work；独立 Git 与维护软件由主机直接导入。"
       ]
     },
