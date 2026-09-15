@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nix-config · 架构图谱</title>
+<style>
+  :root { color-scheme: light dark; font: 14px system-ui, sans-serif; }
+  body { margin: 0; display: grid; grid-template-rows: auto 1fr; height: 100dvh; background: light-dark(#f5f7fb,#0d1117); }
+  nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; padding: 12px 20px; border-bottom: 1px solid light-dark(#d5dce8,#303744); }
+  strong { margin-right: auto; }
+  a { color: light-dark(#185bb5,#91c8ff); text-underline-offset: 4px; padding: 4px 0; }
+  a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+  iframe { width: 100%; height: 100%; min-height: 0; border: 0; }
+</style>
+<nav aria-label="架构专题">
+  <strong>nix-config · 架构图谱</strong>
+  <a href="repository-overview.html" target="diagram">总览</a>
+  <a href="development-workstation.html" target="diagram">开发工作站</a>
+  <a href="terminal-environment.html" target="diagram">终端入口</a>
+  <a href="graphical-desktop.html" target="diagram">桌面与输入</a>
+  <a href="workstation-management.html" target="diagram">系统与应用</a>
+  <a href="host-access-recovery.html" target="diagram">访问与恢复</a>
+  <a href="configuration-assembly.html" target="diagram">装配与验证</a>
+</nav>
+<iframe name="diagram" title="完整架构图" src="repository-overview.html"></iframe>
+</html>

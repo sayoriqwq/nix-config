@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "仓库架构总览",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      640
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "固定来源",
+      "sublabel": "Nixpkgs · HM · Darwin · 工具与设计叶输入",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        },
+        {
+          "path": "flake.lock"
+        }
+      ]
+    },
+    {
+      "id": "assembly",
+      "type": "backend",
+      "label": "配置装配与验证",
+      "sublabel": "flake → hosts → intents / software → modules",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        },
+        {
+          "path": "intents/lib.nix"
+        }
+      ]
+    },
+    {
+      "id": "management",
+      "type": "backend",
+      "label": "工作站系统与应用管理",
+      "sublabel": "Darwin / NixOS · Homebrew / Home Manager",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "type": "external",
+      "label": "外部状态与现场",
+      "sublabel": "应用数据 · 凭据 · 原生应用 · 实机验收",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "type": "backend",
+      "label": "主机访问与服务器恢复",
+      "sublabel": "macbook → Tailscale → nixbox · server SSH",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/tailscale/capabilities/stable-workstation-access/darwin-home.nix"
+        },
+        {
+          "path": "hosts/server/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "macbook",
+      "type": "frontend",
+      "label": "macbook · aarch64-darwin",
+      "sublabel": "多客户端开发 · 终端兼容 · 原生桌面",
+      "pos": [
+        390,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "nixbox",
+      "type": "frontend",
+      "label": "nixbox · x86_64-linux",
+      "sublabel": "核心开发环境 · Hyprland · 中文输入",
+      "pos": [
+        740,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "server",
+      "type": "backend",
+      "label": "server · x86_64-linux",
+      "sublabel": "终端工作 · Git · 诊断 · BIOS / ext4",
+      "pos": [
+        1090,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/server/default.nix"
+        },
+        {
+          "path": "hosts/server/disko.nix"
+        }
+      ]
+    },
+    {
+      "id": "terminal",
+      "type": "backend",
+      "label": "终端入口与兼容环境",
+      "sublabel": "Ghostty / Fish · macbook 另选 WezTerm / Zsh",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/graphical-terminal/default.nix"
+        },
+        {
+          "path": "intents/terminal-compatibility/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "development",
+      "type": "backend",
+      "label": "开发工作站",
+      "sublabel": "代码开发 · 终端工作 · 运行环境 · AI / GitHub",
+      "pos": [
+        390,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/code-development/default.nix"
+        },
+        {
+          "path": "intents/ai-coding/default.nix"
+        },
+        {
+          "path": "intents/development-runtime/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "desktop",
+      "type": "backend",
+      "label": "图形桌面与中文输入",
+      "sublabel": "nixbox 会话与锁屏 · 两机共享 Rime 数据",
+      "pos": [
+        740,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/hyprland-workstation/default.nix"
+        },
+        {
+          "path": "intents/always-on-workstation/default.nix"
+        },
+        {
+          "path": "intents/chinese-input/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "type": "backend",
+      "label": "隔离恢复配置",
+      "sublabel": "复用 serverModules · 只替换测试现场",
+      "pos": [
+        1090,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "operations/server-recovery/default.nix"
+        },
+        {
+          "path": "operations/server-recovery/install-module.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "声明来源与管理边界",
+      "wraps": [
+        "sources",
+        "assembly",
+        "management",
+        "state"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "实际主机 · 详细导入关系见专题源码入口",
+      "wraps": [
+        "access",
+        "macbook",
+        "nixbox",
+        "server"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "内聚能力与恢复派生",
+      "wraps": [
+        "terminal",
+        "development",
+        "desktop",
+        "recovery"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "sources-assembly",
+      "to": "assembly",
+      "label": "固定输入",
+      "from": "sources"
+    },
+    {
+      "id": "assembly-management",
+      "to": "management",
+      "label": "平台装配",
+      "from": "assembly"
+    },
+    {
+      "id": "assembly-macbook",
+      "to": "macbook",
+      "label": "主机输出",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "assembly",
+      "labelAt": [
+        520,
+        210
+      ]
+    },
+    {
+      "id": "management-nixbox",
+      "to": "nixbox",
+      "label": "Linux 适配",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "management",
+      "labelAt": [
+        870,
+        210
+      ]
+    },
+    {
+      "id": "access-macbook",
+      "to": "macbook",
+      "label": "代理入口",
+      "from": "access"
+    },
+    {
+      "id": "macbook-development",
+      "to": "development",
+      "label": "选择组合",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "macbook",
+      "labelAt": [
+        520,
+        420
+      ]
+    },
+    {
+      "id": "terminal-development",
+      "to": "development",
+      "label": "共享 Fish",
+      "variant": "dashed",
+      "from": "terminal"
+    },
+    {
+      "id": "nixbox-desktop",
+      "to": "desktop",
+      "label": "选择会话",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "nixbox",
+      "labelAt": [
+        870,
+        420
+      ]
+    },
+    {
+      "id": "server-recovery",
+      "to": "recovery",
+      "label": "复用模块",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "server",
+      "labelAt": [
+        1220,
+        420
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "跨图共享的是同一份实现",
+      "items": [
+        "Fish、Zed、Yume、GDM 等能力只在各专题按上下文展开；总览箭头选取主路径，完整消费以 hosts 为准。",
+        "两台工作站共享开发和终端用途；server 只选 terminal-work、Git 与维护工具，不消费桌面开发组合。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "review 的起点",
+      "items": [
+        "从专题入口进入完整图，按节点来源核对软件选择、实际接线、平台差异与可写状态。",
+        "图谱记录声明关系；不会把安装列表当作运行依赖，也不会把构建或隔离验证当作现场验收。"
+      ]
+    }
+  ]
+}

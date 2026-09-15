@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "工作站系统与应用管理",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      640
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "darwin",
+      "type": "backend",
+      "label": "macbook · nix-darwin",
+      "sublabel": "系统偏好 · 用户 · Touch ID sudo · 字体",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "brew",
+      "type": "backend",
+      "label": "Homebrew · 安装策略",
+      "sublabel": "不自动更新 / 升级 · cleanup = none",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/homebrew/capabilities/non-destructive-application-management/darwin.nix"
+        }
+      ]
+    },
+    {
+      "id": "casks",
+      "type": "frontend",
+      "label": "Cask / Mac App Store 应用",
+      "sublabel": "Chrome · ChatGPT · 微信 · 飞书 · iWork",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "software/pages/capabilities/document-editing/darwin.nix"
+        }
+      ]
+    },
+    {
+      "id": "native",
+      "type": "external",
+      "label": "原生应用 · 外部生命周期",
+      "sublabel": "Ghostty · Zed · VS Code · 命令入口接入",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+        },
+        {
+          "path": "software/zed/capabilities/gui-editor/home.nix"
+        },
+        {
+          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "lix",
+      "type": "backend",
+      "label": "Lix · Nix daemon",
+      "sublabel": "安装器引导 · 后续由 nix-darwin 管理",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/lix/capabilities/nix-daemon/darwin.nix"
+        }
+      ]
+    },
+    {
+      "id": "hm",
+      "type": "backend",
+      "label": "集成式 Home Manager",
+      "sublabel": "三机共享终端工具 · 两机工作站应用",
+      "pos": [
+        390,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        },
+        {
+          "path": "hosts/server/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "raycast",
+      "type": "backend",
+      "label": "Raycast · 脚本接入",
+      "sublabel": "固定来源 → 校验 manifest → 链接命令",
+      "pos": [
+        740,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/raycast/capabilities/application-launcher/darwin.nix"
+        },
+        {
+          "path": "software/raycast/capabilities/application-launcher/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "应用可写状态",
+      "sublabel": "账户 / 权限 / 数据库 / 偏好与备份在外部",
+      "pos": [
+        1090,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    },
+    {
+      "id": "linux",
+      "type": "backend",
+      "label": "nixbox · NixOS",
+      "sublabel": "硬件配置 · systemd-boot · 区域与语言",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/nixbox/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/hardware-configuration.nix"
+        }
+      ]
+    },
+    {
+      "id": "linuxsys",
+      "type": "backend",
+      "label": "系统服务与工具",
+      "sublabel": "Avahi · BlueZ · curl / wget · 硬件工具",
+      "pos": [
+        390,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "proxy",
+      "type": "backend",
+      "label": "Clash Verge Rev · 两机适配",
+      "sublabel": "macOS cask · Linux serviceMode / 非 TUN",
+      "pos": [
+        740,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/clash-verge-rev/capabilities/proxy-client/darwin.nix"
+        },
+        {
+          "path": "software/clash-verge-rev/capabilities/proxy-client/nixos.nix"
+        }
+      ]
+    },
+    {
+      "id": "apps",
+      "type": "frontend",
+      "label": "Home Manager 应用选择",
+      "sublabel": "Obsidian · Chrome / Termius（Linux）",
+      "pos": [
+        1090,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "macbook · 系统层与安装入口",
+      "wraps": [
+        "darwin",
+        "brew",
+        "casks",
+        "lix",
+        "hm",
+        "raycast"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "nixbox · 系统层（共用 Home Manager）",
+      "wraps": [
+        "linux",
+        "linuxsys",
+        "proxy",
+        "apps"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "darwin-brew",
+      "to": "brew",
+      "label": "激活安装",
+      "from": "darwin"
+    },
+    {
+      "id": "brew-casks",
+      "to": "casks",
+      "label": "声明存在",
+      "from": "brew"
+    },
+    {
+      "id": "darwin-lix",
+      "to": "lix",
+      "label": "管理 daemon",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "darwin",
+      "labelAt": [
+        163,
+        245
+      ]
+    },
+    {
+      "id": "darwin-hm",
+      "to": "hm",
+      "label": "集成用户配置",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "darwin"
+    },
+    {
+      "id": "hm-raycast",
+      "to": "raycast",
+      "label": "挂载脚本",
+      "from": "hm"
+    },
+    {
+      "id": "linux-linuxsys",
+      "to": "linuxsys",
+      "label": "系统模块",
+      "from": "linux"
+    },
+    {
+      "id": "linux-hm",
+      "to": "hm",
+      "label": "集成用户配置",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "from": "linux"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "直接导入的应用也属于主机声明",
+      "items": [
+        "Mac 的 HM 另选 Discord、IINA、LocalSend、MonitorControl、Mos、Upscayl、xbar、rclone；Mos 登录时启动。",
+        "两机还安装 nh、btop、fastfetch、Yazi、Helix；桌面会话、终端与开发工具见对应专题。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "安装存在不等于运行接线",
+      "items": [
+        "Homebrew 还管理云盘、影音、会议、设计与桌面辅助应用；完整选择直接追溯 hosts/macbook。",
+        "Raycast 需在其 UI 中选择脚本目录；扩展源码保留在叶仓库。应用数据不随系统 generation 对称恢复。"
+      ]
+    }
+  ]
+}

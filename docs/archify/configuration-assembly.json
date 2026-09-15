@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "配置装配与验证",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      640
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "inputs",
+      "type": "external",
+      "label": "flake.lock · 固定输入",
+      "sublabel": "Linux 26.05 · Darwin unstable · 独立叶输入",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        },
+        {
+          "path": "flake.lock"
+        }
+      ]
+    },
+    {
+      "id": "flake",
+      "type": "backend",
+      "label": "flake.nix · 输出装配入口",
+      "sublabel": "specialArgs · 平台包集 · 社区模块",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        }
+      ]
+    },
+    {
+      "id": "hosts",
+      "type": "backend",
+      "label": "hosts · 主机选择",
+      "sublabel": "macbook / nixbox / server · 直接导入能力",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        },
+        {
+          "path": "hosts/server/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "intents",
+      "type": "backend",
+      "label": "intents · 内聚用途组合",
+      "sublabel": "代码 / 终端 / 桌面 / 输入 / 运行环境",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/lib.nix"
+        },
+        {
+          "path": "intents/hyprland-workstation/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "outputs",
+      "type": "backend",
+      "label": "系统配置输出",
+      "sublabel": "三台主机 + server-recovery-install",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        }
+      ]
+    },
+    {
+      "id": "modules",
+      "type": "backend",
+      "label": "NixOS / Darwin / HM 合并",
+      "sublabel": "社区模块处理选项 · 同一配置集成用户层",
+      "pos": [
+        390,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        },
+        {
+          "path": "hosts/macbook/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "adapters",
+      "type": "backend",
+      "label": "平台模块与共享小模块",
+      "sublabel": "home / nixos / darwin · 外观 / 播种 / 用户",
+      "pos": [
+        740,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "modules/home/desktop/terminal/appearance.nix"
+        },
+        {
+          "path": "modules/home/desktop/editors/seed-files.nix"
+        },
+        {
+          "path": "modules/nixos/administrator-user.nix"
+        }
+      ]
+    },
+    {
+      "id": "software",
+      "type": "backend",
+      "label": "software · 能力出口",
+      "sublabel": "功能导出模块列表 · 参数化能力与叶包",
+      "pos": [
+        1090,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/default.nix"
+        },
+        {
+          "path": "software/fzf/default.nix"
+        },
+        {
+          "path": "software/clash-verge-rev/package.nix"
+        }
+      ]
+    },
+    {
+      "id": "checks",
+      "type": "backend",
+      "label": "checks · 输出与行为检查",
+      "sublabel": "三机系统 · fzf / zoxide / Zed / SSH proxy",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        },
+        {
+          "path": "checks/code-development/zed-package-selection.nix"
+        }
+      ]
+    },
+    {
+      "id": "packages",
+      "type": "backend",
+      "label": "独立包与格式化出口",
+      "sublabel": "clash-verge-rev / zed-stable · nixfmt",
+      "pos": [
+        390,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "flake.nix"
+        }
+      ]
+    },
+    {
+      "id": "activation",
+      "type": "frontend",
+      "label": "nh · 构建与应用入口",
+      "sublabel": "当前 checkout 候选 · 接受后 switch",
+      "pos": [
+        740,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/nh/capabilities/nix-operations/home.nix"
+        },
+        {
+          "path": "docs/runbooks/daily-nix-maintenance.md"
+        }
+      ]
+    },
+    {
+      "id": "unused",
+      "type": "external",
+      "label": "存在但未被主机选用",
+      "sublabel": "Claude Code · oh-my-pi 能力文件",
+      "pos": [
+        1090,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/claude-code/default.nix"
+        },
+        {
+          "path": "software/oh-my-pi/default.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "选择阶段 · 主机决定消费哪些声明",
+      "wraps": [
+        "inputs",
+        "flake",
+        "hosts",
+        "intents"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "模块阶段 · software 出口接入平台选项",
+      "wraps": [
+        "outputs",
+        "modules",
+        "adapters",
+        "software"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "验证与使用 · 存在的文件不自动部署",
+      "wraps": [
+        "checks",
+        "packages",
+        "activation",
+        "unused"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "inputs-flake",
+      "to": "flake",
+      "label": "锁定来源",
+      "from": "inputs"
+    },
+    {
+      "id": "flake-hosts",
+      "to": "hosts",
+      "label": "选择主机",
+      "from": "flake"
+    },
+    {
+      "id": "hosts-intents",
+      "to": "intents",
+      "label": "导入组合",
+      "from": "hosts"
+    },
+    {
+      "id": "intents-software",
+      "to": "software",
+      "label": "选择能力",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "intents",
+      "labelAt": [
+        1220,
+        210
+      ]
+    },
+    {
+      "id": "software-adapters",
+      "to": "adapters",
+      "label": "模块路径",
+      "from": "software"
+    },
+    {
+      "id": "adapters-modules",
+      "to": "modules",
+      "label": "合并选项",
+      "from": "adapters"
+    },
+    {
+      "id": "modules-outputs",
+      "to": "outputs",
+      "label": "求值产物",
+      "from": "modules"
+    },
+    {
+      "id": "outputs-checks",
+      "to": "checks",
+      "label": "验证目标",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "outputs",
+      "labelAt": [
+        170,
+        420
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "组合机制很小",
+      "items": [
+        "intents/lib.nix 仅拼接 homeModules、nixosModules、darwinModules；运行依赖由所选软件配置体现。",
+        "主机也能直接导入能力，绕过 intents；叶包和 Yume / Raycast 数据输入保持各自边界。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "验证覆盖与使用边界",
+      "items": [
+        "checks 是 flake 导出，仓库当前没有 .github CI 工作流；恢复安装检查按相关变更需要单独运行。",
+        "构建通过不等于激活或现场验收。未被导入的 Claude Code、oh-my-pi 不能算作已部署软件。"
+      ]
+    }
+  ]
+}
