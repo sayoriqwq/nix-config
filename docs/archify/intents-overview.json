@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "全部 Intents · 主机选择与共享能力",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      640
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "8c2b8336bcc1e5ce4138a9ddfc9247ca059421a9",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "terminal-work",
+      "type": "backend",
+      "label": "terminal-work",
+      "sublabel": "终端工作 · Fish · tmux · fzf / fd / bat · 命令行工具",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/terminal-work.nix"
+        }
+      ]
+    },
+    {
+      "id": "graphical-terminal",
+      "type": "backend",
+      "label": "graphical-terminal",
+      "sublabel": "图形终端 · Ghostty · Fish · Yume 主题",
+      "pos": [
+        500,
+        60
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/graphical-terminal.nix"
+        }
+      ]
+    },
+    {
+      "id": "chinese-input",
+      "type": "backend",
+      "label": "chinese-input",
+      "sublabel": "中文输入 · Fcitx5 · Rime Ice · 平台实现不同",
+      "pos": [
+        960,
+        60
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/chinese-input.nix"
+        }
+      ]
+    },
+    {
+      "id": "code-development",
+      "type": "backend",
+      "label": "code-development",
+      "sublabel": "代码开发 · Zed · Fish · Git / LazyGit · nil / nixd",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        350,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/code-development.nix"
+        }
+      ]
+    },
+    {
+      "id": "github-collaboration",
+      "type": "backend",
+      "label": "github-collaboration",
+      "sublabel": "GitHub 协作 · Git / LazyGit · gh 凭据助手 · gitleaks",
+      "pos": [
+        500,
+        270
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/github-collaboration.nix"
+        }
+      ]
+    },
+    {
+      "id": "development-runtime",
+      "type": "backend",
+      "label": "development-runtime",
+      "sublabel": "开发运行环境 · direnv · mise · uv",
+      "pos": [
+        960,
+        270
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/development-runtime.nix"
+        }
+      ]
+    },
+    {
+      "id": "terminal-compatibility",
+      "type": "backend",
+      "label": "terminal-compatibility",
+      "sublabel": "终端兼容 · WezTerm / Zsh · OrbStack · 编辑器与 Shell 集成",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/terminal-compatibility.nix"
+        }
+      ]
+    },
+    {
+      "id": "hyprland-workstation",
+      "type": "backend",
+      "label": "hyprland-workstation",
+      "sublabel": "图形工作站 · Hyprland · GDM · 锁屏 / 状态栏 / 音频 / 网络",
+      "pos": [
+        500,
+        480
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/hyprland-workstation.nix"
+        }
+      ]
+    },
+    {
+      "id": "always-on-workstation",
+      "type": "backend",
+      "label": "always-on-workstation",
+      "sublabel": "常开工作站 · Hypridle · GDM · 禁止自动挂起",
+      "pos": [
+        960,
+        480
+      ],
+      "size": [
+        390,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/always-on-workstation.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "macbook 与 nixbox 共同选择 · terminal-work 也供 server 使用",
+      "wraps": [
+        "terminal-work",
+        "graphical-terminal",
+        "chinese-input",
+        "code-development",
+        "github-collaboration",
+        "development-runtime"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "仅 macbook",
+      "wraps": [
+        "terminal-compatibility"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "仅 nixbox",
+      "wraps": [
+        "hyprland-workstation",
+        "always-on-workstation"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "terminal-work-shared",
+      "from": "terminal-work",
+      "to": "graphical-terminal",
+      "label": "共选 Fish",
+      "variant": "dashed"
+    },
+    {
+      "id": "code-development-shared",
+      "from": "code-development",
+      "to": "github-collaboration",
+      "label": "共选 Git / LazyGit",
+      "variant": "dashed"
+    },
+    {
+      "id": "hyprland-workstation-shared",
+      "from": "hyprland-workstation",
+      "to": "always-on-workstation",
+      "label": "共选 GDM",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "三台主机如何选择",
+      "items": [
+        "macbook 选择前六项与 terminal-compatibility；nixbox 选择前六项与两个 Linux 桌面意图。",
+        "server 仅选择 terminal-work；独立 Git 与维护软件由主机直接导入。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "意图是显式组合",
+      "items": [
+        "虚线表示共同选择同一软件能力，不是意图之间的调用或依赖；其余软件接线见各专题。",
+        "lib.nix 只拼接三类模块列表，不算 intent；AI 编码工作流保持外部。"
+      ]
+    }
+  ]
+}
