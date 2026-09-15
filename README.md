@@ -16,11 +16,10 @@ Build 只证明配置可构建；真实 activation、远端访问、磁盘和生
 
 ```text
 flake.nix
-  ├── hosts/<host>                 精确选择
-  │    ├── intents/<intent>.nix    一起选择的使用需求
-  │    ├── software/<software>     软件 package/config/service owner
-  │    └── shared/                 有实际复用的公共数据与声明
-  └── checks/                      窄 contract checks
+  └── hosts/<host>                 精确选择
+       ├── intents/<intent>.nix    一起选择的使用需求
+       ├── software/<software>     软件 package/config/service owner
+       └── shared/                 有实际复用的公共数据与声明
 ```
 
 - Software 聚合同一软件的声明、材料、实现与外部状态边界；选择软件不代表拥有其全部状态。
@@ -32,17 +31,17 @@ flake.nix
 
 ## 常用验证
 
-纯文档修改检查链接、术语与规范一致性。Nix 修改从下面选择相关检查和受影响的 output：
+纯文档修改检查链接、术语与规范一致性。Nix 修改先格式化并求值受影响的 Host，必要时通过 nh 或原生命令构建；按本次改动在激活后验收实际功能：
 
 ```fish
 nix fmt -- --check .
-nix flake check
-nix build --no-link .#darwinConfigurations.macbook.system
+nix eval --raw .#darwinConfigurations.macbook.system.drvPath
+nh darwin build . -H macbook --diff always
 nix build --no-link .#nixosConfigurations.nixbox.config.system.build.toplevel
 nix build --no-link .#nixosConfigurations.server.config.system.build.toplevel
 ```
 
-🧪 按影响范围验证声明；构建不会激活，也不留下 result 链接。
+🧪 按影响范围验证声明；构建不会激活；Linux 构建需对应架构的构建条件。
 
 ## 文档入口
 

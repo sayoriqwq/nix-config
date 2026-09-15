@@ -12,6 +12,7 @@ in
 compose [
   software.git.versionControl
   software.lazygit.gitTui
+  software.lazygit.zshIntegration
   software.gh.githubCli
   software.gh.gitCredentialHelper
   software.gitleaks.secretScanner

@@ -2,6 +2,20 @@
 
 适用：本机 nh 4.4.2、`darwinConfigurations.macbook` 和集成式 Home Manager。在准备应用的 nix-config checkout 根目录执行。原则见[主工作站管理](../architecture/workstation-management.md)。
 
+## 修改后的验证
+
+先格式化并求值受影响的 Host；需要构建候选时，在 macbook 的 checkout 中执行：
+
+```fish
+nix fmt -- --check .
+nix eval --raw .#darwinConfigurations.macbook.system.drvPath
+nh darwin build . -H macbook --diff always
+```
+
+🔎 检查格式、求值并构建 Mac 候选，不激活；Linux 候选应在具备对应构建条件的机器上构建。
+
+仓库不维护独立 checks。nh 构建和包差异不能证明交互行为：激活后按本次范围确认主力终端进入 Fish、兼容终端进入 Zsh、编辑器快捷命令与任务能找到程序，服务端仍能使用所需 Shell／CLI。
+
 ## 修改配置后应用
 
 先检查本次所选持续管理字段的现场差异，把想保留的修改保存到声明，再审阅并提交，保留无关工作。Zed 的可写合并会在每次激活重新应用声明，须先按 [Zed 手册](update-zed-preview.md) 检查并备份；额外未声明设置不构成偏移。修改设置无需更新输入：

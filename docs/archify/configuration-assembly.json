@@ -8,12 +8,7 @@
     "viewBox": [
       1390,
       640
-    ],
-    "repository": {
-      "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "cf52ea3f2a81ed419881816e9507e2e6db942399",
-      "link_mode": "local-only"
-    }
+    ]
   },
   "components": [
     {
@@ -28,14 +23,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        },
-        {
-          "path": "flake.lock"
-        }
       ]
     },
     {
@@ -50,11 +37,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        }
       ]
     },
     {
@@ -69,17 +51,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/macbook/default.nix"
-        },
-        {
-          "path": "hosts/nixbox/default.nix"
-        },
-        {
-          "path": "hosts/server/default.nix"
-        }
       ]
     },
     {
@@ -94,14 +65,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/lib.nix"
-        },
-        {
-          "path": "intents/hyprland-workstation.nix"
-        }
       ]
     },
     {
@@ -116,11 +79,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        }
       ]
     },
     {
@@ -135,21 +93,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        },
-        {
-          "path": "hosts/macbook/default.nix"
-        }
       ]
     },
     {
       "id": "adapters",
       "type": "backend",
       "label": "平台模块与共享小模块",
-      "sublabel": "home / nixos / darwin · 外观 / 播种 / 用户",
+      "sublabel": "home-manager / nixos / darwin · shared",
       "pos": [
         740,
         270
@@ -157,17 +107,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "shared/terminal-appearance.nix"
-        },
-        {
-          "path": "software/vscode/seed-files.nix"
-        },
-        {
-          "path": "shared/administrator-nixos.nix"
-        }
       ]
     },
     {
@@ -182,24 +121,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/zed/default.nix"
-        },
-        {
-          "path": "software/fzf/default.nix"
-        },
-        {
-          "path": "software/clash-verge-rev/package.nix"
-        }
       ]
     },
     {
-      "id": "checks",
+      "id": "validation",
       "type": "backend",
-      "label": "checks · 输出与行为检查",
-      "sublabel": "三机系统 · fzf / zoxide / Zed / SSH proxy",
+      "label": "求值与候选构建",
+      "sublabel": "格式化 · Host 求值 · 按需 nh build",
       "pos": [
         40,
         480
@@ -207,14 +135,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        },
-        {
-          "path": "checks/code-development/zed-package-selection.nix"
-        }
       ]
     },
     {
@@ -229,11 +149,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        }
       ]
     },
     {
@@ -248,14 +163,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/nh/home-manager.nix"
-        },
-        {
-          "path": "docs/runbooks/daily-nix-maintenance.md"
-        }
       ]
     }
   ],
@@ -286,7 +193,7 @@
       "kind": "region",
       "label": "验证与使用 · 存在的文件不自动部署",
       "wraps": [
-        "checks",
+        "validation",
         "packages",
         "activation"
       ],
@@ -343,8 +250,8 @@
       "from": "modules"
     },
     {
-      "id": "outputs-checks",
-      "to": "checks",
+      "id": "outputs-validation",
+      "to": "validation",
       "label": "验证目标",
       "fromSide": "bottom",
       "toSide": "top",
@@ -361,14 +268,14 @@
       "title": "组合机制很小",
       "items": [
         "intents/lib.nix 仅拼接 homeModules、nixosModules、darwinModules；运行依赖由所选软件配置体现。",
-        "主机也能直接导入能力，绕过 intents；叶包和 Yume / Raycast 数据输入保持各自边界。"
+        "Host 可直接选择独立 Software；共享主题留在 shared，外部输入保持各自范围。"
       ]
     },
     {
       "dot": "amber",
       "title": "验证覆盖与使用边界",
       "items": [
-        "checks 是 flake 导出，仓库当前没有 .github CI 工作流；按改动验证受影响的主机与行为。",
+        "不维护独立 checks；格式化与求值后按需构建，激活后验收本次涉及的功能。",
         "构建通过不等于激活或现场验收；主机只部署实际导入的能力。"
       ]
     }

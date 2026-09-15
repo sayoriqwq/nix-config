@@ -8,19 +8,14 @@
     "viewBox": [
       1390,
       590
-    ],
-    "repository": {
-      "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
-      "link_mode": "local-only"
-    }
+    ]
   },
   "components": [
     {
       "id": "theme",
       "type": "backend",
       "label": "Obsidian · 主题与共享外观",
-      "sublabel": "obsidian.nix · appearance.nix",
+      "sublabel": "obsidian.nix · terminal-appearance.nix",
       "pos": [
         40,
         150
@@ -28,14 +23,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "shared/obsidian.nix"
-        },
-        {
-          "path": "shared/terminal-appearance.nix"
-        }
       ]
     },
     {
@@ -50,18 +37,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/ghostty/home-manager.nix"
-        }
       ]
     },
     {
       "id": "fish",
       "type": "backend",
       "label": "Fish · interactiveShell",
-      "sublabel": "同时被图形终端、兼容与开发组合选择",
+      "sublabel": "命令行、主力终端与开发共享",
       "pos": [
         740,
         60
@@ -69,17 +51,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/fish/default.nix"
-        },
-        {
-          "path": "intents/graphical-terminal.nix"
-        },
-        {
-          "path": "intents/terminal-compatibility.nix"
-        }
       ]
     },
     {
@@ -94,11 +65,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "docs/archify/development-workstation.json"
-        }
       ]
     },
     {
@@ -113,14 +79,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/wezterm/home-manager.nix"
-        },
-        {
-          "path": "software/wezterm/keybindings.nix"
-        }
       ]
     },
     {
@@ -135,18 +93,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/zsh/home-manager.nix"
-        }
       ]
     },
     {
       "id": "integrations",
       "type": "backend",
       "label": "Atuin · direnv · mise · eza · fzf",
-      "sublabel": "LazyGit · pay-respects · starship · zoxide",
+      "sublabel": "所属 Intent 提供；Zsh 启用时生效",
       "pos": [
         1090,
         240
@@ -154,11 +107,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/terminal-compatibility.nix"
-        }
       ]
     },
     {
@@ -173,14 +121,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/macbook/default.nix"
-        },
-        {
-          "path": "hosts/nixbox/default.nix"
-        }
       ]
     },
     {
@@ -195,21 +135,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/orbstack/darwin.nix"
-        },
-        {
-          "path": "software/orbstack/home-manager.nix"
-        }
       ]
     },
     {
       "id": "editors",
       "type": "frontend",
       "label": "Zed + VS Code",
-      "sublabel": "z → zed · v → code（Fish / Zsh）",
+      "sublabel": "代码工作选择 · macOS：z → zed / v → code",
       "pos": [
         1090,
         440
@@ -217,24 +149,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/zed/zsh-command.nix"
-        },
-        {
-          "path": "software/vscode/shell-command.nix"
-        },
-        {
-          "path": "software/vscode/home-manager.nix"
-        }
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "graphical-terminal · 默认图形终端（共用 Yume）",
+      "label": "primary-terminal · 默认图形终端（共用 Obsidian）",
       "wraps": [
         "ghostty",
         "fish"
@@ -243,12 +164,25 @@
     },
     {
       "kind": "region",
-      "label": "terminal-compatibility · macbook 兼容环境（另共用 Fish / Yume）",
+      "label": "terminal-compatibility · macbook 兼容入口",
       "wraps": [
         "wezterm",
-        "zsh",
-        "integrations",
-        "orbstack",
+        "zsh"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "container-development",
+      "wraps": [
+        "orbstack"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "code-development",
+      "wraps": [
         "editors"
       ],
       "pad": 20
@@ -318,10 +252,10 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "接口沿用开发工作站",
+      "title": "入口与工具需求分别选择",
       "items": [
-        "兼容组合复用已有工具，再逐项启用 Zsh 集成；Fish 的既有集成继续保留。",
-        "zoxide 使用 cd，给编辑器保留 z；Atuin 接管增强历史，fzf 不占用 Ctrl+R。"
+        "工具接线由 shell-work、development-runtime、code-development 提供；Zsh 启用时才生效。",
+        "IDE 与 OrbStack 独立选择；移除兼容入口保留代码工作和容器环境。"
       ]
     },
     {

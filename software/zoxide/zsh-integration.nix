@@ -1,6 +1,6 @@
-{ lib, ... }:
+{ config, lib, ... }:
 
-{
+lib.mkIf config.programs.zsh.enable {
   # zoxide itself initializes at order 851. Install the wrapper afterwards,
   # but before zsh-syntax-highlighting, which must remain last.
   programs.zoxide.enableZshIntegration = true;

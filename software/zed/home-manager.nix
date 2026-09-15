@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  editorCommand = if isDarwin then "zed" else "zeditor";
+  editorCommand = import ./command.nix pkgs;
 in
 {
   # macOS owns its native application; Linux uses the release package.

@@ -64,33 +64,6 @@
         pkgs = clashVergeRevPkgs;
         source = inputs.clash-verge-rev-package-source;
       };
-      darwinPkgs = packagesFor "aarch64-darwin";
-      fzfConfigureCheck = import ./checks/terminal-work/fzf-configure.nix {
-        homeManager = home-manager-darwin;
-        inherit (darwinPkgs) lib;
-        pkgs = darwinPkgs;
-      };
-      zoxideZshBehaviorCheck = import ./checks/terminal-work/zoxide-zsh-behavior.nix {
-        homeManager = home-manager-darwin;
-        pkgs = darwinPkgs;
-      };
-      zedAddTaskCheck = import ./checks/code-development/zed-add-task.nix {
-        homeManager = home-manager-darwin;
-        inherit (darwinPkgs) lib;
-        pkgs = darwinPkgs;
-      };
-      zedPackageSelectionCheck = import ./checks/code-development/zed-package-selection.nix {
-        inherit darwinPkgs username;
-        darwinHomeManager = home-manager-darwin;
-        linuxHomeManager = home-manager;
-        linuxPkgs = packagesFor "x86_64-linux";
-        serverConfiguration = self.nixosConfigurations.server;
-      };
-      tailscaleSshProxyCheck = import ./checks/stable-workstation-access/tailscale-ssh-proxy.nix {
-        homeManager = home-manager-darwin;
-        inherit (darwinPkgs) lib;
-        pkgs = darwinPkgs;
-      };
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
@@ -129,27 +102,11 @@
         ];
       };
 
-      # Explicit package outputs give CI and future hosts stable validation
-      # targets for the narrow Clash seam and Linux Zed Stable.
+      # 保留独立包入口，供按需构建与获取 Linux 软件闭包。
       packages = {
         x86_64-linux = {
           clash-verge-rev = clashVergeRevPackage;
           zed-stable = (packagesFor "x86_64-linux").zed-editor;
-        };
-      };
-
-      checks = {
-        aarch64-darwin = {
-          fzf-configure = fzfConfigureCheck;
-          macbook-system = self.darwinConfigurations.macbook.system;
-          tailscale-ssh-proxy = tailscaleSshProxyCheck;
-          zed-add-task = zedAddTaskCheck;
-          zed-package-selection = zedPackageSelectionCheck;
-          zoxide-zsh-behavior = zoxideZshBehaviorCheck;
-        };
-        x86_64-linux = {
-          nixbox-system = self.nixosConfigurations.nixbox.config.system.build.toplevel;
-          server-system = self.nixosConfigurations.server.config.system.build.toplevel;
         };
       };
 

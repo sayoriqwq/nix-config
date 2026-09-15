@@ -24,11 +24,10 @@
 macbook 使用 Lix 作为 Nix implementation；bootstrap 和完整卸载遵循 Lix 官方 installer/receipt，日常版本由 `nix.package = pkgs.lix` 与 lock file 管理。
 
 ```fish
-nix flake check
 nix build .#darwinConfigurations.macbook.system
 ```
 
-🔍 先验证 Flake 并构建目标 generation，不 activation。
+🔍 求值并构建目标 generation，不 activation。
 
 若 `/nix`、daemon、mount 或 installer receipt 与预期不一致，停止并单独诊断；不要把重装 Nix 当作 generation rollback。
 

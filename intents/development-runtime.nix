@@ -10,6 +10,8 @@ let
 in
 compose [
   software.direnv.developmentEnvironment
+  software.direnv.zshIntegration
   software.mise.runtimeManager
+  software.mise.zshIntegration
   software.uv.pythonPackageManager
 ]

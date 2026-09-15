@@ -4,17 +4,16 @@
 
 | 路径 | 负责 | 不负责 |
 | --- | --- | --- |
-| `flake.nix` | inputs、outputs、顶层 package/check wiring | 软件内部配置、Host 业务 bundle |
+| `flake.nix` | inputs、outputs、顶层 package wiring | 软件内部配置、Host 业务 bundle |
 | `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
 | `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
 | `intents/<intent>.nix` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
 | `shared/` | 多个消费者复用且不归单个 Software 的基础数据或声明 | 单软件实现、需求组合、全选入口 |
-| `checks/` | 窄、确定性的 contract validation | production configuration source |
 | `dotfiles/` | 稳定、可投影的静态内容 | auth、session、cache、database 或 secret |
 
 ## 2. Software public interface
 
-供 Intent 使用的 Software owner 在 `software/<name>/default.nix` 暴露命名接口。每个接口是普通 attrset，按需包含 `darwinModules`、`nixosModules`、`homeModules` 列表：
+需要组合多个实现或提供参数化行为的 Software，在 `software/<name>/default.nix` 暴露命名接口。每个接口是普通 attrset，按需包含 `darwinModules`、`nixosModules`、`homeModules` 列表：
 
 ```nix
 {
@@ -33,7 +32,7 @@
 - owner-local package、脚本、manifest 和固定数据留在同一 Software tree；
 - 只有一个真实实现时，不创建空 Darwin/NixOS pass-through。
 
-Software 内部默认平铺；只有实际文件规模需要分组才增加子目录。公开行为由 `default.nix` 表达，不要求每个行为对应目录。
+Software 内部默认平铺；只有实际文件规模需要分组才增加子目录。简单 Software 的单文件平台声明也可以作为公开入口，由 Intent 或 Host 显式引用；不为转发一条声明新增 `default.nix`。命名行为不要求各自对应目录。
 
 `shared/` 仅保留多个消费者实际复用、且不归某个 Software 的基础内容。Software 或 Host 直接引用具体文件；不提供全选入口，也不让 Intent 为内部共享数据额外接线。单消费者实现留在对应 Software。
 
@@ -54,6 +53,8 @@ compose [
 ]
 ```
 
+共同 CLI／TUI 由 `shell-work` 选择；主力与兼容终端只组织入口及其 Shell。代码工作、容器开发和服务端诊断分别选择，编辑器是否存在不由兼容终端决定。工具的 Zsh adapter 放在所属 Software，由对应 Intent 选择，并在 Zsh 启用时生效，不反向启用兼容 Shell。
+
 不得扩展为 registry、relation graph、workflow DSL、自动扫描、优先级求解器或平台 substrate。出现新的真实需求时先增加命名行为；只有 `intents/lib.nix` 的三列表模型本身无法表达时，才通过新 ADR 复审。
 
 ## 4. Import 方向
@@ -66,15 +67,11 @@ flake
        │         └── owner-local files → 按需引用 shared/
        ├── independent Software platform files
        └── shared/ 中的公共声明
-
-Check ──▶ production declaration
 ```
 
 硬规则：
 
 - Software 不 import Intent 或 Host；Intent 不 import Host。
-- Production Host 不 import `checks/`。
-- Check 可以读取 production declaration，但不得成为其运行依赖。
 - Home Manager module 不 import nix-darwin/NixOS system module。
 - Darwin 与 NixOS 实现不互相 import。
 - 所有 imports 显式列出；不递归扫描目录。

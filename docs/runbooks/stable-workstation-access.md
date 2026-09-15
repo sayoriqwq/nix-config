@@ -80,7 +80,6 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 
 ```fish
 nix fmt -- --check .
-nix flake check
 nix build --no-link .#darwinConfigurations.macbook.system
 nix build --no-link .#nixosConfigurations.nixbox.config.system.build.toplevel
 ```

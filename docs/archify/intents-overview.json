@@ -7,20 +7,15 @@
     "quality_profile": "showcase",
     "viewBox": [
       1390,
-      640
-    ],
-    "repository": {
-      "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f28e0e6168b6389a827ef4c1e73082fa10c012df",
-      "link_mode": "local-only"
-    }
+      850
+    ]
   },
   "components": [
     {
-      "id": "terminal-work",
+      "id": "shell-work",
       "type": "backend",
-      "label": "terminal-work",
-      "sublabel": "终端工作 · Fish · tmux · fzf / fd / bat · 命令行工具",
+      "label": "shell-work",
+      "sublabel": "命令行工作 · Fish · Git · CLI / TUI · tmux",
       "pos": [
         40,
         60
@@ -28,18 +23,13 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/terminal-work.nix"
-        }
       ]
     },
     {
-      "id": "graphical-terminal",
+      "id": "primary-terminal",
       "type": "backend",
-      "label": "graphical-terminal",
-      "sublabel": "图形终端 · Ghostty · Fish · Yume 主题",
+      "label": "primary-terminal",
+      "sublabel": "图形终端 · Ghostty · Fish · Obsidian 主题",
       "pos": [
         500,
         60
@@ -47,11 +37,6 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/graphical-terminal.nix"
-        }
       ]
     },
     {
@@ -66,18 +51,13 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/chinese-input.nix"
-        }
       ]
     },
     {
       "id": "code-development",
       "type": "backend",
       "label": "code-development",
-      "sublabel": "代码开发 · Zed · Fish · Git / LazyGit · nil / nixd",
+      "sublabel": "Zed · 任务与工具接线 · macbook 加选 VS Code",
       "pos": [
         40,
         270
@@ -85,11 +65,6 @@
       "size": [
         350,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/code-development.nix"
-        }
       ]
     },
     {
@@ -104,11 +79,6 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/github-collaboration.nix"
-        }
       ]
     },
     {
@@ -123,18 +93,13 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/development-runtime.nix"
-        }
       ]
     },
     {
       "id": "terminal-compatibility",
       "type": "backend",
       "label": "terminal-compatibility",
-      "sublabel": "终端兼容 · WezTerm / Zsh · OrbStack · 编辑器与 Shell 集成",
+      "sublabel": "兼容入口 · WezTerm + Zsh",
       "pos": [
         40,
         480
@@ -142,11 +107,6 @@
       "size": [
         390,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/terminal-compatibility.nix"
-        }
       ]
     },
     {
@@ -161,21 +121,44 @@
       "size": [
         850,
         90
+      ]
+    },
+    {
+      "id": "container-development",
+      "type": "backend",
+      "label": "container-development",
+      "sublabel": "OrbStack 安装与 Shell 接线",
+      "pos": [
+        40,
+        690
       ],
-      "sources": [
-        {
-          "path": "intents/hyprland-workstation.nix"
-        }
+      "size": [
+        390,
+        90
+      ]
+    },
+    {
+      "id": "server-diagnostics",
+      "type": "backend",
+      "label": "server-diagnostics",
+      "sublabel": "bind · lsof · mtr · strace · tcpdump",
+      "pos": [
+        960,
+        690
+      ],
+      "size": [
+        390,
+        90
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "macbook 与 nixbox 共同选择 · terminal-work 也供 server 使用",
+      "label": "macbook 与 nixbox 共同选择 · shell-work 也供 server 使用",
       "wraps": [
-        "terminal-work",
-        "graphical-terminal",
+        "shell-work",
+        "primary-terminal",
         "chinese-input",
         "code-development",
         "github-collaboration",
@@ -187,7 +170,8 @@
       "kind": "region",
       "label": "仅 macbook",
       "wraps": [
-        "terminal-compatibility"
+        "terminal-compatibility",
+        "container-development"
       ],
       "pad": 20
     },
@@ -198,13 +182,21 @@
         "hyprland-workstation"
       ],
       "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "仅 server",
+      "wraps": [
+        "server-diagnostics"
+      ],
+      "pad": 20
     }
   ],
   "connections": [
     {
-      "id": "terminal-work-shared",
-      "from": "terminal-work",
-      "to": "graphical-terminal",
+      "id": "shell-work-shared",
+      "from": "shell-work",
+      "to": "primary-terminal",
       "label": "共选 Fish",
       "variant": "dashed"
     },
@@ -221,8 +213,8 @@
       "dot": "cyan",
       "title": "三台主机如何选择",
       "items": [
-        "macbook 选择前六项与 terminal-compatibility；nixbox 选择前六项与 hyprland-workstation。",
-        "server 仅选择 terminal-work；独立 Git 与维护软件由主机直接导入。"
+        "两台工作站共同选择上方六项；macbook 加选兼容入口与容器开发，nixbox 加选 Hyprland。",
+        "server 选择 shell-work 与 server-diagnostics；macbook 的代码工作加选 VS Code。"
       ]
     },
     {

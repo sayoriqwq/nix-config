@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, ... }:
 
 {
   programs.fish.functions.v = ''
@@ -9,13 +9,15 @@
     end
   '';
 
-  programs.zsh.initContent = lib.mkOrder 1250 ''
-    function v() {
-      if (( $# == 0 )); then
-        command code .
-      else
-        command code "$@"
-      fi
-    }
-  '';
+  programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
+    lib.mkOrder 1250 ''
+      function v() {
+        if (( $# == 0 )); then
+          command code .
+        else
+          command code "$@"
+        fi
+      }
+    ''
+  );
 }

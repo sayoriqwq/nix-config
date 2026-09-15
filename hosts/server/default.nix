@@ -6,8 +6,8 @@
 }:
 
 let
-  git = import ../../software/git;
-  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
+  serverDiagnostics = import ../../intents/server-diagnostics.nix;
+  shellWork = import ../../intents/shell-work.nix { inherit lib; };
 in
 {
   # Production reliability takes precedence over mirror proximity. Keep USTC
@@ -17,20 +17,18 @@ in
     "https://mirrors.ustc.edu.cn/nix-channels/store?priority=50"
   ];
 
-  imports = terminalWork.nixosModules ++ [
-    ./disko.nix
-    ./networking.nix
-    ../../shared/administrator-nixos.nix
-    ../../software/bind/nixos.nix
-    ../../software/lsof/nixos.nix
-    ../../software/mtr/nixos.nix
-    ../../software/nix/nixos.nix
-    ../../software/openssh/key-only-remote-access-nixos.nix
-    ../../software/openssh/ssh-only-firewall-nixos.nix
-    ../../software/strace/nixos.nix
-    ../../software/sudo/nixos.nix
-    ../../software/tcpdump/nixos.nix
-  ];
+  imports =
+    shellWork.nixosModules
+    ++ serverDiagnostics.nixosModules
+    ++ [
+      ./disko.nix
+      ./networking.nix
+      ../../shared/administrator-nixos.nix
+      ../../software/nix/nixos.nix
+      ../../software/openssh/key-only-remote-access-nixos.nix
+      ../../software/openssh/ssh-only-firewall-nixos.nix
+      ../../software/sudo/nixos.nix
+    ];
 
   boot.initrd.availableKernelModules = [
     "virtio_pci"
@@ -54,18 +52,7 @@ in
     useUserPackages = true;
 
     users.${username} = {
-      imports =
-        terminalWork.homeModules
-        ++ git.versionControl.homeModules
-        ++ [
-          ../../software/atuin/home-manager.nix
-          ../../software/nh/home-manager.nix
-          ../../software/pay-respects/home-manager.nix
-          ../../software/btop/home-manager.nix
-          ../../software/fastfetch/home-manager.nix
-          ../../software/yazi/home-manager.nix
-          ../../software/helix/home-manager.nix
-        ];
+      imports = shellWork.homeModules;
 
       home = {
         inherit username;

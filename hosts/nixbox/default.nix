@@ -9,10 +9,10 @@ let
   chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
   codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
-  graphicalTerminal = import ../../intents/graphical-terminal.nix { inherit lib; };
+  primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
   hyprlandWorkstation = import ../../intents/hyprland-workstation.nix { inherit lib; };
-  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
+  shellWork = import ../../intents/shell-work.nix { inherit lib; };
 in
 {
   # Nix chooses substituters by their explicit priority, not list position.
@@ -24,8 +24,8 @@ in
   ];
 
   imports =
-    terminalWork.nixosModules
-    ++ graphicalTerminal.nixosModules
+    shellWork.nixosModules
+    ++ primaryTerminal.nixosModules
     ++ hyprlandWorkstation.nixosModules
     ++ chineseInput.nixosModules
     ++ [
@@ -81,25 +81,12 @@ in
 
     users.${username} = {
       imports =
-        terminalWork.homeModules
-        ++ hyprlandWorkstation.homeModules
+        shellWork.homeModules
+        ++ primaryTerminal.homeModules
         ++ codeDevelopment.homeModules
-        ++ [
-          ../../software/atuin/home-manager.nix
-        ]
-        ++ githubCollaboration.homeModules
-        ++ [
-          ../../software/nh/home-manager.nix
-          ../../software/pay-respects/home-manager.nix
-          ../../software/btop/home-manager.nix
-          ../../software/fastfetch/home-manager.nix
-        ]
         ++ developmentRuntime.homeModules
-        ++ [
-          ../../software/yazi/home-manager.nix
-          ../../software/helix/home-manager.nix
-        ]
-        ++ graphicalTerminal.homeModules
+        ++ githubCollaboration.homeModules
+        ++ hyprlandWorkstation.homeModules
         ++ [
           ../../software/obsidian/home-manager.nix
           ../../software/google-chrome/linux-home-manager.nix

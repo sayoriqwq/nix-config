@@ -8,7 +8,6 @@
 
 - 一个软件只有一个 package/config/service owner；
 - 一起选择的使用需求集中在 Intent，Host 保留最终选择；
-- Check 与 production graph 单向依赖；
 - 外部 state 和操作影响保持可见。
 
 ## 2. 目录与组合
@@ -16,6 +15,20 @@
 Software、Intent、Host 的接口与 import 方向统一见[模块与目录边界](module-boundaries.md)。
 
 Macwarden 的模型、工具和 Skills 由独立项目维护，本仓库不复制其合同或接管跨 Agent 管理。
+
+### 核心工作环境的选择
+
+| Intent | macbook | nixbox | server |
+| --- | --- | --- | --- |
+| `shell-work`：Fish 与共同 CLI／TUI | ✓ | ✓ | ✓ |
+| `primary-terminal`：Ghostty + Fish | ✓ | ✓ | — |
+| `terminal-compatibility`：WezTerm + Zsh | ✓ | — | — |
+| `code-development`：Zed 与开发接线 | 加选 VS Code | Zed | — |
+| `development-runtime`、`github-collaboration` | ✓ | ✓ | — |
+| `container-development`：OrbStack | ✓ | — | — |
+| `server-diagnostics`：服务端诊断工具 | — | — | ✓ |
+
+工具的 Zsh 接线随所属使用需求一起选择，仅在 Host 已选择 Zsh 时生效。兼容终端不再决定 IDE 或容器是否存在。IDE 内置交互终端沿用现有设置；任务按自己的执行环境运行。其他 App 托管范围另行盘点，本轮保留原选择。
 
 ## 3. Flake outputs
 
@@ -31,9 +44,9 @@ Macwarden 的模型、工具和 Skills 由独立项目维护，本仓库不复�
 
 `system.stateVersion` 与 `home.stateVersion` 保留首次采用值，不随 channel 升级。
 
-## 4. Check
+## 4. 验证
 
-Check 验证窄接口和最终 host output，例如 FZF/Zed contribution、Pinshift host selection、Tailscale SSH fragment 与主机 closure。构建成功不能替代现场行为验证，也不能证明未选中的目标状态没有改变。
+Nix 修改格式化并求值相关 Host，必要时通过 nh 或原生命令构建候选；激活后验收本次涉及的 Shell、终端启动、编辑器命令与任务等功能。仓库不维护独立 checks 层。构建成功不能替代现场行为验证，也不能证明未选中的目标状态没有改变。
 
 ## 5. 配置与数据边界
 
@@ -49,7 +62,7 @@ Git/Nix 可以拥有 package 选择、稳定设置、systemd/launchd 声明、�
 | --- | --- | --- |
 | `macbook` | 主工作站与维护者控制面；nix-darwin + Home Manager | 完整工作站 Software、开发/终端 Intents；不承担 Linux closure 原生构建 |
 | `nixbox` | 次级工作站、Linux 实验站、server 同架构验证节点；NixOS + Home Manager | Hyprland、核心开发/终端 Intents 与预生产验证；不镜像 macbook GUI，不持有 maintenance private key |
-| `server` | 最小 headless NixOS production host；NixOS + Home Manager | 终端、Git、基础运维、诊断与 recovery；无 GUI、GitHub credential、工作站 runtime、Tailscale mesh 或旧 Ubuntu workload |
+| `server` | 最小 headless NixOS production host；NixOS + Home Manager | Shell、CLI／TUI、基础运维、诊断与 recovery；无 GUI、GitHub credential、工作站 runtime、Tailscale mesh 或旧 Ubuntu workload |
 
 逻辑 output 名称不要求等于真实 hostname。Server 只按当前需求引入生产能力，并为实际服务明确运行、备份、恢复与 rollback 边界。
 

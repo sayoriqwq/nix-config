@@ -8,19 +8,14 @@
     "viewBox": [
       1390,
       560
-    ],
-    "repository": {
-      "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
-      "link_mode": "local-only"
-    }
+    ]
   },
   "components": [
     {
       "id": "terminal-tools",
       "type": "backend",
-      "label": "starship + zoxide",
-      "sublabel": "eza · jq · ripgrep · tree · Yume 主题",
+      "label": "命令行工具与 TUI",
+      "sublabel": "Atuin · starship · yazi · Helix · 监控工具",
       "pos": [
         40,
         60
@@ -28,11 +23,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/terminal-work.nix"
-        }
       ]
     },
     {
@@ -47,18 +37,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/terminal-work.nix"
-        }
       ]
     },
     {
       "id": "editor",
       "type": "frontend",
       "label": "Zed · guiEditor + addTask",
-      "sublabel": "fishQuickCommand 提供 z → zed",
+      "sublabel": "z → zed / zeditor · macbook 加选 VS Code",
       "pos": [
         740,
         60
@@ -66,11 +51,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/zed/default.nix"
-        }
       ]
     },
     {
@@ -85,18 +65,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/code-development.nix"
-        }
       ]
     },
     {
       "id": "multiplexer",
       "type": "backend",
       "label": "tmux · terminalMultiplexer",
-      "sublabel": "terminal-work 提供终端复用",
+      "sublabel": "shell-work 提供终端复用",
       "pos": [
         40,
         240
@@ -104,18 +79,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/tmux/default.nix"
-        }
       ]
     },
     {
       "id": "shell",
       "type": "backend",
       "label": "Fish · interactiveShell",
-      "sublabel": "terminal-work 与 code-development 共用",
+      "sublabel": "shell-work 与 code-development 共用",
       "pos": [
         390,
         240
@@ -123,18 +93,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/fish/default.nix"
-        }
       ]
     },
     {
       "id": "git",
       "type": "backend",
       "label": "Git · versionControl",
-      "sublabel": "代码开发与 GitHub 协作共用",
+      "sublabel": "命令行、代码开发与 GitHub 协作共用",
       "pos": [
         740,
         240
@@ -142,11 +107,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/git/default.nix"
-        }
       ]
     },
     {
@@ -161,11 +121,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/lazygit/default.nix"
-        }
       ]
     },
     {
@@ -180,11 +135,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/development-runtime.nix"
-        }
       ]
     },
     {
@@ -199,11 +149,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/uv/home-manager.nix"
-        }
       ]
     },
     {
@@ -218,11 +163,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/gh/git-credential-helper.nix"
-        }
       ]
     },
     {
@@ -237,18 +177,13 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/gitleaks/home-manager.nix"
-        }
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "terminal-work · 终端工作",
+      "label": "shell-work · 终端工作",
       "wraps": [
         "terminal-tools",
         "finder",
@@ -306,7 +241,7 @@
       "id": "quick-command",
       "from": "shell",
       "to": "editor",
-      "label": "z → zed",
+      "label": "编辑器命令 z",
       "fromSide": "right",
       "toSide": "left",
       "variant": "emphasis"
@@ -351,8 +286,8 @@
       "dot": "cyan",
       "title": "共享能力就是接缝",
       "items": [
-        "Fish、Git、LazyGit 各一处；交叠边界或节点文字标明共同选择。",
-        "macbook / nixbox 均合并四个组合；nixbox 的 Fish 系统模块由 terminal-work 提供。"
+        "shell-work 提供共同 Shell / CLI / TUI；开发和协作显式选择各自依赖。",
+        "macbook / nixbox 选择四项；VS Code 仅 macbook，server 只取命令行与诊断。"
       ]
     },
     {

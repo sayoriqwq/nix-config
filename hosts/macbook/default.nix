@@ -7,9 +7,13 @@
 
 let
   chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
-  codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
+  codeDevelopment = import ../../intents/code-development.nix {
+    inherit lib;
+    withVscode = true;
+  };
+  containerDevelopment = import ../../intents/container-development.nix { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
-  graphicalTerminal = import ../../intents/graphical-terminal.nix { inherit lib; };
+  primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
   compose = import ../../intents/lib.nix { inherit lib; };
   mise = import ../../software/mise;
@@ -17,16 +21,16 @@ let
     mise.runtimeManager
     mise.macosRuntimeDefaults
   ];
-  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
+  shellWork = import ../../intents/shell-work.nix { inherit lib; };
   terminalCompatibility = import ../../intents/terminal-compatibility.nix { inherit lib; };
-  terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
 in
 {
   imports =
-    terminalWork.darwinModules
-    ++ graphicalTerminal.darwinModules
+    shellWork.darwinModules
+    ++ primaryTerminal.darwinModules
     ++ terminalCompatibility.darwinModules
     ++ codeDevelopment.darwinModules
+    ++ containerDevelopment.darwinModules
     ++ chineseInput.darwinModules
     ++ [
       {
@@ -206,26 +210,15 @@ in
 
     users.sayori = {
       imports =
-        terminalHomeModules
+        shellWork.homeModules
+        ++ primaryTerminal.homeModules
+        ++ terminalCompatibility.homeModules
         ++ codeDevelopment.homeModules
-        ++ chineseInput.homeModules
-        ++ [
-          ../../software/atuin/home-manager.nix
-        ]
-        ++ githubCollaboration.homeModules
-        ++ [
-          ../../software/nh/home-manager.nix
-          ../../software/pay-respects/home-manager.nix
-          ../../software/btop/home-manager.nix
-          ../../software/fastfetch/home-manager.nix
-        ]
         ++ developmentRuntime.homeModules
+        ++ containerDevelopment.homeModules
+        ++ githubCollaboration.homeModules
         ++ macosRuntimeDefaults.homeModules
-        ++ [
-          ../../software/yazi/home-manager.nix
-          ../../software/helix/home-manager.nix
-        ]
-        ++ graphicalTerminal.homeModules
+        ++ chineseInput.homeModules
         ++ [
           ../../software/obsidian/home-manager.nix
           ../../software/discord/home-manager.nix

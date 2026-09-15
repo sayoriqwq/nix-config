@@ -8,12 +8,7 @@
     "viewBox": [
       1390,
       640
-    ],
-    "repository": {
-      "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f28e0e6168b6389a827ef4c1e73082fa10c012df",
-      "link_mode": "local-only"
-    }
+    ]
   },
   "components": [
     {
@@ -28,14 +23,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        },
-        {
-          "path": "flake.lock"
-        }
       ]
     },
     {
@@ -50,14 +37,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "flake.nix"
-        },
-        {
-          "path": "intents/lib.nix"
-        }
       ]
     },
     {
@@ -72,14 +51,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/macbook/default.nix"
-        },
-        {
-          "path": "hosts/nixbox/default.nix"
-        }
       ]
     },
     {
@@ -94,11 +65,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "docs/architecture/workstation-management.md"
-        }
       ]
     },
     {
@@ -113,14 +79,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "software/tailscale/darwin-home-manager.nix"
-        },
-        {
-          "path": "hosts/server/default.nix"
-        }
       ]
     },
     {
@@ -135,11 +93,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/macbook/default.nix"
-        }
       ]
     },
     {
@@ -154,11 +107,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/nixbox/default.nix"
-        }
       ]
     },
     {
@@ -173,14 +121,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "hosts/server/default.nix"
-        },
-        {
-          "path": "hosts/server/disko.nix"
-        }
       ]
     },
     {
@@ -195,14 +135,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/graphical-terminal.nix"
-        },
-        {
-          "path": "intents/terminal-compatibility.nix"
-        }
       ]
     },
     {
@@ -217,14 +149,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/code-development.nix"
-        },
-        {
-          "path": "intents/development-runtime.nix"
-        }
       ]
     },
     {
@@ -239,14 +163,6 @@
       "size": [
         260,
         90
-      ],
-      "sources": [
-        {
-          "path": "intents/hyprland-workstation.nix"
-        },
-        {
-          "path": "intents/chinese-input.nix"
-        }
       ]
     }
   ],
@@ -364,8 +280,8 @@
       "dot": "cyan",
       "title": "跨图共享的是同一份实现",
       "items": [
-        "Fish、Zed、Yume、GDM 等能力只在各专题按上下文展开；总览箭头选取主路径，完整消费以 hosts 为准。",
-        "两台工作站共享开发和终端用途；server 只选 terminal-work、Git 与维护工具，不消费桌面开发组合。"
+        "Fish、Zed、Obsidian、GDM 等能力只在各专题按上下文展开；总览箭头选取主路径，完整消费以 hosts 为准。",
+        "两台工作站共享开发和终端用途；server 选择 shell-work 与 server-diagnostics，不消费桌面开发组合。"
       ]
     },
     {
