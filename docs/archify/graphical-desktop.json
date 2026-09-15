@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
       "link_mode": "local-only"
     }
   },
@@ -97,7 +97,7 @@
       ],
       "sources": [
         {
-          "path": "intents/hyprland-workstation/default.nix"
+          "path": "intents/hyprland-workstation.nix"
         }
       ]
     },
@@ -176,7 +176,7 @@
       ],
       "sources": [
         {
-          "path": "intents/hyprland-workstation/default.nix"
+          "path": "intents/hyprland-workstation.nix"
         },
         {
           "path": "software/pipewire/capabilities/desktop-audio/nixos.nix"

@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "696452c5e4a8beb83f96268e73bd786e4766672c",
+      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
       "link_mode": "local-only"
     }
   },
@@ -31,7 +31,7 @@
       ],
       "sources": [
         {
-          "path": "intents/terminal-work/default.nix"
+          "path": "intents/terminal-work.nix"
         }
       ]
     },
@@ -50,7 +50,7 @@
       ],
       "sources": [
         {
-          "path": "intents/terminal-work/default.nix"
+          "path": "intents/terminal-work.nix"
         }
       ]
     },
@@ -88,7 +88,7 @@
       ],
       "sources": [
         {
-          "path": "intents/code-development/default.nix"
+          "path": "intents/code-development.nix"
         }
       ]
     },
@@ -183,7 +183,7 @@
       ],
       "sources": [
         {
-          "path": "intents/development-runtime/default.nix"
+          "path": "intents/development-runtime.nix"
         }
       ]
     },

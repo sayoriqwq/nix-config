@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "550c689d58d1788ea3034a6a06345d9dd143ce5b",
+      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
       "link_mode": "local-only"
     }
   },
@@ -75,10 +75,10 @@
           "path": "software/fish/default.nix"
         },
         {
-          "path": "intents/graphical-terminal/default.nix"
+          "path": "intents/graphical-terminal.nix"
         },
         {
-          "path": "intents/terminal-compatibility/default.nix"
+          "path": "intents/terminal-compatibility.nix"
         }
       ]
     },
@@ -157,7 +157,7 @@
       ],
       "sources": [
         {
-          "path": "intents/terminal-compatibility/default.nix"
+          "path": "intents/terminal-compatibility.nix"
         }
       ]
     },
