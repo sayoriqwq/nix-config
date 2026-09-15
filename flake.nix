@@ -20,9 +20,6 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # Issues #76 and #233: consume Herdr's stable Nix package through Home Manager.
-    herdr.url = "github:herdrdev/herdr/v0.9.0";
-
     # Issue #90: consume only the reviewed source contract. Raycast's own
     # extension tooling remains in the leaf repository, so this is not a Flake.
     raycast-source = {
@@ -41,11 +38,6 @@
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Issues #120 and #152: consume ax's published package output for the
-    # explicitly approved workstation capabilities.
-    # Keep ax's upstream Nixpkgs/bun2nix graph inside the leaf input.
-    ax.url = "github:yusukebe/ax";
 
     # Issue #157: pin the reviewed Nixpkgs leaf that contains the 2.5.2
     # Clash Verge Rev package expression. It is called with the Linux release

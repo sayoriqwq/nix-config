@@ -6,7 +6,6 @@
 }:
 
 let
-  aiCoding = import ../../intents/ai-coding { inherit lib; };
   alwaysOnWorkstation = import ../../intents/always-on-workstation { inherit lib; };
   chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
@@ -15,7 +14,6 @@ let
   githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
   hyprlandWorkstation = import ../../intents/hyprland-workstation { inherit lib; };
   terminalWork = import ../../intents/terminal-work { inherit lib; };
-  workstationHomeModules = codeDevelopment.homeModules ++ aiCoding.coreCodingEnvironment.homeModules;
 in
 {
   # Nix chooses substituters by their explicit priority, not list position.
@@ -88,7 +86,7 @@ in
         terminalWork.homeModules
         ++ hyprlandWorkstation.homeModules
         ++ alwaysOnWorkstation.homeModules
-        ++ workstationHomeModules
+        ++ codeDevelopment.homeModules
         ++ [
           ../../software/atuin/capabilities/shell-history/home.nix
         ]

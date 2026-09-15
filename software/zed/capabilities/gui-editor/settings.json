@@ -15,11 +15,6 @@
   "git_panel": {
     "dock": "left"
   },
-  "agent_servers": {
-    "codex-acp": {
-      "type": "registry"
-    }
-  },
   "helix_mode": true,
   "vim_mode": false,
   "terminal": {

@@ -6,7 +6,6 @@
 }:
 
 let
-  aiCoding = import ../../intents/ai-coding { inherit lib; };
   chineseInput = import ../../intents/chinese-input { inherit lib; };
   codeDevelopment = import ../../intents/code-development { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime { inherit lib; };
@@ -21,8 +20,6 @@ let
   terminalWork = import ../../intents/terminal-work { inherit lib; };
   terminalCompatibility = import ../../intents/terminal-compatibility { inherit lib; };
   terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
-  workstationHomeModules =
-    codeDevelopment.homeModules ++ aiCoding.multiClientCodingEnvironment.homeModules;
 in
 {
   imports =
@@ -178,7 +175,6 @@ in
     pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
-      "antigravity-cli"
       "mos"
       "obsidian"
       "vscode"
@@ -211,7 +207,7 @@ in
     users.sayori = {
       imports =
         terminalHomeModules
-        ++ workstationHomeModules
+        ++ codeDevelopment.homeModules
         ++ chineseInput.homeModules
         ++ [
           ../../software/atuin/capabilities/shell-history/home.nix

@@ -45,25 +45,16 @@ nix build .#darwinConfigurations.macbook.system
 - VS Code 的 Mac 安装使用微软签名的 `/Applications/Visual Studio Code.app`，由应用原生更新；Nix 只提供首次设置基线和指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。恢复时先安装[官方 macOS 应用](https://code.visualstudio.com/docs/setup/mac)，再应用配置。Mac 首次基线使用 `update.mode = default`；已有设置不会被基线覆盖，旧现场若为 `none`，需在所选迁移范围内改为 `default`。设置、扩展和用户数据保持外部，版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 日常安装使用官方签名的 `/Applications/Ghostty.app`，通过应用原生渠道独立更新；Nix 只保留 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`。恢复时先安装[官方 macOS 应用](https://ghostty.org/docs/install/binary)，再应用配置；Linux 继续使用 Nix 包。Mac 不再由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
-- Codex/RTK CLI 由 Nix 安装；`~/.codex/AGENTS.md` 和 `config.toml` 由用户或 Codex 管理，保持可写，不由 Home Manager 投影或覆盖。`~/.codex/RTK.md` 由 RTK init 生命周期生成；Codex/Claude/Antigravity/Oh My Pi 的 auth、session、history、plugins 与 cache 保持外部。
+- AI 编码工具、解释器、配置与会话由当前外部工作流管理；本仓库已移除旧 AI 编码模块，待工作流稳定后重新评估迁移。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
 - Browser profile、Obsidian vault、VS Code live settings、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
-
-RTK 需要恢复时由维护者运行：
-
-```fish
-rtk init -g --codex
-rtk init -g --codex --show
-```
-
-🧭 重新生成并读回 RTK 自己拥有的全局 Codex policy 依赖，不复制 auth/session 数据。
 
 ## 3. 验收
 
 在新登录 Fish 中至少确认：
 
 ```fish
-command -s fish git uv mise zed code codex rtk
+command -s fish git uv mise zed code
 echo $EDITOR
 echo $VISUAL
 ```
