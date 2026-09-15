@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "配置所有权与可写状态边界",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      640
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "8a7f1fc7eacbf6d9129c71b69b6a2fe0ff1f864e",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "declaration",
+      "type": "external",
+      "label": "Git · 选定声明与输入",
+      "sublabel": "保存稳定选择 · 现场是实际状态的事实来源",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    },
+    {
+      "id": "system",
+      "type": "backend",
+      "label": "NixOS / nix-darwin",
+      "sublabel": "系统模块 · 服务 · macOS defaults",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "hm",
+      "type": "backend",
+      "label": "Home Manager · 用户层",
+      "sublabel": "集成在主机输出中 · 按能力写入配置",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "type": "backend",
+      "label": "受管文件与链接",
+      "sublabel": "Ghostty 配置 · Rime 只读方案叶文件",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+        },
+        {
+          "path": "software/rime-ice/capabilities/chinese-input-schema/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "brew",
+      "type": "backend",
+      "label": "Homebrew / MAS · 安装存在",
+      "sublabel": "禁自动更新与升级 · 不清理额外应用",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/homebrew/capabilities/non-destructive-application-management/darwin.nix"
+        },
+        {
+          "path": "hosts/macbook/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "zed",
+      "type": "backend",
+      "label": "Zed · 持续可写合并",
+      "sublabel": "每次激活重新应用 settings / keymap / tasks",
+      "pos": [
+        390,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/capabilities/gui-editor/home.nix"
+        },
+        {
+          "path": "docs/runbooks/update-zed-preview.md"
+        }
+      ]
+    },
+    {
+      "id": "seed",
+      "type": "backend",
+      "label": "VS Code · 仅首次初始化",
+      "sublabel": "任意现有目标均保留 · 含悬空符号链接",
+      "pos": [
+        740,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "modules/home/desktop/editors/seed-files.nix"
+        },
+        {
+          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "native",
+      "type": "external",
+      "label": "原生应用 · 包版本在外部",
+      "sublabel": "macOS Ghostty / Zed / VS Code",
+      "pos": [
+        1090,
+        270
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/ghostty/capabilities/terminal-emulator/home.nix"
+        },
+        {
+          "path": "software/zed/capabilities/gui-editor/home.nix"
+        },
+        {
+          "path": "software/vscode/capabilities/editor-compatibility/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "generations",
+      "type": "backend",
+      "label": "系统 generation",
+      "sublabel": "声明产物的恢复点 · 不覆盖全部副作用",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/architecture/workstation-management.md"
+        },
+        {
+          "path": "docs/runbooks/daily-nix-maintenance.md"
+        }
+      ]
+    },
+    {
+      "id": "fields",
+      "type": "database",
+      "label": "额外字段与现场修改",
+      "sublabel": "Zed 保留额外字段 · 删除声明不删除遗留值",
+      "pos": [
+        390,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/capabilities/gui-editor/home.nix"
+        },
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "应用数据与身份",
+      "sublabel": "词库 / 密钥环 / 登录态 / 权限 · 独立备份",
+      "pos": [
+        740,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/runbooks/nixbox-desktop-recovery.md"
+        },
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    },
+    {
+      "id": "evidence",
+      "type": "external",
+      "label": "Macwarden · 私有记录",
+      "sublabel": "选定现场证据与历史 · 不代替当前读回",
+      "pos": [
+        1090,
+        480
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docs/architecture/workstation-management.md"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "声明管理 · 按所选能力写入，不接管整个应用",
+      "wraps": [
+        "declaration",
+        "system",
+        "hm",
+        "files"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "四种不同机制 · 安装、持续合并、初始化、外部包",
+      "wraps": [
+        "brew",
+        "zed",
+        "seed",
+        "native"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "恢复与可写边界 · 不建立全局同步或恢复系统",
+      "wraps": [
+        "generations",
+        "fields",
+        "data",
+        "evidence"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "declaration-system",
+      "to": "system",
+      "label": "选择模块",
+      "from": "declaration"
+    },
+    {
+      "id": "system-hm",
+      "to": "hm",
+      "label": "集成用户层",
+      "from": "system"
+    },
+    {
+      "id": "hm-files",
+      "to": "files",
+      "label": "声明写入",
+      "from": "hm"
+    },
+    {
+      "id": "hm-seed",
+      "to": "seed",
+      "label": "缺失才播种",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "hm",
+      "labelAt": [
+        870,
+        210
+      ]
+    },
+    {
+      "id": "system-zed",
+      "to": "zed",
+      "label": "经用户层合并",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "system",
+      "labelAt": [
+        520,
+        210
+      ]
+    },
+    {
+      "id": "zed-fields",
+      "to": "fields",
+      "label": "合并保留",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "from": "zed",
+      "labelAt": [
+        520,
+        420
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "保存现场修改后再应用",
+      "items": [
+        "偏移只涉及已声明且持续管理的字段；应用前把想保留的受管字段修改保存到声明。",
+        "额外设置与应用内容不自动形成补录任务；修改单一软件也不表示整机激活只影响它。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "声明、现场、恢复点是三件事",
+      "items": [
+        "Git 回退不会自动切换运行系统；generation 不保证撤销 defaults、外部安装器或可写合并。",
+        "应用数据由其备份流程恢复；Macwarden 记录私有证据，本仓库只记录配置边界。"
+      ]
+    }
+  ]
+}
