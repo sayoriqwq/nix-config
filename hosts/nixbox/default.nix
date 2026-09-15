@@ -6,7 +6,6 @@
 }:
 
 let
-  alwaysOnWorkstation = import ../../intents/always-on-workstation.nix { inherit lib; };
   chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
   codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
   developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
@@ -28,7 +27,6 @@ in
     terminalWork.nixosModules
     ++ graphicalTerminal.nixosModules
     ++ hyprlandWorkstation.nixosModules
-    ++ alwaysOnWorkstation.nixosModules
     ++ chineseInput.nixosModules
     ++ [
       ./hardware-configuration.nix
@@ -85,7 +83,6 @@ in
       imports =
         terminalWork.homeModules
         ++ hyprlandWorkstation.homeModules
-        ++ alwaysOnWorkstation.homeModules
         ++ codeDevelopment.homeModules
         ++ [
           ../../software/atuin/capabilities/shell-history/home.nix

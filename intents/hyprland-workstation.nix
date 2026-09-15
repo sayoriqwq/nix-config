@@ -6,6 +6,7 @@ let
     fuzzel = import ../software/fuzzel;
     gdm = import ../software/gdm;
     gnomeKeyring = import ../software/gnome-keyring;
+    hypridle = import ../software/hypridle;
     hyprland = import ../software/hyprland;
     hyprlock = import ../software/hyprlock;
     hyprpolkitagent = import ../software/hyprpolkitagent;
@@ -21,10 +22,12 @@ in
 compose [
   software.hyprland.graphicalSession
   software.gdm.displayManager
+  software.gdm.disableAutomaticSuspend
   software.xorgServer.compatibilityServer
   software.qtWayland.platformPlugins
   software.gnomeKeyring.secretService
   software.hyprlock.sessionLock
+  software.hypridle.idleCoordinator
   software.fuzzel.applicationLauncher
   software.waybar.desktopStatus
   software.hyprpolkitagent.authenticationAgent
