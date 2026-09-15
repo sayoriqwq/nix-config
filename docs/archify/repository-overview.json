@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
+      "revision": "cf52ea3f2a81ed419881816e9507e2e6db942399",
       "link_mode": "local-only"
     }
   },
@@ -251,28 +251,6 @@
           "path": "intents/chinese-input.nix"
         }
       ]
-    },
-    {
-      "id": "recovery",
-      "type": "backend",
-      "label": "隔离恢复配置",
-      "sublabel": "复用 serverModules · 只替换测试现场",
-      "pos": [
-        1090,
-        480
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "sources": [
-        {
-          "path": "operations/server-recovery/default.nix"
-        },
-        {
-          "path": "operations/server-recovery/install-module.nix"
-        }
-      ]
     }
   ],
   "boundaries": [
@@ -300,12 +278,11 @@
     },
     {
       "kind": "region",
-      "label": "内聚能力与恢复派生",
+      "label": "内聚能力专题",
       "wraps": [
         "terminal",
         "development",
-        "desktop",
-        "recovery"
+        "desktop"
       ],
       "pad": 20
     }
@@ -383,18 +360,6 @@
         870,
         420
       ]
-    },
-    {
-      "id": "server-recovery",
-      "to": "recovery",
-      "label": "复用模块",
-      "fromSide": "bottom",
-      "toSide": "top",
-      "from": "server",
-      "labelAt": [
-        1220,
-        420
-      ]
     }
   ],
   "cards": [
@@ -411,7 +376,7 @@
       "title": "review 的起点",
       "items": [
         "从专题入口进入完整图，按节点来源核对软件选择、实际接线、平台差异与可写状态。",
-        "图谱记录声明关系；不会把安装列表当作运行依赖，也不会把构建或隔离验证当作现场验收。"
+        "图谱记录声明关系；不会把安装列表当作运行依赖，也不会把构建当作现场验收。"
       ]
     }
   ]

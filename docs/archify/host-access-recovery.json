@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "f6f65af53aa48949ba1b0c0df7e45dfb37d79f6f",
+      "revision": "cf52ea3f2a81ed419881816e9507e2e6db942399",
       "link_mode": "local-only"
     }
   },
@@ -199,7 +199,7 @@
     {
       "id": "production",
       "type": "backend",
-      "label": "serverModules · 复用组合",
+      "label": "server · 正式主机配置",
       "sublabel": "server 主机 + disko + Home Manager",
       "pos": [
         390,
@@ -215,28 +215,6 @@
         },
         {
           "path": "hosts/server/default.nix"
-        }
-      ]
-    },
-    {
-      "id": "recovery",
-      "type": "backend",
-      "label": "server-recovery-install",
-      "sublabel": "覆写磁盘 / 网络 / 测试密钥 · 按需验证",
-      "pos": [
-        740,
-        480
-      ],
-      "size": [
-        260,
-        90
-      ],
-      "sources": [
-        {
-          "path": "operations/server-recovery/default.nix"
-        },
-        {
-          "path": "operations/server-recovery/install-module.nix"
         }
       ]
     },
@@ -285,11 +263,10 @@
     },
     {
       "kind": "region",
-      "label": "server 恢复 · 复用声明与外部救援入口",
+      "label": "server 磁盘声明与外部救援入口",
       "wraps": [
         "disk",
         "production",
-        "recovery",
         "console"
       ],
       "pad": 20
@@ -339,12 +316,6 @@
       "to": "disk",
       "label": "生产磁盘",
       "from": "production"
-    },
-    {
-      "id": "production-recovery",
-      "to": "recovery",
-      "label": "追加覆写",
-      "from": "production"
     }
   ],
   "cards": [
@@ -358,10 +329,10 @@
     },
     {
       "dot": "amber",
-      "title": "恢复配置的实际能力",
+      "title": "人工恢复边界",
       "items": [
-        "隔离配置替换生产网络和密钥，定义 BIOS / ext4 / 无 swap / SSH / firewall 检查；不是无人值守重装器。",
-        "普通构建不表示执行了 VM 演练或恢复生产主机；控制台、备份和破坏性操作仍由维护者现场负责。"
+        "正式 server 配置保存磁盘、启动和访问策略；访问失效按手册逐步升级到提供商控制台。",
+        "构建不恢复生产主机；控制台、备份、Rescue 与重装由维护者按目标现场执行。"
       ]
     }
   ]

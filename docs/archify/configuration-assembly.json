@@ -11,7 +11,7 @@
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config",
-      "revision": "57a77a40e9df1a1813424872c6e763df2b1c483a",
+      "revision": "cf52ea3f2a81ed419881816e9507e2e6db942399",
       "link_mode": "local-only"
     }
   },
@@ -108,7 +108,7 @@
       "id": "outputs",
       "type": "backend",
       "label": "系统配置输出",
-      "sublabel": "三台主机 + server-recovery-install",
+      "sublabel": "macbook · nixbox · server",
       "pos": [
         40,
         270
@@ -368,7 +368,7 @@
       "dot": "amber",
       "title": "验证覆盖与使用边界",
       "items": [
-        "checks 是 flake 导出，仓库当前没有 .github CI 工作流；恢复安装检查按相关变更需要单独运行。",
+        "checks 是 flake 导出，仓库当前没有 .github CI 工作流；按改动验证受影响的主机与行为。",
         "构建通过不等于激活或现场验收；主机只部署实际导入的能力。"
       ]
     }
