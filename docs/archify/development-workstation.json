@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "开发工作站 · 终端、编码与协作",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1390,
+      720
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config",
+      "revision": "9d76835f2afbedb038b353ce8df0b60cef919c2e",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "terminal-tools",
+      "type": "backend",
+      "label": "starship + zoxide",
+      "sublabel": "eza · jq · ripgrep · tree · Yume 主题",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/terminal-work/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "finder",
+      "type": "backend",
+      "label": "fzf + fd + bat",
+      "sublabel": "configure：fd / bat --color=always {}",
+      "pos": [
+        390,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/terminal-work/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "editor",
+      "type": "frontend",
+      "label": "Zed · guiEditor + addTask",
+      "sublabel": "fishQuickCommand 提供 z → zed",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "servers",
+      "type": "backend",
+      "label": "nil + nixd",
+      "sublabel": "仅安装语言服务器软件包",
+      "pos": [
+        1090,
+        60
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/code-development/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "multiplexer",
+      "type": "backend",
+      "label": "tmux · terminalMultiplexer",
+      "sublabel": "terminal-work 与 AI 核心共用",
+      "pos": [
+        40,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/tmux/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "shell",
+      "type": "backend",
+      "label": "Fish · interactiveShell",
+      "sublabel": "terminal-work 与 code-development 共用",
+      "pos": [
+        390,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/fish/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "type": "backend",
+      "label": "Git · versionControl",
+      "sublabel": "开发、GitHub 协作、AI 多客户端共用",
+      "pos": [
+        740,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/git/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "tui",
+      "type": "backend",
+      "label": "LazyGit · gitTui",
+      "sublabel": "开发与 GitHub 协作共用 · Fish 命令 lg",
+      "pos": [
+        1090,
+        240
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/lazygit/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "type": "backend",
+      "label": "direnv + mise",
+      "sublabel": "nix-direnv 环境加载 · 运行时激活",
+      "pos": [
+        40,
+        420
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/development-runtime/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "project-python",
+      "type": "backend",
+      "label": "uv · 项目 Python",
+      "sublabel": "项目版本、虚拟环境、依赖归项目管理",
+      "pos": [
+        390,
+        420
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/uv/capabilities/python-package-manager/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "github-cli",
+      "type": "backend",
+      "label": "gh · githubCli",
+      "sublabel": "gitCredentialHelper · 私有认证状态",
+      "pos": [
+        740,
+        420
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/gh/capabilities/github-cli/git-credential-helper.nix"
+        }
+      ]
+    },
+    {
+      "id": "secret-scanner",
+      "type": "security",
+      "label": "gitleaks · secretScanner",
+      "sublabel": "仅安装工具 · 未声明自动扫描关卡",
+      "pos": [
+        1090,
+        420
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/gitleaks/capabilities/secret-scanner/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "ai-core",
+      "type": "backend",
+      "label": "Herdr + Codex",
+      "sublabel": "ax · rtk · Python · 共用 tmux",
+      "pos": [
+        40,
+        600
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/ai-coding/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "ai-multi",
+      "type": "backend",
+      "label": "多客户端扩展",
+      "sublabel": "Antigravity · 共用 Git",
+      "pos": [
+        390,
+        600
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/ai-coding/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "hosts",
+      "type": "external",
+      "label": "主机合并五个组合的 Home 模块",
+      "sublabel": "macbook：AI 多客户端 + Darwin 模块；nixbox：AI 核心 + NixOS 模块",
+      "pos": [
+        740,
+        600
+      ],
+      "size": [
+        610,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "terminal-work · 终端工作",
+      "wraps": [
+        "terminal-tools",
+        "finder",
+        "multiplexer",
+        "shell"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "code-development · 代码开发（另共用 Fish）",
+      "wraps": [
+        "editor",
+        "servers",
+        "git",
+        "tui"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "github-collaboration · GitHub 协作",
+      "wraps": [
+        "git",
+        "tui",
+        "github-cli",
+        "secret-scanner"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "development-runtime · 项目运行时",
+      "wraps": [
+        "environment",
+        "project-python"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "ai-coding · 核心与多客户端",
+      "wraps": [
+        "ai-core",
+        "ai-multi"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "terminal-fish",
+      "from": "finder",
+      "to": "shell",
+      "label": "Fish 集成",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        520,
+        195
+      ]
+    },
+    {
+      "id": "quick-command",
+      "from": "shell",
+      "to": "editor",
+      "label": "z → zed",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "editor-task",
+      "from": "editor",
+      "to": "tui",
+      "label": "LazyGit 任务：lazygit",
+      "fromSide": "right",
+      "toSide": "top",
+      "variant": "emphasis",
+      "labelAt": [
+        1110,
+        195
+      ]
+    },
+    {
+      "id": "credentials",
+      "from": "git",
+      "to": "github-cli",
+      "label": "gh auth git-credential",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "emphasis",
+      "labelAt": [
+        870,
+        375
+      ]
+    },
+    {
+      "id": "runtime-fish",
+      "from": "shell",
+      "to": "environment",
+      "label": "Fish 环境集成",
+      "fromSide": "bottom",
+      "toSide": "right"
+    },
+    {
+      "id": "core-extension",
+      "from": "ai-core",
+      "to": "ai-multi",
+      "label": "扩展核心",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ai-hosts",
+      "from": "ai-multi",
+      "to": "hosts",
+      "label": "按主机选择",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "共享能力就是接缝",
+      "items": [
+        "Fish、Git、LazyGit、tmux 各一处；交叠边界或节点文字标明共同选择。",
+        "macbook / nixbox 均合并五个组合；nixbox 的 Fish 系统模块由 terminal-work 提供。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "保留声明边界",
+      "items": [
+        "mise 管 Node / Bun / pnpm；uv 管项目 Python；AI 的 Nix Python 仅作基础解释器。",
+        "Herdr 会话与编码代理配置留在应用侧；此处没有声明 Zed → Codex 的调用链。"
+      ]
+    }
+  ]
+}
