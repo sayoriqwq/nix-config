@@ -1,7 +1,8 @@
-{ lib, terminalTheme, ... }:
+{ lib, ... }:
 
 let
-  inherit (terminalTheme.tokens) intent text;
+  obsidian = import ../../../../modules/home/desktop/terminal/obsidian.nix;
+  inherit (obsidian.tokens) intent text;
 in
 {
   programs.starship = {

@@ -1,13 +1,13 @@
 {
   config,
   lib,
-  terminalTheme,
   ...
 }:
 
 let
+  obsidian = import ../../../../modules/home/desktop/terminal/obsidian.nix;
   color = value: lib.removePrefix "#" value;
-  inherit (terminalTheme.tokens) bg intent text;
+  inherit (obsidian.tokens) bg intent text;
 in
 {
   # This is the three-host login-environment owner, not incidental Fish-only PATH configuration.

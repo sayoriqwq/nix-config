@@ -13,12 +13,10 @@ let
     starship = import ../software/starship;
     tmux = import ../software/tmux;
     tree = import ../software/tree;
-    yumeDesign = import ../software/yume-design;
     zoxide = import ../software/zoxide;
   };
 in
 compose [
-  software.yumeDesign.terminalTheme
   software.fish.interactiveShell
   software.bat.contentViewer
   software.eza.directoryListing

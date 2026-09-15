@@ -27,13 +27,6 @@
       flake = false;
     };
 
-    # Issue #155: consume the reviewed terminal design contract as data. The
-    # runtime adapters remain owned by this repository, so this is not a Flake.
-    yume-design = {
-      url = "github:sayoriqwq/yume-design/047c1f44518ed353b8f5d821fc1f3f347ded9206";
-      flake = false;
-    };
-
     disko = {
       url = "github:nix-community/disko/ff8702b4de27f72b4c78573dfb89ec74e36abdf1";
       inputs.nixpkgs.follows = "nixpkgs";

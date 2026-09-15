@@ -15,7 +15,6 @@ let
     starship = import ../software/starship;
     wezterm = import ../software/wezterm;
     vscode = import ../software/vscode;
-    yumeDesign = import ../software/yume-design;
     zed = import ../software/zed;
     zoxide = import ../software/zoxide;
     zsh = import ../software/zsh;
@@ -24,7 +23,6 @@ in
 compose [
   software.fish.interactiveShell
   software.zsh.compatibilityShell
-  software.yumeDesign.terminalTheme
   software.wezterm.terminalEmulator
   software.orbstack.containerRuntime
   software.orbstack.shellIntegration

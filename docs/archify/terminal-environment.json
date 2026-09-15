@@ -19,8 +19,8 @@
     {
       "id": "theme",
       "type": "backend",
-      "label": "Yume · 主题与共享外观",
-      "sublabel": "terminalTheme · appearance.nix",
+      "label": "Obsidian · 主题与共享外观",
+      "sublabel": "obsidian.nix · appearance.nix",
       "pos": [
         40,
         150
@@ -31,7 +31,7 @@
       ],
       "sources": [
         {
-          "path": "software/yume-design/capabilities/terminal-theme/home.nix"
+          "path": "modules/home/desktop/terminal/obsidian.nix"
         },
         {
           "path": "modules/home/desktop/terminal/appearance.nix"

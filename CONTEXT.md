@@ -71,3 +71,8 @@ _Avoid_：Primary Capability、Extension Capability。
 
 **人工授权（Human approval gate）**：
 维护者对需要确认的具体动作给出的当前授权。授权范围由目标、动作及其影响边界确定。
+
+## 终端外观
+
+**Obsidian 主题**：
+终端与命令行显示共用的一套配色，涵盖终端调色板、文字、语义及背景颜色。Ghostty、WezTerm、Fish 和 Starship 使用同一主题，各自映射到对应的显示用途。

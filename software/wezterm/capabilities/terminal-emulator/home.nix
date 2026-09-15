@@ -2,14 +2,14 @@
   config,
   lib,
   pkgs,
-  terminalTheme,
   ...
 }:
 
 let
+  obsidian = import ../../../../modules/home/desktop/terminal/obsidian.nix;
   appearance = import ../../../../modules/home/desktop/terminal/appearance.nix;
   keybindings = import ../../../../modules/home/desktop/terminal/keybindings.nix { inherit lib; };
-  theme = terminalTheme.terminal;
+  theme = obsidian.terminal;
 in
 {
   programs.wezterm = {
@@ -20,7 +20,7 @@ in
     settings = {
       automatically_reload_config = true;
       check_for_updates = false;
-      color_scheme = terminalTheme.id;
+      color_scheme = obsidian.id;
       default_prog = [
         (lib.getExe config.programs.zsh.package)
         "-l"
@@ -36,7 +36,7 @@ in
       window_decorations = "RESIZE";
     };
 
-    colorSchemes.${terminalTheme.id} = {
+    colorSchemes.${obsidian.id} = {
       inherit (theme) ansi brights;
       inherit (theme) background foreground;
       cursor_bg = theme.cursor;
