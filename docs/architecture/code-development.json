@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "code-development · 代码开发组合",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1160,
+      550
+    ],
+    "repository": {
+      "url": "https://github.com/sayoriqwq/nix-config.git",
+      "revision": "12e37696d4e6f6aba5c05bea064ae66a4a03d72e",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "shell",
+      "type": "backend",
+      "label": "Fish · interactiveShell",
+      "sublabel": "交互 Shell · Darwin / NixOS / Home",
+      "pos": [
+        70,
+        50
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/fish/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "editor",
+      "type": "frontend",
+      "label": "Zed · guiEditor",
+      "sublabel": "编辑器配置 · Darwin / Home",
+      "pos": [
+        450,
+        50
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "task",
+      "type": "frontend",
+      "label": "Zed · addTask",
+      "sublabel": "name = \"LazyGit\" · shell = \"sh\"",
+      "pos": [
+        810,
+        50
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/zed/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "servers",
+      "type": "backend",
+      "label": "nil + nixd",
+      "sublabel": "各选 nixLanguageServer · 安装软件包",
+      "pos": [
+        70,
+        170
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/code-development/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "type": "backend",
+      "label": "Git · versionControl",
+      "sublabel": "Git + delta · 私有身份文件外置",
+      "pos": [
+        450,
+        170
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/git/capabilities/version-control/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "tui",
+      "type": "backend",
+      "label": "LazyGit · gitTui",
+      "sublabel": "Fish 包装命令 lg · Q 退出不换目录",
+      "pos": [
+        810,
+        170
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/lazygit/capabilities/git-tui/home.nix"
+        }
+      ]
+    },
+    {
+      "id": "compose",
+      "type": "messagebus",
+      "label": "compose · 按平台汇总上述选择",
+      "sublabel": "darwinModules × 2     /     nixosModules × 1     /     homeModules × 8",
+      "pos": [
+        260,
+        285
+      ],
+      "size": [
+        640,
+        90
+      ],
+      "sources": [
+        {
+          "path": "intents/lib.nix"
+        }
+      ]
+    },
+    {
+      "id": "macbook",
+      "type": "external",
+      "label": "macbook",
+      "sublabel": "系统 imports + 用户 Home Manager",
+      "pos": [
+        90,
+        435
+      ],
+      "size": [
+        360,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/macbook/default.nix"
+        }
+      ]
+    },
+    {
+      "id": "nixbox",
+      "type": "external",
+      "label": "nixbox",
+      "sublabel": "用户 Home Manager",
+      "pos": [
+        710,
+        435
+      ],
+      "size": [
+        360,
+        90
+      ],
+      "sources": [
+        {
+          "path": "hosts/nixbox/default.nix"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "code-development · 8 个能力选择与参数化接线",
+      "wraps": [
+        "shell",
+        "editor",
+        "task",
+        "servers",
+        "git",
+        "tui",
+        "compose"
+      ],
+      "pad": 30
+    }
+  ],
+  "connections": [
+    {
+      "id": "quick-command",
+      "from": "shell",
+      "to": "editor",
+      "label": "z → zed",
+      "variant": "emphasis"
+    },
+    {
+      "id": "register-task",
+      "from": "task",
+      "to": "editor",
+      "label": "写入任务",
+      "variant": "emphasis"
+    },
+    {
+      "id": "run-lazygit",
+      "from": "task",
+      "to": "tui",
+      "label": "command = \"lazygit\"",
+      "variant": "emphasis",
+      "labelAt": [
+        950,
+        155
+      ]
+    },
+    {
+      "id": "darwin-consumer",
+      "from": "compose",
+      "to": "macbook",
+      "label": "darwinModules + homeModules",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "linux-consumer",
+      "from": "compose",
+      "to": "nixbox",
+      "label": "homeModules",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "编辑器的接线",
+      "items": [
+        "fishQuickCommand 提供 z；addTask 把 LazyGit 注册为 Zed 任务。",
+        "macOS 应用由外部维护，Darwin 模块补 PATH；Linux 由 Home Manager 安装 Zed。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "组合的边界",
+      "items": [
+        "nil、nixd 仅安装；此处未指定 Zed 的 Nix 语言服务器。",
+        "nixbox 未消费本组合的 nixosModules；Fish 系统模块来自 terminal-work。"
+      ]
+    }
+  ]
+}
