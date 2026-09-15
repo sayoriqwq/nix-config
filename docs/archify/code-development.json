@@ -2,16 +2,16 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "code-development · 代码开发组合",
+    "title": "代码开发 × GitHub 协作",
     "locale": "zh-CN",
     "quality_profile": "showcase",
     "viewBox": [
-      1160,
-      550
+      1380,
+      675
     ],
     "repository": {
       "url": "https://github.com/sayoriqwq/nix-config.git",
-      "revision": "12e37696d4e6f6aba5c05bea064ae66a4a03d72e",
+      "revision": "517474fe6e160f007573e0e7df43e2683570b026",
       "link_mode": "local-only"
     }
   },
@@ -22,7 +22,7 @@
       "label": "Fish · interactiveShell",
       "sublabel": "交互 Shell · Darwin / NixOS / Home",
       "pos": [
-        70,
+        40,
         50
       ],
       "size": [
@@ -41,7 +41,7 @@
       "label": "Zed · guiEditor",
       "sublabel": "编辑器配置 · Darwin / Home",
       "pos": [
-        450,
+        380,
         50
       ],
       "size": [
@@ -60,7 +60,7 @@
       "label": "Zed · addTask",
       "sublabel": "name = \"LazyGit\" · shell = \"sh\"",
       "pos": [
-        810,
+        720,
         50
       ],
       "size": [
@@ -79,8 +79,8 @@
       "label": "nil + nixd",
       "sublabel": "各选 nixLanguageServer · 安装软件包",
       "pos": [
-        70,
-        170
+        1060,
+        50
       ],
       "size": [
         280,
@@ -98,7 +98,7 @@
       "label": "Git · versionControl",
       "sublabel": "Git + delta · 私有身份文件外置",
       "pos": [
-        450,
+        380,
         170
       ],
       "size": [
@@ -109,7 +109,8 @@
         {
           "path": "software/git/capabilities/version-control/home.nix"
         }
-      ]
+      ],
+      "tag": "两个组合共用"
     },
     {
       "id": "tui",
@@ -117,7 +118,7 @@
       "label": "LazyGit · gitTui",
       "sublabel": "Fish 包装命令 lg · Q 退出不换目录",
       "pos": [
-        810,
+        720,
         170
       ],
       "size": [
@@ -128,24 +129,28 @@
         {
           "path": "software/lazygit/capabilities/git-tui/home.nix"
         }
-      ]
+      ],
+      "tag": "两个组合共用"
     },
     {
       "id": "compose",
       "type": "messagebus",
-      "label": "compose · 按平台汇总上述选择",
-      "sublabel": "darwinModules × 2     /     nixosModules × 1     /     homeModules × 8",
+      "label": "主机合并两个组合的模块列表",
+      "sublabel": "codeDevelopment.homeModules ++ githubCollaboration.homeModules",
       "pos": [
-        260,
-        285
+        345,
+        425
       ],
       "size": [
-        640,
+        690,
         90
       ],
       "sources": [
         {
-          "path": "intents/lib.nix"
+          "path": "hosts/macbook/default.nix"
+        },
+        {
+          "path": "hosts/nixbox/default.nix"
         }
       ]
     },
@@ -155,8 +160,8 @@
       "label": "macbook",
       "sublabel": "系统 imports + 用户 Home Manager",
       "pos": [
-        90,
-        435
+        100,
+        560
       ],
       "size": [
         360,
@@ -174,8 +179,8 @@
       "label": "nixbox",
       "sublabel": "用户 Home Manager",
       "pos": [
-        710,
-        435
+        920,
+        560
       ],
       "size": [
         360,
@@ -186,22 +191,73 @@
           "path": "hosts/nixbox/default.nix"
         }
       ]
+    },
+    {
+      "id": "github-cli",
+      "type": "backend",
+      "label": "gh · githubCli",
+      "sublabel": "gitCredentialHelper 接入 Git",
+      "pos": [
+        380,
+        300
+      ],
+      "size": [
+        260,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/gh/default.nix"
+        },
+        {
+          "path": "software/gh/capabilities/github-cli/git-credential-helper.nix"
+        }
+      ]
+    },
+    {
+      "id": "secret-scanner",
+      "type": "security",
+      "label": "gitleaks · secretScanner",
+      "sublabel": "安装扫描工具 · 未声明自动扫描关卡",
+      "pos": [
+        720,
+        300
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "sources": [
+        {
+          "path": "software/gitleaks/capabilities/secret-scanner/home.nix"
+        }
+      ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "code-development · 8 个能力选择与参数化接线",
+      "label": "code-development · 8 个选择",
       "wraps": [
         "shell",
         "editor",
         "task",
         "servers",
         "git",
-        "tui",
-        "compose"
+        "tui"
       ],
-      "pad": 30
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "github-collaboration · 5 个选择",
+      "wraps": [
+        "git",
+        "tui",
+        "github-cli",
+        "secret-scanner"
+      ],
+      "pad": 20
     }
   ],
   "connections": [
@@ -226,7 +282,7 @@
       "label": "command = \"lazygit\"",
       "variant": "emphasis",
       "labelAt": [
-        950,
+        860,
         155
       ]
     },
@@ -234,7 +290,7 @@
       "id": "darwin-consumer",
       "from": "compose",
       "to": "macbook",
-      "label": "darwinModules + homeModules",
+      "label": "另接 codeDevelopment.darwinModules",
       "fromSide": "bottom",
       "toSide": "top"
     },
@@ -242,26 +298,39 @@
       "id": "linux-consumer",
       "from": "compose",
       "to": "nixbox",
-      "label": "homeModules",
+      "label": "仅接用户模块",
       "fromSide": "bottom",
       "toSide": "top"
+    },
+    {
+      "id": "git-credential-helper",
+      "from": "git",
+      "to": "github-cli",
+      "label": "gh auth git-credential",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        510,
+        280
+      ]
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "编辑器的接线",
+      "title": "共享 seam：同一能力，两处选择",
       "items": [
-        "fishQuickCommand 提供 z；addTask 把 LazyGit 注册为 Zed 任务。",
-        "macOS 应用由外部维护，Darwin 模块补 PATH；Linux 由 Home Manager 安装 Zed。"
+        "Git 与 LazyGit 同时属于两个组合；图中各保留一个节点。",
+        "Git 的 github.com / gist.github.com 凭据交给 gh；认证状态保存在私有文件。"
       ]
     },
     {
       "dot": "amber",
-      "title": "组合的边界",
+      "title": "保留真实边界",
       "items": [
-        "nil、nixd 仅安装；此处未指定 Zed 的 Nix 语言服务器。",
-        "nixbox 未消费本组合的 nixosModules；Fish 系统模块来自 terminal-work。"
+        "nil、nixd 仅安装；gitleaks 仅安装，未接自动扫描。",
+        "nixbox 的 Fish 系统模块仍来自 terminal-work；两个主机都追加 GitHub 协作的 Home 模块。"
       ]
     }
   ]
