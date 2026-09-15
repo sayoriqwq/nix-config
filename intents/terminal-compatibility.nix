@@ -1,24 +1,24 @@
 { lib }:
 
 let
-  compose = import ../lib.nix { inherit lib; };
+  compose = import ./lib.nix { inherit lib; };
   software = {
-    atuin = import ../../software/atuin;
-    direnv = import ../../software/direnv;
-    eza = import ../../software/eza;
-    fish = import ../../software/fish;
-    fzf = import ../../software/fzf { inherit lib; };
-    lazygit = import ../../software/lazygit;
-    mise = import ../../software/mise;
-    orbstack = import ../../software/orbstack;
-    payRespects = import ../../software/pay-respects;
-    starship = import ../../software/starship;
-    wezterm = import ../../software/wezterm;
-    vscode = import ../../software/vscode;
-    yumeDesign = import ../../software/yume-design;
-    zed = import ../../software/zed;
-    zoxide = import ../../software/zoxide;
-    zsh = import ../../software/zsh;
+    atuin = import ../software/atuin;
+    direnv = import ../software/direnv;
+    eza = import ../software/eza;
+    fish = import ../software/fish;
+    fzf = import ../software/fzf { inherit lib; };
+    lazygit = import ../software/lazygit;
+    mise = import ../software/mise;
+    orbstack = import ../software/orbstack;
+    payRespects = import ../software/pay-respects;
+    starship = import ../software/starship;
+    wezterm = import ../software/wezterm;
+    vscode = import ../software/vscode;
+    yumeDesign = import ../software/yume-design;
+    zed = import ../software/zed;
+    zoxide = import ../software/zoxide;
+    zsh = import ../software/zsh;
   };
 in
 compose [

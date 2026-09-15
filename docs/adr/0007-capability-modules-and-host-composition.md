@@ -17,7 +17,7 @@
 采用三类长期对象：
 
 1. `software/<software>/` 聚合同一软件的声明、素材、实现及外部边界，公开可选择的行为；
-2. `intents/<intent>/` 表达维护者希望整体选择的使用需求，只调用 Software public interface；不要求多个软件或必须存在接线逻辑；
+2. `intents/<intent>.nix` 表达维护者希望整体选择的使用需求，只调用 Software public interface；不要求多个软件或必须存在接线逻辑；
 3. `hosts/<host>/` 是最终 caller，显式选择 Intent、独立 Software platform module 与机器事实。
 
 Software public interface 直接暴露包含模块列表的 attrset；有真实参数的行为接口返回同型 attrset。`intents/lib.nix` 只用 `lib.concatMap` 按顺序拼接 `darwinModules`、`nixosModules`、`homeModules`，把缺失字段视为空列表，并返回三个显式列表。Import graph 表达声明选择，不增加第二份选择清单。

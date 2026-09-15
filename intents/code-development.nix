@@ -1,14 +1,14 @@
 { lib }:
 
 let
-  compose = import ../lib.nix { inherit lib; };
+  compose = import ./lib.nix { inherit lib; };
   software = {
-    fish = import ../../software/fish;
-    git = import ../../software/git;
-    lazygit = import ../../software/lazygit;
-    nil = import ../../software/nil;
-    nixd = import ../../software/nixd;
-    zed = import ../../software/zed;
+    fish = import ../software/fish;
+    git = import ../software/git;
+    lazygit = import ../software/lazygit;
+    nil = import ../software/nil;
+    nixd = import ../software/nixd;
+    zed = import ../software/zed;
   };
 in
 compose [

@@ -6,14 +6,14 @@
 }:
 
 let
-  alwaysOnWorkstation = import ../../intents/always-on-workstation { inherit lib; };
-  chineseInput = import ../../intents/chinese-input { inherit lib; };
-  codeDevelopment = import ../../intents/code-development { inherit lib; };
-  developmentRuntime = import ../../intents/development-runtime { inherit lib; };
-  graphicalTerminal = import ../../intents/graphical-terminal { inherit lib; };
-  githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
-  hyprlandWorkstation = import ../../intents/hyprland-workstation { inherit lib; };
-  terminalWork = import ../../intents/terminal-work { inherit lib; };
+  alwaysOnWorkstation = import ../../intents/always-on-workstation.nix { inherit lib; };
+  chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
+  codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
+  developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
+  graphicalTerminal = import ../../intents/graphical-terminal.nix { inherit lib; };
+  githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
+  hyprlandWorkstation = import ../../intents/hyprland-workstation.nix { inherit lib; };
+  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
 in
 {
   # Nix chooses substituters by their explicit priority, not list position.

@@ -6,19 +6,19 @@
 }:
 
 let
-  chineseInput = import ../../intents/chinese-input { inherit lib; };
-  codeDevelopment = import ../../intents/code-development { inherit lib; };
-  developmentRuntime = import ../../intents/development-runtime { inherit lib; };
-  graphicalTerminal = import ../../intents/graphical-terminal { inherit lib; };
-  githubCollaboration = import ../../intents/github-collaboration { inherit lib; };
+  chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
+  codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
+  developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
+  graphicalTerminal = import ../../intents/graphical-terminal.nix { inherit lib; };
+  githubCollaboration = import ../../intents/github-collaboration.nix { inherit lib; };
   compose = import ../../intents/lib.nix { inherit lib; };
   mise = import ../../software/mise;
   macosRuntimeDefaults = compose [
     mise.runtimeManager
     mise.macosRuntimeDefaults
   ];
-  terminalWork = import ../../intents/terminal-work { inherit lib; };
-  terminalCompatibility = import ../../intents/terminal-compatibility { inherit lib; };
+  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
+  terminalCompatibility = import ../../intents/terminal-compatibility.nix { inherit lib; };
   terminalHomeModules = terminalWork.homeModules ++ terminalCompatibility.homeModules;
 in
 {

@@ -7,7 +7,7 @@
 
 let
   git = import ../../software/git;
-  terminalWork = import ../../intents/terminal-work { inherit lib; };
+  terminalWork = import ../../intents/terminal-work.nix { inherit lib; };
 in
 {
   # Production reliability takes precedence over mirror proximity. Keep USTC

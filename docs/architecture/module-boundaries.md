@@ -7,7 +7,7 @@
 | `flake.nix` | inputs、outputs、顶层 package/check/operation wiring | 软件内部配置、Host 业务 bundle |
 | `hosts/<host>/` | 最终选择、platform/hardware/provider facts、目标用户 | 复用软件实现、隐式继承其他 Host |
 | `software/<software>/` | 单个 Software 的声明、配置材料、实现、外部路径说明与公开行为 | Host 选择、跨软件需求编排 |
-| `intents/<intent>/` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
+| `intents/<intent>.nix` | 通过公开行为表达一起选择的使用需求 | 写 owner 私有 option、runtime mutation |
 | `modules/` | 有真实消费者的 System 或跨 owner primitive | `common`/`desktop`/平台全选 bundle |
 | `checks/` | 窄、确定性的 contract validation | production configuration source |
 | `operations/` | 人工可调用且边界固定的安全操作 | 隐式 target、无人值守 production mutation |
@@ -42,7 +42,7 @@ Intent 表达一起选择的使用需求，可以只有一个软件，也不要�
 
 ```nix
 let
-  compose = import ../lib.nix { inherit lib; };
+  compose = import ./lib.nix { inherit lib; };
 in
 compose [
   software.editor.guiEditor
