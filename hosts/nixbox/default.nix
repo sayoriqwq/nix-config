@@ -104,7 +104,6 @@ in
           ../../software/obsidian/capabilities/knowledge-base/home.nix
           ../../software/google-chrome/capabilities/web-browser/linux-home.nix
           ../../software/termius/capabilities/remote-access-client/linux-home.nix
-          ../../modules/home/capabilities/shortcut-reference.nix
         ];
 
       home = {

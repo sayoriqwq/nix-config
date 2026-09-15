@@ -1,6 +1,6 @@
 # 快捷键与快速入口
 
-本表按平台标注，随对应软件的配置一起维护；条目以对应软件已启用为前提。macbook 与 nixbox 将同一份静态文档投影到 `~/.local/share/nix-config/SHORTCUTS.md`，server 不选择此表。
+本表按平台标注，随对应软件的配置一起维护；条目以对应软件已启用为前提。本表仅在仓库中维护和查阅。
 
 nixbox 使用 Fish，表中的 Zsh 范围只适用于 macOS 兼容 Shell。
 
