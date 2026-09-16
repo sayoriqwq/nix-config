@@ -12,10 +12,7 @@ let
     withVscode = true;
   };
   containerDevelopment = import ../../intents/container-development.nix;
-  developmentRuntime = import ../../intents/development-runtime.nix {
-    inherit lib;
-    withMacosDefaults = true;
-  };
+  developmentRuntime = import ../../intents/development-runtime.nix;
   primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration.nix;
   shellWork = import ../../intents/shell-work.nix { inherit lib; };

@@ -39,7 +39,7 @@
 
 工具的 Zsh adapter 随其所属需求选择，仅在已启用 Zsh 时生效；选择工具不能额外开启兼容入口。保留普通三列表组合，不为每项软件预建安装／配置开关或新的关系框架。普通 App 是否继续托管另行确认。
 
-第一组已采用上述规则：CLI 纯安装、Nix 语言工具与 GitHub 工具直接声明在各自 Intent；终端、Git、Fish、Zed 等实际配置继续复用 Software 文件。相同配置依赖继续引用同一模块路径，不复制成多个匿名声明。macbook 的 mise 默认版本通过开发运行时 Intent 显式选择。
+第一组已采用上述规则：CLI 纯安装、Nix 语言工具与 GitHub 工具直接声明在各自 Intent；终端、Git、Fish、Zed 等实际配置继续复用 Software 文件。相同配置依赖继续引用同一模块路径，不复制成多个匿名声明。Erlang／Elixir 的历史用户级默认版本已取消，后续由实际项目的 Nix 配置选择；开发运行时不提供按机器命名的默认版本开关。
 
 OrbStack 保留，职责是 macOS 项目容器运行环境。安装与 Shell 初始化一起放在 `container-development`；两者没有独立选择需求，不再公开两个行为。项目仓库管理 Compose 等项目声明，OrbStack 管理镜像、容器和数据卷。此处简短接线内联，不意味着所有软件配置都必须进入 Intent。
 

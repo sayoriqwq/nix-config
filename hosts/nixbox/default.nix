@@ -8,7 +8,7 @@
 let
   chineseInput = import ../../intents/chinese-input.nix { inherit lib; };
   codeDevelopment = import ../../intents/code-development.nix { inherit lib; };
-  developmentRuntime = import ../../intents/development-runtime.nix { inherit lib; };
+  developmentRuntime = import ../../intents/development-runtime.nix;
   primaryTerminal = import ../../intents/primary-terminal.nix { inherit lib; };
   githubCollaboration = import ../../intents/github-collaboration.nix;
   hyprlandWorkstation = import ../../intents/hyprland-workstation.nix { inherit lib; };
