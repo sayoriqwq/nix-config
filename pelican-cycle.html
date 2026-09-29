@@ -23,8 +23,8 @@
     button:focus-visible { outline: 3px solid #d99147; outline-offset: 4px; }
     @media (hover: hover) and (pointer: fine) { button:hover { background: #3c6152; } }
     .clouds { animation: drift 48s linear infinite; }
-    .road { animation: road 3s linear infinite; }
-    .scarf { transform-origin: 512px 281px; animation: flutter 1.2s ease-in-out infinite alternate; }
+    .road { animation: road 1.5s linear infinite; }
+    .scarf { transform-origin: 512px 281px; animation: flutter 1.2s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate; }
     @keyframes drift { to { transform: translateX(-1100px); } }
     @keyframes road { to { transform: translateX(-220px); } }
     @keyframes flutter { to { transform: rotate(-7deg); } }
@@ -41,7 +41,7 @@
       <title id="title">鹈鹕的海边骑行</title>
       <desc id="desc">一只系着橘红围巾的白色鹈鹕，骑着绿色自行车沿海岸前行。脚掌带动踏板，车轮不停转动，云朵和路面缓缓后退。</desc>
       <defs>
-        <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#d9e9e2"/><stop offset="1" stop-color="#f3f0d9"/></linearGradient>
+        <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#d9e9e2"/><stop offset="1" stop-color="#f3f0d9"/></linearGradient>
         <g id="cloud" fill="#fffdf3"><path d="M0 20C-5 5 12-4 23 4C30-17 60-17 69 3C86-7 103 3 102 17C119 15 129 24 125 31H0Z"/></g>
         <g id="spokes" stroke="#7f9282" stroke-width="2"><path d="M-76 0H76M0-76V76M-54-54L54 54M-54 54L54-54M-70-29L70 29M-29-70L29 70M-70 29L70-29M-29 70L29-70"/></g>
         <g id="wheel"><circle r="84" fill="#f8f4df" stroke="#2e4841" stroke-width="11"/><circle r="76" fill="none" stroke="#c9bb93" stroke-width="3"/></g>
@@ -64,6 +64,7 @@
         <g transform="translate(379 462)"><use href="#wheel"/><g id="rear-spokes"><use href="#spokes"/></g><circle r="8" fill="#e8c17d" stroke="#2e4841" stroke-width="3"/></g>
         <g transform="translate(699 462)"><use href="#wheel"/><g id="front-spokes"><use href="#spokes"/></g><circle r="8" fill="#e8c17d" stroke="#2e4841" stroke-width="3"/></g>
         <path id="far-leg" d="M505 350L549 394L533 452" fill="none" stroke="#c2873e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+        <g id="far-foot"><path d="M-11 0H15" stroke="#394e44" stroke-width="6" stroke-linecap="round"/></g>
         <path d="M379 462L461 340L527 462ZM461 340L651 340L527 462M651 340L699 462" fill="none" stroke="#36786b" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M467 353L451 316M654 350L639 300Q637 285 655 282L678 282" fill="none" stroke="#2e4841" stroke-width="8" stroke-linecap="round"/>
         <path d="M422 316Q450 308 479 316" fill="none" stroke="#6d4f3c" stroke-width="13" stroke-linecap="round"/>
@@ -89,7 +90,6 @@
       </g>
       <path id="near-leg" d="M503 353L482 405L548 462" fill="none" stroke="#e7aa4d" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
       <path id="crank" d="M506 462L548 462" stroke="#394e44" stroke-width="5" stroke-linecap="round"/>
-      <g id="far-foot"><path d="M-11 0H15" stroke="#394e44" stroke-width="6" stroke-linecap="round"/></g>
       <g id="near-foot"><path d="M-12-3L-8-15Q0-10 7-11L17-3Z" fill="#efb655" stroke="#8c693d" stroke-width="2" stroke-linejoin="round"/><path d="M-14 2H18" stroke="#394e44" stroke-width="5" stroke-linecap="round"/></g>
       <text x="44" y="605" font-size="11" letter-spacing="3" fill="#8e947c">A LITTLE RIDE, A LITTLE JOY.</text>
       <g transform="translate(1005 576)" fill="none" stroke="#83917b" stroke-width="1.5"><circle r="23"/><path d="M-10 0H10M3-7L10 0L3 7"/></g>
@@ -105,13 +105,16 @@
   const nearLeg = byId('near-leg'), farLeg = byId('far-leg');
   const nearFoot = byId('near-foot'), farFoot = byId('far-foot');
   const crank = byId('crank'), rear = byId('rear-spokes'), front = byId('front-spokes');
+  const bird = byId('bird');
   function draw(t) {
     const angle = t / 1800 * Math.PI * 2;
+    const bob = -2 + 2 * Math.cos(angle * 2);
+    bird.setAttribute('transform', `translate(0 ${bob})`);
     const x = 527 + 28 * Math.cos(angle), y = 462 + 28 * Math.sin(angle);
     const fx = 1054 - x, fy = 924 - y;
     // 两段等长腿通过膝关节连接脚踏，脚掌始终保持水平。
     function legPath(px, py, bend) {
-      const hx = 502, hy = 353, dx = px - hx, dy = py - hy;
+      const hx = 502, hy = 353 + bob, dx = px - hx, dy = py - hy;
       const d = Math.hypot(dx, dy), length = 77;
       const h = Math.sqrt(Math.max(0, length * length - d * d / 4));
       return `M${hx} ${hy}L${(hx + px) / 2 + bend * dy / d * h} ${(hy + py) / 2 - bend * dx / d * h}L${px} ${py - 7}`;
