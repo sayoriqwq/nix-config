@@ -219,6 +219,7 @@ in
           ../../software/localsend/home-manager.nix
           ../../software/monitorcontrol/home-manager.nix
           ../../software/mos/home-manager.nix
+          ../../software/postgresql/home-manager.nix
           ../../software/upscayl/home-manager.nix
           ../../software/xbar/home-manager.nix
           ../../software/rclone/home-manager.nix
