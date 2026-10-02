@@ -82,6 +82,8 @@ WezTerm 是低频使用的兼容终端，保留 Nix 安装与现有社区配置�
 
 LocalSend 的 Mac 安装和升级由 Homebrew cask `localsend` 负责；Linux 保留 Nix 包与既有防火墙规则。Pages、Keynote、Numbers、GarageBand 按维护者选择移出安装声明，交由系统或 App Store 处理，缺失不形成补录任务。当前 Homebrew `cleanup = "none"`，移除声明不会自动卸载现场应用。
 
+Obsidian 的 Mac 安装需求由 Homebrew cask `obsidian` 保存，日常更新由应用处理，Electron 安装器通过 Homebrew 按需升级。官方 CLI 由 cask 提供，使用前在应用内开启命令行界面；Home Manager 不再提供旧的图形程序链接。笔记库、插件、主题、偏好与账号由 Obsidian 管理，Linux 继续使用 Nix 包。
+
 长期软件优先使用社区 Nix 模块和 nh，允许合理版本滞后；实际阻碍可以支持原生迁移。迁出后删除无人使用的固定包与更新器，保留仍有用途的配置和集成。当前 Lix、nix-darwin、集成 Home Manager 与 Darwin rolling/Linux release 都可按真实需求复审，不预设永久绑定。
 
 日常入口见[日常 Nix 维护](../runbooks/daily-nix-maintenance.md)。按实际操作需要增加包装命令，复用 Git/Nix/nh，减少重复输入；不另造声明或恢复系统。

@@ -164,7 +164,10 @@ in
       ../../software/tailscale/darwin.nix
     ];
 
-  homebrew.casks = [ "localsend" ];
+  homebrew.casks = [
+    "localsend"
+    "obsidian"
+  ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfreePredicate =
@@ -172,7 +175,6 @@ in
     builtins.elem (lib.getName pkg) [
       "discord"
       "mos"
-      "obsidian"
       "vscode"
     ];
 
@@ -211,7 +213,6 @@ in
         ++ githubCollaboration.homeModules
         ++ chineseInput.homeModules
         ++ [
-          ../../software/obsidian/home-manager.nix
           ../../software/discord/home-manager.nix
           ../../software/iina/home-manager.nix
           ../../software/monitorcontrol/home-manager.nix

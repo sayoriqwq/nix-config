@@ -42,7 +42,7 @@ Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明�
 按单一 owner 恢复外部状态：
 
 - Pinshift 的 `~/.local/bin/pinshift` 由项目自己的 `pinshift register` 注册，Home Manager 不再提供转发命令。项目移动后从新 checkout 重新注册；项目依赖、签名、设备操作和应用数据仍由 Pinshift 管理。
-- Obsidian 的 Mac 安装使用[官方安装器](https://obsidian.md/download)提供的 `/Applications/Obsidian.app`；Nix 只提供指向该应用的 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：后者仍需按[官方更新说明](https://obsidian.md/help/updates)定期重新安装。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
+- Obsidian 的 Mac 安装需求由 `homebrew.casks` 声明 `obsidian`；[cask](https://formulae.brew.sh/cask/obsidian) 安装 `/Applications/Obsidian.app`，并提供指向其中 `obsidian-cli` 的官方命令。Home Manager 不再提供 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：前者由应用处理，后者通过 Homebrew 按需升级，见[官方更新说明](https://obsidian.md/help/updates)。[官方 CLI](https://obsidian.md/help/cli) 需要安装器 1.12.7 以上，并在应用设置中开启命令行界面；cask 已提供 PATH 入口时可跳过应用的重复注册。`obsidian` 不带参数进入交互式命令界面，单纯启动图形应用使用 `open -a Obsidian`。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
 - VS Code 的 Mac 安装需求由现有 `homebrew.casks` 声明 `visual-studio-code`；[cask](https://formulae.brew.sh/cask/visual-studio-code) 使用微软提供的应用安装到 `/Applications/Visual Studio Code.app`，日常继续由应用原生更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 保留指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。每次 Mac 激活都会用仓库基线整份覆盖默认用户的 `~/Library/Application Support/Code/User/settings.json`，保持文件可写；基线使用 `update.mode = default`。日常可以直接修改，但希望保留的内容应先保存到声明，下次激活不会保留该文件的额外字段。扩展、账号、keybindings、其他 profiles 和用户数据保持外部，原生应用版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 安装需求由现有 `homebrew.casks` 声明 `ghostty`；cask 使用[官方 DMG](https://ghostty.org/docs/install/binary#homebrew)安装到 `/Applications/Ghostty.app`，日常继续通过应用原生渠道独立更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 继续维护 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`；Linux 继续使用 Nix 包。Mac 不由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
 - LocalSend 的 Mac 安装需求由 `homebrew.casks` 声明 `localsend`，安装和升级使用 Homebrew，应用没有内置自动更新；当前激活只安装缺失应用，不升级已有包。Linux 继续使用 Nix 包和既有防火墙规则。
@@ -51,14 +51,14 @@ Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明�
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
 - Browser profile、Obsidian vault、VS Code 扩展与其他外部配置、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
 
-VS Code 与 Ghostty 首次接管已有手工安装时需核实应用与安装记录，处理冲突，不在常规声明中固化 `force`。
+VS Code、Ghostty 与 Obsidian 首次接管已有手工安装时需核实应用与安装记录，处理冲突，不在常规声明中固化 `force`。
 
 ## 3. 验收
 
 在新登录 Fish 中至少确认：
 
 ```fish
-command -s fish git uv mise zed code
+command -s fish git uv mise zed code obsidian
 echo $EDITOR
 echo $VISUAL
 ```
@@ -69,7 +69,7 @@ echo $VISUAL
 
 VS Code 需确认 Homebrew 安装记录、启动器、`code` 与 `v` 对应同一份 `/Applications/Visual Studio Code.app`，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版保留、默认用户 `settings.json` 与声明一致且仍可写、旧 Home Manager 入口未重建。该设置文件的临时修改和额外字段应被基线覆盖；扩展、账号、keybindings 和其他 profiles 不受此写入动作管理。没有可用更新时，真实更新项保持待验收。
 
-Obsidian 需确认原有笔记库、插件与主题可用，自动更新开启，启动器与 `obsidian` 使用同一原生安装。应用基线后确认原生版本和偏好保留、旧 Home Manager 应用与 CLI 入口未重建。通过官方安装器升级不能代替应用内自动更新验收；没有可用应用更新时，后者保持待验收。
+Obsidian 需确认 Homebrew 安装记录、原有笔记库、插件与主题可用，自动更新与命令行界面开启；`obsidian version`、`obsidian help open` 正常，启动器与 CLI 使用同一原生安装。应用基线后确认原生版本和偏好保留、旧 Home Manager 应用与 CLI 入口未重建。通过 Homebrew 更新安装器不能代替应用内自动更新验收；没有可用应用更新时，后者保持待验收。
 
 Ghostty 还需确认 Homebrew 安装记录、启动器与 `ghostty` CLI 对应同一份 `/Applications/Ghostty.app`，Fish、主题和分屏可用；用 `ghostty +validate-config` 显式校验配置。通过应用完成一次真实更新与重启，并在随后应用基线后确认新版仍在、旧 Home Manager 应用入口未重建、现场偏好未覆盖。没有可用更新时，该项保持待验收，不能把“已是最新”当作更新成功。
 
