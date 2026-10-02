@@ -6,31 +6,26 @@
 }:
 
 let
-  baseline =
-    if pkgs.stdenv.hostPlatform.isDarwin then
-      pkgs.writeText "vscode-settings.jsonc" (
-        builtins.replaceStrings [ ''"update.mode": "none"'' ] [ ''"update.mode": "default"'' ] (
-          builtins.readFile ./settings.jsonc
-        )
-      )
-    else
-      ./settings.jsonc;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  baseline = pkgs.writeText "vscode-settings.jsonc" (
+    builtins.replaceStrings [ ''"update.mode": "none"'' ] [ ''"update.mode": "default"'' ] (
+      builtins.readFile ./settings.jsonc
+    )
+  );
   target = "${config.home.homeDirectory}/Library/Application Support/Code/User/settings.json";
 in
 {
-  imports = [
-    ./seed-files.nix
-  ];
-
-  home.packages = lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.vscode ];
+  home.packages = lib.optionals (!isDarwin) [ pkgs.vscode ];
 
   # The native macOS bundle owns updates; CLI calls use that same installation.
-  home.file.".local/bin/code" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+  home.file.".local/bin/code" = lib.mkIf isDarwin {
     source = config.lib.file.mkOutOfStoreSymlink "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code";
   };
 
-  # VS Code and its extensions keep this file writable. Nix provides only a
-  # first-run baseline and never overwrites an existing file or symlink.
-  sayori.editors.seedFiles = [ { inherit target baseline; } ];
-
+  # 每次应用整份基线，生成普通可写文件；未入仓的现场设置不保留。
+  home.activation.applyVscodeSettings = lib.mkIf isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${pkgs.coreutils}/bin/install -D -T -m 0644 -- ${baseline} ${lib.escapeShellArg target}
+    ''
+  );
 }

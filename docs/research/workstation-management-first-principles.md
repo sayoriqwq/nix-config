@@ -63,7 +63,7 @@ Pinshift 旧包装与项目自行注册的新入口并存，根因是重复所�
 
 ## 4. nh 可以简化哪部分
 
-本机已安装 **nh 4.4.2**；[仓库声明](../../software/nh/home-manager.nix)已启用它。它不是尚待引入的新方案。
+本机已安装 **nh 4.4.2**；[仓库声明](../../intents/shell-work.nix)已启用它。它不是尚待引入的新方案。
 
 nh 提供 NixOS、Home Manager、nix-darwin 的操作入口，改善构建进度、版本差异、确认、搜索和清理体验。若问题是命令难记、输出难读，先用好已有 nh 比迁移安装来源更直接。[nh 官方项目](https://github.com/nix-community/nh)
 
@@ -92,7 +92,9 @@ Nix 本身也提供独立包 profile 和单包升级。这说明“用 Nix”不
 
 现有仓库已经有中间路径：[Homebrew 模块](../../software/homebrew/darwin.nix)关闭激活时自动更新、升级和清理；nix-darwin 可以保存安装需求而不要求这些应用都成为 Nix 包。Brewfile 也可独立维护。两种入口不应重复拥有同一份安装清单。[nix-darwin Homebrew 行为](https://nix-darwin.github.io/nix-darwin/manual/#opt-homebrew.onActivation.upgrade)
 
-当前 [VS Code 声明](../../software/vscode/home-manager.nix)只为首次设置提供基线；[seed-files 实现](../../software/vscode/seed-files.nix)遇到已有路径就跳过。这能保留现场调整，却不会自动把后续现场设置记录进 Git。若“恢复我后来调好的设置”很重要，仍需显式选取和保存，而不能把首次模板误当完整恢复方案。
+2026-09-13 研究时，VS Code 声明只为首次设置提供基线，当时的 seed-files 实现遇到已有路径就跳过。这能保留现场调整，却不会自动把后续现场设置记录进 Git。若“恢复我后来调好的设置”很重要，仍需显式选取和保存，而不能把首次模板误当完整恢复方案。
+
+2026-10-03 后续变更：[VS Code 声明](../../software/vscode/home-manager.nix)改为每次 Mac 激活用同一基线整份覆盖默认用户 `settings.json`，文件保持可写；首次 seed 实现已退役。希望保留的日常修改应先保存到声明，文件内额外字段不会在激活后保留。原生应用安装和更新归属不变，扩展、账号、keybindings 与其他 profiles 不自动纳管。本段记录后续变化，不改写前述研究阶段的事实或验证范围。
 
 ## 6. 下一步应验证问题，而非继续搬应用
 

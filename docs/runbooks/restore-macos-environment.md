@@ -41,12 +41,12 @@ nix build .#darwinConfigurations.macbook.system
 
 - Pinshift 的 `~/.local/bin/pinshift` 由项目自己的 `pinshift register` 注册，Home Manager 不再提供转发命令。项目移动后从新 checkout 重新注册；项目依赖、签名、设备操作和应用数据仍由 Pinshift 管理。
 - Obsidian 的 Mac 安装使用[官方安装器](https://obsidian.md/download)提供的 `/Applications/Obsidian.app`；Nix 只提供指向该应用的 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：后者仍需按[官方更新说明](https://obsidian.md/help/updates)定期重新安装。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
-- VS Code 的 Mac 安装使用微软签名的 `/Applications/Visual Studio Code.app`，由应用原生更新；Nix 只提供首次设置基线和指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。恢复时先安装[官方 macOS 应用](https://code.visualstudio.com/docs/setup/mac)，再应用配置。Mac 首次基线使用 `update.mode = default`；已有设置不会被基线覆盖，旧现场若为 `none`，需在所选迁移范围内改为 `default`。设置、扩展和用户数据保持外部，版本不会随 Nix generation 回滚；非 Mac 包策略不变。
+- VS Code 的 Mac 安装使用微软签名的 `/Applications/Visual Studio Code.app`，由应用原生更新；Nix 提供指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。恢复时先安装[官方 macOS 应用](https://code.visualstudio.com/docs/setup/mac)，再应用配置。每次 Mac 激活都会用仓库基线整份覆盖默认用户的 `~/Library/Application Support/Code/User/settings.json`，保持文件可写；基线使用 `update.mode = default`。日常可以直接修改，但希望保留的内容应先保存到声明，下次激活不会保留该文件的额外字段。扩展、账号、keybindings、其他 profiles 和用户数据保持外部，原生应用版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 日常安装使用官方签名的 `/Applications/Ghostty.app`，通过应用原生渠道独立更新；Nix 只保留 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`。恢复时先安装[官方 macOS 应用](https://ghostty.org/docs/install/binary)，再应用配置；Linux 继续使用 Nix 包。Mac 不再由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
 - AI 编码工具、解释器、配置与会话由当前外部工作流管理；本仓库已移除旧 AI 编码模块，待工作流稳定后重新评估迁移。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
-- Browser profile、Obsidian vault、VS Code live settings、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
+- Browser profile、Obsidian vault、VS Code 扩展与其他外部配置、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
 
 ## 3. 验收
 
@@ -62,7 +62,7 @@ echo $VISUAL
 
 随后人工验证 Ghostty/Fish、Zed、Raycast、Fcitx/Rime、Tailscale、Homebrew/MAS 应用和必要 macOS defaults。Build 不能替代这些 runtime checks。
 
-VS Code 需确认启动器、`code` 与 `v` 使用同一原生安装，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版和现场配置保留、旧 Home Manager 入口未重建。没有可用更新时，真实更新项保持待验收。
+VS Code 需确认启动器、`code` 与 `v` 使用同一原生安装，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版保留、默认用户 `settings.json` 与声明一致且仍可写、旧 Home Manager 入口未重建。该设置文件的临时修改和额外字段应被基线覆盖；扩展、账号、keybindings 和其他 profiles 不受此写入动作管理。没有可用更新时，真实更新项保持待验收。
 
 Obsidian 需确认原有笔记库、插件与主题可用，自动更新开启，启动器与 `obsidian` 使用同一原生安装。应用基线后确认原生版本和偏好保留、旧 Home Manager 应用与 CLI 入口未重建。通过官方安装器升级不能代替应用内自动更新验收；没有可用应用更新时，后者保持待验收。
 

@@ -148,8 +148,8 @@
     {
       "id": "seed",
       "type": "backend",
-      "label": "VS Code · 仅首次初始化",
-      "sublabel": "任意现有目标均保留 · 含悬空符号链接",
+      "label": "VS Code · 持续可写覆盖",
+      "sublabel": "Mac 每次激活整份覆盖 · 文件仍可编辑",
       "pos": [
         740,
         270
@@ -159,9 +159,6 @@
         90
       ],
       "sources": [
-        {
-          "path": "software/vscode/seed-files.nix"
-        },
         {
           "path": "software/vscode/home-manager.nix"
         }
@@ -292,7 +289,7 @@
     },
     {
       "kind": "region",
-      "label": "四种不同机制 · 安装、持续合并、初始化、外部包",
+      "label": "四种不同机制 · 安装、合并、整份覆盖、外部包",
       "wraps": [
         "brew",
         "zed",
@@ -335,7 +332,7 @@
     {
       "id": "hm-seed",
       "to": "seed",
-      "label": "缺失才播种",
+      "label": "激活时覆盖",
       "fromSide": "bottom",
       "toSide": "top",
       "from": "hm",
