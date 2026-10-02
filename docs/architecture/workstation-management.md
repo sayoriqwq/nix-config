@@ -80,6 +80,8 @@ Ghostty 与 VS Code 的 Mac 安装需求分别由现有 Homebrew cask `ghostty`�
 
 WezTerm 是低频使用的兼容终端，保留 Nix 安装与现有社区配置模块，版本由 `flake.lock` 中的 `nixpkgs-darwin` 输入锁定，关闭应用更新提示，不单独追新。更新该包集时，WezTerm 仍可能随候选一起变化；是否接受通过同一份候选差异判断。
 
+LocalSend 的 Mac 安装和升级由 Homebrew cask `localsend` 负责；Linux 保留 Nix 包与既有防火墙规则。Pages、Keynote、Numbers、GarageBand 按维护者选择移出安装声明，交由系统或 App Store 处理，缺失不形成补录任务。当前 Homebrew `cleanup = "none"`，移除声明不会自动卸载现场应用。
+
 长期软件优先使用社区 Nix 模块和 nh，允许合理版本滞后；实际阻碍可以支持原生迁移。迁出后删除无人使用的固定包与更新器，保留仍有用途的配置和集成。当前 Lix、nix-darwin、集成 Home Manager 与 Darwin rolling/Linux release 都可按真实需求复审，不预设永久绑定。
 
 日常入口见[日常 Nix 维护](../runbooks/daily-nix-maintenance.md)。按实际操作需要增加包装命令，复用 Git/Nix/nh，减少重复输入；不另造声明或恢复系统。

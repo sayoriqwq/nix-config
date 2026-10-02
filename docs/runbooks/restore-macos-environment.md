@@ -35,6 +35,8 @@ nix build .#darwinConfigurations.macbook.system
 
 审阅 exact commit、build output、现有 generation 和 rollback 后，维护者另行批准并执行 activation。Activation 可以落地 nix-darwin、Home Manager、Homebrew/MAS 声明与 macOS defaults，但不会恢复外部应用数据，也不会自动删除现场多余应用。
 
+Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明，交由系统或 App Store 处理，缺失不形成仓库补录任务；当前 Homebrew `cleanup = "none"`，移除声明不会自动卸载已安装的应用。
+
 ### 2.4 外部 owner
 
 按单一 owner 恢复外部状态：
@@ -43,6 +45,7 @@ nix build .#darwinConfigurations.macbook.system
 - Obsidian 的 Mac 安装使用[官方安装器](https://obsidian.md/download)提供的 `/Applications/Obsidian.app`；Nix 只提供指向该应用的 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：后者仍需按[官方更新说明](https://obsidian.md/help/updates)定期重新安装。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
 - VS Code 的 Mac 安装需求由现有 `homebrew.casks` 声明 `visual-studio-code`；[cask](https://formulae.brew.sh/cask/visual-studio-code) 使用微软提供的应用安装到 `/Applications/Visual Studio Code.app`，日常继续由应用原生更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 保留指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。每次 Mac 激活都会用仓库基线整份覆盖默认用户的 `~/Library/Application Support/Code/User/settings.json`，保持文件可写；基线使用 `update.mode = default`。日常可以直接修改，但希望保留的内容应先保存到声明，下次激活不会保留该文件的额外字段。扩展、账号、keybindings、其他 profiles 和用户数据保持外部，原生应用版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 安装需求由现有 `homebrew.casks` 声明 `ghostty`；cask 使用[官方 DMG](https://ghostty.org/docs/install/binary#homebrew)安装到 `/Applications/Ghostty.app`，日常继续通过应用原生渠道独立更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 继续维护 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`；Linux 继续使用 Nix 包。Mac 不由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
+- LocalSend 的 Mac 安装需求由 `homebrew.casks` 声明 `localsend`，安装和升级使用 Homebrew，应用没有内置自动更新；当前激活只安装缺失应用，不升级已有包。Linux 继续使用 Nix 包和既有防火墙规则。
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
 - AI 编码工具、解释器、配置与会话由当前外部工作流管理；本仓库已移除旧 AI 编码模块，待工作流稳定后重新评估迁移。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。

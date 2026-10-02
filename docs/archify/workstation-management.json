@@ -58,7 +58,7 @@
       "id": "casks",
       "type": "frontend",
       "label": "Cask / Mac App Store 应用",
-      "sublabel": "Chrome · ChatGPT · 微信 · 飞书 · iWork",
+      "sublabel": "Chrome · ChatGPT · 微信 · 飞书 · LocalSend",
       "pos": [
         740,
         60
@@ -70,9 +70,6 @@
       "sources": [
         {
           "path": "hosts/macbook/default.nix"
-        },
-        {
-          "path": "software/pages/darwin.nix"
         },
         {
           "path": "intents/primary-terminal.nix"
@@ -363,7 +360,7 @@
       "dot": "cyan",
       "title": "直接导入的应用也属于主机声明",
       "items": [
-        "Mac 的 HM 另选 Discord、IINA、LocalSend、MonitorControl、Mos、Upscayl、xbar、rclone；Mos 登录时启动。",
+        "Mac 的 HM 另选 Discord、IINA、MonitorControl、Mos、Upscayl、xbar、rclone；Mos 登录时启动。",
         "两机还安装 nh、btop、fastfetch、Yazi、Helix；桌面会话、终端与开发工具见对应专题。"
       ]
     },

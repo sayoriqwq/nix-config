@@ -139,19 +139,15 @@ in
       ../../software/feishu/darwin.nix
       ../../software/figma/darwin.nix
       ../../software/fuse-t/darwin.nix
-      ../../software/garageband/darwin.nix
       ../../software/google-chrome/darwin.nix
       ../../software/hazeover/darwin.nix
       ../../software/izip/darwin.nix
-      ../../software/keynote/darwin.nix
       ../../software/keyscreen/darwin.nix
       ../../software/linear/darwin.nix
       ../../software/mega/darwin.nix
       ../../software/netease-cloud-music/darwin.nix
-      ../../software/numbers/darwin.nix
       ../../software/obs-studio/darwin.nix
       ../../software/one-thing/darwin.nix
-      ../../software/pages/darwin.nix
       ../../software/paseo/darwin.nix
       ../../software/pearcleaner/darwin.nix
       ../../software/qq/darwin.nix
@@ -167,6 +163,8 @@ in
       ../../software/windows-app/darwin.nix
       ../../software/tailscale/darwin.nix
     ];
+
+  homebrew.casks = [ "localsend" ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfreePredicate =
@@ -216,7 +214,6 @@ in
           ../../software/obsidian/home-manager.nix
           ../../software/discord/home-manager.nix
           ../../software/iina/home-manager.nix
-          ../../software/localsend/home-manager.nix
           ../../software/monitorcontrol/home-manager.nix
           ../../software/mos/home-manager.nix
           ../../software/postgresql/home-manager.nix
