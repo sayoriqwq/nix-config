@@ -141,7 +141,7 @@
       "id": "editors",
       "type": "frontend",
       "label": "Zed + VS Code",
-      "sublabel": "代码工作选择 · macOS：z → zed / v → code",
+      "sublabel": "macOS：z → zed-preview / v → code",
       "pos": [
         1090,
         440

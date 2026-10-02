@@ -1,6 +1,6 @@
 # ADR-0006：Zed 按平台安装，共享可写配置声明
 
-状态：已接受；2026-09-14 修订，2026-10-03 简化日常配置应用。范围为 Zed 安装、配置写入与二进制更新。
+状态：已接受；2026-09-14 修订，2026-10-03 简化日常配置应用并补入 Homebrew 安装声明。范围为 Zed 安装、配置写入与二进制更新。
 
 ## 背景
 
@@ -10,7 +10,7 @@
 
 ## 决定
 
-- macbook 使用原生 Preview 与应用自更新，Home Manager 的 `package = null`。原生安装提供 PATH 中的 `zed`，并验证 CLI 与 Finder/Raycast 指向同一应用。Nix 不固定或恢复 Mac 应用版本。
+- macbook 由 Homebrew cask `zed@preview` 保存原生 Preview 的安装需求，应用自行更新，Home Manager 的 `package = null`。直接使用 cask 提供的 `zed-preview` 命令，`z` 快捷与默认编辑器跟随该名称，并验证 CLI 与 Finder/Raycast 指向同一应用。Nix 不固定或恢复 Mac 应用版本。
 - nixbox 使用锁定的 Linux release `pkgs.zed-editor`，关闭应用自更新，保留 `packages.x86_64-linux.zed-stable` 验证入口。server 不选择 Zed。
 - 配置采用 `programs.zed-editor` 的 `mutableUserSettings`、`mutableUserKeymaps`、`mutableUserTasks`。每次激活按上游机制合并声明；settings 声明字段优先，keymap 按 context、tasks 按 label 合并。用户额外字段继续保留。
 - settings、keymap 和 Intent 提供的任务是所选稳定声明；应用账号、扩展安装、会话、数据库、缓存与用户内容保持外部。明确希望保留的现场配置修改先保存到声明，未保存修改可以被覆盖，不增加常规比对或备份流程。

@@ -25,7 +25,7 @@ Home Manager 持续合并 settings、keymap 与 tasks，文件仍可由 Zed 修�
 
 ## 应用更新
 
-Mac 使用 Preview 自身的更新入口；确认 CLI `zed` 和图形入口指向同一原生应用。应用安装与版本恢复使用原生流程，Nix 不提供 Mac Zed 恢复包。
+Mac 安装需求由 Homebrew cask [`zed@preview`](https://formulae.brew.sh/cask/zed@preview) 保存，应用位于 `/Applications/Zed Preview.app`；日常使用 Preview 自身的更新入口。直接使用 cask 提供的 `zed-preview` 命令，`z` 快捷与 `EDITOR`、`VISUAL` 跟随该名称，不另设 `zed` 兼容入口。确认 CLI 和图形入口指向同一原生应用；当前 Homebrew 激活不升级已有应用，Nix 不提供 Mac Zed 恢复包。
 
 Linux 随 Linux nixpkgs input 更新。求值精确目标：
 

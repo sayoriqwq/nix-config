@@ -4,6 +4,8 @@ let
   homeManagerProfileBin = "${config.home-manager.users.${username}.home.profileDirectory}/bin";
 in
 {
+  homebrew.casks = [ "zed@preview" ];
+
   # Finder/launchd starts Zed outside a login shell. Expose only the managed
   # user profile and active system generation without touching live Zed state.
   launchd.user.envVariables.PATH = [

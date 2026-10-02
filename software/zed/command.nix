@@ -1,1 +1,1 @@
-pkgs: if pkgs.stdenv.hostPlatform.isDarwin then "zed" else "zeditor"
+pkgs: if pkgs.stdenv.hostPlatform.isDarwin then "zed-preview" else "zeditor"

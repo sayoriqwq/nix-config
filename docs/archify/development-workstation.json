@@ -43,7 +43,7 @@
       "id": "editor",
       "type": "frontend",
       "label": "Zed · guiEditor + addTask",
-      "sublabel": "z → zed / zeditor · macbook 加选 VS Code",
+      "sublabel": "z → zed-preview / zeditor · Mac 加选 VS Code",
       "pos": [
         740,
         60

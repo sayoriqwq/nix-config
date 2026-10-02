@@ -94,7 +94,7 @@ Obsidian 的 Mac 安装需求由 Homebrew cask `obsidian` 保存，日常更新�
 
 偏移只涉及已声明且持续管理的字段。用户新增的未声明设置、账号、会话和数据不是声明缺陷，也不形成自动捕获任务。应用会重新执行所选配置的激活动作；只有明确想保留的现场修改才先保存到声明，其余未保存的受管字段修改可以被覆盖。常规应用不增加逐字段比对或强制私有备份；发现差异本身不授权整机激活。
 
-Zed 使用 Home Manager 的可写合并，声明字段在每次激活时重新应用，额外字段保留；删除声明不会删除现场遗留字段。具体写入限制与处理方式见 [Zed 手册](../runbooks/update-zed-preview.md)。
+Zed 的 Mac 安装需求由 Homebrew cask `zed@preview` 保存，Preview 应用原生更新；CLI 直接使用 `zed-preview`，`z` 快捷与默认编辑器跟随该名称。配置使用 Home Manager 的可写合并，声明字段在每次激活时重新应用，额外字段保留；删除声明不会删除现场遗留字段。具体写入限制与处理方式见 [Zed 手册](../runbooks/update-zed-preview.md)。
 
 VS Code 的 Mac 默认用户 `settings.json` 使用持续整份覆盖：每次激活写入仓库基线，文件仍可直接编辑；该文件内未保存的修改和额外字段会被覆盖。基线使用 `update.mode = default`，扩展、账号、keybindings 与其他 profiles 不自动纳管。具体范围与验收见 [macOS 环境恢复与回滚](../runbooks/restore-macos-environment.md)。
 
