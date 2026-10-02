@@ -18,7 +18,7 @@ nh darwin build . -H macbook --diff always
 
 ## 修改配置后应用
 
-先检查本次所选持续管理字段的现场差异，把想保留的修改保存到声明，再审阅并提交，保留无关工作。Zed 的可写合并会在每次激活重新应用声明，须先按 [Zed 手册](update-zed-preview.md) 检查并备份；额外未声明设置不构成偏移。修改设置无需更新输入：
+本次明确想保留的现场配置修改先保存到声明，再审阅并提交，保留无关工作。未保存的受管字段修改可以被覆盖，常规应用不强制逐字段比对或制作备份。Zed 的可写合并会在每次激活重新应用声明，具体行为见 [Zed 手册](update-zed-preview.md)；额外未声明设置不构成偏移。修改设置无需更新输入：
 
 ```fish
 nh darwin switch . -H macbook --ask --show-activation-logs

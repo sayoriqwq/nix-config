@@ -1,6 +1,6 @@
 # ADR-0006：Zed 按平台安装，共享可写配置声明
 
-状态：已接受；2026-09-14 修订。范围为 Zed 安装、配置写入与二进制更新。
+状态：已接受；2026-09-14 修订，2026-10-03 简化日常配置应用。范围为 Zed 安装、配置写入与二进制更新。
 
 ## 背景
 
@@ -13,7 +13,7 @@
 - macbook 使用原生 Preview 与应用自更新，Home Manager 的 `package = null`。原生安装提供 PATH 中的 `zed`，并验证 CLI 与 Finder/Raycast 指向同一应用。Nix 不固定或恢复 Mac 应用版本。
 - nixbox 使用锁定的 Linux release `pkgs.zed-editor`，关闭应用自更新，保留 `packages.x86_64-linux.zed-stable` 验证入口。server 不选择 Zed。
 - 配置采用 `programs.zed-editor` 的 `mutableUserSettings`、`mutableUserKeymaps`、`mutableUserTasks`。每次激活按上游机制合并声明；settings 声明字段优先，keymap 按 context、tasks 按 label 合并。用户额外字段继续保留。
-- settings、keymap 和 Intent 提供的任务是所选稳定声明；应用账号、扩展安装、会话、数据库、缓存与用户内容保持外部。应用前先检查已声明字段的现场差异，把希望保留的修改保存到声明。
+- settings、keymap 和 Intent 提供的任务是所选稳定声明；应用账号、扩展安装、会话、数据库、缓存与用户内容保持外部。明确希望保留的现场配置修改先保存到声明，未保存修改可以被覆盖，不增加常规比对或备份流程。
 - 不实现本地合并引擎，不保留 Mac 固定包、恢复包或专用 updater。默认编辑器、快捷命令与任务集成保留。
 
 ## Linux 二进制边界
@@ -24,7 +24,7 @@ Linux input 更新时先取得 `zed-stable` 精确 outPath，以真实 `nix copy
 
 ## 代价与验证
 
-可写合并不是双向同步或完整恢复：声明删除不会清除现场旧值；注释和格式会被重写；当前上游在现场解析失败时可能退回空配置并覆盖文件。激活前须验证 JSON/JSONC 可解析并备份，不能依赖 generation 恢复可写文件。具体步骤见 [Zed 手册](../runbooks/update-zed-preview.md)。
+可写合并不是双向同步或完整恢复：声明删除不会清除现场旧值；注释和格式会被重写；当前上游在现场解析失败时可能退回空配置并覆盖文件。维护者接受未保存配置丢失，日常应用不再以现场解析检查或三份文件快照为前置关卡；已发现的配置错误按实际问题修复。Git 负责已入仓声明的回退，generation 不负责恢复可写文件。具体步骤见 [Zed 手册](../runbooks/update-zed-preview.md)。
 
 Preview/Stable 的 schema 与功能可能不同，需要验证实际使用的设置和任务。修改模块时验证平台包选择、任务组合和上游生成合并动作；更新 Linux 包时额外执行完整缓存验证。真实应用、退出程序、升级和恢复仍需当前任务授权；本 ADR 不声称已经激活。
 
