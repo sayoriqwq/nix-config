@@ -76,6 +76,9 @@
         },
         {
           "path": "intents/primary-terminal.nix"
+        },
+        {
+          "path": "intents/code-development.nix"
         }
       ]
     },
@@ -368,7 +371,7 @@
       "dot": "amber",
       "title": "安装存在不等于运行接线",
       "items": [
-        "Ghostty 由 Homebrew 声明安装，版本由原生应用更新；云盘、影音、会议、设计等安装选择追溯 hosts/macbook 及所选 Intent。",
+        "Ghostty 与 VS Code 由 Homebrew 声明安装，版本由原生应用更新；云盘、影音、会议、设计等安装选择追溯 hosts/macbook 及所选 Intent。",
         "Raycast 需在其 UI 中选择脚本目录；扩展源码保留在叶仓库。应用数据不随系统 generation 对称恢复。"
       ]
     }

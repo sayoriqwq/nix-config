@@ -14,6 +14,9 @@ compose [
   zed.fishQuickCommand
   zed.zshQuickCommand
   {
+    darwinModules = lib.optionals withVscode [
+      { homebrew.casks = [ "visual-studio-code" ]; }
+    ];
     homeModules = [
       ../software/git/home-manager.nix
       ../software/lazygit/home-manager.nix

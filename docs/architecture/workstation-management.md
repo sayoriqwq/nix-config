@@ -76,7 +76,7 @@ flowchart TD
 
 可以先在 Mac 安装、试用和调整，再把认可且适合复用的设置、快捷键、任务保存为 Nix 版本。选择一个 Software 不等于接管它的全部配置和数据。每项声明必须按实际机制区分安装需求、包版本、持续管理字段和仅初始化材料。
 
-Ghostty 的 Mac 安装需求由现有 Homebrew cask 声明保存，应用仍位于 `/Applications/Ghostty.app`，通过原生渠道独立更新；当前 Homebrew 激活不升级已有包。Home Manager 的配置与 CLI 接线保持原有职责。
+Ghostty 与 VS Code 的 Mac 安装需求分别由现有 Homebrew cask `ghostty`、`visual-studio-code` 声明保存，应用仍位于 `/Applications/Ghostty.app` 和 `/Applications/Visual Studio Code.app`，通过原生渠道独立更新；当前 Homebrew 激活不升级已有包。Home Manager 的配置与 CLI 接线保持原有职责。
 
 长期软件优先使用社区 Nix 模块和 nh，允许合理版本滞后；实际阻碍可以支持原生迁移。迁出后删除无人使用的固定包与更新器，保留仍有用途的配置和集成。当前 Lix、nix-darwin、集成 Home Manager 与 Darwin rolling/Linux release 都可按真实需求复审，不预设永久绑定。
 
@@ -90,7 +90,7 @@ Ghostty 的 Mac 安装需求由现有 Homebrew cask 声明保存，应用仍位�
 
 Zed 使用 Home Manager 的可写合并，声明字段在每次激活时重新应用，额外字段保留；删除声明不会删除现场遗留字段。具体写入限制与处理方式见 [Zed 手册](../runbooks/update-zed-preview.md)。
 
-VS Code 的 Mac 默认用户 `settings.json` 使用持续整份覆盖：每次激活写入仓库基线，文件仍可直接编辑；该文件内未保存的修改和额外字段会被覆盖。原生应用安装和更新归属不变，扩展、账号、keybindings 与其他 profiles 不自动纳管。具体范围与验收见 [macOS 环境恢复与回滚](../runbooks/restore-macos-environment.md)。
+VS Code 的 Mac 默认用户 `settings.json` 使用持续整份覆盖：每次激活写入仓库基线，文件仍可直接编辑；该文件内未保存的修改和额外字段会被覆盖。基线使用 `update.mode = default`，扩展、账号、keybindings 与其他 profiles 不自动纳管。具体范围与验收见 [macOS 环境恢复与回滚](../runbooks/restore-macos-environment.md)。
 
 ## 选择复用
 
