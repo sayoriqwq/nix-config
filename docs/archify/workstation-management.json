@@ -73,13 +73,16 @@
         },
         {
           "path": "software/pages/darwin.nix"
+        },
+        {
+          "path": "intents/primary-terminal.nix"
         }
       ]
     },
     {
       "id": "native",
       "type": "external",
-      "label": "原生应用 · 外部生命周期",
+      "label": "原生应用 · 原生更新",
       "sublabel": "Ghostty · Zed · VS Code · 命令入口接入",
       "pos": [
         1090,
@@ -365,7 +368,7 @@
       "dot": "amber",
       "title": "安装存在不等于运行接线",
       "items": [
-        "Homebrew 还管理云盘、影音、会议、设计与桌面辅助应用；完整选择直接追溯 hosts/macbook。",
+        "Ghostty 由 Homebrew 声明安装，版本由原生应用更新；云盘、影音、会议、设计等安装选择追溯 hosts/macbook 及所选 Intent。",
         "Raycast 需在其 UI 中选择脚本目录；扩展源码保留在叶仓库。应用数据不随系统 generation 对称恢复。"
       ]
     }

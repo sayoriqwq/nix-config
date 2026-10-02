@@ -262,7 +262,7 @@
       "dot": "amber",
       "title": "安装与可写状态",
       "items": [
-        "macOS 的 Ghostty、VS Code 使用原生应用；OrbStack 由 Homebrew 安装；WezTerm 由 Nix 管理。",
+        "macOS 的 Ghostty 由 Homebrew 声明安装、原生应用更新；VS Code 使用原生应用；OrbStack 由 Homebrew 安装；WezTerm 由 Nix 管理。",
         "macOS 的 VS Code 每次激活将 settings 整份覆盖为可编辑文件；OrbStack 初始化文件、Atuin 数据库与密钥保持外部。"
       ]
     }

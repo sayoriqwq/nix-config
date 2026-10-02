@@ -6,5 +6,8 @@ let
 in
 compose [
   fish.interactiveShell
-  { homeModules = [ ../software/ghostty/home-manager.nix ]; }
+  {
+    darwinModules = [ { homebrew.casks = [ "ghostty" ]; } ];
+    homeModules = [ ../software/ghostty/home-manager.nix ];
+  }
 ]

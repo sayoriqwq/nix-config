@@ -76,6 +76,8 @@ flowchart TD
 
 可以先在 Mac 安装、试用和调整，再把认可且适合复用的设置、快捷键、任务保存为 Nix 版本。选择一个 Software 不等于接管它的全部配置和数据。每项声明必须按实际机制区分安装需求、包版本、持续管理字段和仅初始化材料。
 
+Ghostty 的 Mac 安装需求由现有 Homebrew cask 声明保存，应用仍位于 `/Applications/Ghostty.app`，通过原生渠道独立更新；当前 Homebrew 激活不升级已有包。Home Manager 的配置与 CLI 接线保持原有职责。
+
 长期软件优先使用社区 Nix 模块和 nh，允许合理版本滞后；实际阻碍可以支持原生迁移。迁出后删除无人使用的固定包与更新器，保留仍有用途的配置和集成。当前 Lix、nix-darwin、集成 Home Manager 与 Darwin rolling/Linux release 都可按真实需求复审，不预设永久绑定。
 
 日常入口见[日常 Nix 维护](../runbooks/daily-nix-maintenance.md)。按实际操作需要增加包装命令，复用 Git/Nix/nh，减少重复输入；不另造声明或恢复系统。
