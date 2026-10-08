@@ -19,6 +19,10 @@
     footer { padding: 23px 2px 0; }
     .caption { font-size: 13px; line-height: 1.8; margin: 0; color: #66766b; }
     .caption strong { display: block; color: #28473f; font-weight: 500; }
+    .controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .speed { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #66766b; }
+    select { font: inherit; color: #28473f; background: #fffdf4; border: 1px solid #bfc8ba; border-radius: 12px; padding: 10px; }
+    select:focus-visible { outline: 3px solid #d99147; outline-offset: 4px; }
     button { font: inherit; font-size: 13px; background: #28473f; color: #fffdf4; border: 0; border-radius: 30px; padding: 13px 23px; cursor: pointer; white-space: nowrap; }
     button:focus-visible { outline: 3px solid #d99147; outline-offset: 4px; }
     @media (hover: hover) and (pointer: fine) { button:hover { background: #3c6152; } }
@@ -30,7 +34,7 @@
     @keyframes flutter { to { transform: rotate(-7deg); } }
     .paused * { animation-play-state: paused !important; }
     @media (prefers-reduced-motion: reduce) { .clouds, .road, .scarf { animation: none; } }
-    @media (max-width: 600px) { body { padding: 20px 14px; } .badge { display: none; } header { padding-bottom: 20px; } footer { gap: 12px; } .caption { font-size: 11px; } button { padding: 12px 16px; } }
+    @media (max-width: 600px) { body { padding: 20px 14px; } .badge { display: none; } header { padding-bottom: 20px; } footer { gap: 18px; align-items: flex-start; flex-direction: column; } .caption { font-size: 11px; } button { padding: 12px 16px; } }
   </style>
 </head>
 <body>
@@ -95,12 +99,12 @@
       <g transform="translate(1005 576)" fill="none" stroke="#83917b" stroke-width="1.5"><circle r="23"/><path d="M-10 0H10M3-7L10 0L3 7"/></g>
     </svg>
   </div>
-  <footer><p class="caption"><strong>今日路线：沿着海岸，一直向前。</strong>不赶时间，只追海风。让快乐再多转一圈。</p><button id="toggle" type="button" aria-pressed="false">暂停骑行 Ⅱ</button></footer>
+  <footer><p class="caption"><strong>今日路线：沿着海岸，一直向前。</strong>不赶时间，只追海风。让快乐再多转一圈。</p><div class="controls"><label class="speed" for="speed">骑行速度<select id="speed"><option value="0.5">悠闲 · 0.5×</option><option value="1" selected>轻快 · 1×</option><option value="1.5">追风 · 1.5×</option></select></label><button id="toggle" type="button" aria-pressed="false">暂停骑行 Ⅱ</button></div></footer>
 </main>
 <script>
   const byId = id => document.getElementById(id);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let paused = reduced.matches, elapsed = 0, last = null;
+  let paused = reduced.matches, elapsed = 0, last = null, speed = 1, frameId = null;
   const scene = byId('scene'), toggle = byId('toggle');
   const nearLeg = byId('near-leg'), farLeg = byId('far-leg');
   const nearFoot = byId('near-foot'), farFoot = byId('far-foot');
@@ -132,17 +136,25 @@
     scene.classList.toggle('paused', paused);
     toggle.textContent = paused ? '继续骑行 ▷' : '暂停骑行 Ⅱ';
     toggle.setAttribute('aria-pressed', String(paused));
+    cancelAnimationFrame(frameId);
+    frameId = null;
+    last = null;
+    if (!paused && !document.hidden) frameId = requestAnimationFrame(frame);
   }
+  byId('speed').addEventListener('change', event => {
+    speed = Number(event.target.value);
+    scene.getAnimations({ subtree: true }).forEach(animation => animation.updatePlaybackRate(speed));
+  });
   toggle.addEventListener('click', () => { paused = !paused; updateState(); });
   reduced.addEventListener('change', event => { paused = event.matches; updateState(); });
-  document.addEventListener('visibilitychange', () => { last = null; });
+  document.addEventListener('visibilitychange', updateState);
   function frame(now) {
-    if (last !== null && !paused && !document.hidden) elapsed += Math.min(now - last, 64);
+    if (last !== null && !paused && !document.hidden) elapsed += Math.min(now - last, 64) * speed;
     last = now;
     if (!paused) draw(elapsed);
-    requestAnimationFrame(frame);
+    if (!paused && !document.hidden) frameId = requestAnimationFrame(frame);
   }
-  draw(0); updateState(); requestAnimationFrame(frame);
+  draw(0); updateState();
 </script>
 </body>
 </html>
