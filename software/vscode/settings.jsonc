@@ -4,6 +4,8 @@
   "editor.fontLigatures": true,
   "editor.fontFamily": "Maple Mono NF CN",
 
+  /* 透明度和壁纸 */
+
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontFamily": "Maple Mono NF CN",
   "terminal.integrated.fontLigatures.enabled": true,
@@ -40,7 +42,7 @@
   "editor.links": false,
   /* layout */
   // minimap
-  "editor.minimap.enabled": false,
+  "editor.minimap.enabled": true,
   // "editor.minimap.renderCharacters": false,
   // 文件树辅助线
   "workbench.tree.indent": 20,
@@ -74,7 +76,7 @@
 
   "editor.mouseWheelZoom": true,
   "security.workspace.trust.enabled": false,
-  "update.mode": "none",
+  "update.mode": "default",
   "chat.disableAIFeatures": true,
   // 无障碍
   "editor.accessibilitySupport": "off",
@@ -104,10 +106,12 @@
   "git.autofetch": true,
   /* 其他扩展 */
   "console-ninja.featureSet": "Community",
-  "cSpell.userWords": ["Nuqs", "wezterm"],
-  "workbench.colorTheme": "Moegi Iris",
+  "cSpell.userWords": [
+    "Nuqs",
+    "wezterm"
+  ],
   "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   // ty
   "python.languageServer": "Pylance",
@@ -123,4 +127,14 @@
   "markdown-preview-enhanced.enablePreviewZenMode": false,
   "explorer.confirmPasteNative": false,
   "diffEditor.ignoreTrimWhitespace": false,
+  "deeptask.debug": false,
+  "deeptask.allowedCommands": [
+    "git log",
+    "git diff",
+    "git show",
+    "* "
+  ],
+  "deeptask.deniedCommands": [],
+  "terminal.integrated.inheritEnv": false,
+  "workbench.colorTheme": "Light 2026",
 }

@@ -7,11 +7,7 @@
 
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  baseline = pkgs.writeText "vscode-settings.jsonc" (
-    builtins.replaceStrings [ ''"update.mode": "none"'' ] [ ''"update.mode": "default"'' ] (
-      builtins.readFile ./settings.jsonc
-    )
-  );
+  baseline = pkgs.writeText "vscode-settings.jsonc" (builtins.readFile ./settings.jsonc);
   target = "${config.home.homeDirectory}/Library/Application Support/Code/User/settings.json";
 in
 {
