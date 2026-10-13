@@ -57,7 +57,7 @@ Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明�
 
 登录启动的唯一声明集中在 [login-items.nix](../../hosts/macbook/login-items.nix)，使用 Home Manager 标准 `launchd.agents`，覆盖独立安装和 Setapp 应用。恢复前先由各安装渠道准备好声明所指应用。普通任务通过 `/usr/bin/open -g` 打开指定应用，手动退出后不会重启；新建或修改任务的激活也可能立即打开应用。Timing 启动包内原有 `TimingHelper.app`，不是 Timing 主窗口。
 
-首次迁移先撤销名单内应用重复的原生登录登记，再应用候选；现代登录项从系统“登录时打开”或应用对应开关移除，不能用旧式 AppleScript 列表删除代替。Tailscale 只关闭“登录时启动”跳板，不退出应用、不关闭 VPN、网络扩展或后台总开关。Clash Verge 的旧 agent 拥有当前主进程，直接卸载会终止它；在维护者可恢复网络的现场安排交接，关闭应用自启后核实旧任务已撤销，必要时立即重新打开应用。
+首次迁移先撤销名单内应用重复的原生登录登记，再应用候选；现代登录项从系统“登录时打开”或应用对应开关移除，不能用旧式 AppleScript 列表删除代替。Tailscale 只关闭“登录时启动”跳板，不退出应用、不关闭 VPN、网络扩展或后台总开关。Clash Verge 关闭自身“开机自启”后，只需核实旧 plist 已移除；当前会话中已加载的旧任务可保留到正常退出或注销，无需主动卸载。直接卸载该任务会终止主进程，并可能触发退出清理、停止代理内核；需要此动作时另行安排网络恢复通道。
 
 NuPhy Key Probe 保留原 `local.sayori.NuPhyKeyProbe` label、常驻重启策略与日志位置，由 Home Manager 接管同名任务。先保存原 plist 作为仓库外的恢复材料，核实应用和日志目录存在；应用候选时会短暂重启此服务。若交接失败，先卸载新任务，再恢复原 plist 并加载，不能同时保留两个启动入口。应用二进制与探测数据不纳入仓库。
 
@@ -77,7 +77,7 @@ echo $VISUAL
 
 随后人工验证 Ghostty/Fish、Zed、Raycast、Fcitx/Rime、Tailscale、Homebrew/MAS 应用和必要 macOS defaults。Build 不能替代这些 runtime checks。
 
-六个迁移应用需核对 Homebrew 安装记录、原有偏好和权限，并确认旧 Home Manager 应用链接已经移除；IINA 的 `iina --help` 应来自 cask。登录启动需在下一次真实登录后确认 14 个普通 GUI／菜单栏任务各启动一次；手动退出普通应用后不应被这些任务重新拉起。NuPhy Key Probe 另行核对常驻与原有重启策略。仅加载 agent 或执行 `open` 不代表已完成登录验收；网络应用的退出测试应安排在有恢复通道的现场。
+LocalSend 及六个迁移应用需核对 Homebrew 安装记录、原有偏好和权限，并确认旧 Home Manager 应用副本已经移除；当前 `copyApps` 会清理受管应用目录中的旧副本，不清理外部应用数据。IINA 的 `iina --help` 应来自 cask。登录启动需在下一次真实登录后确认 14 个普通 GUI／菜单栏任务各启动一次；手动退出普通应用后不应被这些任务重新拉起。NuPhy Key Probe 另行核对常驻与原有重启策略。仅加载 agent 或执行 `open` 不代表已完成登录验收；网络应用的退出测试应安排在有恢复通道的现场。
 
 VS Code 需确认 Homebrew 安装记录、启动器、`code` 与 `v` 对应同一份 `/Applications/Visual Studio Code.app`，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版保留、默认用户 `settings.json` 与声明一致且仍可写、旧 Home Manager 入口未重建。该设置文件的临时修改和额外字段应被基线覆盖；扩展、账号、keybindings 和其他 profiles 不受此写入动作管理。没有可用更新时，真实更新项保持待验收。
 
