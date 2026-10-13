@@ -86,7 +86,7 @@ Apple 也提供声明式后台任务管理，可以交付 launchd 配置及相�
 
 ## 6. 当前仓库与 Nix 社区机制
 
-当前仓库中，普通 GUI 的显式登录启动只有 [Mos](../../software/mos/home-manager.nix)：Home Manager 建立用户 agent，通过 `open -g` 打开受管 Mos.app。其他普通 GUI 没有同类仓库声明；不能据此推断它们的原生登录项是否已经登记或启用。本文不保存完整现场名单。
+调研时仓库中普通 GUI 的显式登录启动只有 Mos：Home Manager 建立用户 agent，通过 `open -g` 打开受管 Mos.app；其他普通 GUI 尚无同类仓库声明。实施后的受管名单见 [login-items.nix](../../hosts/macbook/login-items.nix)，不能据此推断未纳管应用的原生登录项状态。本文不保存完整现场名单。
 
 锁定的 Home Manager 使用 `launchd.agents` 生成并安装任务，首次激活、任务内容改变或任务未加载时会立即加载；内容未变且任务已加载则跳过。Mos 的 `RunAtLoad=true` 使加载触发一次打开，`KeepAlive=false` 且命令不等待 GUI 退出，因此不会因退出 Mos 而持续重开。`waitForNixStore=true` 只是等待 Nix Store 就绪。[锁定 HM 实现](https://github.com/nix-community/home-manager/blob/a7c70cc290290f373f50cd820403833d250459ac/modules/launchd/default.nix)
 

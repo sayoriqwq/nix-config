@@ -46,13 +46,22 @@ Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明�
 - VS Code 的 Mac 安装需求由现有 `homebrew.casks` 声明 `visual-studio-code`；[cask](https://formulae.brew.sh/cask/visual-studio-code) 使用微软提供的应用安装到 `/Applications/Visual Studio Code.app`，日常继续由应用原生更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 保留指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。每次 Mac 激活都会用仓库基线整份覆盖默认用户的 `~/Library/Application Support/Code/User/settings.json`，保持文件可写；基线使用 `update.mode = default`。日常可以直接修改，但希望保留的内容应先保存到声明，下次激活不会保留该文件的额外字段。扩展、账号、keybindings、其他 profiles 和用户数据保持外部，原生应用版本不会随 Nix generation 回滚；非 Mac 包策略不变。
 - Ghostty 的 Mac 安装需求由现有 `homebrew.casks` 声明 `ghostty`；cask 使用[官方 DMG](https://ghostty.org/docs/install/binary#homebrew)安装到 `/Applications/Ghostty.app`，日常继续通过应用原生渠道独立更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 继续维护 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`；Linux 继续使用 Nix 包。Mac 不由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
 - LocalSend 的 Mac 安装需求由 `homebrew.casks` 声明 `localsend`，安装和升级使用 Homebrew，应用没有内置自动更新；当前激活只安装缺失应用，不升级已有包。Linux 继续使用 Nix 包和既有防火墙规则。
+- Discord、IINA、MonitorControl、Mos、Upscayl 与 xbar 的 Mac 安装改由同名 Homebrew cask 声明，日常更新沿用应用自身机制；IINA 的 `iina` CLI 由 cask 提供。Home Manager 不再安装这六个应用。偏好、插件、账号和辅助功能权限保持外部，原生版本不随 Nix generation 回滚。
 - Zed 的 Mac 安装需求由 `homebrew.casks` 声明 `zed@preview`，Preview 应用继续原生更新。直接使用 Homebrew 提供的 `zed-preview`，`z` 快捷与默认编辑器同步采用此名称；配置按现有 Home Manager 可写合并应用，详见 [Zed 手册](update-zed-preview.md)。Linux 继续使用 Stable 与 `zeditor`。
 - Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
 - AI 编码工具、解释器、配置与会话由当前外部工作流管理；本仓库已移除旧 AI 编码模块，待工作流稳定后重新评估迁移。
 - Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
 - Browser profile、Obsidian vault、VS Code 扩展与其他外部配置、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
 
-VS Code、Ghostty、Obsidian 与 Zed Preview 首次接管已有手工安装时需核实应用与安装记录，处理冲突，不在常规声明中固化 `force`。公共 Homebrew 配置将其命令目录追加到系统 PATH，使登录环境可找到 cask 提供的 CLI，并保留现有工具优先级。
+首次由 Homebrew 接管已有手工安装或 Nix 应用时，核实 `/Applications` 的实际内容与安装记录，处理冲突，不在常规声明中固化 `force`。公共 Homebrew 配置将其命令目录追加到系统 PATH，使登录环境可找到 cask 提供的 CLI，并保留现有工具优先级。
+
+登录启动的唯一声明集中在 [login-items.nix](../../hosts/macbook/login-items.nix)，使用 Home Manager 标准 `launchd.agents`，覆盖独立安装和 Setapp 应用。恢复前先由各安装渠道准备好声明所指应用。普通任务通过 `/usr/bin/open -g` 打开指定应用，手动退出后不会重启；新建或修改任务的激活也可能立即打开应用。Timing 启动包内原有 `TimingHelper.app`，不是 Timing 主窗口。
+
+首次迁移先撤销名单内应用重复的原生登录登记，再应用候选；现代登录项从系统“登录时打开”或应用对应开关移除，不能用旧式 AppleScript 列表删除代替。Tailscale 只关闭“登录时启动”跳板，不退出应用、不关闭 VPN、网络扩展或后台总开关。Clash Verge 的旧 agent 拥有当前主进程，直接卸载会终止它；在维护者可恢复网络的现场安排交接，关闭应用自启后核实旧任务已撤销，必要时立即重新打开应用。
+
+NuPhy Key Probe 保留原 `local.sayori.NuPhyKeyProbe` label、常驻重启策略与日志位置，由 Home Manager 接管同名任务。先保存原 plist 作为仓库外的恢复材料，核实应用和日志目录存在；应用候选时会短暂重启此服务。若交接失败，先卸载新任务，再恢复原 plist 并加载，不能同时保留两个启动入口。应用二进制与探测数据不纳入仓库。
+
+系统“允许在后台”中的 Setapp XPC 服务、更新器、网盘服务、设备驱动和必要网络组件继续由产品维护，不能为消除重复 GUI 登录入口而一并关闭。取消迁移时撤回新增任务并恢复原生登录开关；NuPhy 恢复原 plist。应用版本和偏好仍按各自机制处理。
 
 ## 3. 验收
 
@@ -67,6 +76,8 @@ echo $VISUAL
 ✅ 核对主要 CLI 的预期来源与默认编辑器环境；原生应用的 CLI 应指向对应的 `/Applications` 安装。
 
 随后人工验证 Ghostty/Fish、Zed、Raycast、Fcitx/Rime、Tailscale、Homebrew/MAS 应用和必要 macOS defaults。Build 不能替代这些 runtime checks。
+
+六个迁移应用需核对 Homebrew 安装记录、原有偏好和权限，并确认旧 Home Manager 应用链接已经移除；IINA 的 `iina --help` 应来自 cask。登录启动需在下一次真实登录后确认 14 个普通 GUI／菜单栏任务各启动一次；手动退出普通应用后不应被这些任务重新拉起。NuPhy Key Probe 另行核对常驻与原有重启策略。仅加载 agent 或执行 `open` 不代表已完成登录验收；网络应用的退出测试应安排在有恢复通道的现场。
 
 VS Code 需确认 Homebrew 安装记录、启动器、`code` 与 `v` 对应同一份 `/Applications/Visual Studio Code.app`，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版保留、默认用户 `settings.json` 与声明一致且仍可写、旧 Home Manager 入口未重建。该设置文件的临时修改和额外字段应被基线覆盖；扩展、账号、keybindings 和其他 profiles 不受此写入动作管理。没有可用更新时，真实更新项保持待验收。
 

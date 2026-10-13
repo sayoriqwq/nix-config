@@ -360,7 +360,7 @@
       "dot": "cyan",
       "title": "直接导入的应用也属于主机声明",
       "items": [
-        "Mac 的 HM 另选 Discord、IINA、MonitorControl、Mos、Upscayl、xbar、rclone；Mos 登录时启动。",
+        "Discord、IINA、MonitorControl、Mos、Upscayl、xbar 由 Homebrew 安装；HM 保留 rclone 与集中声明的 GUI 登录启动。",
         "两机还安装 nh、btop、fastfetch、Yazi、Helix；桌面会话、终端与开发工具见对应专题。"
       ]
     },

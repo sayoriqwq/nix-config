@@ -165,16 +165,20 @@ in
     ];
 
   homebrew.casks = [
+    "discord"
+    "iina"
     "localsend"
+    "monitorcontrol"
+    "mos"
     "obsidian"
+    "upscayl"
+    "xbar"
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
-      "discord"
-      "mos"
       "vscode"
     ];
 
@@ -213,13 +217,8 @@ in
         ++ githubCollaboration.homeModules
         ++ chineseInput.homeModules
         ++ [
-          ../../software/discord/home-manager.nix
-          ../../software/iina/home-manager.nix
-          ../../software/monitorcontrol/home-manager.nix
-          ../../software/mos/home-manager.nix
+          ./login-items.nix
           ../../software/postgresql/home-manager.nix
-          ../../software/upscayl/home-manager.nix
-          ../../software/xbar/home-manager.nix
           ../../software/rclone/home-manager.nix
           ../../software/tailscale/darwin-home-manager.nix
         ];

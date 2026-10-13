@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+用法：
+  ./bin/workstation update qq
+  ⬆️ 定向更新已声明、已安装的官方 Homebrew cask；也接受其他官方 cask 的名称。
+  ./bin/workstation update nix
+  🧰 只更新 nixpkgs-darwin，审阅并确认后应用 Mac 候选，功能验收后本地提交 lock。
+EOF
+}
+
+die() { printf '停止：%s\n' "$*" >&2; exit 1; }
+confirm() {
+  local answer
+  printf '%s [y/N] ' "$1"
+  IFS= read -r answer || return 1
+  [[ "$answer" == y || "$answer" == Y ]]
+}
+need() { command -v "$1" >/dev/null || die "找不到 $1。"; }
+
+if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then usage; exit 0; fi
+[[ $# == 2 && "$1" == update ]] || { usage >&2; exit 1; }
+target=$2
+[[ "$target" =~ ^[a-z0-9][a-z0-9@+._/-]*$ ]] || die '更新对象名称无效。'
+[[ "$(uname -s)" == Darwin ]] || die '这个入口只处理本机 macbook 配置。'
+for tool in git nix jq; do need "$tool"; done
+repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+cd "$repo"
+[[ "$(git rev-parse --show-toplevel)" == "$repo" ]] || die '请使用仓库中的 bin/workstation。'
+[[ $EUID != 0 ]] || die '请以普通用户运行；nh 会在激活时请求所需权限。'
+
+temp=$(mktemp -d "${TMPDIR:-/tmp}/workstation.XXXXXX")
+lock_guard=$(git rev-parse --git-path workstation-update.lock)
+owns_guard=false
+lock_state=未更改
+build_state=未构建
+apply_state=未应用
+verify_state=未验收
+commit_state=未提交
+brew_state=未升级
+finish() {
+  local status=$?
+  trap - EXIT
+  if [[ "$target" == nix ]]; then
+    if [[ -f "$temp/flake.lock.before" ]] && ! cmp -s "$temp/flake.lock.before" flake.lock; then
+      lock_state=有变化
+    fi
+    printf '\n结果：lock %s；构建 %s；应用 %s；功能 %s；本地提交 %s。\n' \
+      "$lock_state" "$build_state" "$apply_state" "$verify_state" "$commit_state"
+  else
+    printf '\n结果：Homebrew %s；功能 %s；本入口未改写仓库声明、未提交。\n' "$brew_state" "$verify_state"
+  fi
+  if "$owns_guard"; then rmdir "$lock_guard"; fi
+  rm -rf "$temp"
+  exit "$status"
+}
+trap finish EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+mkdir "$lock_guard" 2>/dev/null || die '另一次更新仍在运行，或上次意外退出留下了更新锁。'
+owns_guard=true
+
+# 同时检测文件内容、纳入 Flake 的文件集合和 Git 基线变化。
+source_fingerprint() {
+  {
+    git rev-parse HEAD
+    git ls-files --stage -z -- . ':!flake.lock'
+    git diff --no-ext-diff --binary HEAD -- . ':!flake.lock'
+  } | git hash-object --stdin
+}
+candidate_fingerprint() {
+  { source_fingerprint; git hash-object flake.lock; } | git hash-object --stdin
+}
+
+update_nix() {
+  need nh
+  [[ -f flake.lock ]] || die '缺少已提交的 flake.lock。'
+  for state in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD rebase-merge rebase-apply; do
+    [[ ! -e "$(git rev-parse --git-path "$state")" ]] || die '请先完成当前 Git 合并、变基或拣选。'
+  done
+  git diff --quiet HEAD -- flake.lock && git diff --cached --quiet -- flake.lock \
+    || die 'flake.lock 已有改动，无法区分本次更新；请先单独处理。'
+  # 文档不会参与本仓库的系统声明；其他已有改动不混入更新候选。
+  git diff --quiet HEAD -- . ':!docs' ':!README.md' ':!CONTEXT.md' ':!AGENTS.md' \
+    && git diff --cached --quiet -- . ':!docs' ':!README.md' ':!CONTEXT.md' ':!AGENTS.md' \
+    || die '已有非文档的已跟踪改动会混入候选，请先提交或隔离；现有工作保持原样。'
+  cp flake.lock "$temp/flake.lock.before"
+  local source_before lock_index candidate fingerprint previous
+  source_before=$(source_fingerprint)
+  lock_index=$(git rev-parse :flake.lock)
+  previous=$(nix path-info /run/current-system)
+  printf '目标：macbook；仅更新 nixpkgs-darwin。当前运行产物：%s\n' "$previous"
+  printf '更新输入；本步骤尚不应用系统。\n'
+  nix flake update nixpkgs-darwin --flake "$repo" || die '输入更新失败；保留已经产生的 lock 差异。'
+  [[ "$(source_fingerprint)" == "$source_before" ]] || die '更新期间源码或 Git 状态改变，请重新准备候选。'
+  # nixpkgs-darwin 是无子输入的叶节点；只允许改变它的 locked 内容。
+  for file in "$temp/flake.lock.before" flake.lock; do
+    jq -eS '(.nodes[.root].inputs["nixpkgs-darwin"]) as $node |
+      if ($node | type) == "string" and (.nodes[$node].inputs // {} | length) == 0
+      then del(.nodes[$node].locked) else error("目标不是独立叶输入") end' \
+      "$file" > "$temp/$(basename "$file").scope"
+  done
+  cmp -s "$temp/flake.lock.before.scope" "$temp/flake.lock.scope" \
+    || die 'lock 包含 nixpkgs-darwin 以外的变化；未构建、未应用，请先检查。'
+  if cmp -s "$temp/flake.lock.before" flake.lock; then
+    lock_state=无变化
+    commit_state=无需提交
+    printf '所选输入已是当前版本，无需构建或应用。\n'
+    return
+  fi
+  lock_state=有变化
+  fingerprint=$(candidate_fingerprint)
+  build_state=构建中或失败
+  nh darwin build "$repo" -H macbook --no-update-lock-file \
+    --out-link "$temp/candidate" --diff never || die '构建失败；系统未应用，保留 lock 差异。'
+  build_state=成功
+  [[ "$(candidate_fingerprint)" == "$fingerprint" ]] || die '构建期间源码或 lock 改变，候选不能应用；请重新构建并审阅。'
+  candidate=$(nix path-info "$temp/candidate")
+  [[ "$candidate" =~ ^/nix/store/[a-z0-9]+-[a-zA-Z0-9.+_-]+$ ]] || die '未得到唯一、有效的候选 Store 路径。'
+  printf '\n当前系统与候选的包差异：\n'
+  nix store diff-closures "$previous" "$candidate" || die '未能显示包差异；候选未应用。'
+  printf '\n本次 lock 差异：\n'
+  git --no-pager diff -- flake.lock
+  printf '\n将应用整份 macbook 配置，包括系统设置、可写配置、Homebrew 和登录任务。\n'
+  printf '包差异不包含所有这些写入。恢复点：%s；可用原有代际恢复流程，外部副作用不保证随代际撤销。\n' "$previous"
+  confirm '确认已审阅全部影响并应用这个候选？' || { printf '已取消应用，保留 lock 差异。\n'; exit 2; }
+  [[ "$(candidate_fingerprint)" == "$fingerprint" ]] || die '审阅后源码或 lock 改变，需重新构建并审阅。'
+  [[ "$(nix path-info /run/current-system)" == "$previous" ]] || die '当前运行系统已改变，需重新比较候选。'
+  apply_state=已尝试但结果待核实
+  # nh 4.4.2 不接受 Darwin Store installable；表达式只引用已审阅产物。
+  nh darwin switch --expr "{ config.system.build.toplevel = builtins.storePath \"$candidate\"; }" \
+    --impure -H macbook --diff never --show-activation-logs \
+    || die '激活返回失败；可能已有部分写入，请检查现场，不自动提交或回滚。'
+  apply_state=命令成功但运行产物待核实
+  [[ "$(nix path-info /run/current-system)" == "$candidate" ]] || die '激活命令成功，但运行系统不匹配候选；请检查现场。'
+  apply_state=成功
+  printf '\n请实际测试本次变化涉及的工具、终端和编辑器；需要重启的应用应重新打开。\n'
+  confirm '实际功能验收全部通过？' || { printf '尚未验收通过，保留差异、不提交。\n'; exit 2; }
+  verify_state=通过
+  [[ "$(candidate_fingerprint)" == "$fingerprint" && "$(git rev-parse :flake.lock)" == "$lock_index" ]] \
+    || die '应用或验收期间源码、lock 或 Git 状态改变；系统已应用，但无法自动归属提交。'
+  commit_state=失败
+  git commit --only -m '更新 macOS Nix 工具集锁定版本' -- flake.lock \
+    || die '本地提交失败；系统已应用且功能已验收，保留 lock 差异供处理。'
+  commit_state=成功
+}
+
+update_cask() {
+  local cask brew token expected_source preview_names brew_config setting refresh_status=0
+  nix eval --json .#darwinConfigurations.macbook.config.homebrew --no-write-lock-file \
+    --apply 'h: { inherit (h) enable prefix; casks = map (c: c.name) h.casks; }' > "$temp/homebrew.json"
+  jq -e '.enable == true' "$temp/homebrew.json" >/dev/null || die 'Mac 配置没有启用 Homebrew。'
+  cask=$(jq -er --arg name "$target" '[.casks[] |
+    select(. == $name or (split("/") | last) == $name)] | unique |
+    if length == 1 then .[0] else error("未声明或名称不唯一") end' "$temp/homebrew.json") \
+    || die '找不到唯一的已声明 cask；此入口不安装新软件，也不推断其他 Nix 软件的更新来源。'
+  brew="$(jq -r '.prefix' "$temp/homebrew.json")/bin/brew"
+  [[ -x "$brew" ]] || die "找不到配置对应的 Homebrew：$brew。"
+  token=${cask##*/}
+  expected_source=$cask
+  [[ "$cask" == */* ]] || expected_source="homebrew/cask/$cask"
+  [[ "$expected_source" == "homebrew/cask/$token" ]] || die '当前入口只支持官方 homebrew/cask，不刷新第三方 tap。'
+  [[ -z "${HOMEBREW_NO_INSTALL_FROM_API:-}" ]] || die '当前入口需要 Homebrew API 模式；未执行更新。'
+  export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+  export HOMEBREW_NO_COLOR=1
+  unset HOMEBREW_FORCE_API_AUTO_UPDATE
+  brew_config=$'\n'"$("$brew" config)"$'\n'
+  [[ "$brew_config" != *$'\nHOMEBREW_NO_INSTALL_FROM_API: set\n'* ]] \
+    || die 'Homebrew 的实际配置禁用了 API 模式，未执行更新。'
+  for setting in HOMEBREW_NO_AUTO_UPDATE HOMEBREW_NO_INSTALL_CLEANUP HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK; do
+    [[ "$brew_config" == *$'\n'"$setting: set"$'\n'* ]] \
+      || die 'Homebrew 实际配置覆盖了单软件更新的范围保护，未执行更新。'
+  done
+  cask_info() {
+    local caskroom receipt
+    "$brew" info --cask --json=v2 "$cask" > "$temp/cask.json"
+    jq -e --arg source "$expected_source" '.casks | length == 1 and
+      (.[0] | (.tap + "/" + .token) == $source and .installed != null and .installed != "")' \
+      "$temp/cask.json" >/dev/null || die '安装记录或来源无法确认，请核实安装现场。'
+    # info.tap 属于当前定义；实际安装来源必须从 receipt 核实。
+    caskroom=$("$brew" --caskroom "$cask")
+    receipt="$caskroom/.metadata/INSTALL_RECEIPT.json"
+    [[ -f "$receipt" ]] && jq -e --arg tap "${expected_source%/*}" \
+      --arg version "$(jq -r '.casks[0].installed' "$temp/cask.json")" \
+      '.source.tap == $tap and .source.version == $version' "$receipt" >/dev/null \
+      || die '安装 receipt 缺失、来源不符或版本记录不一致，请核实安装现场。'
+  }
+  cask_info
+  printf '尝试刷新官方 API 目录并检查 %s；网络失败可能沿用 Homebrew 缓存。\n' "$cask"
+  # 只刷新 API 元数据，避免 brew update 顺带迁移其他已安装软件。
+  env -u HOMEBREW_API_UPDATED HOMEBREW_FORCE_API_AUTO_UPDATE=1 HOMEBREW_API_AUTO_UPDATE_SECS=0 \
+    "$brew" outdated --cask --greedy --json=v2 "$cask" > "$temp/outdated.json" || refresh_status=$?
+  [[ "$refresh_status" == 0 || "$refresh_status" == 1 ]] || die 'Homebrew 更新查询失败，未执行升级。'
+  jq -e --arg token "$token" --arg cask "$cask" --argjson status "$refresh_status" '
+    type == "object" and (.formulae | type == "array" and length == 0) and
+    (.casks | type == "array" and length == $status) and
+    all(.casks[]; .name == $token or .name == $cask)' "$temp/outdated.json" >/dev/null \
+    || die 'Homebrew 更新查询结果无效或涉及其他软件，未执行升级。'
+  cask_info
+  if ! jq -e '((.casks[0].depends_on.cask // []) | length) == 0 and
+    ((.casks[0].depends_on.formula // []) | length) == 0' "$temp/cask.json" >/dev/null; then
+    jq '.casks[0].depends_on' "$temp/cask.json"
+    die '目标包含其他软件依赖，超出当前单软件路径；请先单独确认依赖处理。'
+  fi
+  brew_state=预览中
+  "$brew" upgrade --cask --dry-run "$cask" > "$temp/brew-preview" 2>&1 \
+    || { cat "$temp/brew-preview"; die '升级预览失败，尚未执行升级。'; }
+  cat "$temp/brew-preview"
+  preview_names=$(awk '/ -> / { print $1 }' "$temp/brew-preview")
+  if [[ -z "$preview_names" ]]; then
+    [[ "$refresh_status" == 0 ]] || die '查询报告有更新，但预览未列出动作；未执行升级。'
+    jq -e '.casks[0].disabled == false and .casks[0].pinned == false' \
+      "$temp/cask.json" >/dev/null || die '预览没有可确认的定向更新，未执行升级。'
+    brew_state=无需升级
+    printf '当前 Homebrew 目录未列出 %s 的可用更新。\n' "$cask"
+    return
+  fi
+  [[ "$preview_names" == "$token" || "$preview_names" == "$cask" ]] \
+    || die '预览涉及其他软件或格式无法确认；未执行升级。'
+  brew_state=已尝试但结果待核实
+  "$brew" upgrade --cask --no-ask "$cask" || die 'Homebrew 升级失败；请按输出核实安装现场。'
+  brew_state=命令成功
+  cask_info
+  jq -e '.casks[0] | .installed == .version' "$temp/cask.json" >/dev/null \
+    || die '升级命令结束，但安装元数据未达到目标版本；请核实现场。'
+  brew_state=安装记录已核对
+  printf '\n请打开 %s 并检查日常功能。\n' "$cask"
+  confirm '应用启动与实际功能验收通过？' || { printf '安装步骤完成，实际功能仍待验收。\n'; exit 2; }
+  verify_state=通过
+}
+
+if [[ "$target" == nix ]]; then update_nix; else update_cask; fi
