@@ -1,7 +1,7 @@
 { lib }:
 
-capabilities: {
-  darwinModules = lib.concatMap (capability: capability.darwinModules or [ ]) capabilities;
-  nixosModules = lib.concatMap (capability: capability.nixosModules or [ ]) capabilities;
-  homeModules = lib.concatMap (capability: capability.homeModules or [ ]) capabilities;
+parts: {
+  darwinModules = lib.concatMap (part: part.darwinModules or [ ]) parts;
+  nixosModules = lib.concatMap (part: part.nixosModules or [ ]) parts;
+  homeModules = lib.concatMap (part: part.homeModules or [ ]) parts;
 }

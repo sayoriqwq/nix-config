@@ -1,9 +1,5 @@
 {
-  # Capability contract (NixOS): package = Tailscale from the NixOS module;
-  # managed configuration = daemon, port and stable overlay name below;
-  # mutable-state path = /var/lib/tailscale, vendor-owned; services = tailscaled;
-  # network effects = UDP 41641 plus vendor overlay chains, with no native SSH
-  # ownership; human gate = ADR-0010 activation/enrollment and full readback.
+  # 设备授权留在主机本地；原生 SSH 仍由 OpenSSH 负责。
   services.tailscale = {
     enable = true;
     port = 41641;

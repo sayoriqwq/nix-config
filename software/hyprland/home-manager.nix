@@ -26,11 +26,6 @@ let
   ) (lib.range 1 10);
 in
 {
-  # Capability contract (Home Manager): package = none because NixOS owns the
-  # compositor; managed configuration = Lua session settings and shortcuts;
-  # mutable-state paths = none (runtime sockets/session are ephemeral); services
-  # = no second Home Manager systemd target; network effects = none; human gate
-  # = exact-commit login, bindings, portal and session-exit smoke.
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;

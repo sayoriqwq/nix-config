@@ -1,94 +1,123 @@
 # macOS 环境恢复与回滚
 
-本手册恢复 `macbook` 的声明式系统和软件来源，不恢复应用数据库、账号或用户内容。
+恢复 `macbook` 的声明式系统、选定软件与使用习惯。职责见[架构](../architecture.md)，日常变更走[日常维护](daily-nix-maintenance.md)；账号、应用数据库与用户内容从各自外部材料恢复。
 
-## 1. 前置与禁止项
+## 恢复前准备
 
-恢复前确认：
+- 确认目标为 Apple Silicon macOS，核对 [macbook](../../hosts/macbook/default.nix) 中的用户名、主目录与机器事实；不同机器先调整声明，不修改 `stateVersion`。
+- 确认管理员与 FileVault 恢复方式可用，所需用户数据和应用恢复材料在旧机之外可取得。
+- 确认选定的仓库提交及 `flake.lock` 能从远端或独立备份取回；仅存在于旧机的本地提交不构成异机恢复材料。
+- 若目标已有环境，只处理本次涉及的文件与应用冲突，并保留想要的现场修改；不做全机补录或批量 cleanup/zap。
 
-- 目标仍是兼容的 Apple Silicon macOS；
-- 管理员、FileVault/recovery 与重要数据备份可用；
-- 仓库和 `flake.lock` 来自已审阅 commit；
-- 浏览器、编辑器、OrbStack、云盘、AI CLI、Atuin、Rime userdb 与应用账号有各自恢复策略。
+## 空白机器首次接入
 
-不要运行批量 Homebrew cleanup/zap，不覆盖未知 `/Applications` 或 `~/Library` 内容，不把 private key、token、Keychain、TCC、database、profile 或容器 volume 放进 Git/Nix Store。
+1. 在 Terminal 中按 [Lix 官方安装说明](https://lix.systems/install/)安装 Lix，保留安装收据；已有可用 Lix 时跳过，不把重装当作回滚。
+2. 按 [Homebrew 官方安装说明](https://docs.brew.sh/Installation)安装 Apple Silicon 版本至 `/opt/homebrew`，完成安装器提示的环境设置；准备可用 Git，系统提示缺少 Command Line Tools 时先完成安装。
+3. 按需登录 App Store，并准备登录任务引用的外部应用，见下文“应用与外部材料”；激活会加载这些任务。
 
-## 2. 恢复顺序
-
-### 2.1 盘点与数据保护
-
-按 [host-inventory.md](host-inventory.md) 重新收集当前机器事实。记录现有 Nix generation、Homebrew/MAS receipts 和应用冲突；先备份用户数据，再恢复声明。
-
-### 2.2 Lix 与非激活构建
-
-macbook 使用 Lix 作为 Nix implementation；bootstrap 和完整卸载遵循 Lix 官方 installer/receipt，日常版本由 `nix.package = pkgs.lix` 与 lock file 管理。
+首次激活前可用 Terminal 默认 Shell 执行以下兼容命令；激活后改用 Ghostty 中的 Fish。
 
 ```fish
-nix build .#darwinConfigurations.macbook.system
+nix --version
+/opt/homebrew/bin/brew --version
+git --version
 ```
 
-🔍 求值并构建目标 generation，不 activation。
+🔎 确认 Lix、Homebrew 与 Git 可用；Nix 版本输出应包含 Lix。
 
-若 `/nix`、daemon、mount 或 installer receipt 与预期不一致，停止并单独诊断；不要把重装 Nix 当作 generation rollback。
-
-### 2.3 Activation
-
-审阅 exact commit、build output、现有 generation 和 rollback 后，维护者另行批准并执行 activation。Activation 可以落地 nix-darwin、Home Manager、Homebrew/MAS 声明与 macOS defaults，但不会恢复外部应用数据，也不会自动删除现场多余应用。
-
-Pages、Keynote、Numbers、GarageBand 已按维护者选择移出安装声明，交由系统或 App Store 处理，缺失不形成仓库补录任务；当前 Homebrew `cleanup = "none"`，移除声明不会自动卸载已安装的应用。
-
-### 2.4 外部 owner
-
-按单一 owner 恢复外部状态：
-
-- Pinshift 的 `~/.local/bin/pinshift` 由项目自己的 `pinshift register` 注册，Home Manager 不再提供转发命令。项目移动后从新 checkout 重新注册；项目依赖、签名、设备操作和应用数据仍由 Pinshift 管理。
-- Obsidian 的 Mac 安装需求由 `homebrew.casks` 声明 `obsidian`；[cask](https://formulae.brew.sh/cask/obsidian) 安装 `/Applications/Obsidian.app`，并提供指向其中 `obsidian-cli` 的官方命令。Home Manager 不再提供 `~/.local/bin/obsidian`，Linux 继续使用 Nix 包。应用日常自动更新与 Electron 安装器更新是两件事：前者由应用处理，后者通过 Homebrew 按需升级，见[官方更新说明](https://obsidian.md/help/updates)。[官方 CLI](https://obsidian.md/help/cli) 需要安装器 1.12.7 以上，并在应用设置中开启命令行界面；cask 已提供 PATH 入口时可跳过应用的重复注册。`obsidian` 不带参数进入交互式命令界面，单纯启动图形应用使用 `open -a Obsidian`。笔记库、插件、主题、偏好与账号保持外部，原生版本不会随 Nix generation 回滚。
-- VS Code 的 Mac 安装需求由现有 `homebrew.casks` 声明 `visual-studio-code`；[cask](https://formulae.brew.sh/cask/visual-studio-code) 使用微软提供的应用安装到 `/Applications/Visual Studio Code.app`，日常继续由应用原生更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 保留指向该应用的 `~/.local/bin/code`，快捷命令 `v` 复用此入口。每次 Mac 激活都会用仓库基线整份覆盖默认用户的 `~/Library/Application Support/Code/User/settings.json`，保持文件可写；基线使用 `update.mode = default`。日常可以直接修改，但希望保留的内容应先保存到声明，下次激活不会保留该文件的额外字段。扩展、账号、keybindings、其他 profiles 和用户数据保持外部，原生应用版本不会随 Nix generation 回滚；非 Mac 包策略不变。
-- Ghostty 的 Mac 安装需求由现有 `homebrew.casks` 声明 `ghostty`；cask 使用[官方 DMG](https://ghostty.org/docs/install/binary#homebrew)安装到 `/Applications/Ghostty.app`，日常继续通过应用原生渠道独立更新。恢复时由 Homebrew 安装缺失应用，当前激活配置不升级已有包。Home Manager 继续维护 Fish、主题和终端设置，以及指向原生应用的 `~/.local/bin/ghostty`；Linux 继续使用 Nix 包。Mac 不由 Home Manager 自动校验 Ghostty 配置或提供 `bat` 的 Ghostty 配置语法高亮。原生版本不会随 Nix generation 回滚，已有应用偏好文件保持原样。
-- LocalSend 的 Mac 安装需求由 `homebrew.casks` 声明 `localsend`，安装和升级使用 Homebrew，应用没有内置自动更新；当前激活只安装缺失应用，不升级已有包。Linux 继续使用 Nix 包和既有防火墙规则。
-- Discord、IINA、MonitorControl、Mos、Upscayl 与 xbar 的 Mac 安装改由同名 Homebrew cask 声明，日常更新沿用应用自身机制；IINA 的 `iina` CLI 由 cask 提供。Home Manager 不再安装这六个应用。偏好、插件、账号和辅助功能权限保持外部，原生版本不随 Nix generation 回滚。
-- Zed 的 Mac 安装需求由 `homebrew.casks` 声明 `zed@preview`，Preview 应用继续原生更新。直接使用 Homebrew 提供的 `zed-preview`，`z` 快捷与默认编辑器同步采用此名称；配置按现有 Home Manager 可写合并应用，详见 [Zed 手册](update-zed-preview.md)。Linux 继续使用 Stable 与 `zeditor`。
-- Fcitx5.app/frontend 由官方 installer 和 macOS 输入源拥有；Nix 只投影 Rime Ice 静态 schema leaves。不得覆盖 `~/.config/fcitx5`、userdb、sync、identity 或整个 Rime 根目录；只有静态 overlay 实际改变且另获批准时才人工 deploy。
-- AI 编码工具、解释器、配置与会话由当前外部工作流管理；本仓库已移除旧 AI 编码模块，待工作流稳定后重新评估迁移。
-- Raycast 的 Script Commands 由 Nix 投影；Settings、database、shortcuts、extensions 和 Script Directory 选择保持外部。
-- Browser profile、Obsidian vault、VS Code 扩展与其他外部配置、Zed 未声明设置与应用状态、Atuin history/key、OrbStack VM/container/volume、cloud data、licenses 和账号通过各自产品流程恢复。
-
-首次由 Homebrew 接管已有手工安装或 Nix 应用时，核实 `/Applications` 的实际内容与安装记录，处理冲突，不在常规声明中固化 `force`。公共 Homebrew 配置将其命令目录追加到系统 PATH，使登录环境可找到 cask 提供的 CLI，并保留现有工具优先级。
-
-登录启动的唯一声明集中在 [login-items.nix](../../hosts/macbook/login-items.nix)，使用 Home Manager 标准 `launchd.agents`，覆盖独立安装和 Setapp 应用。恢复前先由各安装渠道准备好声明所指应用。普通任务通过 `/usr/bin/open -g` 打开指定应用，手动退出后不会重启；新建或修改任务的激活也可能立即打开应用。Timing 启动包内原有 `TimingHelper.app`，不是 Timing 主窗口。
-
-首次迁移先撤销名单内应用重复的原生登录登记，再应用候选；现代登录项从系统“登录时打开”或应用对应开关移除，不能用旧式 AppleScript 列表删除代替。Tailscale 只关闭“登录时启动”跳板，不退出应用、不关闭 VPN、网络扩展或后台总开关。Clash Verge 关闭自身“开机自启”后，只需核实旧 plist 已移除；当前会话中已加载的旧任务可保留到正常退出或注销，无需主动卸载。直接卸载该任务会终止主进程，并可能触发退出清理、停止代理内核；需要此动作时另行安排网络恢复通道。
-
-NuPhy Key Probe 保留原 `local.sayori.NuPhyKeyProbe` label、常驻重启策略与日志位置，由 Home Manager 接管同名任务。先保存原 plist 作为仓库外的恢复材料，核实应用和日志目录存在；应用候选时会短暂重启此服务。若交接失败，先卸载新任务，再恢复原 plist 并加载，不能同时保留两个启动入口。应用二进制与探测数据不纳入仓库。
-
-系统“允许在后台”中的 Setapp XPC 服务、更新器、网盘服务、设备驱动和必要网络组件继续由产品维护，不能为消除重复 GUI 登录入口而一并关闭。取消迁移时撤回新增任务并恢复原生登录开关；NuPhy 恢复原 plist。应用版本和偏好仍按各自机制处理。
-
-## 3. 验收
-
-在新登录 Fish 中至少确认：
+目标目录尚不存在时取得仓库；已有 checkout 直接进入并核对提交：
 
 ```fish
-command -s fish git uv mise zed-preview code obsidian
+mkdir -p ~/workspace
+git clone https://github.com/sayoriqwq/nix-config.git ~/workspace/nix-config
+cd ~/workspace/nix-config
+git log -1 --oneline
+```
+
+📦 确认当前 HEAD 正是选定的已审阅恢复点，再继续；不在恢复过程中顺手更新输入。
+
+```fish
+nix build --no-update-lock-file .#darwinConfigurations.macbook.system
+```
+
+🔨 按现有 lock 构建候选并生成 `result`，尚未应用。遇到已有文件或应用冲突，先确认其来源与保留方式。
+
+目标、写入范围与恢复办法明确后，按 [AGENTS.md](../../AGENTS.md) 的授权执行首次激活，期间保持 checkout 与 lock 不变：
+
+```fish
+sudo ./result/sw/bin/darwin-rebuild switch --flake .#macbook --no-update-lock-file
+```
+
+🔧 使用候选自带的 `darwin-rebuild` 首次应用此仓库；它会再次求值同一配置并登记系统代际，无需先安装 nh。[nix-darwin 安装说明](https://github.com/nix-darwin/nix-darwin#step-2-installing-nix-darwin)
+
+完成后重新打开 Ghostty，后续通过[日常维护](daily-nix-maintenance.md#应用配置)中的 nh 入口应用配置，不再重复安装器步骤。首次激活前没有可退回的 Nix 代际；安装器问题按 Lix 收据处理，应用与数据使用各自恢复材料。
+
+## 应用与外部材料
+
+Homebrew 声明安装缺失软件，当前激活不升级已有软件、不卸载额外应用。遇到同名手工安装副本先处理具体冲突，不把 `force` 固化进常规声明。
+
+| 对象 | 恢复与写入边界 |
+| --- | --- |
+| Ghostty | Homebrew 安装原生应用并保留应用自更新；Home Manager 持续管理 `~/.config/ghostty/config`、主题和 CLI 接线，外部应用偏好与数据另行恢复。 |
+| VS Code | 原生应用自更新；每次激活整份覆盖默认用户 `settings.json` 并保持可写，未保存修改及额外字段会丢失；扩展、账号、keybindings、其他 profiles 与数据保持外部。 |
+| Zed | 原生 Preview 自更新；settings/keymap/tasks 可写合并，删除声明不删除现场遗留值，见 [Zed 维护](zed-maintenance.md)。扩展与应用状态另行恢复。 |
+| Obsidian | 应用日常自动更新，Electron 安装器按需由 Homebrew 更新；恢复笔记库、插件、主题与账号，并在应用内开启官方 CLI，cask 已提供命令入口。 |
+| Git | 从私有恢复材料还原 `~/.config/git/identity.inc`；身份和凭据不写入公开声明。 |
+| Fcitx/Rime | Fcitx frontend 与输入源由官方安装流程恢复；Nix 只投影静态 Rime schema，不覆盖 userdb、sync、identity 或整个配置目录。 |
+| Raycast、Pinshift | Raycast 设置、扩展与 Script Directory 选择保持外部；Pinshift 从自己的项目恢复，并由 `pinshift register` 注册命令。 |
+| 其他外部状态 | 浏览器资料、Atuin 历史与密钥、OrbStack 容器和卷、云盘、许可、AI 工具及账号按各自产品与项目流程恢复。 |
+
+登录启动名单集中在 [login-items.nix](../../hosts/macbook/login-items.nix)。先准备名单中的 Setapp 应用及其他外部安装；NuPhy Key Probe 的程序与数据从其项目或备份恢复，并确保声明中的日志目录存在。
+
+同一应用只保留一个“登录时打开”入口。启用受管任务时撤销重复原生登记，但保留产品必要的更新器、设备驱动、网盘服务与网络扩展；不要把系统“允许在后台”总开关当作重复 GUI 入口关闭。
+
+普通任务登录时打开应用，手动退出后不重新拉起；NuPhy 保留常驻策略。新增或修改任务的激活可能立即打开应用或重启服务，移除普通任务不会退出已运行应用。调整 Tailscale、Clash Verge 等网络应用时保留恢复通道，勿通过退出主进程来试探登录项归属。
+
+## 开发运行时准备
+
+在新 Ghostty/Fish 中执行：
+
+```fish
+cd ~
+mise install node bun pnpm
+```
+
+🧰 按当前 mise 配置准备运行时。[mise install](https://mise.jdx.dev/cli/install.html) 安装工具而不改写版本选择；仓库默认使用 `latest`，不保证恢复旧机的精确版本，已有个人配置也可能覆盖默认值。
+
+等 Fish 出现新的提示符、刷新运行时 PATH 后核对：
+
+```fish
+mise ls --current
+node --version
+bun --version
+pnpm --version
+```
+
+🔎 确认当前选中的工具已安装，并能从新 Fish 会话直接调用。
+
+项目需要的版本、依赖与锁文件从项目恢复。进入含 `.envrc` 的项目时先阅读其内容再按 direnv 提示授权；有 mise 配置时先审阅并按其提示信任、安装。Python 由项目和 uv 管理，不交给 mise；本仓库标准库测试入口见[日常维护](daily-nix-maintenance.md#更新入口的测试)。
+
+## 实际使用验收
+
+```fish
+command -s fish git uv mise direnv zed-preview lazygit code obsidian
 echo $EDITOR
 echo $VISUAL
+ghostty +validate-config
+cd ~/workspace/nix-config
+z .
 ```
 
-✅ 核对主要 CLI 的预期来源与默认编辑器环境；原生应用的 CLI 应指向对应的 `/Applications` 安装。
+✅ 确认 Ghostty 启动 Fish、主要命令可用，编辑器变量为 `zed-preview --wait`；Ghostty 配置校验通过，`z .` 打开当前仓库的原生 Zed Preview。
 
-随后人工验证 Ghostty/Fish、Zed、Raycast、Fcitx/Rime、Tailscale、Homebrew/MAS 应用和必要 macOS defaults。Build 不能替代这些 runtime checks。
+在 Zed 中按 `Cmd+Shift+G` 或选 `Run → Spawn Task → LazyGit`，确认任务打开当前仓库并可按 `q` 退出。再从 Finder 或应用启动器打开同一项目，检查集成终端与任务；两个入口的环境获取方式见 [Zed 维护](zed-maintenance.md)。nix-config 没有项目运行时文件，这一步不证明其他项目的版本切换。
 
-LocalSend 及六个迁移应用需核对 Homebrew 安装记录、原有偏好和权限，并确认旧 Home Manager 应用副本已经移除；当前 `copyApps` 会清理受管应用目录中的旧副本，不清理外部应用数据。IINA 的 `iina --help` 应来自 cask。登录启动需在下一次真实登录后确认 14 个普通 GUI／菜单栏任务各启动一次；手动退出普通应用后不应被这些任务重新拉起。NuPhy Key Probe 另行核对常驻与原有重启策略。仅加载 agent 或执行 `open` 不代表已完成登录验收；网络应用的退出测试应安排在有恢复通道的现场。
+按实际恢复范围检查原生应用启动器与 CLI 指向同一份 `/Applications` 安装，并验证笔记库、扩展、输入法、必要权限和网络功能。遇到真实应用更新时，更新并重启后再应用配置，确认新版与外部数据保留；没有更新时不把“已是最新”当作升级验收。
 
-VS Code 需确认 Homebrew 安装记录、启动器、`code` 与 `v` 对应同一份 `/Applications/Visual Studio Code.app`，扩展和集成终端正常；完成应用内真实更新与重启后，再应用基线并确认新版保留、默认用户 `settings.json` 与声明一致且仍可写、旧 Home Manager 入口未重建。该设置文件的临时修改和额外字段应被基线覆盖；扩展、账号、keybindings 和其他 profiles 不受此写入动作管理。没有可用更新时，真实更新项保持待验收。
+下一次真实登录后核对受管 GUI 应用各启动一次，普通应用退出后不会被任务重开，NuPhy 正常常驻。重新打开终端、手工 `open` 或单独加载任务不能代替登录验收；网络应用的退出测试须有恢复通道。
 
-Obsidian 需确认 Homebrew 安装记录、原有笔记库、插件与主题可用，自动更新与命令行界面开启；`obsidian version`、`obsidian help open` 正常，启动器与 CLI 使用同一原生安装。应用基线后确认原生版本和偏好保留、旧 Home Manager 应用与 CLI 入口未重建。通过 Homebrew 更新安装器不能代替应用内自动更新验收；没有可用应用更新时，后者保持待验收。
+## 回滚
 
-Ghostty 还需确认 Homebrew 安装记录、启动器与 `ghostty` CLI 对应同一份 `/Applications/Ghostty.app`，Fish、主题和分屏可用；用 `ghostty +validate-config` 显式校验配置。通过应用完成一次真实更新与重启，并在随后应用基线后确认新版仍在、旧 Home Manager 应用入口未重建、现场偏好未覆盖。没有可用更新时，该项保持待验收，不能把“已是最新”当作更新成功。
+已有已验收代际时按[日常维护](daily-nix-maintenance.md#恢复已知可用配置)切换并验证实际功能。代际切换不会对称撤销 Homebrew 安装、原生应用升级、macOS 偏好、权限或应用数据变化。
 
-## 4. 回滚
-
-优先切回 activation 前一代 nix-darwin generation；这只恢复 Nix 声明，不会撤销 Homebrew 已执行安装、vendor login、TCC、数据库或用户数据变化。
-
-Homebrew/MAS 问题先从声明撤回并重新 build；定向 uninstall、zap、receipt 修复或数据删除必须另获批准。Fcitx/Rime 回滚要区分静态 Nix leaves、外部 frontend/preferences 与 userdb；禁止通过清空用户目录验证“干净恢复”。
-
-如果上一代本身包含已退役的 activation side effect，切换前必须先审阅该 generation，不能假设旧 generation 只恢复静态文件。
+声明错误从 Git 修复或撤销后重新应用；应用数据库与用户内容使用外部恢复材料。定向卸载、receipt 修复或数据删除按具体目标处理，不用清空用户目录验证“干净恢复”。

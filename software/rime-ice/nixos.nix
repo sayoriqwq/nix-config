@@ -11,11 +11,6 @@ let
   };
 in
 {
-  # Capability contract (NixOS): package = the filtered Rime Ice data package
-  # plus fcitx5-rime addon; managed configuration = the sole Rime group/default
-  # and InputState; mutable-state paths = Rime build/userdb/sync/identity files
-  # via the Home attachment; services = none beyond Fcitx5's frontend; network
-  # effects = none; human gate = activation, deploy and real-input smoke.
   i18n.inputMethod.fcitx5 = {
     addons = [ rimeAddon ];
     settings = {

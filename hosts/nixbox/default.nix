@@ -15,9 +15,7 @@ let
   shellWork = import ../../intents/shell-work.nix { inherit lib; };
 in
 {
-  # Nix chooses substituters by their explicit priority, not list position.
-  # Prefer the nearby USTC mirror on this interactive workstation, then fall
-  # back to the official cache. Capability-specific caches remain additive.
+  # Nix 按显式优先级选择缓存；此工作站优先使用就近镜像，再回退官方缓存。
   nix.settings.substituters = lib.mkForce [
     "https://mirrors.ustc.edu.cn/nix-channels/store?priority=30"
     "https://cache.nixos.org?priority=40"
@@ -97,8 +95,7 @@ in
         inherit username;
         homeDirectory = "/home/${username}";
 
-        # This is nixbox's first Home Manager adoption. Keep the initial
-        # value unchanged after activation.
+        # 首次启用后的兼容版本保持不变。
         stateVersion = "26.05";
       };
     };

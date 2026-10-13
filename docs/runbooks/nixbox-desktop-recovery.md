@@ -1,149 +1,82 @@
-# nixbox 桌面验收与恢复
+# nixbox 桌面检查与恢复
 
-## 1. 用途与边界
+配置来源为 [nixbox](../../hosts/nixbox/default.nix)、[桌面组合](../../intents/hyprland-workstation.nix)和[中文输入](../../intents/chinese-input.nix)。NixOS 提供 Hyprland／UWSM 会话，Home Manager 管理用户配置；Fcitx5 通过 XDG 自启动，不另建第二个会话或输入法服务。
 
-本文用于维护者在 `nixbox` 上验收或恢复当前声明的 Hyprland、Fcitx 5 与 Rime Ice 桌面能力。仓库检查或构建通过不代表真实 activation、注销、重启或 rollback 已获批准；当次授权须绑定准确声明版本、目标机器、命令、执行窗口和恢复路径。
+应用、注销或重启前按 [AGENTS.md](../../AGENTS.md) 明确目标与恢复办法，保留本地 TTY／显示器和已验证的 SSH 通道。当前运行系统、默认启动项及可用旧代际必须从目标机核实，不能由仓库推断；恢复完成前不清理代际、GC root 或启动项。
 
-通用协作流程与授权记录方式以 [AGENTS.md](../../AGENTS.md) 为准，不要求先创建 Issue 或 PR。
+## 检查目标与候选
 
-不得为排障运行 GC、删除 system generation、GC root 或 boot entry，也不得删除或迁移 keyring、Fcitx、Rime、dconf、portal permission、浏览器配置和其他应用状态。Generation rollback 只回退声明式系统，不恢复可变用户数据。
-
-## 2. 操作前证据
-
-执行任何 `test`、`switch`、注销或重启前，维护者必须确认：
-
-1. 当前明确授权已覆盖准确声明版本与准确动作；
-2. 工作树无未审阅改动；
-3. 当前运行 closure、system profile、可恢复 generation 与 boot entry 已记录并核实；
-4. 本地 TTY 或显示器可用，既有 SSH/Tailscale 恢复通道已从另一台获授权机器实测；
-5. 旧 generation、profile、GC root 与 boot entry 在验收结束前不会被清理；
-6. 重要可变数据已有独立备份，或维护者已接受 generation rollback 不覆盖它们。
-
-在 `nixbox` 仓库根目录记录声明与恢复身份：
+在 nixbox 上查看运行系统和启动恢复点：
 
 ```fish
-git rev-parse HEAD
-git status --short
-set -l running_system (readlink -f /run/current-system)
-set -l profiled_system (readlink -f /nix/var/nix/profiles/system)
-printf 'running:  %s\nprofiled: %s\n' $running_system $profiled_system
+hostname
+readlink -f /run/current-system
+readlink -f /nix/var/nix/profiles/system
 nixos-rebuild list-generations
 bootctl list --no-pager
 ```
 
-🔎 记录准确提交、运行 closure、profile、generation 与 boot entry，不把编号写成长期固定事实。
+🔎 区分当前运行系统、正式 profile 和默认启动项，确认拟恢复的代际仍存在。
 
-从另一台已授权机器验证恢复通道；不要在公开记录中粘贴地址、密钥或完整网络身份：
-
-```fish
-ssh nixbox 'systemctl is-active sshd tailscaled NetworkManager'
-```
-
-🔐 确认既有 SSH、Tailscale 与 NetworkManager 恢复入口在线。
-
-## 3. 非激活构建
-
-先构建当前 `nixbox` output；失败即停止，不通过临时新增桌面组件掩盖问题：
+在具备 `x86_64-linux` 构建条件的仓库 checkout 中准备候选：
 
 ```fish
 nix build .#nixosConfigurations.nixbox.config.system.build.toplevel --no-link
 ```
 
-🏗️ 只构建 closure，不切换运行系统、profile 或 boot default。
+🏗️ 只构建候选，不切换运行系统或启动项；失败时先修复声明。
 
-## 4. Activation 后 smoke
+## 桌面与输入故障
 
-Activation、注销或重新登录只由维护者在当前批准范围内执行。进入 `Hyprland (uwsm-managed)` 后，按顺序记录 PASS/FAIL：
-
-- `sshd`、Tailscale、NetworkManager、display manager 与 rtkit 正常；
-- Waybar、Hypridle、hyprpolkitagent、portal、PipeWire 与 WirePlumber 各有预期的唯一 owner；
-- Ghostty、Fuzzel、窗口与 workspace 绑定、手动锁屏和正常结束 UWSM session 可用；
-- Chrome 屏幕共享选择器、文件选择器、音频与网络正常；
-- Fcitx 只运行一个实例，默认 engine 为 Rime，没有 IBus daemon 争夺 owner；
-- Ghostty、Chrome、Qt 与 XWayland 应用都能输入，左右 Shift 只切换 Rime 内部中英文状态；
-- GDM、Hyprlock 与密码字段不泄露预编辑文本，GNOME Keyring 不被删除、重建或另行解锁；
-- Rime 学习结果在注销并重新登录后仍存在；重启验证必须另行批准。
-
-检查关键 system 与 user services：
+在 nixbox 的目标用户会话中检查：
 
 ```fish
 systemctl --no-pager --full status sshd tailscaled NetworkManager rtkit-daemon display-manager
-systemctl --user --no-pager --full status waybar.service hypridle.service hyprpolkitagent.service
-systemctl --user --no-pager --full status xdg-desktop-portal.service xdg-desktop-portal-hyprland.service pipewire.service wireplumber.service
+systemctl --user --no-pager --full status waybar hypridle hyprpolkitagent
+systemctl --user --no-pager --full status xdg-desktop-portal xdg-desktop-portal-hyprland pipewire wireplumber
 pgrep -a fcitx5
 fcitx5-remote -n
 wpctl status
-```
-
-🩺 核对访问、桌面外围、输入法、portal 与音频的实际运行状态。
-
-只读确认 Secret Service 可达，不创建测试 secret，也不输出已有内容：
-
-```fish
-secret-tool search nixbox-desktop-probe absent >/dev/null
 busctl --user list | string match '*org.freedesktop.secrets*'
 ```
 
-🗝️ 验证当前登录 session 可以访问 Secret Service。
+🩺 检查系统和用户服务、Fcitx 实例及引擎、音频设备与 Secret Service 注册；这些状态不能代替实际桌面操作。
 
-## 5. 失败证据
+按本次改动或故障验证相关功能：
 
-核心访问、锁屏、密码安全或输入法 owner 失败时立即停止晋升；不要现场修改声明或清理状态。只收集必要日志，并在公开记录前删除账号、地址、密钥与应用内容：
+- 使用 `Hyprland (uwsm-managed)` 登录，确认 Ghostty、Fuzzel、工作区、锁屏、退出会话和休眠唤醒正常；UWSM 是唯一会话管理者。
+- 检查浏览器共享屏幕、文件选择器和音频，避免只看到 portal 或 PipeWire 服务在线就判定可用。
+- Fcitx5 只运行一个实例，默认使用 Rime；在 Ghostty、Chrome、Qt 与 XWayland 应用中验证输入和左右 Shift 行为。
+- GDM、Hyprlock 和密码字段不泄露预编辑文本；钥匙环正常使用，Rime 学习结果在重新登录后保留。
+
+收集故障日志时限定到本次启动和相关服务：
 
 ```fish
-journalctl -b -u display-manager -u NetworkManager -u tailscaled -u sshd --no-pager
-journalctl --user -b -u waybar -u hypridle -u hyprpolkitagent -u xdg-desktop-portal -u xdg-desktop-portal-hyprland -u pipewire -u wireplumber --no-pager
-journalctl --user -b | rg -i 'fcitx|rime|uwsm|hyprland'
+journalctl -b -u display-manager -u NetworkManager -u tailscaled -u sshd -n 100 --no-pager
+journalctl --user -b -u waybar -u hypridle -u hyprpolkitagent -u xdg-desktop-portal -u xdg-desktop-portal-hyprland -u pipewire -u wireplumber -n 100 --no-pager
+journalctl --user -b -n 300 --no-pager | rg -i 'fcitx|rime|uwsm|hyprland'
 ```
 
-🧾 收集当前 boot 的最小失败证据，不读取或上传可变数据内容。
+🧾 保存必要错误摘要，不公开完整会话日志或应用内容。SSH 故障另见[稳定访问手册](stable-workstation-access.md)。
 
-## 6. 恢复模型
+## 恢复系统配置
 
-### `nixos-rebuild test` 失败
+`nixos-rebuild test` 只切换当前运行系统，不移动正式 profile 或默认启动项。失败时从保留的 SSH 或 TTY 处理；需要重启恢复时，先确认默认启动项确实是已知可用版本。
 
-`test` 只临时切换当前运行系统，不移动 system profile，也不改变 boot default。继续使用已实测的 SSH 或本地 TTY；若重启已经单独获批，重启应返回操作前核实的 boot default。若默认项不可用，只选择操作前已核实身份且仍存在的旧 boot entry，不凭 generation 编号猜测。
-
-### `nixos-rebuild switch` 后失败
-
-`switch` 会更新 system profile 与 boot default。只有当前明确授权已覆盖准确 rollback、已重新核实上一代身份且恢复入口仍可用时，维护者才能执行：
+`nixos-rebuild switch` 会修改正式 profile 和默认启动项。只有上一代就是所需恢复点时，在可靠控制台或 SSH 通道执行：
 
 ```fish
 sudo nixos-rebuild switch --rollback
+readlink -f /run/current-system
+readlink -f /nix/var/nix/profiles/system
 ```
 
-↩️ 把 system profile 切回已核实的上一代；命令本身不授权重启，也不恢复可变用户数据。
+↩️ 切回上一代并核对运行系统和 profile；动作按本次授权执行，不同时清理其他代际。
 
-若命令式 rollback 不安全或无法完成，使用本地 boot menu 选择操作前核实的旧 entry；重启同样需要当前批准。恢复访问后记录实际运行 closure、profile 与失败证据，再按当前协作流程修复声明。
+上一代不可用时，从本地启动菜单选择已核实的旧项，或使用[指定 NixOS 代际恢复](server-recovery.md#恢复已知可用代际)。恢复访问、锁屏和输入后再修复仓库声明，不把旧代际的启动成功当成问题已经解决。
 
-## 7. 可变状态边界
+## 不随代际恢复的数据
 
-以下路径可能在登录、输入或 Rime deploy 时变化，不由 generation rollback 撤销：
+`~/.config/fcitx5/`、Rime 的 `*.userdb`／`build`／`sync`／身份文件、`~/.local/share/keyrings/`、dconf、portal 权限和浏览器资料都是外部可变状态。Nix 只投影[静态 Rime 方案文件](../../software/rime-ice/home-manager.nix)，不保存学习数据。
 
-- `~/.config/fcitx5/`
-- `~/.local/share/fcitx5/rime/` 下的 `*.userdb`、`build/`、`sync/`、`installation.yaml` 与 `user.yaml`
-- `~/.local/share/keyrings/`
-- dconf、portal permissions、浏览器 profile 与其他应用状态
-
-除非本次动作另有包含备份、精确目标和恢复验证的明确批准，不得删除、覆盖或迁移这些路径。排障只记录必要的路径、类型、权限和时间戳，不公开内容。
-
-## 8. 记录模板
-
-```text
-exact commit:
-approved action: build / test / switch / rollback
-running closure and profile recorded: PASS / FAIL
-verified recovery generation and boot entry: PASS / FAIL
-SSH + TTY recovery path: PASS / FAIL
-core system services: PASS / FAIL
-UWSM desktop services: PASS / FAIL
-Fcitx/Rime input matrix: PASS / FAIL
-password and keyring safety: PASS / FAIL
-mutable state left untouched: PASS / FAIL
-reboot: NOT RUN / PASS / FAIL
-rollback: NOT RUN / PASS / FAIL
-```
-
-📝 记录真人运行结果与批准边界，不把构建结果误报为运行态验收。
-
-NixOS 的 `test`、`switch` 与 rollback 语义以官方手册的 [Changing the Configuration](https://nixos.org/manual/nixos/stable/#sec-changing-config) 和 [Rolling Back Configuration Changes](https://nixos.org/manual/nixos/stable/#sec-rollback) 为准。
+不要通过删除这些目录测试“干净恢复”。需要修复或迁移数据时，先确定精确目标并准备对应备份；系统回滚不撤销 Rime deploy、学习、登录或应用产生的变化。

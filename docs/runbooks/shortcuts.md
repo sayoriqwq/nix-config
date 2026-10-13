@@ -6,8 +6,8 @@ nixbox 使用 Fish，表中的 Zsh 范围只适用于 macOS 兼容 Shell。
 
 | 平台 | 范围 | 快捷键或入口 | 行为 | 所有者 |
 | --- | --- | --- | --- | --- |
-| macOS / nixbox | Fish | `↑ / ↓` | 按当前输入前缀浏览 Fish 原生历史 | fish |
-| macOS | Zsh | `↑ / ↓` | 按当前输入前缀浏览原生 Shell 历史 | zsh |
+| macOS / nixbox | Fish | `↑ / ↓` | 浏览包含当前输入内容的 Fish 原生历史 | fish |
+| macOS | Zsh | `↑ / ↓` | 按当前输入的首词查找以其开头的 Shell 历史 | [zsh](https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html#History-Control) |
 | macOS / nixbox | Fish / Zsh | `Ctrl+R` | 打开 Atuin 增强历史搜索 | atuin |
 | macOS / nixbox | Fish / Zsh | `Ctrl+T` | 用 fzf 选择文件并插入命令行 | fzf |
 | macOS / nixbox | Fish / Zsh | `Alt+C` | 用 fzf 选择目录并进入 | fzf |

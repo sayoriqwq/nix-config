@@ -83,8 +83,8 @@ update_nix() {
   git diff --quiet HEAD -- flake.lock && git diff --cached --quiet -- flake.lock \
     || die 'flake.lock 已有改动，无法区分本次更新；请先单独处理。'
   # 文档不会参与本仓库的系统声明；其他已有改动不混入更新候选。
-  git diff --quiet HEAD -- . ':!docs' ':!README.md' ':!CONTEXT.md' ':!AGENTS.md' \
-    && git diff --cached --quiet -- . ':!docs' ':!README.md' ':!CONTEXT.md' ':!AGENTS.md' \
+  git diff --quiet HEAD -- . ':!docs' ':!README.md' ':!AGENTS.md' \
+    && git diff --cached --quiet -- . ':!docs' ':!README.md' ':!AGENTS.md' \
     || die '已有非文档的已跟踪改动会混入候选，请先提交或隔离；现有工作保持原样。'
   cp flake.lock "$temp/flake.lock.before"
   local source_before lock_index candidate fingerprint previous

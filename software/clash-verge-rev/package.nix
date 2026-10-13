@@ -3,8 +3,7 @@
   source,
 }:
 
-# Consume only the reviewed Clash Verge Rev expression from the pinned leaf.
-# Its dependencies continue to come from the repository's Linux release set.
+# 只取固定版本的包表达式，依赖仍使用本仓库的 Linux 包集。
 let
   package = pkgs.callPackage (source + "/pkgs/by-name/cl/clash-verge-rev/package.nix") { };
 in

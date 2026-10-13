@@ -50,7 +50,7 @@ in
     }
     {
       assertion = builtins.length entrypoints == 7;
-      message = "Raycast capability expects exactly seven active Script Command entrypoints.";
+      message = "Raycast expects exactly seven active Script Command entrypoints.";
     }
     {
       assertion = builtins.length managedPaths == 24 && builtins.length (lib.unique managedPaths) == 24;
@@ -72,7 +72,7 @@ in
     }
     {
       assertion = builtins.length manifest.extensions == 2 && extensionMap == expectedExtensions;
-      message = "Raycast capability expects only the open-in-editor and terminal-finder source extensions.";
+      message = "Raycast expects only the open-in-editor and terminal-finder source extensions.";
     }
     {
       assertion =

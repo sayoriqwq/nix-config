@@ -20,8 +20,7 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # Issue #90: consume only the reviewed source contract. Raycast's own
-    # extension tooling remains in the leaf repository, so this is not a Flake.
+    # 只引用扩展源码；构建工具仍由 Raycast 源码仓库维护。
     raycast-source = {
       url = "github:sayoriqwq/raycast/7b8ac1fee61703b26cc881903e23bc2d73d4ca3a";
       flake = false;
@@ -32,9 +31,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Issue #157: pin the reviewed Nixpkgs leaf that contains the 2.5.2
-    # Clash Verge Rev package expression. It is called with the Linux release
-    # package set below; this source is not imported as another package set.
+    # 只取固定版本的包表达式，依赖仍使用本仓库的 Linux 包集。
     clash-verge-rev-package-source = {
       url = "github:NixOS/nixpkgs/d9e5fe493950fb219c0e7ccd2c0430a3babd77a6";
       flake = false;
@@ -112,7 +109,6 @@
 
       formatter = {
         aarch64-darwin = (packagesFor "aarch64-darwin").nixfmt;
-        # Used by the temporary Linux validation container on Apple Silicon.
         aarch64-linux = (packagesFor "aarch64-linux").nixfmt;
         x86_64-linux = (packagesFor "x86_64-linux").nixfmt;
       };
