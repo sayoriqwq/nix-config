@@ -2,7 +2,9 @@
 
 ## 目标与事实来源
 
-本仓库服务于 macOS 主工作站的日常使用与换机恢复。可以先在机器上安装、试用和调整，再保存认可且值得复用的内容；新增声明由实际需求驱动。
+本仓库当前只维护 macOS 主工作站的日常使用与换机恢复，维护与验收目标为 `macbook`。可以先在机器上安装、试用和调整，再保存认可且值得复用的内容；新增声明由实际需求驱动。
+
+保留的 `nixbox`、`server` 配置与相关手册属于历史参考，不构成跨机同步、修复或常规验证任务。后续重新使用时，按当次需求核实配置与现场。
 
 | 概念 | 本仓库中的含义 |
 | --- | --- |
@@ -17,11 +19,11 @@
 
 ## 代码怎样组合
 
-一个 Flake 和一个 lock 保存输入与输出，所有导入显式列出。每台 Host 独立选择需求，不从另一台机器继承后再排除。
+一个 Flake 和一个 lock 保存输入与输出，所有导入显式列出。当前由 `hosts/macbook` 选择 Mac 所需的组合，模块划分以实际配置归属和复用需求为准。
 
 | 层次 | 放什么 | 何时独立出来 |
 | --- | --- | --- |
-| Host · `hosts/` | 最终软件选择、用户、硬件、磁盘、启动与网络事实 | 一台目标机器就是一个选择边界 |
+| Host · `hosts/macbook/` | Mac 的最终软件选择、用户与系统设置 | 作为当前工作站的组合入口 |
 | Intent · `intents/` | 一起启停的使用需求、包声明与简短接线 | 维护者希望整体选择这个需求时 |
 | Software · `software/` | 单软件的配置、素材、平台实现与必要的外部状态说明 | 有值得独立维护或复用的配置知识时 |
 | Shared · `shared/` | 不属于单个软件的基础数据或声明 | 已有多个实际消费者时 |
@@ -32,13 +34,13 @@ Intent 可以直接声明安装项和社区选项；只有安装需求的软件�
 
 Software 的配置文件可直接作为入口；`default.nix` 只用于真实的平台组合或参数化行为。平台安装、配置或运行方式有差异时才分实现，内部默认平铺。`intents/lib.nix` 只拼接模块列表，单列表需求直接返回对应列表。`shared/` 按具体文件引用。
 
-导入方向由 Host 到 Intent、Software，再到所需的 Shared；Software 不反向选择 Intent 或 Host，Home Manager 模块不导入系统模块，Darwin 与 NixOS 实现各自独立。删除一层如果只减少跳转，就合并；如果会让配置知识散落到多个调用点，就保留。
+导入方向由 Host 到 Intent、Software，再到所需的 Shared；Software 不反向选择 Intent 或 Host，Home Manager 模块不导入系统模块。删除一层如果只减少跳转，就合并；如果会让配置知识散落到多个调用点，就保留。
 
 ## 工具怎样分工
 
-Nix 保存和构建锁定的工具与配置，nix-darwin/NixOS 应用系统声明，Home Manager 提供用户层社区模块。优先复用这些模块与 nh；包装命令只补足实际操作中的重复步骤，直接读取现有声明。具体入口见[日常维护](runbooks/daily-nix-maintenance.md)。
+Nix 保存和构建锁定的工具与配置，nix-darwin 应用 Mac 系统声明，Home Manager 提供用户层社区模块。优先复用这些模块与 nh；包装命令只补足实际操作中的重复步骤，直接读取现有声明。具体入口见[日常维护](runbooks/daily-nix-maintenance.md)。
 
-Mac 使用 Lix。Darwin 输入采用 rolling 节奏以适应工作站更新，Linux 使用 release 输入以减少服务端变动；两者仍由同一 `flake.lock` 固定具体版本。更新保持 Home Manager 的版本兼容检查，保留各机器最初采用的 `stateVersion`。
+Mac 使用 Lix。Darwin 输入采用 rolling 节奏以适应工作站更新，由 `flake.lock` 固定具体版本。更新保持 Home Manager 的版本兼容检查，保留最初采用的 `stateVersion`。
 
 Mac 的 GUI 安装按软件选择 Homebrew、Nix 或外部原生渠道。Homebrew 声明保存安装需求，原生自动更新的软件允许现场版本变化；`flake.lock` 并不锁住它们。当前 Homebrew 激活不升级已有包、不自动清理移出声明的应用。WezTerm 是低频兼容终端，保留 Nix 安装并随所选包集更新。
 
@@ -48,19 +50,17 @@ Mac 的 GUI 安装按软件选择 Homebrew、Nix 或外部原生渠道。Homebre
 
 写入方式按资源选择：缺失时初始化、每次激活整份覆盖，或由社区模块合并选定字段。初始化材料更新不改写已有目标；合并机制的额外字段与删除语义由具体模块决定。操作前查对应手册中的实际边界：[Mac 配置与恢复](runbooks/restore-macos-environment.md)、[Zed 配置](runbooks/zed-maintenance.md)。
 
-日常开发链路是 Ghostty → Fish → 项目目录 → Zed 与任务。工作站提供运行工具，mise 管理选定的可变运行时，direnv 按项目声明加载环境；项目依赖与精确版本由项目维护。IDE 任务使用自己的执行环境，不能只凭交互 Shell 可用就认定任务可用。服务端业务的运行时随服务闭包或容器管理。
+日常开发链路是 Ghostty → Fish → 项目目录 → Zed 与任务。工作站提供运行工具，mise 管理选定的可变运行时，direnv 按项目声明加载环境；项目依赖与精确版本由项目维护。IDE 任务使用自己的执行环境，不能只凭交互 Shell 可用就认定任务可用。
 
 普通 GUI 登录启动使用 Home Manager 标准 `launchd.agents`，唯一名单在 [login-items.nix](../hosts/macbook/login-items.nix)。同一应用只保留一个打开入口；必要后台 helper、更新器和网络扩展继续由产品管理。普通应用退出后不重新拉起，常驻服务保留自己的重启策略。
 
 激活新增或修改的登录任务可能立即启动应用或重启服务；移除普通任务不等于退出已运行的应用。产品重新登记了重复入口时，按选定声明纠正。具体操作与真实登录验收见[恢复手册](runbooks/restore-macos-environment.md)。
 
-## 主机之间怎样复用
-
-配置复用由维护者选择软件、字段与目标，以相同使用意图为准，允许必要的平台适配和版本差异；要求精确版本一致时单独核实。每台机器的数据、账号和登录态独立，数据同步按另一个具体需求处理。
-
-nixbox 提供 Linux 工作环境和 server 同架构构建验证。Server 接收已构建的闭包，运行时不依赖 GitHub 或可变 checkout；Mac 保留直达 server 的独立管理路径。凭据与恢复边界见 [server 恢复](runbooks/server-recovery.md)。Mac 到 nixbox 的访问使用 Tailscale 传输、原生 OpenSSH 认证和 tmux 会话恢复，见[稳定访问](runbooks/stable-workstation-access.md)。
+## 应用与验证范围
 
 Mac 的 Home Manager 集成在 nix-darwin 中，应用整机配置可能同时影响系统设置、Homebrew 和登录任务。修改一个软件不代表只激活该软件。现场动作的授权与安全约定见 [AGENTS.md](../AGENTS.md)。
+
+验证围绕本次 Mac 改动展开：文档检查链接与一致性，Nix 改动检查格式与相关配置求值，必要时构建并验收实际功能；更新入口使用已有测试。保留 Linux 配置不要求增加三端组合验证。
 
 ## 恢复材料与文档
 

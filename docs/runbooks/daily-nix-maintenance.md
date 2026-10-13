@@ -10,7 +10,7 @@ nix eval --raw .#darwinConfigurations.macbook.system.drvPath
 nh darwin build . -H macbook --diff always
 ```
 
-🔎 检查格式、求值并构建 Mac 候选，不激活。文档修改只检查链接与内容；Linux 候选在具备对应构建条件的机器上验证。
+🔎 检查格式、求值并构建 Mac 候选，不激活。文档修改只检查链接与内容。
 
 ## 应用配置
 
