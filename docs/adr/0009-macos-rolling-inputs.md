@@ -51,11 +51,12 @@ input，使 macOS 的 package、system module 与 user module 共同 rolling；L
   不表示构建时绕过锁文件获取最新提交；
 - Zed 按 ADR-0006 使用 Mac 原生 Preview 更新与 Linux release Stable；Mac 不保留固定包或专用 updater，Linux 禁止把源码构建作为正常回退，server 不选择 Zed。
 
-Darwin input 更新必须作为可审阅的 Git diff 进入独立维护范围，并至少通过 formatter、
-Flake check、macbook system build 和与已知兼容 seam 对应的 policy check。
+Darwin input 更新作为可审阅的 Git diff 进入独立维护范围。2026-09-16 按 ADR-0007
+移除独立 checks 层后，验证改为格式化、相关 Host 求值、必要的 macbook system build，
+以及激活后对本次影响功能的现场验收，不再要求原有 Flake/policy checks。
 
 三台主机都保留 `home.enableNixpkgsReleaseCheck` 默认值。macbook 的 Home Manager
-release 必须与 `system.nixpkgsRelease` 相同；policy check 固定该关系，不能用关闭检查
+release 必须与 `system.nixpkgsRelease` 相同；更新时核对这一关系，不能用关闭检查
 代替 input 对齐。
 
 Darwin 同时设置 `nix.channel.enable = false`，不提供 `nix-channel` 或 mutable channel
@@ -77,8 +78,10 @@ Obsidian capability 仅在 Darwin 对 `pkgs.obsidian` 做 override：清除错�
 原始 `pkgs.obsidian`。
 
 2026-09-13 后续变更：Mac 的 Obsidian 改为官方原生安装，日常应用更新由
-Obsidian 拥有，Electron 安装器更新按官方流程手动安装；因此删除上述 Darwin
-DMG 解包 override。Linux 继续使用原始 `pkgs.obsidian`，rolling inputs 决策不变。
+Obsidian 拥有，因此删除上述 Darwin DMG 解包 override。
+2026-10-03 后续变更：Homebrew cask `obsidian` 保存 Mac 安装需求，Electron
+安装器通过 Homebrew 按需升级，日常应用更新仍由 Obsidian 处理。Linux 继续使用
+原始 `pkgs.obsidian`，rolling inputs 决策不变。
 恢复与可变数据边界见[macOS 恢复手册](../runbooks/restore-macos-environment.md)。
 
 Home Manager 26.05 曾直接读取 Fish package 中已经移除的
@@ -97,7 +100,7 @@ Home Manager 26.05 曾直接读取 Fish package 中已经移除的
 - Linux/NixOS release 基线不被桌面更新节奏带动；
 - macbook 的 Home Manager 与 Darwin Nixpkgs 回到同一 release line，通用兼容检查保持
   开启；
-- 已修复的 Fish seam 及时退场，剩余兼容问题仍有窄平台条件和回归检查；
+- 已修复的 Fish seam 及时退场，剩余兼容问题保留窄平台条件，并按本次影响范围验证；
 - Lix、Linux Home Manager release 与 stateVersion 的既有边界保持不变。
 
 ### 代价与风险
@@ -130,7 +133,7 @@ Nixpkgs 上重新制造反向 release mismatch；只为 macbook 拆分 input。
 ### 关闭 Home Manager release check
 
 可以隐藏 warning，却不会修复版本线差异。维护者要求先升级验证，因此三台主机均保留
-默认检查，并由 policy check 保证 macbook 的两个 rolling inputs 对齐。
+默认检查，并在更新时核对 macbook 的两个 rolling inputs 对齐。
 
 ### 创建空 root channels 目录
 
