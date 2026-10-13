@@ -10,7 +10,7 @@ Mac 使用 Tailscale Standalone 应用，nixbox 使用 NixOS 的 `tailscaled`。
 
 ```fish
 env TAILSCALE_BE_CLI=1 /Applications/Tailscale.app/Contents/MacOS/Tailscale status
-ssh -G nixbox | string match -r '^(hostname|user|identityfile|identitiesonly|stricthostkeychecking|proxycommand) '
+ssh -G nixbox | rg '^(hostname|user|identityfile|identitiesonly|stricthostkeychecking|proxycommand) '
 ```
 
 🔎 确认客户端在线，目标和身份来自外部 SSH 配置，`ProxyCommand` 使用同一份 Tailscale 应用。
@@ -86,7 +86,7 @@ Mac 的主 SSH 配置仍由维护者拥有：`Host nixbox` 保存实际完整 Ma
 
 ```fish
 test -L ~/.ssh/config.d/nixbox-tailscale.conf
-ssh -G nixbox | string match -r '^(hostname|user|identityfile|stricthostkeychecking|proxycommand) '
+ssh -G nixbox | rg '^(hostname|user|identityfile|stricthostkeychecking|proxycommand) '
 ```
 
 🧩 核对片段已经落地且主配置确实采用它；仅有文件并不证明 Include 生效。
